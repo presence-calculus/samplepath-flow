@@ -1,6 +1,5 @@
 # pypcalc
-
-**The Presence Calculus Toolkit**  
+# The Presence Calculus Toolkit
 _A modern foundation for reasoning about flow and presence in non-linear systems._
 
 [![PyPI](https://img.shields.io/pypi/v/pypcalc.svg)](https://pypi.org/project/pypcalc/)
