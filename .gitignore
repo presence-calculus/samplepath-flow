@@ -1,0 +1,49 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Poetry
+dist/
+build/
+*.egg-info/
+
+
+# Virtualenvs
+.env
+.venv
+env/
+venv/
+ENV/
+.venv.bak/
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Jupyter
+.ipynb_checkpoints
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Test output
+.coverage
+htmlcov/
+.tox/
+.cache/
+pytest_cache/
+
+#AI
+.coding-aider-plans
+
+#data
+.csv

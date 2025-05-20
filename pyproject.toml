@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "pypcalc"
+version = "0.1.0"
+description = "The Presence Calculus Toolkit"
+authors = ["Krishna Kumar <kkumar@exathink.com>"]
+license = "MIT"
+readme = "./pcalc/README.md"
+homepage = "https://py.pcalc.org"
+repository = "https://github.com/krishnaku/pypcalc"
+packages = [{ include = "pcalc" }]
+keywords = ["presence", "flow", "queueing", "analytics"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent"
+]
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+numpy = ">=1.26,<2.0"
+pandas = { version = ">=2.2,<3.0", optional = true }
+polars = { version = ">=0.20,<0.21", optional = true }
+
+[tool.poetry.extras]
+pandas = ["pandas"]
+polars = ["polars"]
+
+[tool.poetry.group.dev.dependencies]
+notebook = "*"
+ipykernel = "*"
+pytest = "*"
+pytest-cov = "*"
+black = "*"
+isort = "*"
+mypy = "*"
+pre-commit = "*"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
