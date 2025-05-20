@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "The Presence Calculus Toolkit"
 authors = ["Krishna Kumar <kkumar@exathink.com>"]
 license = "MIT"
-readme = "./pcalc/README.md"
+readme = "README.md"
 homepage = "https://py.pcalc.org"
 repository = "https://github.com/krishnaku/pypcalc"
 packages = [{ include = "pcalc" }]
