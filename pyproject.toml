@@ -21,10 +21,13 @@ python = ">=3.11"
 numpy = ">=1.26,<2.0"
 pandas = { version = ">=2.2,<3.0", optional = true }
 polars = { version = ">=0.20,<0.21", optional = true }
+matplotlib = { version = ">=3.8,<4.0", optional = true }
 
 [tool.poetry.extras]
 pandas = ["pandas"]
 polars = ["polars"]
+matplotlib = ["matplotlib"]
+docs = ["pandas", "polars", "matplotlib"]
 
 [tool.poetry.group.dev.dependencies]
 notebook = "*"
@@ -35,6 +38,7 @@ black = "*"
 isort = "*"
 mypy = "*"
 pre-commit = "*"
+pdoc = "^15.0.3"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
