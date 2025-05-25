@@ -49,7 +49,7 @@ pip install pypcalc[pandas,polars]
 from pcalc.presence import Presence
 
 # A presence record indicating an element existed in a boundary from t=0 to t=10
-p = Presence(element="job-42", boundary="system-a", start=0.0, end=10.0)
+p = Presence(element="job-42", boundary="system-a", onset_time=0.0, reset_time=10.0)
 
 print(p.duration())  # Outputs: 10.0
 ```
