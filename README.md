@@ -10,9 +10,8 @@ _A modern foundation for reasoning about flow and presence in non-linear systems
 
 ## 🔍 Overview
 
-`pypcalc` provides a formal foundation and practical tools for modeling, measuring, and analyzing *presence* — 
-a unifying concept for modeling and measuring "flow" in systems ranging from simple, linear systems to complex, 
-stochastic and non-linear systems. 
+`pypcalc` is a python library that provides a reference implementation for the concepts
+in [The Presence Calculus](https://docs.pcalc.org)
 
 The toolkit includes implementations for key concepts of The Presence Calculus, including
 
@@ -20,48 +19,24 @@ The toolkit includes implementations for key concepts of The Presence Calculus, 
 - The `PresenceMatrix` for computing over presences.
 - The `PresenceInvariant` that expresses the fundamental invariant of The Presence Calculus. 
 
-In addition to base implementations we also provide 
+In addition to base implementations we plan to provide 
 
 - Support for optional export to `pandas` or `polars` and imports from csv files for barebones integration with external models.
-- Examples showing how to use the concepts in different contexts, including simulations and real-time sources, as well as how to use it for causal analysis, and modeling flow in complex adaptive systems
+- Integration APIs to use the calculus in different contexts, including simulations and real-time sources, as well as how to use it for causal analysis, and modeling flow in complex adaptive systems
 
----
+STATUS: The current implementation should be considered pre-alpha quality and not ready for production use. 
+When a releasable library is available, we will publish it as a package on PyPi. 
 
-## 📦 Installation
-
-Install the core package:
-
-```bash
-pip install pypcalc
-```
-
-Optional extras:
-
-```bash
-pip install pypcalc[pandas,polars]
-```
-
----
-
-## 🚀 Quickstart
-
-```python
-from pcalc.presence import PresenceAssertion
-
-# A presence record indicating an element existed in a boundary from t=0 to t=10
-p = PresenceAssertion(element="job-42", boundary="system-a", onset_time=0.0, reset_time=10.0)
-
-print(p.mass())  # Outputs: 10.0
-```
-
-For more advanced usage, see examples in the repository.
+For now, it is best to think of the code in this repository as a concrete, but evolving implementation of the 
+high level concepts we talk about in the documentation. 
 
 ---
 
 ## 📚 Documentation
 
-- 📘 [API Reference](https://py.pcalc.org)
-- 🧠 [Concepts and Blog](https://www.polaris-flow-dispatch.com)
+- 🧠 [Concepts](https://docs.pcalc.org)
+- 📘 [API Reference](https://docs.pcalc.org/api/pcalc.html)
+- 
 
 
 
