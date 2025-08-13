@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from cli import get_parser
+import cli
 
 # -------------------------------
 # Globals for Λ(T) axis clipping
@@ -767,7 +767,7 @@ def produce_all_charts(csv_path: str,
                        incomplete_only: bool = False,
                        with_A: bool = False,
                        with_daily_breakdown: bool = False,
-                       class_filters: Optional[List[str]] = None,
+                       classes: str = None,
                        scatter: bool = False,
                        outlier_hours: Optional[float] = None,
                        outlier_pctl: Optional[float] = None,
@@ -786,7 +786,9 @@ def produce_all_charts(csv_path: str,
         df = df[df["end_ts"].isna()].copy()
 
     # Class filters
-    if class_filters:
+    if classes:
+        class_filters = cli.get_class_filters(classes)
+
         if "class" not in df.columns:
             raise ValueError("--classes was provided but the CSV has no 'class' column")
         classes_norm = {c.strip().lower() for c in class_filters if c is not None}
@@ -1068,7 +1070,7 @@ def produce_all_charts(csv_path: str,
 
 
 def main():
-    parser = get_parser()
+    parser = cli.get_parser()
 
     args = parser.parse_args()
 
@@ -1081,10 +1083,6 @@ def main():
     LAMBDA_PCTL_LOWER = args.lambda_lower_pctl
     LAMBDA_WARMUP_HOURS = float(args.lambda_warmup)
 
-    class_filters = None
-    if args.classes:
-        class_filters = [c for c in args.classes.split(',') if c.strip() != '']
-
     try:
         paths = produce_all_charts(
             args.csv,
@@ -1092,7 +1090,7 @@ def main():
             incomplete_only=args.incomplete,
             with_A=args.with_A,
             with_daily_breakdown=args.with_daily_breakdown,
-            class_filters=class_filters,
+            classes=args.classes,
             scatter=args.scatter,
             outlier_hours=args.outlier_hours,
             outlier_pctl=args.outlier_pctl,

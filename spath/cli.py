@@ -35,3 +35,10 @@ def get_parser():
                         help="Minimum horizon in days when assessing coherence (default 28)")
     parser.add_argument("csv", type=str, help="Path to CSV (id,start_ts,end_ts[,class])")
     return parser
+
+
+def get_class_filters(classes):
+    class_filters = None
+    if classes:
+        class_filters = [c for c in classes.split(',') if c.strip() != '']
+    return class_filters
