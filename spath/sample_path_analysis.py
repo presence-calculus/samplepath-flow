@@ -14,13 +14,6 @@ import matplotlib.pyplot as plt
 
 import cli
 
-# -------------------------------
-# Globals for Λ(T) axis clipping
-# -------------------------------
-LAMBDA_PCTL_UPPER: Optional[float] = None
-LAMBDA_PCTL_LOWER: Optional[float] = None
-LAMBDA_WARMUP_HOURS: float = 0.0
-
 
 # -------------------------------
 # Plot helpers
@@ -71,7 +64,16 @@ def draw_line_chart(times: List[pd.Timestamp], values: np.ndarray, title: str, y
     plt.close(fig)
 
 
-def draw_lambda_chart(times: List[pd.Timestamp], values: np.ndarray, title: str, ylabel: str, out_path: str) -> None:
+def draw_lambda_chart(times: List[pd.Timestamp],
+                      values: np.ndarray,
+                      title: str,
+                      ylabel: str,
+                      out_path: str,
+                      lambda_pctl_upper: Optional[float] = None,
+                      lambda_pctl_lower: Optional[float] = None,
+                      lambda_warmup_hours: Optional[float] = None
+                      ) -> None:
+
     fig, ax = plt.subplots(figsize=(10, 4))
     ax.plot(times, values, label=ylabel)
     ax.set_title(title)
@@ -79,9 +81,9 @@ def draw_lambda_chart(times: List[pd.Timestamp], values: np.ndarray, title: str,
     ax.set_xlabel("Date")
     ax.legend()
     _clip_axis_to_percentile(ax, times, values,
-                             upper_p=LAMBDA_PCTL_UPPER,
-                             lower_p=LAMBDA_PCTL_LOWER,
-                             warmup_hours=LAMBDA_WARMUP_HOURS)
+                             upper_p=lambda_pctl_upper,
+                             lower_p=lambda_pctl_lower,
+                             warmup_hours=lambda_warmup_hours)
     _format_date_axis(ax)
     fig.tight_layout()
     fig.savefig(out_path)
@@ -142,7 +144,11 @@ def draw_four_panel_column(times: List[pd.Timestamp],
                            Lam_vals: np.ndarray,
                            w_vals: np.ndarray,
                            title: str,
-                           out_path: str) -> None:
+                           out_path: str,
+                           lambda_pctl_upper: Optional[float] = None,
+                           lambda_pctl_lower: Optional[float] = None,
+                           lambda_warmup_hours: Optional[float] = None
+                           ) -> None:
     fig, axes = plt.subplots(4, 1, figsize=(12, 11), sharex=True)
 
     axes[0].step(times, N_vals, where='post', label='N(t)')
@@ -160,9 +166,9 @@ def draw_four_panel_column(times: List[pd.Timestamp],
     axes[2].set_ylabel('Λ(T) [1/hr]')
     axes[2].legend()
     _clip_axis_to_percentile(axes[2], times, Lam_vals,
-                             upper_p=LAMBDA_PCTL_UPPER,
-                             lower_p=LAMBDA_PCTL_LOWER,
-                             warmup_hours=LAMBDA_WARMUP_HOURS)
+                             upper_p=lambda_pctl_upper,
+                             lower_p=lambda_pctl_lower,
+                             warmup_hours=lambda_warmup_hours)
 
     axes[3].plot(times, w_vals, label='w(T) [hrs]')
     axes[3].set_title('w(T) — average residence time in window')
@@ -189,7 +195,11 @@ def draw_five_panel_column(times: List[pd.Timestamp],
                            out_path: str,
                            scatter_times: Optional[List[pd.Timestamp]] = None,
                            scatter_values: Optional[np.ndarray] = None,
-                           scatter_label: str = "Item time in system") -> None:
+                           scatter_label: str = "Item time in system",
+                           lambda_pctl_upper: Optional[float] = None,
+                           lambda_pctl_lower: Optional[float] = None,
+                           lambda_warmup_hours: Optional[float] = None
+                           ) -> None:
     fig, axes = plt.subplots(5, 1, figsize=(12, 14), sharex=True)
 
     axes[0].step(times, N_vals, where='post', label='N(t)')
@@ -207,9 +217,9 @@ def draw_five_panel_column(times: List[pd.Timestamp],
     axes[2].set_ylabel('Λ(T) [1/hr]')
     axes[2].legend()
     _clip_axis_to_percentile(axes[2], times, Lam_vals,
-                             upper_p=LAMBDA_PCTL_UPPER,
-                             lower_p=LAMBDA_PCTL_LOWER,
-                             warmup_hours=LAMBDA_WARMUP_HOURS)
+                             upper_p=lambda_pctl_upper,
+                             lower_p=lambda_pctl_lower,
+                             warmup_hours=lambda_warmup_hours)
 
     axes[3].plot(times, w_vals, label='w(T) [hrs]')
     if scatter_times is not None and scatter_values is not None and len(scatter_times) > 0:
@@ -242,7 +252,11 @@ def draw_five_panel_column_with_scatter(times: List[pd.Timestamp],
                                         out_path: str,
                                         scatter_times: Optional[List[pd.Timestamp]] = None,
                                         scatter_values: Optional[np.ndarray] = None,
-                                        scatter_label: str = "Item time in system") -> None:
+                                        scatter_label: str = "Item time in system",
+                                        lambda_pctl_upper: Optional[float] = None,
+                                        lambda_pctl_lower: Optional[float] = None,
+                                        lambda_warmup_hours: Optional[float] = None
+                                        ) -> None:
     fig, axes = plt.subplots(5, 1, figsize=(12, 14), sharex=True)
 
     axes[0].step(times, N_vals, where='post', label='N(t)')
@@ -260,9 +274,9 @@ def draw_five_panel_column_with_scatter(times: List[pd.Timestamp],
     axes[2].set_ylabel('Λ(T) [1/hr]')
     axes[2].legend()
     _clip_axis_to_percentile(axes[2], times, Lam_vals,
-                             upper_p=LAMBDA_PCTL_UPPER,
-                             lower_p=LAMBDA_PCTL_LOWER,
-                             warmup_hours=LAMBDA_WARMUP_HOURS)
+                             upper_p=lambda_pctl_upper,
+                             lower_p=lambda_pctl_lower,
+                             warmup_hours=lambda_warmup_hours)
 
     axes[3].plot(times, w_vals, label='w(T) [hrs]')
     axes[3].set_title('w(T) — average residence time (plain, own scale)')
@@ -308,7 +322,11 @@ def draw_convergence_panel(times: List[pd.Timestamp],
                            W_emp: float,
                            lam_emp: float,
                            title: str,
-                           out_path: str) -> None:
+                           out_path: str,
+                           lambda_pctl_upper: Optional[float] = None,
+                           lambda_pctl_lower: Optional[float] = None,
+                           lambda_warmup_hours: Optional[float] = None
+                           ) -> None:
     fig, axes = plt.subplots(2, 1, figsize=(12, 6.5), sharex=True)
 
     axes[0].plot(times, w_vals, label='w(T) [hrs]')
@@ -327,9 +345,9 @@ def draw_convergence_panel(times: List[pd.Timestamp],
     axes[1].legend()
 
     _clip_axis_to_percentile(axes[1], times, lam_vals,
-                             upper_p=LAMBDA_PCTL_UPPER,
-                             lower_p=LAMBDA_PCTL_LOWER,
-                             warmup_hours=LAMBDA_WARMUP_HOURS)
+                             upper_p=lambda_pctl_upper,
+                             lower_p=lambda_pctl_lower,
+                             warmup_hours=lambda_warmup_hours)
 
     for ax in axes:
         _format_date_axis(ax)
@@ -346,7 +364,11 @@ def draw_dynamic_convergence_panel(times: List[pd.Timestamp],
                                    W_star: np.ndarray,
                                    lam_star: np.ndarray,
                                    title: str,
-                                   out_path: str) -> None:
+                                   out_path: str,
+                                   lambda_pctl_upper: Optional[float] = None,
+                                   lambda_pctl_lower: Optional[float] = None,
+                                   lambda_warmup_hours: Optional[float] = None
+                                   ) -> None:
     fig, axes = plt.subplots(2, 1, figsize=(12, 6.5), sharex=True)
 
     axes[0].plot(times, w_vals, label='w(T) [hrs]')
@@ -363,9 +385,9 @@ def draw_dynamic_convergence_panel(times: List[pd.Timestamp],
     axes[1].legend()
 
     _clip_axis_to_percentile(axes[1], times, lam_vals,
-                             upper_p=LAMBDA_PCTL_UPPER,
-                             lower_p=LAMBDA_PCTL_LOWER,
-                             warmup_hours=LAMBDA_WARMUP_HOURS)
+                             upper_p=lambda_pctl_upper,
+                             lower_p=lambda_pctl_lower,
+                             warmup_hours=lambda_warmup_hours)
 
     for ax in axes:
         _format_date_axis(ax)
@@ -385,7 +407,11 @@ def draw_dynamic_convergence_panel_with_errors(times: List[pd.Timestamp],
                                                eLam: np.ndarray,
                                                epsilon: Optional[float],
                                                title: str,
-                                               out_path: str) -> None:
+                                               out_path: str,
+                                               lambda_pctl_upper: Optional[float] = None,
+                                               lambda_pctl_lower: Optional[float] = None,
+                                               lambda_warmup_hours: Optional[float] = None
+                                               ) -> None:
     fig, axes = plt.subplots(3, 1, figsize=(12, 9.2), sharex=True)
 
     axes[0].plot(times, w_vals, label='w(T) [hrs]')
@@ -400,9 +426,9 @@ def draw_dynamic_convergence_panel_with_errors(times: List[pd.Timestamp],
     axes[1].set_ylabel('1/hr')
     axes[1].legend()
     _clip_axis_to_percentile(axes[1], times, lam_vals,
-                             upper_p=LAMBDA_PCTL_UPPER,
-                             lower_p=LAMBDA_PCTL_LOWER,
-                             warmup_hours=LAMBDA_WARMUP_HOURS)
+                             upper_p=lambda_pctl_upper,
+                             lower_p=lambda_pctl_lower,
+                             warmup_hours=lambda_warmup_hours)
 
     axes[2].plot(times, eW, label='rel. error e_W')
     axes[2].plot(times, eLam, label='rel. error e_λ')
@@ -492,7 +518,11 @@ def draw_dynamic_convergence_panel_with_errors_and_endeffects(times: List[pd.Tim
                                                               rho: np.ndarray,
                                                               epsilon: Optional[float],
                                                               title: str,
-                                                              out_path: str) -> None:
+                                                              out_path: str,
+                                                              lambda_pctl_upper: Optional[float] = None,
+                                                              lambda_pctl_lower: Optional[float] = None,
+                                                              lambda_warmup_hours: Optional[float] = None
+                                                              ) -> None:
     """Four-row dynamic convergence view with end-effect metrics."""
     fig, axes = plt.subplots(4, 1, figsize=(12, 12), sharex=True)
 
@@ -508,9 +538,9 @@ def draw_dynamic_convergence_panel_with_errors_and_endeffects(times: List[pd.Tim
     axes[1].set_ylabel('1/hr')
     axes[1].legend()
     _clip_axis_to_percentile(axes[1], times, lam_vals,
-                             upper_p=LAMBDA_PCTL_UPPER,
-                             lower_p=LAMBDA_PCTL_LOWER,
-                             warmup_hours=LAMBDA_WARMUP_HOURS)
+                             upper_p=lambda_pctl_upper,
+                             lower_p=lambda_pctl_lower,
+                             warmup_hours=lambda_warmup_hours)
 
     axes[2].plot(times, eW, label='rel. error e_W')
     axes[2].plot(times, eLam, label='rel. error e_λ')
@@ -774,7 +804,11 @@ def produce_all_charts(csv_path: str,
                        outlier_iqr: Optional[float] = None,
                        outlier_iqr_two_sided: bool = False,
                        epsilon: Optional[float] = None,
-                       horizon_days: Optional[float] = None) -> List[str]:
+                       horizon_days: Optional[float] = None,
+                       lambda_pctl_upper: Optional[float] = None,
+                       lambda_pctl_lower: Optional[float] = None,
+                       lambda_warmup_hours: Optional[float] = None
+                       ) -> List[str]:
     df = parse_and_validate_csv(csv_path)
 
     # Basic filters
@@ -913,7 +947,7 @@ def produce_all_charts(csv_path: str,
     ts_Np = os.path.join(out_dir, "timestamp_N.png")
 
     draw_line_chart(t_times, t_L, f"L(T) — time-average number (timestamp, {mode_label})", "L(T)", ts_L)
-    draw_lambda_chart(t_times, t_Lam, f"Λ(T) — cumulative arrivals per hour (timestamp, {mode_label})", "Λ(T) [1/hr]", ts_Lam)
+    draw_lambda_chart(t_times, t_Lam, f"Λ(T) — cumulative arrivals per hour (timestamp, {mode_label})", "Λ(T) [1/hr]", ts_Lam, lambda_pctl_upper, lambda_pctl_lower, lambda_warmup_hours)
 
     if scatter and len(t_scatter_times) > 0:
         label = "Item age at sweep end" if incomplete_only else "Item time in system"
@@ -930,18 +964,18 @@ def produce_all_charts(csv_path: str,
     if len(t_times) > 0:
         ts_conv = os.path.join(out_dir, 'timestamp_convergence.png')
         draw_convergence_panel(t_times, t_w, t_Lam, W_emp_ts, lam_emp_ts,
-                               f'Convergence diagnostics (timestamp, {mode_label})', ts_conv)
+                               f'Convergence diagnostics (timestamp, {mode_label})', ts_conv, lambda_pctl_upper=lambda_pctl_upper, lambda_pctl_lower=lambda_pctl_lower, lambda_warmup_hours=lambda_warmup_hours)
         written.append(ts_conv)
 
         ts_conv_dyn = os.path.join(out_dir, 'timestamp_convergence_dynamic.png')
         draw_dynamic_convergence_panel(t_times, t_w, t_Lam, W_star_ts, lam_star_ts,
-                                       f'Dynamic convergence (timestamp, {mode_label})', ts_conv_dyn)
+                                       f'Dynamic convergence (timestamp, {mode_label})', ts_conv_dyn, lambda_pctl_upper=lambda_pctl_upper, lambda_pctl_lower=lambda_pctl_lower, lambda_warmup_hours=lambda_warmup_hours)
         written.append(ts_conv_dyn)
 
         ts_conv_dyn3 = os.path.join(out_dir, 'timestamp_convergence_dynamic_errors.png')
         draw_dynamic_convergence_panel_with_errors(t_times, t_w, t_Lam, W_star_ts, lam_star_ts,
                                                    eW_ts, eLam_ts, epsilon,
-                                                   f'Dynamic convergence + errors (timestamp, {mode_label})', ts_conv_dyn3)
+                                                   f'Dynamic convergence + errors (timestamp, {mode_label})', ts_conv_dyn3, lambda_pctl_upper=lambda_pctl_upper, lambda_pctl_lower=lambda_pctl_lower, lambda_warmup_hours=lambda_warmup_hours)
         written.append(ts_conv_dyn3)
 
     # Daily charts
@@ -951,7 +985,7 @@ def produce_all_charts(csv_path: str,
     dNp = os.path.join(out_dir, "daily_N.png")
 
     draw_line_chart(d_times, d_L, f"L(T) — time-average number (daily, {mode_label})", "L(T)", dL)
-    draw_lambda_chart(d_times, d_Lam, f"Λ(T) — cumulative arrivals per hour (daily, {mode_label})", "Λ(T) [1/hr]", dLam)
+    draw_lambda_chart(d_times, d_Lam, f"Λ(T) — cumulative arrivals per hour (daily, {mode_label})", "Λ(T) [1/hr]", dLam, lambda_pctl_upper, lambda_pctl_lower, lambda_warmup_hours)
 
     if scatter and len(d_scatter_times) > 0:
         draw_line_chart_with_scatter(d_times, d_w,
@@ -979,7 +1013,7 @@ def produce_all_charts(csv_path: str,
         d_conv_dyn3 = os.path.join(out_dir, 'daily_convergence_dynamic_errors.png')
         draw_dynamic_convergence_panel_with_errors(d_times, d_w, d_Lam, W_star_d, lam_star_d,
                                                    eW_d, eLam_d, epsilon,
-                                                   f'Dynamic convergence + errors (daily, {mode_label})', d_conv_dyn3)
+                                                   f'Dynamic convergence + errors (daily, {mode_label})', d_conv_dyn3, lambda_pctl_upper=lambda_pctl_upper, lambda_pctl_lower=lambda_pctl_lower, lambda_warmup_hours=lambda_warmup_hours)
         written.append(d_conv_dyn3)
 
     # --- End-effect diagnostics ---
@@ -991,7 +1025,7 @@ def produce_all_charts(csv_path: str,
         draw_dynamic_convergence_panel_with_errors_and_endeffects(
             t_times, t_w, t_Lam, W_star_ts, lam_star_ts, eW_ts, eLam_ts,
             rA_ts, rB_ts, rho_ts, epsilon,
-            f'Dynamic convergence + errors + end-effects (timestamp, {mode_label})', ts_conv_dyn4)
+            f'Dynamic convergence + errors + end-effects (timestamp, {mode_label})', ts_conv_dyn4, lambda_pctl_upper=lambda_pctl_upper, lambda_pctl_lower=lambda_pctl_lower, lambda_warmup_hours=lambda_warmup_hours)
         written.append(ts_conv_dyn4)
 
     if len(d_times) > 0:
@@ -999,16 +1033,16 @@ def produce_all_charts(csv_path: str,
         draw_dynamic_convergence_panel_with_errors_and_endeffects(
             d_times, d_w, d_Lam, W_star_d, lam_star_d, eW_d, eLam_d,
             rA_d, rB_d, rho_d, epsilon,
-            f'Dynamic convergence + errors + end-effects (daily, {mode_label})', d_conv_dyn4)
+            f'Dynamic convergence + errors + end-effects (daily, {mode_label})', d_conv_dyn4, lambda_pctl_upper=lambda_pctl_upper, lambda_pctl_lower=lambda_pctl_lower, lambda_warmup_hours=lambda_warmup_hours)
         written.append(d_conv_dyn4)
 
     # Vertical stacks (4×1)
     col_ts = os.path.join(out_dir, 'timestamp_stack.png')
-    draw_four_panel_column(t_times, t_N, t_L, t_Lam, t_w, f'Finite-window metrics (timestamp, {mode_label})', col_ts)
+    draw_four_panel_column(t_times, t_N, t_L, t_Lam, t_w, f'Finite-window metrics (timestamp, {mode_label})', col_ts, lambda_pctl_upper, lambda_pctl_lower, lambda_warmup_hours)
     written.append(col_ts)
 
     col_d = os.path.join(out_dir, 'daily_stack.png')
-    draw_four_panel_column(d_times, d_N, d_L, d_Lam, d_w, f'Finite-window metrics (daily, {mode_label})', col_d)
+    draw_four_panel_column(d_times, d_N, d_L, d_Lam, d_w, f'Finite-window metrics (daily, {mode_label})', col_d, lambda_pctl_upper, lambda_pctl_lower, lambda_warmup_hours)
     written.append(col_d)
 
     # 5-panel stacks including A(T)
@@ -1016,27 +1050,27 @@ def produce_all_charts(csv_path: str,
         col_ts5 = os.path.join(out_dir, 'timestamp_stack_with_A.png')
         draw_five_panel_column(t_times, t_N, t_L, t_Lam, t_w, t_A,
                                f'Finite-window metrics incl. A(T) (timestamp, {mode_label})', col_ts5,
-                               scatter_times=t_scatter_times, scatter_values=t_scatter_vals)
+                               scatter_times=t_scatter_times, scatter_values=t_scatter_vals, lambda_pctl_upper=lambda_pctl_upper, lambda_pctl_lower=lambda_pctl_lower, lambda_warmup_hours=lambda_warmup_hours)
         written.append(col_ts5)
 
         col_d5 = os.path.join(out_dir, 'daily_stack_with_A.png')
         draw_five_panel_column(d_times, d_N, d_L, d_Lam, d_w, d_A,
                                f'Finite-window metrics incl. A(T) (daily, {mode_label})', col_d5,
-                               scatter_times=d_scatter_times, scatter_values=d_scatter_vals)
+                               scatter_times=d_scatter_times, scatter_values=d_scatter_vals, lambda_pctl_upper=lambda_pctl_upper, lambda_pctl_lower=lambda_pctl_lower, lambda_warmup_hours=lambda_warmup_hours)
         written.append(col_d5)
     elif scatter:
         col_ts5s = os.path.join(out_dir, 'timestamp_stack_with_scatter.png')
         draw_five_panel_column_with_scatter(t_times, t_N, t_L, t_Lam, t_w,
                                             f'Finite-window metrics with w(T) plain + w(T)+scatter (timestamp, {mode_label})',
                                             col_ts5s,
-                                            scatter_times=t_scatter_times, scatter_values=t_scatter_vals)
+                                            scatter_times=t_scatter_times, scatter_values=t_scatter_vals, lambda_pctl_upper=lambda_pctl_upper, lambda_pctl_lower=lambda_pctl_lower, lambda_warmup_hours=lambda_warmup_hours)
         written.append(col_ts5s)
 
         col_d5s = os.path.join(out_dir, 'daily_stack_with_scatter.png')
         draw_five_panel_column_with_scatter(d_times, d_N, d_L, d_Lam, d_w,
                                             f'Finite-window metrics with w(T) plain + w(T)+scatter (daily, {mode_label})',
                                             col_d5s,
-                                            scatter_times=d_scatter_times, scatter_values=d_scatter_vals)
+                                            scatter_times=d_scatter_times, scatter_values=d_scatter_vals, lambda_pctl_upper=lambda_pctl_upper, lambda_pctl_lower=lambda_pctl_lower, lambda_warmup_hours=lambda_warmup_hours)
         written.append(col_d5s)
 
     # Optional daily breakdowns derived from A(T)
@@ -1073,11 +1107,6 @@ def main():
     args = cli.parse_args()
 
 
-    global LAMBDA_PCTL_UPPER, LAMBDA_PCTL_LOWER, LAMBDA_WARMUP_HOURS
-    LAMBDA_PCTL_UPPER = args.lambda_pctl
-    LAMBDA_PCTL_LOWER = args.lambda_lower_pctl
-    LAMBDA_WARMUP_HOURS = float(args.lambda_warmup)
-
     try:
         paths = produce_all_charts(
             args.csv,
@@ -1093,6 +1122,9 @@ def main():
             outlier_iqr_two_sided=args.outlier_iqr_two_sided,
             epsilon=args.epsilon,
             horizon_days=args.horizon_days,
+            lambda_pctl_upper=args.lambda_pctl,
+            lambda_pctl_lower=args.lambda_lower_pctl,
+            lambda_warmup_hours=float(args.lambda_warmup)
         )
         print("Wrote charts:\n" + "\n".join(paths))
     except Exception as e:
