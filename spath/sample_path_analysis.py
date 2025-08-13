@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Copyright (c) 2025 Krishna Kumar
+# SPDX-License-Identifier: MIT
+
 """
 Finite-window flow metrics & convergence diagnostics with end-effect panel.
 See README.md for context.
@@ -13,6 +16,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 import cli
+from csv_loader import csv_to_dataframe
 
 
 # -------------------------------
@@ -579,35 +583,6 @@ def draw_dynamic_convergence_panel_with_errors_and_endeffects(times: List[pd.Tim
 # -------------------------------
 # Core computations
 # -------------------------------
-def parse_and_validate_csv(csv_path: str) -> pd.DataFrame:
-    """Read CSV into normalized schema: id, start_ts, end_ts, (optional) class."""
-    df = pd.read_csv(csv_path)
-    cols = [c.strip().lower() for c in df.columns]
-
-    if set(cols) >= {"id", "start_ts", "end_ts"}:
-        pass
-    elif len(df.columns) in (3, 4):
-        if len(df.columns) == 3:
-            df.columns = ["id", "start_ts", "end_ts"]
-        else:
-            df.columns = ["id", "start_ts", "end_ts", "class"]
-    else:
-        raise ValueError("CSV must have columns (id,start_ts,end_ts[,class]) either with header or as 3/4 columns.")
-
-    df["start_ts"] = pd.to_datetime(df["start_ts"], errors="coerce")
-    df["end_ts"] = pd.to_datetime(df["end_ts"], errors="coerce")
-
-    if df["start_ts"].isna().any():
-        raise ValueError("Found rows with invalid or missing start_ts.")
-    bad = df["end_ts"].notna() & (df["end_ts"] < df["start_ts"])
-    if bad.any():
-        raise ValueError(f"Found {int(bad.sum())} rows where end_ts < start_ts.")
-
-    if "class" not in df.columns:
-        df["class"] = np.nan
-
-    df = df.sort_values("start_ts").reset_index(drop=True)
-    return df
 
 
 def ensure_output_dir(csv_path: str) -> str:
@@ -809,7 +784,8 @@ def produce_all_charts(csv_path: str,
                        lambda_pctl_lower: Optional[float] = None,
                        lambda_warmup_hours: Optional[float] = None
                        ) -> List[str]:
-    df = parse_and_validate_csv(csv_path)
+
+    df = csv_to_dataframe(csv_path)
 
     # Basic filters
     if completed_only and incomplete_only:
@@ -1105,8 +1081,6 @@ def produce_all_charts(csv_path: str,
 
 def main():
     args = cli.parse_args()
-
-
     try:
         paths = produce_all_charts(
             args.csv,
