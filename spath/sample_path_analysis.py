@@ -10,14 +10,17 @@ See README.md for context.
 import os
 import sys
 from typing import List, Optional, Tuple
+from argparse import Namespace
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
+
 import cli
 from csv_loader import csv_to_dataframe
-
+from filter import FilterResult, apply_filters
 
 # -------------------------------
 # Plot helpers
@@ -768,90 +771,24 @@ def compute_coherence_score(eW: np.ndarray,
 # Orchestration
 # -------------------------------
 def produce_all_charts(csv_path: str,
+                       args: Namespace,
                        completed_only: bool = False,
                        incomplete_only: bool = False,
                        with_A: bool = False,
                        with_daily_breakdown: bool = False,
-                       classes: str = None,
                        scatter: bool = False,
-                       outlier_hours: Optional[float] = None,
-                       outlier_pctl: Optional[float] = None,
-                       outlier_iqr: Optional[float] = None,
-                       outlier_iqr_two_sided: bool = False,
                        epsilon: Optional[float] = None,
                        horizon_days: Optional[float] = None,
                        lambda_pctl_upper: Optional[float] = None,
                        lambda_pctl_lower: Optional[float] = None,
-                       lambda_warmup_hours: Optional[float] = None
+                       lambda_warmup_hours: Optional[float] = None,
                        ) -> List[str]:
 
     df = csv_to_dataframe(csv_path)
 
-    # Basic filters
-    if completed_only and incomplete_only:
-        raise ValueError("--completed and --incomplete are mutually exclusive")
-    if completed_only:
-        df = df[df["end_ts"].notna()].copy()
-    if incomplete_only:
-        df = df[df["end_ts"].isna()].copy()
+    filter_result: FilterResult = apply_filters(df, args)
+    df = filter_result.df
 
-    # Class filters
-    if classes:
-        class_filters = cli.get_class_filters(classes)
-
-        if "class" not in df.columns:
-            raise ValueError("--classes was provided but the CSV has no 'class' column")
-        classes_norm = {c.strip().lower() for c in class_filters if c is not None}
-        df = df[df["class"].astype(str).str.lower().isin(classes_norm)].copy()
-        if df.empty:
-            raise ValueError(f"No rows match the requested classes: {sorted(classes_norm)}")
-
-    # Outlier filters on completed durations
-    outlier_note = ""
-    durations_hr = (df["end_ts"] - df["start_ts"]).dt.total_seconds() / 3600.0
-    keep_mask = pd.Series(True, index=df.index)
-    dropped_tags: List[str] = []
-
-    if outlier_hours is not None:
-        hrs = float(outlier_hours)
-        keep_mask &= (df["end_ts"].isna() | (durations_hr <= hrs))
-        dropped_tags.append(f">{hrs:g}h")
-
-    if outlier_pctl is not None:
-        p = float(outlier_pctl)
-        if not (0.0 < p < 100.0):
-            raise ValueError(f"--outlier-pctl must be between 0 and 100 (got {outlier_pctl})")
-        comp_mask = df["end_ts"].notna()
-        if comp_mask.any():
-            thresh = float(np.nanpercentile(durations_hr[comp_mask], p))
-            keep_mask &= (df["end_ts"].isna() | (durations_hr <= thresh))
-            dropped_tags.append(f">p{p:g} (>{thresh:.2f}h)")
-
-    if outlier_iqr is not None:
-        k = float(outlier_iqr)
-        comp_mask = df["end_ts"].notna()
-        comp_d = durations_hr[comp_mask].dropna()
-        if len(comp_d) >= 4:
-            q1 = float(np.nanpercentile(comp_d, 25))
-            q3 = float(np.nanpercentile(comp_d, 75))
-            iqr = q3 - q1
-            high_fence = q3 + k * iqr
-            low_fence = q1 - k * iqr
-            keep = df["end_ts"].isna() | (durations_hr <= high_fence)
-            tag_high = f">Q3+{k:g}·IQR (>{high_fence:.2f}h)"
-            if outlier_iqr_two_sided:
-                keep &= (df["end_ts"].isna() | (durations_hr >= low_fence))
-                dropped_tags.append(f"<Q1−{k:g}·IQR (<{low_fence:.2f}h)")
-            keep_mask &= keep
-            dropped_tags.append(tag_high)
-
-    if (keep_mask != True).any():
-        dropped = int((~keep_mask).sum())
-        df = df[keep_mask].copy()
-        if dropped > 0 and df.empty:
-            raise ValueError("All rows removed by outlier filters")
-        if dropped_tags:
-            outlier_note = "outliers " + " & ".join(dropped_tags) + " removed"
 
     # Build events and sweeps
     events = build_event_stream(df)
@@ -907,11 +844,7 @@ def produce_all_charts(csv_path: str,
                 d_scatter_times = t_scatter_times
                 d_scatter_vals = t_scatter_vals
 
-    mode_label = "completed work" if completed_only else ("incomplete (aging view)" if incomplete_only else "all work")
-    if class_filters:
-        mode_label += f", classes: {','.join(class_filters)}"
-    if outlier_note:
-        mode_label += f", {outlier_note}"
+    mode_label = filter_result.label
 
     out_dir = ensure_output_dir(csv_path)
     written: List[str] = []
@@ -1084,16 +1017,12 @@ def main():
     try:
         paths = produce_all_charts(
             args.csv,
+            args,
             completed_only=args.completed,
             incomplete_only=args.incomplete,
             with_A=args.with_A,
             with_daily_breakdown=args.with_daily_breakdown,
-            classes=args.classes,
             scatter=args.scatter,
-            outlier_hours=args.outlier_hours,
-            outlier_pctl=args.outlier_pctl,
-            outlier_iqr=args.outlier_iqr,
-            outlier_iqr_two_sided=args.outlier_iqr_two_sided,
             epsilon=args.epsilon,
             horizon_days=args.horizon_days,
             lambda_pctl_upper=args.lambda_pctl,
