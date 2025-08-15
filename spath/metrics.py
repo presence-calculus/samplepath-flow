@@ -358,3 +358,143 @@ def _resolve_freq(
         f"Unknown frequency '{bucket}'. Use pandas alias (e.g., 'D','W-MON','MS','QS-JAN','YS-JAN') "
         f"or one of {{day, week, month, quarter, year}}."
     )
+
+
+def compute_end_effect_series(df: pd.DataFrame,
+                              times: List[pd.Timestamp],
+                              A_vals: np.ndarray,
+                              W_star: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Compute end-effect diagnostics over [t0, t]:
+
+    Returns arrays aligned to `times`:
+      - rA(T) = E(T) / A(T), where E(T) = A(T) - sum(full durations of items fully contained)
+      - rB(T) = B(T) / total_items_started_by_t, boundary share
+      - rho(T) = T / W*(t), window/typical-duration ratio
+    """
+    n = len(times)
+    rA = np.full(n, np.nan, dtype=float)
+    rB = np.full(n, np.nan, dtype=float)
+    rho = np.full(n, np.nan, dtype=float)
+    if n == 0:
+        return rA, rB, rho
+
+    df = df.copy()
+    df["duration_h"] = (df["end_ts"] - df["start_ts"]).dt.total_seconds() / 3600.0
+    df_sorted_by_end = df.sort_values("end_ts")
+    df_sorted_by_start = df.sort_values("start_ts")
+
+    t0 = times[0]
+
+    for i, t in enumerate(times):
+        elapsed_h = (t - t0).total_seconds() / 3600.0
+        if elapsed_h <= 0:
+            continue
+
+        A_T = float(A_vals[i]) if i < len(A_vals) and np.isfinite(A_vals[i]) else np.nan
+        if not np.isfinite(A_T) or A_T <= 0:
+            continue
+
+        mask_full = df_sorted_by_end["end_ts"].notna() & (df_sorted_by_end["end_ts"] <= t)
+        A_full = float(df_sorted_by_end.loc[mask_full, "duration_h"].sum()) if mask_full.any() else 0.0
+
+        E_T = max(A_T - A_full, 0.0)
+        rA[i] = E_T / A_T if A_T > 0 else np.nan
+
+        mask_started = (df_sorted_by_start["start_ts"] <= t)
+        total_started = int(mask_started.sum())
+        mask_incomplete_by_t = mask_started & ((df_sorted_by_start["end_ts"].isna()) | (df_sorted_by_start["end_ts"] > t))
+        B_T = int(mask_incomplete_by_t.sum())
+        rB[i] = (B_T / total_started) if total_started > 0 else np.nan
+
+        Wstar_t = float(W_star[i]) if i < len(W_star) else float('nan')
+        rho[i] = (elapsed_h / Wstar_t) if np.isfinite(Wstar_t) and Wstar_t > 0 else np.nan
+
+    return rA, rB, rho
+
+
+def compute_empirical_targets(df: pd.DataFrame, t0: pd.Timestamp, t_end: pd.Timestamp) -> Tuple[float, float]:
+    comp = df[df["end_ts"].notna()].copy()
+    if not comp.empty:
+        W_emp = float(((comp["end_ts"] - comp["start_ts"]).dt.total_seconds() / 3600.0).mean())
+    else:
+        W_emp = float('nan')
+    arrivals = int((df["start_ts"] <= t_end).sum())
+    elapsed_h = (t_end - t0).total_seconds() / 3600.0 if pd.notna(t_end) and pd.notna(t0) else 0.0
+    lam_emp = float(arrivals / elapsed_h) if elapsed_h > 0 else float('nan')
+    return W_emp, lam_emp
+
+
+def compute_dynamic_empirical_series(df: pd.DataFrame,
+                                     times: List[pd.Timestamp]) -> Tuple[np.ndarray, np.ndarray]:
+    """Return W*(t) and λ*(t) aligned to `times`."""
+    n = len(times)
+    W_star = np.full(n, np.nan, dtype=float)
+    lam_star = np.full(n, np.nan, dtype=float)
+    if n == 0:
+        return W_star, lam_star
+
+    comp = df[df["end_ts"].notna()].copy().sort_values("end_ts")
+    comp_durations = ((comp["end_ts"] - comp["start_ts"]).dt.total_seconds() / 3600.0).to_numpy()
+    comp_end_times = comp["end_ts"].to_list()
+
+    starts = df["start_ts"].sort_values().to_list()
+
+    j = 0
+    count_c = 0
+    sum_c = 0.0
+    k = 0
+    count_starts = 0
+    t0 = times[0]
+
+    for i, t in enumerate(times):
+        while j < len(comp_end_times) and comp_end_times[j] <= t:
+            sum_c += comp_durations[j]
+            count_c += 1
+            j += 1
+        if count_c > 0:
+            W_star[i] = sum_c / count_c
+
+        while k < len(starts) and starts[k] <= t:
+            count_starts += 1
+            k += 1
+        elapsed_h = (t - t0).total_seconds() / 3600.0
+        if elapsed_h > 0:
+            lam_star[i] = count_starts / elapsed_h
+
+    return W_star, lam_star
+
+
+def compute_tracking_errors(times: List[pd.Timestamp],
+                            w_vals: np.ndarray,
+                            lam_vals: np.ndarray,
+                            W_star: np.ndarray,
+                            lam_star: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    n = len(times)
+    if n == 0:
+        return np.array([]), np.array([]), np.array([])
+    t0 = times[0]
+    elapsed_hours = np.array([(t - t0).total_seconds() / 3600.0 for t in times], dtype=float)
+
+    eW = np.full(n, np.nan, dtype=float)
+    eLam = np.full(n, np.nan, dtype=float)
+
+    valid_W = np.isfinite(w_vals) & np.isfinite(W_star) & (W_star > 0)
+    valid_L = np.isfinite(lam_vals) & np.isfinite(lam_star) & (lam_star > 0)
+
+    eW[valid_W] = np.abs(w_vals[valid_W] - W_star[valid_W]) / W_star[valid_W]
+    eLam[valid_L] = np.abs(lam_vals[valid_L] - lam_star[valid_L]) / lam_star[valid_L]
+
+    return eW, eLam, elapsed_hours
+
+
+def compute_coherence_score(eW: np.ndarray,
+                            eLam: np.ndarray,
+                            elapsed_hours: np.ndarray,
+                            epsilon: float,
+                            horizon_hours: float) -> Tuple[float, int, int]:
+    ok_idx = np.isfinite(eW) & np.isfinite(eLam) & (elapsed_hours >= horizon_hours)
+    total = int(np.sum(ok_idx))
+    if total == 0:
+        return float('nan'), 0, 0
+    coherent = int(np.sum(np.maximum(eW[ok_idx], eLam[ok_idx]) <= epsilon))
+    return coherent / total, coherent, total
