@@ -21,7 +21,8 @@ import matplotlib.pyplot as plt
 import cli
 from csv_loader import csv_to_dataframe
 from filter import FilterResult, apply_filters
-from metrics import compute_sample_path_metrics, compute_finite_window_flow_metrics, FlowMetricsResult
+from metrics import compute_sample_path_metrics, compute_finite_window_flow_metrics
+from point_process import build_arrival_departure_events
 
 
 # -------------------------------
@@ -598,19 +599,6 @@ def ensure_output_dir(csv_path: str) -> str:
     return out_dir
 
 
-def build_event_stream(df: pd.DataFrame) -> List[Tuple[pd.Timestamp, int, int]]:
-    """Return sorted events: (time, deltaN, arrivals_at_time)."""
-    events: List[Tuple[pd.Timestamp, int, int]] = []
-    for _, row in df.iterrows():
-        st = row["start_ts"]
-        events.append((st, +1, 1))
-        et = row["end_ts"]
-        if pd.notna(et):
-            events.append((et, -1, 0))
-    events.sort(key=lambda x: (x[0], -x[1]))
-    return events
-
-
 def sweep_timestamp_series(events: List[Tuple[pd.Timestamp, int, int]]):
     unique_times: List[pd.Timestamp] = sorted({t for t, _, _ in events})
     return compute_sample_path_metrics(events, unique_times)
@@ -731,7 +719,7 @@ def produce_all_charts(csv_path: str,
 
 
     # Build events and sweeps
-    events = build_event_stream(df)
+    events = build_arrival_departure_events(df)
     # Compute core finite window flow metrics
     metrics = compute_finite_window_flow_metrics(events)
 
