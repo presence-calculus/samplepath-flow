@@ -24,7 +24,7 @@ from plots import draw_line_chart, draw_lambda_chart, draw_line_chart_with_scatt
     draw_four_panel_column, draw_five_panel_column, draw_five_panel_column_with_scatter, draw_convergence_panel, \
     draw_dynamic_convergence_panel, draw_dynamic_convergence_panel_with_errors, \
     draw_dynamic_convergence_panel_with_errors_and_endeffects
-from point_process import build_arrival_departure_events
+from point_process import to_arrival_departure_process
 
 
 # -------------------------------
@@ -47,10 +47,6 @@ def ensure_output_dir(csv_path: str) -> str:
     os.makedirs(out_dir, exist_ok=True)
     return out_dir
 
-
-def sweep_timestamp_series(events: List[Tuple[pd.Timestamp, int, int]]):
-    unique_times: List[pd.Timestamp] = sorted({t for t, _, _ in events})
-    return compute_sample_path_metrics(events, unique_times)
 
 
 # -------------------------------
@@ -81,10 +77,10 @@ def produce_all_charts(csv_path: str,
     df = filter_result.df
     mode_label = filter_result.label
 
-    # Build events and sweeps
-    events = build_arrival_departure_events(df)
+    # Build arrival departure process
+    arrival_departure_process = to_arrival_departure_process(df)
     # Compute core finite window flow metrics
-    metrics = compute_finite_window_flow_metrics(events)
+    metrics = compute_finite_window_flow_metrics(arrival_departure_process)
 
     t_times, t_L, t_Lam, t_w, t_N, t_A = (
         metrics.times,

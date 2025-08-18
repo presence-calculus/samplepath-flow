@@ -61,7 +61,7 @@ range of stochastic processes and their sample paths.
 
 
 
-def build_arrival_departure_events(df: pd.DataFrame) -> List[Tuple[pd.Timestamp, int, int]]:
+def to_arrival_departure_process(df: pd.DataFrame) -> List[Tuple[pd.Timestamp, int, int]]:
     """
     Construct a sorted list of arrival and departure events from a time interval DataFrame.
 
@@ -112,7 +112,7 @@ def build_arrival_departure_events(df: pd.DataFrame) -> List[Tuple[pd.Timestamp,
     ...     {"start_ts": pd.Timestamp("2024-01-01 09:30"), "end_ts": pd.Timestamp("2024-01-01 11:00")},
     ... ]
     >>> df = pd.DataFrame(data)
-    >>> build_arrival_departure_events(df)
+    >>> to_arrival_departure_process(df)
     [
         (Timestamp('2024-01-01 09:00:00'),  1, 1),
         (Timestamp('2024-01-01 09:30:00'),  1, 1),

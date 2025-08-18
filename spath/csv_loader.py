@@ -14,11 +14,19 @@ class CSVLoader:
     """
     Robust CSV -> DataFrame loader for event/sample-path data.
 
-    Contract:
+    CSV Contract:
+      - 'id' - string representing the id of an item - need not be unique across all rows (ie - same id can appear multiple times)
+      - 'start_ts' and 'end_ts' - strings in a format that can be parsed with <a href=https://dateutil.readthedocs.io/en/stable/parser.html>dateutil.parser.parse</a>
+      - Optional 'class' attribute - string
+
+    DataFrame Contract:
       - 'start_ts' and 'end_ts' are pandas datetimes (tz-normalized per config)
+      - optional 'class' cast to 'category' if present
+
+      Computed columns
       - 'duration_td' is Timedelta (NaT for incomplete)
       - 'duration_hr' is float hours (NaN for incomplete)
-      - optional 'class' cast to 'category' if present
+
 
     Safety:
       - Validates required columns
@@ -31,7 +39,7 @@ class CSVLoader:
     """
 
     # --- configuration ---
-    required_columns: Tuple[str, str] = ("start_ts", "end_ts")
+    required_columns: Tuple[str, str, str] = ("id", "start_ts", "end_ts")
     class_column: str = "class"
     parse_dates: Tuple[str, str] = ("start_ts", "end_ts")
 
@@ -53,48 +61,48 @@ class CSVLoader:
         self._require_columns(df, self.required_columns)
 
         # --- parse datetimes with targeted warnings ---
-        c0, c1 = self.required_columns  # start_ts, end_ts
+        id, start_ts, end_ts = self.required_columns  # start_ts, end_ts
 
-        df[c0], n_start_missing, n_start_fail = self._parse_dt_with_stats(df[c0])
-        df[c1], n_end_missing,   n_end_fail   = self._parse_dt_with_stats(df[c1])
+        df[start_ts], n_start_missing, n_start_fail = self._parse_dt_with_stats(df[start_ts])
+        df[end_ts], n_end_missing,   n_end_fail   = self._parse_dt_with_stats(df[end_ts])
 
         # start_ts: any NaT (missing or failed) is noteworthy
         if n_start_missing or n_start_fail:
             warnings.warn(
-                f"{n_start_missing + n_start_fail} rows have invalid/missing '{c0}' (set to NaT).",
+                f"{n_start_missing + n_start_fail} rows have invalid/missing '{start_ts}' (set to NaT).",
                 RuntimeWarning,
             )
 
         # end_ts: ONLY warn on parse failures; legit missing is allowed
         if n_end_fail:
             warnings.warn(
-                f"{n_end_fail} rows had non-empty '{c1}' values that failed to parse (set to NaT).",
+                f"{n_end_fail} rows had non-empty '{end_ts}' values that failed to parse (set to NaT).",
                 RuntimeWarning,
             )
 
         # optional hard stop if all start_ts are NaT
-        if self.error_on_all_invalid_times and df[c0].isna().all():
-            raise ValueError(f"All '{c0}' values are NaT after parsing.")
+        if self.error_on_all_invalid_times and df[start_ts].isna().all():
+            raise ValueError(f"All '{start_ts}' values are NaT after parsing.")
 
         # We cannot compute duration without start_ts. Drop those rows with a warning.
-        miss_start = df[c0].isna()
+        miss_start = df[start_ts].isna()
         n_miss_start = int(miss_start.sum())
         if n_miss_start:
             warnings.warn(
-                f"{n_miss_start} rows have NaT in '{c0}' and will be dropped.",
+                f"{n_miss_start} rows have NaT in '{start_ts}' and will be dropped.",
                 RuntimeWarning,
             )
             df = df.loc[~miss_start]
 
         # --- timezone normalization (handles naive/aware/mixed) ---
         if self.normalize_tz and not df.empty:
-            for col in self.required_columns:
+            for col in (start_ts, end_ts):
                 if not pd.api.types.is_datetime64_any_dtype(df[col]):
                     raise TypeError(f"Column '{col}' must be datetime64[ns][tz] after parsing.")
-            df = self._normalize_timezones(df, self.required_columns, self.target_tz)
+            df = self._normalize_timezones(df, (start_ts,end_ts), self.target_tz)
 
         # --- compute durations ---
-        df["duration_td"] = df[c1] - df[c0]                                # NaT when end_ts is NaT
+        df["duration_td"] = df[end_ts] - df[start_ts]                                # NaT when end_ts is NaT
         df["duration_hr"] = df["duration_td"].dt.total_seconds() / 3600.0  # NaN when duration_td is NaT
 
         # --- negative duration handling ---
