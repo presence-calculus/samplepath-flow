@@ -24,7 +24,6 @@ def _add_caption(fig: Figure, text: str) -> None:
         ha="center",
         va="bottom",
         fontsize=9,
-        color="gray",
     )
 
 
