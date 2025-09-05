@@ -30,11 +30,14 @@ class FilterSpec:
 @dataclass
 class FilterResult:
     df: pd.DataFrame
-    label: str
     applied: List[str]
     dropped_per_filter: Dict[str, int]
     thresholds: Dict[str, float]
+    label: str
 
+    @property
+    def display(self) -> str:
+        return f"Filters: {self.label}"
 
 # ---------- Helpers ----------
 

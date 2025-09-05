@@ -237,19 +237,17 @@ def draw_line_chart_with_scatter(times: List[pd.Timestamp],
                                  out_path: str,
                                  scatter_times: List[pd.Timestamp],
                                  scatter_values: np.ndarray,
-                                 scatter_label: str = "Item time in system") -> None:
+                                 line_label: str = 'average residence time',
+                                 scatter_label: str = "element sojourn time",
+                                 unit: str = "timestamp",
+                                 caption: Optional[str] = None
+                                 ) -> None:
     fig, ax = plt.subplots(figsize=(10, 4))
-    ax.plot(times, values, label=ylabel)
+    ax.plot(times, values, label=line_label)
     if scatter_times is not None and scatter_values is not None and len(scatter_times) > 0:
         ax.scatter(scatter_times, scatter_values, s=16, alpha=0.6, marker='o', label=scatter_label)
-    ax.set_title(title)
-    ax.set_ylabel(ylabel)
-    ax.set_xlabel("Date")
-    ax.legend()
-    _format_date_axis(ax)
-    fig.tight_layout()
-    fig.savefig(out_path)
-    plt.close(fig)
+
+    _format_and_save(fig, ax, title, ylabel, unit, caption, out_path)
 
 
 
@@ -509,10 +507,11 @@ def plot_sojourn_time_scatter(args, df, filter_result, metrics,out_dir) -> List[
 
     if len(t_scatter_times) > 0:
         ts_w_scatter = os.path.join(out_dir, "timestamp_w_with_scatter.png")
-        label = "Item age at sweep end" if args.incomplete else "Item time in system"
+        label = "age" if args.incomplete else "sojourn time"
         draw_line_chart_with_scatter(metrics.times, metrics.w,
-                                     f"w(T) — average residence time (timestamp, {filter_result.label})",
-                                     "w(T) [hrs]", ts_w_scatter, t_scatter_times, t_scatter_vals, scatter_label=label)
+                                     f"Element {label} vs Average residence time",
+                                     f"Time [hrs]", ts_w_scatter, t_scatter_times, t_scatter_vals, scatter_label=f"element {label}",
+                                      caption=f"{filter_result.label}")
 
         written += [ts_w_scatter]
 
@@ -528,7 +527,8 @@ def draw_four_panel_column(times: List[pd.Timestamp],
                            out_path: str,
                            lambda_pctl_upper: Optional[float] = None,
                            lambda_pctl_lower: Optional[float] = None,
-                           lambda_warmup_hours: Optional[float] = None
+                           lambda_warmup_hours: Optional[float] = None,
+                           caption:Optional[str] = None
                            ) -> None:
     fig, axes = plt.subplots(4, 1, figsize=(12, 11), sharex=True)
 
@@ -560,8 +560,15 @@ def draw_four_panel_column(times: List[pd.Timestamp],
     for ax in axes:
         _format_date_axis(ax)
 
-    fig.suptitle(title)
-    plt.tight_layout(rect=(0, 0, 1, 0.97))
+    plt.tight_layout(rect=(0, 0, 1, 0.90))
+    fig.suptitle(title, fontsize=14, y=0.97)  # larger main title
+    if caption:
+        fig.text(0.5, 0.945, caption,  # small gray subtitle just below title
+                 ha="center", va="top")
+
+
+
+
     fig.savefig(out_path)
     plt.close(fig)
 
@@ -774,8 +781,8 @@ def plot_coherence_charts(df, args, filter_result, metrics, out_dir):
 def plot_core_metrics_stack(args, filter_result, metrics, out_dir):
     four_col_stack = os.path.join(out_dir, 'timestamp_stack.png')
     draw_four_panel_column(metrics.times, metrics.N, metrics.L, metrics.Lambda, metrics.w,
-                           f'Finite-window metrics (timestamp, {filter_result.label})', four_col_stack, args.lambda_pctl,
-                           args.lambda_lower_pctl, args.lambda_warmup)
+                           f'Sample Path Flow Metrics', four_col_stack, args.lambda_pctl,
+                           args.lambda_lower_pctl, args.lambda_warmup, caption=f"{filter_result.display}")
     return [four_col_stack]
 
 
