@@ -179,6 +179,7 @@ def draw_lambda_chart(
 
 
 def plot_core_flow_metrics(
+    df: pd.DataFrame,
     args,
     filter_result: Optional[FilterResult],
     metrics: FlowMetricsResult,
@@ -227,8 +228,20 @@ def plot_core_flow_metrics(
     )
 
     path_LLw = os.path.join(out_dir, "timestamp_LLw.png")
-    draw_L_vs_Lambda_w(metrics.times, metrics.L, metrics.Lambda, metrics.w, title="L(T) vs Λ(T).w(T)", out_path=path_LLw, caption=note)
-    return [path_N, path_L, path_Lam, path_w, path_LLw]
+    draw_L_vs_Lambda_w(
+        metrics.times,
+        metrics.L,
+        metrics.Lambda,
+        metrics.w,
+        title="L(T) vs Λ(T).w(T)",
+        out_path=path_LLw,
+        caption=note
+    )
+
+    path_little_law = os.path.join(out_dir, "timestamp_little_law.png")
+    draw_L_vs_lambdaW(df, metrics.times, metrics.L, "Little's Law Empirical Convergence", out_path=path_little_law,
+                      caption=note)
+    return [path_N, path_L, path_Lam, path_w, path_LLw, path_little_law]
 
 
 
@@ -306,6 +319,65 @@ def draw_L_vs_Lambda_w(
     fig.tight_layout(rect=(0.05, 0, 1, 1))
     fig.savefig(out_path)
     plt.close(fig)
+
+def draw_L_vs_lambdaW(
+    df: pd.DataFrame,
+    times: List[pd.Timestamp],
+    L_vals: np.ndarray,
+    title: str,
+    out_path: str,
+    caption: Optional[str] = None,
+) -> None:
+    """
+    Scatter plot of L(T) vs λ*(T)·W*(T) with an x=y reference line.
+    Uses empirical λ*(T) and W*(T) from compute_dynamic_empirical_series.
+    Layout tweaks:
+      • square figure + equal aspect (true 45° reference)
+      • left margin so y-label isn't cut
+      • caption added after tight_layout, with extra bottom space
+    """
+    # Empirical series
+    W_star, lam_star = compute_dynamic_empirical_series(df, times)
+
+    # x = L(T), y = λ*(T)·W*(T)
+    x = np.asarray(L_vals, dtype=float)
+    y = np.asarray(lam_star, dtype=float) * np.asarray(W_star, dtype=float)
+    mask = np.isfinite(x) & np.isfinite(y)
+    x, y = x[mask], y[mask]
+
+    fig, ax = plt.subplots(figsize=(6.0, 6.0))
+
+    # Slightly larger markers + alpha to show clustering
+    ax.scatter(x, y, s=18, alpha=0.7)
+
+    # x = y reference line with small padding
+    if x.size and y.size:
+        mn = float(np.nanmin([x.min(), y.min()]))
+        mx = float(np.nanmax([x.max(), y.max()]))
+        pad = 0.03 * (mx - mn if mx > mn else 1.0)
+        lo, hi = mn - pad, mx + pad
+        ax.plot([lo, hi], [lo, hi], linestyle="--", color="gray")
+        ax.set_xlim(lo, hi)
+        ax.set_ylim(lo, hi)
+
+    # Make axes visually comparable
+    ax.set_aspect("equal", adjustable="box")
+    ax.grid(True, linewidth=0.5, alpha=0.4)
+
+    # Labels and title
+    ax.set_xlabel("L(T)")
+    ax.set_ylabel("λ*(T)·W*(T)")
+    ax.set_title(title)
+
+    # Layout:
+    # 1) Tight layout with a bit of extra LEFT margin so the y-label isn't clipped
+    if caption:
+        _add_caption(fig, caption)  # uses the helper you already have
+    fig.tight_layout(rect=(0.05, 0, 1, 1))
+
+    fig.savefig(out_path)
+    plt.close(fig)
+
 
 def draw_convergence_panel(times: List[pd.Timestamp],
                            w_vals: np.ndarray,

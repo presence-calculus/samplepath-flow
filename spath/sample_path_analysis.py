@@ -54,7 +54,7 @@ def produce_all_charts(csv_path: str,
     written: List[str] = []
 
     # create plots
-    written += plot_core_flow_metrics(args, filter_result, metrics, out_dir)
+    written += plot_core_flow_metrics(df, args, filter_result, metrics, out_dir)
     # Vertical stacks (4×1)
     written += plot_core_metrics_stack(args, filter_result, metrics, out_dir)
 
