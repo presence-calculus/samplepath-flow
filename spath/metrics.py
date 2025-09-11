@@ -546,7 +546,10 @@ def compute_total_active_age_series(df: pd.DataFrame,
         # sums of clipped (relative) starts up to T
         S_le_T_rel_ns = starts_rel_cumsum[i_s - 1] if i_s > 0 else 0
         S_le_T_ended_rel_ns = ended_starts_rel_cumsum[i_e - 1] if i_e > 0 else 0
-        S_active_rel_ns = S_le_T_rel_ns - S_le_T_ended_rel_ns
+        a = np.asarray(S_le_T_rel_ns, dtype="int64")
+        b = np.asarray(S_le_T_ended_rel_ns, dtype="int64")
+        S_active_rel_ns = a - b
+        S_active_rel_ns = np.maximum(S_active_rel_ns, 0)
 
         # R_rel_ns = N_active * (T - t0)  - sum_active_clipped_starts(rel)
         T_rel_ns = pd.Timestamp(T).value - t0_ns
