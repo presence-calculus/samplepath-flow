@@ -12,7 +12,7 @@ from matplotlib.axes import Axes
 
 from spath.filter import FilterResult
 from spath.metrics import FlowMetricsResult, compute_dynamic_empirical_series, compute_tracking_errors, \
-    compute_coherence_score, compute_end_effect_series
+    compute_coherence_score, compute_end_effect_series, compute_total_active_age_series
 
 def _add_caption(fig: Figure, text: str) -> None:
     """Add a caption below the x-axis."""
@@ -941,5 +941,136 @@ def plot_five_column_stacks(df, args, filter_result, metrics, out_dir):
                                             lambda_pctl_lower=args.lambda_lower_pctl,
                                             lambda_warmup_hours=args.lambda_warmup)
         written.append(col_ts5s)
+
+    return written
+
+def plot_rate_stability_charts(
+    df: pd.DataFrame,
+    args,                 # kept for signature consistency
+    filter_result,        # may provide .title_prefix (optional)
+    metrics,              # FlowMetricsResult with .times, .N, .t0
+    out_dir: str,
+) -> List[str]:
+    """
+    Produce TWO separate charts (N(T)/T and R(T)/T) and ONE stacked 2-row chart.
+    Only the rate functions are drawn. No secondary y-axis. Reference guides are:
+      - y = 0 (baseline)
+      - y = 1 (unit linear-growth guide; unlabeled, not in legend)
+
+    Filenames:
+      - timestamp_rate_stability_n.png
+      - timestamp_rate_stability_r.png
+      - timestamp_rate_stability_stack.png
+    """
+    written: List[str] = []
+
+    # Observation grid
+    times = [pd.Timestamp(t) for t in metrics.times]
+    if not times:
+        return written
+
+    # Elapsed hours since t0
+    t0 = metrics.t0 if hasattr(metrics, "t0") and pd.notna(metrics.t0) else times[0]
+    elapsed_h = np.array([(t - t0).total_seconds() / 3600.0 for t in times], dtype=float)
+    denom = np.where(elapsed_h > 0.0, elapsed_h, np.nan)
+
+    # Core rate series
+    N_raw = np.asarray(metrics.N, dtype=float)
+    R_raw = compute_total_active_age_series(df, times)  # hours
+
+    with np.errstate(divide="ignore", invalid="ignore"):
+        N_over_T = N_raw / denom
+        R_over_T = R_raw / denom
+
+    title_prefix = getattr(filter_result, "title_prefix", None)
+    ref_line = 1.0  # unit linear-growth guide in rate space
+
+    # --------------------- Chart 1: N(T)/T ---------------------
+    out_path_N = os.path.join(out_dir, "timestamp_rate_stability_n.png")
+    fig, ax = plt.subplots(figsize=(10, 5.2))
+    ax.plot(times, N_over_T, label="N(T)/T", linewidth=1.9, zorder=3)
+    ax.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
+    ax.axhline(ref_line, linewidth=1.0, alpha=0.35, linestyle=":", zorder=1)  # unlabeled guide
+
+    _format_date_axis(ax)
+    ax.set_xlabel("time")
+    ax.set_ylabel("rate")
+    ax.set_title(f"{title_prefix}: N(T)/T" if title_prefix else "N(T)/T")
+    ax.legend(loc="best")
+
+    finite_vals_N = N_over_T[np.isfinite(N_over_T)]
+    if finite_vals_N.size:
+        top = float(np.nanpercentile(finite_vals_N, 99.5))
+        bot = float(np.nanmin(finite_vals_N))
+        ax.set_ylim(bottom=min(0.0, bot * 1.05), top=top * 1.05)
+
+    fig.tight_layout()
+    fig.savefig(out_path_N, dpi=200)
+    plt.close(fig)
+    written.append(out_path_N)
+
+    # --------------------- Chart 2: R(T)/T ---------------------
+    out_path_R = os.path.join(out_dir, "timestamp_rate_stability_r.png")
+    fig, ax = plt.subplots(figsize=(10, 5.2))
+    ax.plot(times, R_over_T, label="R(T)/T", linewidth=1.9, zorder=3)
+    ax.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
+    ax.axhline(ref_line, linewidth=1.0, alpha=0.35, linestyle=":", zorder=1)  # unlabeled guide
+
+    _format_date_axis(ax)
+    ax.set_xlabel("time")
+    ax.set_ylabel("rate")
+    ax.set_title(f"{title_prefix}: R(T)/T" if title_prefix else "R(T)/T")
+    ax.legend(loc="best")
+
+    finite_vals_R = R_over_T[np.isfinite(R_over_T)]
+    if finite_vals_R.size:
+        top = float(np.nanpercentile(finite_vals_R, 99.5))
+        bot = float(np.nanmin(finite_vals_R))
+        ax.set_ylim(bottom=min(0.0, bot * 1.05), top=top * 1.05)
+
+    fig.tight_layout()
+    fig.savefig(out_path_R, dpi=200)
+    plt.close(fig)
+    written.append(out_path_R)
+
+    # --------------------- Stacked 2-row chart ---------------------
+    out_path_stack = os.path.join(out_dir, "timestamp_rate_stability_stack.png")
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 10.4), sharex=True)
+
+    # Top: N(T)/T
+    axN = axes[0]
+    axN.plot(times, N_over_T, label="N(T)/T", linewidth=1.9, zorder=3)
+    axN.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
+    axN.axhline(ref_line, linewidth=1.0, alpha=0.6, linestyle=":", zorder=1)
+    _format_date_axis(axN)
+    axN.set_ylabel("rate")
+    axN.set_title(f"{title_prefix}: N(T)/T" if title_prefix else "N(T)/T")
+    axN.legend(loc="best")
+
+    # Bottom: R(T)/T
+    axR = axes[1]
+    axR.plot(times, R_over_T, label="R(T)/T", linewidth=1.9, zorder=3)
+    axR.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
+    axR.axhline(ref_line, linewidth=1.0, alpha=0.6, linestyle=":", zorder=1)
+    _format_date_axis(axR)
+    axR.set_xlabel("time")
+    axR.set_ylabel("rate")
+    axR.set_title(f"{title_prefix}: R(T)/T" if title_prefix else "R(T)/T")
+    axR.legend(loc="best")
+
+    # Robust y-lims for each axis
+    if finite_vals_N.size:
+        topN = float(np.nanpercentile(finite_vals_N, 99.5))
+        botN = float(np.nanmin(finite_vals_N))
+        axN.set_ylim(bottom=min(0.0, botN * 1.05), top=topN * 1.05)
+    if finite_vals_R.size:
+        topR = float(np.nanpercentile(finite_vals_R, 99.5))
+        botR = float(np.nanmin(finite_vals_R))
+        axR.set_ylim(bottom=min(0.0, botR * 1.05), top=topR * 1.05)
+
+    fig.tight_layout()
+    fig.savefig(out_path_stack, dpi=200)
+    plt.close(fig)
+    written.append(out_path_stack)
 
     return written
