@@ -592,6 +592,128 @@ def draw_dynamic_convergence_panel_with_errors_and_endeffects(times: List[pd.Tim
     plt.close(fig)
 
 
+# ── Arrival departure convergence: two-panel stack ───────────────────
+
+def draw_arrival_departure_convergence_stack(
+    times: List[pd.Timestamp],
+    arrivals_cum: np.ndarray,           # A(t)  = metrics.Arrivals
+    departures_cum: np.ndarray,         # D(t)  = metrics.Departures
+    lambda_cum_rate: np.ndarray,        # Λ(T)  = metrics.Lambda [1/hr]
+    title: str,
+    out_path: str,
+    lambda_pctl_upper: Optional[float] = None,
+    lambda_pctl_lower: Optional[float] = None,
+    lambda_warmup_hours: Optional[float] = None,
+    caption: Optional[str] = None,
+) -> None:
+    """
+    Two stacked charts sharing the x-axis:
+
+      (1) Cumulative Arrivals vs Cumulative Departures
+          Stability: A(t) and D(t) grow together; gap A-D = N(t) stays bounded.
+
+      (2) Λ(T) vs θ(T)  (arrival rate vs throughput rate)
+          θ(T) := D(T) / (T - t0) [1/hr], masked after the last departure to avoid the
+          idle-tail artifact where the ratio would decay toward 0.
+    """
+    # ---- Compute elapsed hours and throughput rate θ(T) ----------------------
+    n = len(times)
+    if n > 0:
+        t0 = times[0]
+        elapsed_h = np.array([(t - t0).total_seconds() / 3600.0 for t in times], dtype=float)
+    else:
+        elapsed_h = np.array([], dtype=float)
+
+    with np.errstate(divide="ignore", invalid="ignore"):
+        theta_rate = np.where(elapsed_h > 0.0, departures_cum / elapsed_h, np.nan)
+
+    # Find last departure index (last time D(t) increases)
+    last_dep_idx = -1
+    if len(departures_cum) > 0:
+        d = np.asarray(departures_cum, dtype=float)
+        inc = np.flatnonzero(np.diff(d, prepend=d[0]) > 0)
+        if inc.size > 0:
+            last_dep_idx = int(inc.max())
+
+    # Mask θ(T) after the last departure (prevents idle tail from misleading viewers)
+    if last_dep_idx >= 0 and last_dep_idx + 1 < n:
+        theta_rate[last_dep_idx + 1:] = np.nan
+
+    # ---- Figure ----------------------------------------------------------------
+    fig, axes = plt.subplots(2, 1, figsize=(12, 6.5), sharex=True)
+
+    # Panel 1: cumulative counts (step plots)
+    axes[0].step(times, arrivals_cum, where='post', label='A(t): cumulative arrivals')
+    axes[0].step(times, departures_cum, where='post', label='D(t): cumulative departures')
+    axes[0].set_title('Cumulative Arrivals vs Cumulative Departures')
+    axes[0].set_ylabel('count')
+    axes[0].legend(loc='best')
+    _format_date_axis(axes[0])
+
+    # Panel 2: rates (Λ vs θ), with house percentile clipping on Λ
+    axes[1].plot(times, lambda_cum_rate, label='Λ(T) [1/hr]')
+    axes[1].plot(times, theta_rate, label='θ(T) = D(T)/elapsed [1/hr]')
+    axes[1].set_title('Arrival Rate Λ(T) vs Throughput Rate θ(T)')
+    axes[1].set_ylabel('1/hr')
+    axes[1].legend(loc='best')
+    _clip_axis_to_percentile(
+        axes[1], times, lambda_cum_rate,
+        upper_p=lambda_pctl_upper,
+        lower_p=lambda_pctl_lower,
+        warmup_hours=(lambda_warmup_hours or 0.0),
+    )
+    _format_date_axis(axes[1])
+
+    fig.suptitle(title)
+    if caption:
+        fig.text(0.5, 0.01, caption, ha='center', va='bottom', fontsize=9)
+        plt.tight_layout(rect=(0, 0.03, 1, 0.96))
+    else:
+        plt.tight_layout(rect=(0, 0, 1, 0.96))
+
+    fig.savefig(out_path)
+    plt.close(fig)
+
+
+def plot_arrival_departure_convergence(
+    args,
+    filter_result: Optional[FilterResult],
+    metrics: FlowMetricsResult,
+    out_dir: str,
+) -> List[str]:
+    """
+    Orchestrator mirroring your other plot_* wrappers.
+
+    Inputs expected from FlowMetricsResult:
+      - metrics.times                : List[pd.Timestamp]
+      - metrics.Arrivals             : cumulative arrivals A(t)
+      - metrics.Departures           : cumulative departures D(t)
+      - metrics.Lambda               : cumulative arrival rate Λ(T) [1/hr]
+
+    Returns list of written image paths.
+    """
+    out_dir = ensure_output_dir(out_dir)
+    caption = (filter_result.display if filter_result else None)
+
+    pctl_upper = getattr(args, "lambda_pctl", None)
+    pctl_lower = getattr(args, "lambda_lower_pctl", None)
+    warmup_hrs = getattr(args, "lambda_warmup", None)
+
+    out_path = os.path.join(out_dir, "timestamp_arrival_departure_convergence_stack.png")
+    draw_arrival_departure_convergence_stack(
+        metrics.times,
+        metrics.Arrivals,
+        metrics.Departures,
+        metrics.Lambda,
+        title="λ equals Throughput (Stable Systems)",
+        out_path=out_path,
+        lambda_pctl_upper=pctl_upper,
+        lambda_pctl_lower=pctl_lower,
+        lambda_warmup_hours=warmup_hrs,
+        caption=caption,
+    )
+    return [out_path]
+
 def _clip_axis_to_percentile(ax: plt.Axes,
                              times: List[pd.Timestamp],
                              values: np.ndarray,
