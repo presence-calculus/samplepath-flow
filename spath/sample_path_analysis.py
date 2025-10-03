@@ -21,7 +21,7 @@ from point_process import to_arrival_departure_process
 from spath.plots import plot_core_flow_metrics, plot_sojourn_time_scatter, ensure_output_dir, plot_coherence_charts, \
     plot_core_metrics_stack, \
     plot_five_column_stacks, plot_rate_stability_charts, plot_llaw_manifold_3d, plot_arrival_departure_convergence, \
-    plot_residence_vs_sojourn_stack
+    plot_residence_vs_sojourn_stack, plot_sample_path_coherence
 
 
 # -------------------------------
@@ -73,6 +73,8 @@ def produce_all_charts(csv_path: str,
     written += plot_rate_stability_charts(df, args, filter_result, metrics, out_dir)
 
     written += plot_residence_vs_sojourn_stack(df, args, filter_result, metrics, out_dir)
+
+    written += plot_sample_path_coherence(df, args, filter_result, metrics, out_dir)
 
     written += plot_llaw_manifold_3d(df, metrics, out_dir)
     return written

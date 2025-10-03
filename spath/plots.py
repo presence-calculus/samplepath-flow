@@ -653,7 +653,7 @@ def draw_arrival_departure_convergence_stack(
     # Panel 2: rates (Λ vs θ), with house percentile clipping on Λ
     axes[1].plot(times, lambda_cum_rate, label='Λ(T) [1/hr]')
     axes[1].plot(times, theta_rate, label='θ(T) = D(T)/elapsed [1/hr]')
-    axes[1].set_title('Arrival Rate Λ(T) vs Throughput Rate θ(T)')
+    axes[1].set_title('Arrival Rate Λ(T) vs Departure Rate θ(T)')
     axes[1].set_ylabel('1/hr')
     axes[1].legend(loc='best')
     _clip_axis_to_percentile(
@@ -810,6 +810,167 @@ def plot_residence_vs_sojourn_stack(
         caption=caption,
     )
     return [out_path]
+
+# ── Little's Law scatter coherence: L(T) vs λ*(t)·W*(t) ──────────────────────
+
+def draw_ll_scatter_coherence(
+    L_vals: np.ndarray,                 # metrics.L (avg number-in-system)
+    lam_star: np.ndarray,               # λ*(t) [1/hr] aligned to metrics.times
+    W_star_hours: np.ndarray,           # W*(t) [hrs] aligned to metrics.times
+    times: List[pd.Timestamp],          # metrics.times
+    epsilon: float,                     # tolerance for "within band"
+    out_png: str,
+    title: str = "Sample Path Coherence",
+    caption: Optional[str] = None,
+    horizon_days: float = 0.0,         # require elapsed >= horizon_days
+) -> Tuple[float, int, int]:
+    """
+    Scatter points x=L(T) vs y=λ*(t)·W*(t), draw x=y and an ε relative band:
+        (1-ε)·x  <=  y  <=  (1+ε)·x
+    Return (score, ok_count, total_count) using only points with elapsed >= horizon_hours.
+
+    Notes:
+      • Relative band makes the tolerance scale with magnitude.
+      • Also robust to zeros by ignoring points where x <= 0 or y is NaN/inf.
+    """
+    # Build y = λ*(t)·W*(t). W* is in HOURS, λ* in 1/hr so product is dimensionless (matches L).
+    y_vals = lam_star * W_star_hours
+    x_vals = np.asarray(L_vals, dtype=float)
+
+    n = len(times)
+    if n > 0:
+        t0 = times[0]
+        elapsed_h = np.array([(t - t0).total_seconds() / 3600.0 for t in times], dtype=float)
+    else:
+        elapsed_h = np.array([], dtype=float)
+
+    # Mask: finite and past horizon
+    finite_mask = np.isfinite(x_vals) & np.isfinite(y_vals) & (x_vals > 0.0)
+    horizon_hours = float(horizon_days) * 24.0
+    if horizon_hours and horizon_hours > 0.0:
+        finite_mask &= elapsed_h >= float(horizon_hours)
+
+    X = x_vals[finite_mask]
+    Y = y_vals[finite_mask]
+
+    # Coherence test: inside relative epsilon tube around x=y
+    # Equivalent to |Y/X - 1| <= ε  (avoid division-by-zero via x>0 mask above)
+    rel_err = np.abs(Y / X - 1.0)
+    ok_mask = rel_err <= float(epsilon)
+    ok_count = int(np.count_nonzero(ok_mask))
+    total_count = int(X.size)
+    score = (ok_count / total_count) if total_count > 0 else float("nan")
+
+    # ---- Plot
+    fig, ax = _init_fig_ax(figsize=(7.5, 6.0))
+
+    # Scatter (only evaluated points)
+    ax.scatter(X, Y, s=16, alpha=0.7, label='Points: (L(T), λ*(t)·W*(t))')
+
+    # Diagonal x=y
+    if X.size > 0:
+        x_min, x_max = float(np.nanmin(X)), float(np.nanmax(X))
+        pad = 0.05 * (x_max - x_min if x_max > x_min else 1.0)
+        x_line = np.linspace(max(0.0, x_min - pad), x_max + pad, 200)
+        ax.plot(x_line, x_line, linewidth=1.2, label='x = y')
+
+        # ε-band: (1-ε)x .. (1+ε)x
+        ax.plot(x_line, (1.0 + float(epsilon)) * x_line, linewidth=0.8, linestyle='--', label=f'y=(1+ε)x')
+        ax.plot(x_line, (1.0 - float(epsilon)) * x_line, linewidth=0.8, linestyle='--', label=f'y=(1−ε)x')
+        ax.fill_between(
+            x_line,
+            (1.0 - float(epsilon)) * x_line,
+            (1.0 + float(epsilon)) * x_line,
+            alpha=0.08
+        )
+
+    ax.set_xlabel('L(T)  (average number in system)')
+    ax.set_ylabel('λ*(t)·W*(t)')
+    ax.set_title(title)
+    ax.legend(loc='best')
+
+    # annotate score
+    if total_count > 0:
+        ax.text(
+            0.02, 0.98,
+            f'ε={epsilon:.3g}, horizon={horizon_days:.1f}d:  {ok_count}/{total_count}  ({score*100:.1f}%)',
+            ha='left', va='top', transform=ax.transAxes, fontsize=9
+        )
+
+    if caption:
+        fig.text(0.5, 0.01, caption, ha='center', va='bottom', fontsize=9)
+        plt.tight_layout(rect=(0, 0.03, 1, 0.96))
+    else:
+        plt.tight_layout()
+
+    fig.savefig(out_png)
+    plt.close(fig)
+
+    return score, ok_count, total_count
+
+
+def plot_sample_path_coherence(
+    df: pd.DataFrame,
+    args,
+    filter_result: Optional[FilterResult],
+    metrics: FlowMetricsResult,
+    out_dir: str,
+) -> List[str]:
+    """
+
+    Uses:
+      • metrics.L                : L(T) series (dimensionless)
+      • metrics.times            : timestamps
+      • compute_dynamic_empirical_series(df, metrics.times) -> (W*, λ*)
+        - W* in HOURS, λ* in 1/hr
+
+    CLI-style knobs (optional in args):
+      • args.epsilon   : default 0.05
+      • args.horizon_day : horizon in days (default 28)
+
+    Outputs:
+      • PNG: timestamp_sample_path_coherence.png
+      • TXT: ll_empirical_coherence_summary.txt
+    """
+    out_dir = ensure_output_dir(out_dir)
+    caption = (filter_result.display if filter_result else None)
+
+    # derive W*(t), λ*(t) aligned to times
+    if len(metrics.times) > 0:
+        W_star_hours, lam_star = compute_dynamic_empirical_series(df, metrics.times)
+    else:
+        W_star_hours = np.array([])
+        lam_star = np.array([])
+
+    epsilon = getattr(args, "epsilon", 0.05)
+    horizon_days = getattr(args, "horizon_days", 28)
+
+
+    png_path = os.path.join(out_dir, "timestamp_sample_path_coherence.png")
+    score, ok_count, total_count = draw_ll_scatter_coherence(
+        metrics.L,
+        lam_star,
+        W_star_hours,
+        metrics.times,
+        epsilon=epsilon,
+        out_png=png_path,
+        title="Sample Path Coherence: L(T) vs λ*(t)·W*(t)",
+        caption=caption,
+        horizon_days=horizon_days,
+    )
+
+    # write a small summary alongside
+    txt_path = os.path.join(out_dir, "ll_sample_path_coherence_summary.txt")
+    with open(txt_path, "w") as f:
+        if np.isnan(score):
+            f.write(f"Sample Path Coherence: ε={epsilon}, H={horizon_days}d -> n/a (no valid points)\n")
+        else:
+            f.write(
+                f"Sample Path Coherence: ε={epsilon}, H={horizon_days}d -> "
+                f"{ok_count}/{total_count} ({score*100:.1f}%)\n"
+            )
+
+    return [png_path, txt_path]
 
 def _clip_axis_to_percentile(ax: plt.Axes,
                              times: List[pd.Timestamp],
