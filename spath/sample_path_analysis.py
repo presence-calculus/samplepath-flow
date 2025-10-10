@@ -41,7 +41,7 @@ def produce_all_charts(csv_path: str,
                        lambda_warmup_hours: Optional[float] = None,
                        ) -> List[str]:
 
-    df = csv_to_dataframe(csv_path)
+    df = csv_to_dataframe(csv_path, args=args)
 
     filter_result: FilterResult = apply_filters(df, args)
     df = filter_result.df

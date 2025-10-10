@@ -45,6 +45,19 @@ def parse_args():
                         help="Minimum horizon in days when assessing coherence (default 28)")
     parser.add_argument("csv", type=str, help="Path to CSV (id,start_ts,end_ts[,class])")
 
+    parser.add_argument(
+        "--date-format",
+        type=str,
+        default=None,
+        help="Optional explicit datetime format string for parsing CSV timestamps (e.g. '%d/%m/%Y %H:%M').",
+    )
+
+    parser.add_argument(
+        "--dayfirst",
+        action="store_true",
+        default=False,
+        help="Interpret ambiguous dates as day-first (e.g., 03/04/2024 → 3 April 2024).",
+    )
 
     args = parser.parse_args()
     validate_args(args)

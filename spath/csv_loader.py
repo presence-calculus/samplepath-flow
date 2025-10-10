@@ -2,8 +2,10 @@
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
+
+from argparse import Namespace
 from dataclasses import dataclass
-from typing import Iterable, Tuple
+from typing import Iterable, Tuple, Optional
 import warnings
 import numpy as np
 import pandas as pd
@@ -42,6 +44,10 @@ class CSVLoader:
     required_columns: Tuple[str, str, str] = ("id", "start_ts", "end_ts")
     class_column: str = "class"
     parse_dates: Tuple[str, str] = ("start_ts", "end_ts")
+
+    # date parsing options.
+    date_format: Optional[str] = None
+    dayfirst: bool = False
 
     # Timezone handling
     normalize_tz: bool = True
@@ -149,8 +155,8 @@ class CSVLoader:
         if missing:
             raise ValueError(f"Missing required column(s): {missing}")
 
-    @staticmethod
-    def _parse_dt_with_stats(s: pd.Series):
+
+    def _parse_dt_with_stats(self, s: pd.Series):
         """
         Returns (parsed_series, n_missing_raw, n_parse_failures).
 
@@ -158,7 +164,13 @@ class CSVLoader:
         - n_parse_failures: rows that had non-empty text but still became NaT after parsing.
         """
         raw = s.copy()
-        parsed = pd.to_datetime(raw, errors="coerce", utc=False)
+        parsed = pd.to_datetime(
+            raw,
+            errors="coerce",
+            utc=False,
+            format=self.date_format,
+            dayfirst=self.dayfirst,
+        )
 
         is_missing_raw = raw.isna() | (raw.astype(str).str.strip() == "")
         n_missing_raw = int(is_missing_raw.sum())
@@ -212,12 +224,15 @@ def csv_to_dataframe(
     normalize_tz: bool = True,
     target_tz: str = "UTC",
     negative_duration_policy: str = "drop",
+    args: Namespace = None,
 ) -> pd.DataFrame:
     """Read CSV into normalized schema: start_ts, end_ts, (optional) class, plus duration columns."""
     loader = CSVLoader(
         normalize_tz=normalize_tz,
         target_tz=target_tz,
         negative_duration_policy=negative_duration_policy,
+        date_format=args.date_format,
+        dayfirst=args.dayfirst,
     )
     df = loader.load(csv_path)
     df = df.sort_values("start_ts").reset_index(drop=True)
