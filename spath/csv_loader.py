@@ -5,11 +5,13 @@ from __future__ import annotations
 
 from argparse import Namespace
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Iterable, Tuple, Optional
 import warnings
 import numpy as np
 import pandas as pd
-
+import os
+import statistics
 
 @dataclass
 class CSVLoader:
@@ -45,6 +47,13 @@ class CSVLoader:
     class_column: str = "class"
     parse_dates: Tuple[str, str] = ("start_ts", "end_ts")
 
+    # csv delimiter
+    delimiter: Optional[str] = None
+    autodetect_delimiter: bool = True
+    delimiter_candidates: Tuple[str, ...] = ("\t", ",", ";", "|", ":")  # single-char only
+    delimiter_sample_bytes: int = 65536  # ~64KB header peek
+
+    time_zone: str = "America/Los_Angeles"
     # date parsing options.
     date_format: Optional[str] = None
     dayfirst: bool = False
@@ -59,9 +68,79 @@ class CSVLoader:
     warn_on_empty: bool = True
     error_on_all_invalid_times: bool = True
 
+    # ---------- delimiter detection & cache ----------
+
+    @staticmethod
+    @lru_cache(maxsize=256)
+    def _detect_delimiter_cached(
+            path: str,
+            size: int,
+            mtime: int,
+            candidates: Tuple[str, ...],
+            sample_bytes: int,
+    ) -> Optional[str]:
+        # Cache key is (path, size, mtime, candidates, sample_bytes) via lru_cache args
+        return CSVLoader._detect_delimiter(path, candidates, sample_bytes)
+
+    @staticmethod
+    def _detect_delimiter(path: str, candidates: Tuple[str, ...], sample_bytes: int) -> Optional[str]:
+        # Read a small header sample once
+        with open(path, "rb") as f:
+            sample = f.read(sample_bytes)
+        text = sample.decode("utf-8", errors="ignore")
+
+        # Use first ~50 non-empty lines
+        lines = [ln for ln in text.splitlines() if ln.strip()]
+        if not lines:
+            return None
+        lines = lines[:50]
+
+        # Heuristic: pick the candidate with the most consistent per-line field count
+        best = None
+        best_key = None
+
+        for sep in candidates:
+            # Count separators per line
+            counts = [ln.count(sep) for ln in lines]
+            if not any(c > 0 for c in counts):
+                continue
+
+            mode = max(set(counts), key=counts.count)
+            frac = counts.count(mode) / len(counts)
+            total = sum(counts)
+            spread = (max(counts) - min(counts))  # smaller is better
+
+            # Rank by: higher consistency (frac), higher mode (fields-1), lower spread, higher total
+            key = (frac, mode, -spread, total)
+
+            # Prefer tabs on ties (common TSV)
+            if best is None or key > best_key or (key == best_key and sep == "\t"):
+                best = sep
+                best_key = key
+
+        return best
+
     def load(self, path: str) -> pd.DataFrame:
+        # --- choose delimiter ---
+        sep = self.delimiter
+        if sep == r"\t":  # normalize common CLI input
+            sep = "\t"
+
+        if sep is None and self.autodetect_delimiter:
+            st = os.stat(path)
+            sep = self._detect_delimiter_cached(
+                path=path,
+                size=st.st_size,
+                mtime=int(st.st_mtime),
+                candidates=self.delimiter_candidates,
+                sample_bytes=self.delimiter_sample_bytes,
+            )
+
+        if sep is None:
+            # final fallback if nothing detected
+            sep = ","
         # --- read CSV ---
-        df = pd.read_csv(path)
+        df = pd.read_csv(path, sep=sep)
 
         # --- column presence checks ---
         self._require_columns(df, self.required_columns)
@@ -233,6 +312,7 @@ def csv_to_dataframe(
         negative_duration_policy=negative_duration_policy,
         date_format=args.date_format,
         dayfirst=args.dayfirst,
+        delimiter=args.delimiter,
     )
     df = loader.load(csv_path)
     df = df.sort_values("start_ts").reset_index(drop=True)

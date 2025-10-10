@@ -59,6 +59,13 @@ def parse_args():
         help="Interpret ambiguous dates as day-first (e.g., 03/04/2024 → 3 April 2024).",
     )
 
+    parser.add_argument(
+        "--delimiter",
+        type=str,
+        default=None,
+        help="Optional delimiter for csv",
+    )
+
     args = parser.parse_args()
     validate_args(args)
     return args
