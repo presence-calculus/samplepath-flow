@@ -488,13 +488,15 @@ def compute_coherence_score(eW: np.ndarray,
     coherent = int(np.sum(np.maximum(eW[ok_idx], eLam[ok_idx]) <= epsilon))
     return coherent / total, coherent, total
 
-def compute_total_active_age_series(df: pd.DataFrame,
-                                    times: List[pd.Timestamp]) -> np.ndarray:
+def compute_total_active_age_series(
+    df: pd.DataFrame,
+    times: List[pd.Timestamp]
+) -> np.ndarray:
     """
     Return R(T) aligned to `times`: total age (HOURS) of ACTIVE elements at T.
 
-    Numerically safe: all prefix sums are done in time **relative to t0** to avoid
-    int64 overflows from epoch-nanosecond accumulation.
+    Numerically safe: all prefix sums are done in time **relative to t0** and
+    in float64 HOURS (not ns) to avoid int64 overflows.
 
     active(T): start <= T and (end > T or end is NaT)
     window clip: ages measured from s' = max(start, t0), so R(t0) = 0.
@@ -504,38 +506,45 @@ def compute_total_active_age_series(df: pd.DataFrame,
     if n == 0:
         return R
 
-    # Assume `times` are ascending (as in your pipeline)
-    T_seq = [pd.Timestamp(t) for t in times]
+    # Ensure ascending times
+    T_seq: List[pd.Timestamp] = [pd.Timestamp(t) for t in times]
     t0 = T_seq[0]
-    t0_ns = pd.Timestamp(t0).value  # int ns
+    t0_ns = pd.Timestamp(t0).value  # int64 (ns since epoch)
 
-    # For comparisons (absolute time)
+    # ----------------- Prepare start/end arrays -----------------
+    # Starts (absolute for comparisons; sorted)
     starts_dt = pd.to_datetime(df["start_ts"]).sort_values().to_numpy(dtype="datetime64[ns]")
+
+    # Ends: only completed items; keep their corresponding starts for subtraction
     ended = df[df["end_ts"].notna()].copy()
     ended.sort_values("end_ts", inplace=True)
     ends_dt = pd.to_datetime(ended["end_ts"]).to_numpy(dtype="datetime64[ns]")
+    ended_starts_dt = pd.to_datetime(ended["start_ts"]).to_numpy(dtype="datetime64[ns]")
 
-    # For sums (relative-to-t0, in ns; guarantees no overflow in cumsums)
+    # ----------------- Relative-to-t0 in HOURS (float64) -----------------
+    # Convert to ns int for relative deltas, then to hours
     starts_ns = starts_dt.astype("int64")
-    starts_rel_ns = np.maximum(starts_ns - t0_ns, 0)                # clip to t0
-    starts_rel_cumsum = np.cumsum(starts_rel_ns, dtype=np.int64)
+    starts_rel_h = np.maximum((starts_ns - t0_ns) / 3.6e12, 0.0).astype(np.float64)
+    starts_rel_cumsum_h = np.cumsum(starts_rel_h, dtype=np.float64)
 
-    ended_starts_ns = pd.to_datetime(ended["start_ts"]).to_numpy(dtype="datetime64[ns]").astype("int64")
-    ended_starts_rel_ns = np.maximum(ended_starts_ns - t0_ns, 0)    # clip to t0
-    ended_starts_rel_cumsum = np.cumsum(ended_starts_rel_ns, dtype=np.int64)
+    ended_starts_ns = ended_starts_dt.astype("int64")
+    ended_starts_rel_h = np.maximum((ended_starts_ns - t0_ns) / 3.6e12, 0.0).astype(np.float64)
+    ended_starts_rel_cumsum_h = np.cumsum(ended_starts_rel_h, dtype=np.float64)
 
+    # Pointers over sorted arrays
     S = starts_dt.size
     E = ends_dt.size
     i_s = 0  # count of starts with start <= T
     i_e = 0  # count of ends   with end   <= T
 
+    # ----------------- Main sweep -----------------
     for i, T in enumerate(T_seq):
-        T_dt = np.datetime64(T).astype("datetime64[ns]")
+        T_dt_ns = np.datetime64(T).astype("datetime64[ns]")
 
-        # advance pointers monotonically
-        while i_s < S and starts_dt[i_s] <= T_dt:
+        # Advance pointers monotonically
+        while i_s < S and starts_dt[i_s] <= T_dt_ns:
             i_s += 1
-        while i_e < E and ends_dt[i_e] <= T_dt:
+        while i_e < E and ends_dt[i_e] <= T_dt_ns:
             i_e += 1
 
         N_active = i_s - i_e
@@ -543,19 +552,16 @@ def compute_total_active_age_series(df: pd.DataFrame,
             R[i] = 0.0
             continue
 
-        # sums of clipped (relative) starts up to T
-        S_le_T_rel_ns = starts_rel_cumsum[i_s - 1] if i_s > 0 else 0
-        S_le_T_ended_rel_ns = ended_starts_rel_cumsum[i_e - 1] if i_e > 0 else 0
-        a = np.asarray(S_le_T_rel_ns, dtype="int64")
-        b = np.asarray(S_le_T_ended_rel_ns, dtype="int64")
-        S_active_rel_ns = a - b
-        S_active_rel_ns = np.maximum(S_active_rel_ns, 0)
+        # Sum of clipped (relative) starts up to T, in HOURS
+        S_le_T_rel_h = starts_rel_cumsum_h[i_s - 1] if i_s > 0 else 0.0
+        S_le_T_ended_rel_h = ended_starts_rel_cumsum_h[i_e - 1] if i_e > 0 else 0.0
+        S_active_rel_h = max(S_le_T_rel_h - S_le_T_ended_rel_h, 0.0)
 
-        # R_rel_ns = N_active * (T - t0)  - sum_active_clipped_starts(rel)
-        T_rel_ns = pd.Timestamp(T).value - t0_ns
-        R_rel_ns = np.int64(N_active) * np.int64(T_rel_ns) - S_active_rel_ns
+        # R_h = N_active * (T - t0) [hours] - sum_active_clipped_starts [hours]
+        T_rel_h = (pd.Timestamp(T).value - t0_ns) / 3.6e12  # ns → hours
+        R_h = float(N_active) * T_rel_h - S_active_rel_h
 
-        # ns -> hours
-        R[i] = R_rel_ns / 1e9 / 3600.0
+        # Numerical safety: never negative
+        R[i] = max(R_h, 0.0)
 
     return R
