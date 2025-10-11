@@ -1008,8 +1008,9 @@ def plot_sojourn_time_scatter(args, df, filter_result, metrics,out_dir) -> List[
     written = []
     if args.incomplete:
         if len(metrics.times) > 0:
+            t_end = metrics.times[-1]
             t_scatter_times = df["start_ts"].tolist()
-            t_scatter_vals = df["duration_hr"].to_numpy()
+            t_scatter_vals = ((t_end - df["start_ts"]).dt.total_seconds() / 3600.0).to_numpy()
 
     else:
         df_c = df[df["end_ts"].notna()].copy()

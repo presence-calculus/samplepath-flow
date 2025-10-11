@@ -60,10 +60,10 @@ def produce_all_charts(csv_path: str,
     # Vertical stacks (4×1)
     written += plot_core_metrics_stack(args, filter_result, metrics, out_dir)
 
-    if scatter:
-        written += plot_sojourn_time_scatter(args, df, filter_result, metrics, out_dir)
+    #soujourn time scatter plot
+    written += plot_sojourn_time_scatter(args, df, filter_result, metrics, out_dir)
 
-        # 5-panel stacks including scatter
+    # 5-panel stacks including scatter
     plot_five_column_stacks(df, args, filter_result, metrics, out_dir)
 
     written += plot_coherence_charts(df, args, filter_result, metrics, out_dir)
