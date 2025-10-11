@@ -1384,7 +1384,7 @@ def plot_rate_stability_charts(
     ax = axes[1]
     ax.plot(times, N_over_T, label='N(t)/T', linewidth=1.9, zorder=3)
     ax.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
-    ax.axhline(1.0, linewidth=1.0, alpha=0.35, linestyle=':', zorder=1)
+    ax.axhline(1.0, linewidth=1.0, alpha=1.0, linestyle=':', zorder=1)
     _format_date_axis(ax)
     ax.set_xlabel('time')
     ax.set_ylabel('rate')
@@ -1402,17 +1402,29 @@ def plot_rate_stability_charts(
     plt.close(fig)
     written.append(out_path_N)
 
-    # --------------------- Chart 2: R(T)/T ---------------------
+    # --------------------- Chart 2: R(t) sample path + R(T)/T ---------------------
     out_path_R = os.path.join(out_dir, "timestamp_rate_stability_r.png")
-    fig, ax = plt.subplots(figsize=(10, 5.2))
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 7.8), sharex=True)
+
+    # Top: R(t) — total age of WIP at time t
+    ax_top = axes[0]
+    ax_top.plot(times, R_raw, label='R(t) [hours]', linewidth=1.5, zorder=3)
+    ax_top.set_ylabel('hours')
+    ax_top.set_title('R(t) — Total age of WIP')
+    ax_top.legend(loc='best')
+    _format_date_axis(ax_top)
+
+    # Bottom: Total Age Growth Rate R(T)/T
+    ax = axes[1]
     ax.plot(times, R_over_T, label="R(T)/T", linewidth=1.9, zorder=3)
     ax.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
-    ax.axhline(1.0, linewidth=1.0, alpha=0.35, linestyle=":", zorder=1)  # reference guide
+    ax.axhline(1.0, linewidth=1.0, alpha=1.0, linestyle=":", zorder=1)  # reference guide
 
     _format_date_axis(ax)
     ax.set_xlabel("time")
     ax.set_ylabel("rate")
-    ax.set_title(f"{title_prefix}: Total Age Growth Rate - R(T)/T" if title_prefix else "Total Age Growth Rate - R(T)/T")
+    ax.set_title(
+        f"{title_prefix}: Total Age Growth Rate - R(T)/T" if title_prefix else "Total Age Growth Rate - R(T)/T")
     ax.legend(loc="best")
 
     finite_vals_R = R_over_T[np.isfinite(R_over_T)]
@@ -1434,7 +1446,7 @@ def plot_rate_stability_charts(
     axN = axes[0]
     axN.plot(times, N_over_T, label="N(T)/T", linewidth=1.9, zorder=3)
     axN.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
-    axN.axhline(1.0, linewidth=1.0, alpha=0.35, linestyle=":", zorder=1)
+    axN.axhline(1.0, linewidth=1.0, alpha=1.0, linestyle=":", zorder=1)
     _format_date_axis(axN)
     axN.set_ylabel("rate")
     axN.set_title("WIP Growth Rate: N(T)/T")
@@ -1448,7 +1460,7 @@ def plot_rate_stability_charts(
     axR = axes[1]
     axR.plot(times, R_over_T, label="R(T)/T", linewidth=1.9, zorder=3)
     axR.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
-    axR.axhline(1.0, linewidth=1.0, alpha=0.35, linestyle=":", zorder=1)
+    axR.axhline(1.0, linewidth=1.0, alpha=1.0, linestyle=":", zorder=1)
     _format_date_axis(axR)
     axR.set_ylabel("rate")
     axR.set_title("Total Age Growth Rate: R(T)/T")
