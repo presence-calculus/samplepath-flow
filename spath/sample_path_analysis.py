@@ -18,7 +18,7 @@ from csv_loader import csv_to_dataframe
 from filter import FilterResult, apply_filters
 from metrics import compute_finite_window_flow_metrics, FlowMetricsResult
 from point_process import to_arrival_departure_process
-from spath.plots import plot_core_flow_metrics, plot_sojourn_time_scatter, ensure_output_dir, plot_coherence_charts, \
+from spath.plots import plot_core_flow_metrics, plot_sojourn_time_scatter, ensure_output_dirs, plot_coherence_charts, \
     plot_core_metrics_stack, \
     plot_five_column_stacks, plot_rate_stability_charts, plot_llaw_manifold_3d, plot_arrival_departure_convergence, \
     plot_residence_vs_sojourn_stack, plot_sample_path_coherence
@@ -52,7 +52,7 @@ def produce_all_charts(csv_path: str,
     # Compute core finite window flow metrics
     metrics: FlowMetricsResult = compute_finite_window_flow_metrics(arrival_departure_process)
 
-    out_dir = ensure_output_dir(csv_path)
+    out_dir = ensure_output_dirs(csv_path)
     written: List[str] = []
 
     # create plots

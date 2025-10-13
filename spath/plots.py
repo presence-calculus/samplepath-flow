@@ -186,7 +186,7 @@ def plot_core_flow_metrics(
     metrics: FlowMetricsResult,
     out_dir: str,
 ) -> List[str]:
-    out_dir = ensure_output_dir(out_dir)
+    out_dir = ensure_output_dirs(out_dir)
     filter_label = filter_result.label if filter_result else ""
     note = f"Filters: {filter_label}"
 
@@ -692,7 +692,7 @@ def plot_arrival_departure_convergence(
 
     Returns list of written image paths.
     """
-    out_dir = ensure_output_dir(out_dir)
+    out_dir = ensure_output_dirs(out_dir)
     caption = (filter_result.display if filter_result else None)
 
     pctl_upper = getattr(args, "lambda_pctl", None)
@@ -797,7 +797,7 @@ def plot_residence_vs_sojourn_stack(
     Uses compute_dynamic_empirical_series(df, metrics.times) for W*(t).
     Writes: timestamp_residence_vs_sojourn_stack.png
     """
-    out_dir = ensure_output_dir(out_dir)
+    out_dir = ensure_output_dirs(out_dir)
     caption = (filter_result.display if filter_result else None)
 
     out_path = os.path.join(out_dir, "timestamp_residence_vs_sojourn_stack.png")
@@ -932,7 +932,7 @@ def plot_sample_path_coherence(
       • PNG: timestamp_sample_path_coherence.png
       • TXT: ll_empirical_coherence_summary.txt
     """
-    out_dir = ensure_output_dir(out_dir)
+    out_dir = ensure_output_dirs(out_dir)
     caption = (filter_result.display if filter_result else None)
 
     # derive W*(t), λ*(t) aligned to times
@@ -1217,11 +1217,15 @@ def draw_five_panel_column_with_scatter(times: List[pd.Timestamp],
     plt.close(fig)
 
 
-def ensure_output_dir(csv_path: str) -> str:
+def ensure_output_dirs(csv_path: str) -> str:
     base = os.path.basename(csv_path)
     stem = os.path.splitext(base)[0]
     out_dir = os.path.join("charts", stem)
     os.makedirs(out_dir, exist_ok=True)
+    stacks_dir = os.path.join(out_dir, "panels")
+    os.makedirs(stacks_dir, exist_ok=True)
+    stacks_dir = os.path.join(out_dir, "stacks")
+    os.makedirs(stacks_dir, exist_ok=True)
     return out_dir
 
 
