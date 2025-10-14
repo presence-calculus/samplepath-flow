@@ -185,16 +185,16 @@ def plot_core_flow_metrics(
     metrics: FlowMetricsResult,
     out_dir: str,
 ) -> List[str]:
-    core_dir = os.path.join(out_dir, "core")
+    core_panels_dir = os.path.join(out_dir, "core/panels")
     filter_label = filter_result.label if filter_result else ""
     note = f"Filters: {filter_label}"
 
-    path_N = os.path.join(core_dir, "N.png")
+    path_N = os.path.join(core_panels_dir, "sample_path_N.png")
     draw_step_chart(
         metrics.times, metrics.N, "N(t) — Sample Path", "N(t)", path_N, caption=note
     )
 
-    path_L = os.path.join(core_dir, "L.png")
+    path_L = os.path.join(core_panels_dir, "time_average_N_L.png")
     draw_line_chart(
         metrics.times,
         metrics.L,
@@ -204,7 +204,7 @@ def plot_core_flow_metrics(
         caption=note,
     )
 
-    path_Lam = os.path.join(core_dir, "Lambda.png")
+    path_Lam = os.path.join(core_panels_dir, "cumulative_arrival_rate_Lambda.png")
     draw_lambda_chart(
         metrics.times,
         metrics.Lambda,
@@ -217,7 +217,7 @@ def plot_core_flow_metrics(
         caption=note,
     )
 
-    path_w = os.path.join(core_dir, "w.png")
+    path_w = os.path.join(core_panels_dir, "average_residence_time_w.png")
     draw_line_chart(
         metrics.times,
         metrics.w,
@@ -227,7 +227,7 @@ def plot_core_flow_metrics(
         caption=note,
     )
 
-    path_invariant = os.path.join(core_dir, "ll_invariant.png")
+    path_invariant = os.path.join(core_panels_dir, "littles_law_invariant.png")
     draw_L_vs_Lambda_w(
         metrics.times,
         metrics.L,

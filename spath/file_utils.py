@@ -28,7 +28,7 @@ def make_root_dir(csv_path, output_dir, clean):
 
 def ensure_output_dirs(csv_path: str, output_dir=None, clean=False) -> str:
     out_dir = make_root_dir(csv_path, output_dir, clean)
-    for chart_dir in ['core', 'convergence', 'stability', 'advanced', 'misc']:
+    for chart_dir in ['core', 'core/panels',  'convergence', 'convergence/panels', 'stability', 'advanced', 'misc']:
         sub_dir = os.path.join(out_dir, chart_dir)
         os.makedirs(sub_dir, exist_ok=True)
 
