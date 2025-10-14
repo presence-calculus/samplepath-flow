@@ -237,7 +237,12 @@ def plot_core_flow_metrics(
         out_path=path_invariant,
         caption=note
     )
-    return [path_N, path_L, path_Lam, path_w, path_invariant]
+    # soujourn time scatter plot
+    path_w_scatter = plot_sojourn_time_scatter(args, df, filter_result, metrics, out_dir)
+
+    # Vertical stacks (4×1)
+    path_sample_path_analysis = plot_core_sample_path_analysis_stack(args, filter_result, metrics, out_dir)
+    return [path_N, path_L, path_Lam, path_w, path_invariant, path_sample_path_analysis, path_w_scatter]
 
 
 
@@ -997,7 +1002,7 @@ def _clip_axis_to_percentile(ax: plt.Axes,
 
 
 
-def plot_sojourn_time_scatter(args, df, filter_result, metrics,out_dir) -> List[str]:
+def plot_sojourn_time_scatter(args, df, filter_result, metrics,out_dir) -> str:
     t_scatter_times: List[pd.Timestamp] = []
     t_scatter_vals = np.array([])
     written = []
@@ -1014,16 +1019,16 @@ def plot_sojourn_time_scatter(args, df, filter_result, metrics,out_dir) -> List[
             t_scatter_vals = df_c["duration_hr"].to_numpy()
 
     if len(t_scatter_times) > 0:
-        ts_w_scatter = os.path.join(out_dir, "timestamp_w_with_scatter.png")
+        ts_w_scatter = os.path.join(out_dir, "convergence/panels/residence_time_sojourn_time_scatter.png")
         label = "age" if args.incomplete else "sojourn time"
         draw_line_chart_with_scatter(metrics.times, metrics.w,
                                      f"Element {label} vs Average residence time",
                                      f"Time [hrs]", ts_w_scatter, t_scatter_times, t_scatter_vals, scatter_label=f"element {label}",
                                       caption=f"{filter_result.label}")
 
-        written += [ts_w_scatter]
 
-    return written
+
+    return ts_w_scatter
 
 
 def draw_four_panel_column(times: List[pd.Timestamp],
@@ -1279,12 +1284,12 @@ def plot_coherence_charts(df, args, filter_result, metrics, out_dir):
     return written
 
 
-def plot_core_metrics_stack(args, filter_result, metrics, out_dir):
-    four_col_stack = os.path.join(out_dir, 'core/timestamp_stack.png')
+def plot_core_sample_path_analysis_stack(args, filter_result, metrics, out_dir):
+    four_col_stack = os.path.join(out_dir, 'core/sample_path_flow_metrics.png')
     draw_four_panel_column(metrics.times, metrics.N, metrics.L, metrics.Lambda, metrics.w,
                            f'Sample Path Flow Metrics', four_col_stack, args.lambda_pctl,
                            args.lambda_lower_pctl, args.lambda_warmup, caption=f"{filter_result.display}")
-    return [four_col_stack]
+    return four_col_stack
 
 
 def plot_five_column_stacks(df, args, filter_result, metrics, out_dir):

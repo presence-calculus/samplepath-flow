@@ -8,8 +8,8 @@ See README.md for context.
 """
 
 import sys
-from typing import List, Optional, Tuple
 from argparse import Namespace
+from typing import List, Optional, Tuple
 
 import pandas as pd
 
@@ -18,11 +18,10 @@ from csv_loader import csv_to_dataframe
 from filter import FilterResult, apply_filters
 from metrics import compute_finite_window_flow_metrics, FlowMetricsResult
 from point_process import to_arrival_departure_process
-from spath.plots import plot_core_flow_metrics, plot_sojourn_time_scatter, plot_coherence_charts, \
-    plot_core_metrics_stack, \
+from spath.file_utils import ensure_output_dirs
+from spath.plots import plot_core_flow_metrics, plot_coherence_charts, \
     plot_five_column_stacks, plot_rate_stability_charts, plot_llaw_manifold_3d, plot_arrival_departure_convergence, \
     plot_residence_vs_sojourn_stack, plot_sample_path_coherence
-from spath.file_utils import ensure_output_dirs
 
 
 # -------------------------------
@@ -58,11 +57,6 @@ def produce_all_charts(csv_path: str,
 
     # create plots
     written += plot_core_flow_metrics(df, args, filter_result, metrics, out_dir)
-    # Vertical stacks (4×1)
-    written += plot_core_metrics_stack(args, filter_result, metrics, out_dir)
-
-    #soujourn time scatter plot
-    written += plot_sojourn_time_scatter(args, df, filter_result, metrics, out_dir)
 
     # 5-panel stacks including scatter
     plot_five_column_stacks(df, args, filter_result, metrics, out_dir)
