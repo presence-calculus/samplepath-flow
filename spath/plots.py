@@ -994,7 +994,7 @@ def plot_sample_path_convergence(
     horizon_days = getattr(args, "horizon_days", 28)
 
 
-    png_path = os.path.join(out_dir, "convergence/sample_path_convergence.png")
+    png_path = os.path.join(out_dir, "sample_path_convergence.png")
     score, ok_count, total_count = draw_ll_scatter_coherence(
         metrics.L,
         lam_star,
@@ -1333,7 +1333,7 @@ def plot_residence_time_sojourn_time_coherence_charts(df, args, filter_result, m
 
 
 def plot_core_sample_path_analysis_stack(args, filter_result, metrics, out_dir):
-    four_col_stack = os.path.join(out_dir, 'core/sample_path_flow_metrics.png')
+    four_col_stack = os.path.join(out_dir, 'sample_path_flow_metrics.png')
     draw_four_panel_column(metrics.times, metrics.N, metrics.L, metrics.Lambda, metrics.w,
                            f'Sample Path Flow Metrics', four_col_stack, args.lambda_pctl,
                            args.lambda_lower_pctl, args.lambda_warmup, caption=f"{filter_result.display}")
