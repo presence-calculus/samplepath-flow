@@ -19,7 +19,7 @@ from filter import FilterResult, apply_filters
 from metrics import compute_finite_window_flow_metrics, FlowMetricsResult
 from point_process import to_arrival_departure_process
 from spath.metrics import ElementWiseEmpiricalMetrics, compute_elementwise_empirical_metrics
-from spath.plots import produce_all_charts
+from spath.plots.plots import produce_all_charts
 
 
 # -------------------------------
