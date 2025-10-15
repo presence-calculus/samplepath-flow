@@ -15,8 +15,7 @@ from spath.filter import FilterResult
 from spath.metrics import FlowMetricsResult, compute_elementwise_empirical_metrics, compute_tracking_errors, \
     compute_coherence_score, compute_end_effect_series, compute_total_active_age_series, ElementWiseEmpiricalMetrics
 from spath.plots.helpers import add_caption, format_date_axis, format_and_save, init_fig_ax, draw_line_chart, \
-    draw_step_chart
-
+    draw_step_chart, _clip_axis_to_percentile
 
 
 def draw_lambda_chart(
@@ -832,35 +831,6 @@ def plot_sample_path_convergence(
         print(f"Sample Path Convergence: ε={epsilon}, H={horizon_days}d -> "
                 f"{ok_count}/{total_count} ({score*100:.1f}%)\n")
     return [png_path]
-
-def _clip_axis_to_percentile(ax: plt.Axes,
-                             times: List[pd.Timestamp],
-                             values: np.ndarray,
-                             upper_p: Optional[float] = None,
-                             lower_p: Optional[float] = None,
-                             warmup_hours: float = 0.0) -> None:
-    if upper_p is None and lower_p is None:
-        return
-    vals = np.asarray(values, dtype=float)
-    if vals.size == 0:
-        return
-    mask = np.isfinite(vals)
-    if warmup_hours and times:
-        t0 = times[0]
-        ages_hr = np.array([(t - t0).total_seconds() / 3600.0 for t in times])
-        mask &= (ages_hr >= float(warmup_hours))
-    data = vals[mask]
-    if data.size == 0 or not np.isfinite(data).any():
-        return
-    top = np.nanpercentile(data, upper_p) if upper_p is not None else np.nanmax(data)
-    bottom = np.nanpercentile(data, lower_p) if lower_p is not None else 0.0
-    if not np.isfinite(top) or not np.isfinite(bottom) or top <= bottom:
-        return
-    ax.set_ylim(float(bottom), float(top))
-
-
-
-
 
 
 def plot_sojourn_time_scatter(args, df, filter_result, metrics,out_dir) -> str:

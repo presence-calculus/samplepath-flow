@@ -124,3 +124,29 @@ def draw_step_chart(
     draw_series_chart(
         times, values, title, ylabel, out_path, unit=unit, caption=caption, style="step"
     )
+
+
+def _clip_axis_to_percentile(ax: plt.Axes,
+                             times: List[pd.Timestamp],
+                             values: np.ndarray,
+                             upper_p: Optional[float] = None,
+                             lower_p: Optional[float] = None,
+                             warmup_hours: float = 0.0) -> None:
+    if upper_p is None and lower_p is None:
+        return
+    vals = np.asarray(values, dtype=float)
+    if vals.size == 0:
+        return
+    mask = np.isfinite(vals)
+    if warmup_hours and times:
+        t0 = times[0]
+        ages_hr = np.array([(t - t0).total_seconds() / 3600.0 for t in times])
+        mask &= (ages_hr >= float(warmup_hours))
+    data = vals[mask]
+    if data.size == 0 or not np.isfinite(data).any():
+        return
+    top = np.nanpercentile(data, upper_p) if upper_p is not None else np.nanmax(data)
+    bottom = np.nanpercentile(data, lower_p) if lower_p is not None else 0.0
+    if not np.isfinite(top) or not np.isfinite(bottom) or top <= bottom:
+        return
+    ax.set_ylim(float(bottom), float(top))
