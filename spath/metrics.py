@@ -453,6 +453,8 @@ class ElementWiseEmpiricalMetrics:
     W_star: np.ndarray
     lam_star: np.ndarray
 
+    def as_tuple(self) -> [np.ndarray, np.ndarray]:
+        return self.W_star, self.lam_star
 
 
 def compute_elementwise_empirical_metrics(df: pd.DataFrame, times: List[pd.Timestamp]) -> ElementWiseEmpiricalMetrics:
