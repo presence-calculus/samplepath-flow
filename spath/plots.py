@@ -11,8 +11,9 @@ from matplotlib.axes import Axes
 
 from spath.file_utils import ensure_output_dirs
 from spath.filter import FilterResult
-from spath.metrics import FlowMetricsResult, compute_dynamic_empirical_series, compute_tracking_errors, \
-    compute_coherence_score, compute_end_effect_series, compute_total_active_age_series
+from spath.metrics import FlowMetricsResult, compute_elementwise_empirical_metrics, compute_tracking_errors, \
+    compute_coherence_score, compute_end_effect_series, compute_total_active_age_series, ElementWiseEmpiricalMetrics
+
 
 def _add_caption(fig: Figure, text: str) -> None:
     """Add a caption below the x-axis."""
@@ -249,6 +250,7 @@ def plot_convergence_charts(
     args,
     filter_result: Optional[FilterResult],
     metrics: FlowMetricsResult,
+    empirical_metrics: ElementWiseEmpiricalMetrics,
     out_dir: str,
 ) -> List[str]:
     written = []
@@ -386,7 +388,7 @@ def draw_L_vs_lambdaW(
       • caption added after tight_layout, with extra bottom space
     """
     # Empirical series
-    W_star, lam_star = compute_dynamic_empirical_series(df, times)
+    W_star, lam_star = compute_elementwise_empirical_metrics(df, times)
 
     # x = L(T), y = λ*(T)·W*(T)
     x = np.asarray(L_vals, dtype=float)
@@ -706,14 +708,11 @@ def plot_arrival_departure_convergence(
     out_dir: str,
 ) -> List[str]:
     """
-
-
     Inputs expected from FlowMetricsResult:
       - metrics.times                : List[pd.Timestamp]
       - metrics.Arrivals             : cumulative arrivals A(t)
       - metrics.Departures           : cumulative departures D(t)
       - metrics.Lambda               : Cumulative Arrival Rate Λ(T) [1/hr]
-
     Returns list of written image paths.
     """
 
@@ -761,7 +760,7 @@ def draw_residence_vs_sojourn_stack(
     """
     # --- Compute W*(t) aligned to `times`
     if len(times) > 0:
-        W_star_hours, _lam_star = compute_dynamic_empirical_series(df, times)
+        W_star_hours, _lam_star = compute_elementwise_empirical_metrics(df, times)
     else:
         W_star_hours = np.array([])
 
@@ -961,7 +960,7 @@ def plot_sample_path_convergence(
 
     # derive W*(t), λ*(t) aligned to times
     if len(metrics.times) > 0:
-        W_star_hours, lam_star = compute_dynamic_empirical_series(df, metrics.times)
+        W_star_hours, lam_star = compute_elementwise_empirical_metrics(df, metrics.times)
     else:
         W_star_hours = np.array([])
         lam_star = np.array([])
@@ -1248,9 +1247,9 @@ def plot_residence_time_sojourn_time_coherence_charts(df, args, filter_result, m
     written: List[str] = []
 
     if len(metrics.times) > 0:
-        W_star_ts, lam_star_ts = compute_dynamic_empirical_series(df, metrics.times)
+        W_star_ts, lam_star_ts = compute_elementwise_empirical_metrics(df, metrics.times)
     else:
-        W_star_ts = lam_star_ts = np.array([])
+        W_star_ts = np.array([])
     # Relative errors & coherence
     eW_ts, eLam_ts, elapsed_ts = compute_tracking_errors(metrics.times, metrics.w, metrics.Lambda, W_star_ts,
                                                          lam_star_ts)
@@ -1362,7 +1361,7 @@ def plot_rate_stability_charts(
         R_over_T = R_raw / denom
 
     # Dynamic empirical series (for λ* and W*)
-    W_star_ts, lam_star_ts = compute_dynamic_empirical_series(df, times)
+    W_star_ts, lam_star_ts = compute_elementwise_empirical_metrics(df, times)
     w_ts = np.asarray(metrics.w, dtype=float)
 
     # Optional display bits
@@ -1636,12 +1635,12 @@ def plot_llaw_manifold_3d(
     return [out_path]
 
 
-def produce_all_charts(df, csv_path, args, filter_result, metrics):
+def produce_all_charts(df, csv_path, args, filter_result, metrics, empirical_metrics):
     out_dir = ensure_output_dirs(csv_path, output_dir=args.output_dir, clean=args.clean)
     written: List[str] = []
     # create plots
     written += plot_core_flow_metrics_charts(df, args, filter_result, metrics, out_dir)
-    written += plot_convergence_charts(df, args, filter_result, metrics, out_dir)
+    written += plot_convergence_charts(df, args, filter_result, metrics, empirical_metrics, out_dir)
     written += plot_stability_charts(df, args, filter_result, metrics, out_dir)
     written += plot_advanced_charts(df, args, filter_result, metrics, out_dir)
     written += plot_misc_charts(df, args, filter_result, metrics, out_dir)

@@ -18,6 +18,7 @@ from csv_loader import csv_to_dataframe
 from filter import FilterResult, apply_filters
 from metrics import compute_finite_window_flow_metrics, FlowMetricsResult
 from point_process import to_arrival_departure_process
+from spath.metrics import ElementWiseEmpiricalMetrics, compute_elementwise_empirical_metrics
 from spath.plots import produce_all_charts
 
 
@@ -33,7 +34,10 @@ def run_analysis(csv_path: str, args: Namespace) -> List[str]:
     # Compute core finite window flow metrics
     metrics: FlowMetricsResult = compute_finite_window_flow_metrics(arrival_departure_process)
 
-    return produce_all_charts(df, csv_path, args, filter_result, metrics)
+    # Compute  ElementWiseMetrics once
+    empirical_metrics: ElementWiseEmpiricalMetrics = compute_elementwise_empirical_metrics(df, metrics.times)
+
+    return produce_all_charts(df, csv_path, args, filter_result, metrics, empirical_metrics)
 
 
 def main():

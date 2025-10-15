@@ -412,9 +412,52 @@ def compute_end_effect_series(df: pd.DataFrame,
     return rA, rB, rho
 
 
+@dataclass
+class ElementWiseEmpiricalMetrics:
+    """
+    Element-wise empirical flow metrics evaluated along a sample-path timeline.
 
-def compute_dynamic_empirical_series(df: pd.DataFrame,
-                                     times: List[pd.Timestamp]) -> Tuple[np.ndarray, np.ndarray]:
+    Attributes
+    ----------
+    W_star : np.ndarray
+        Array of empirical mean sojourn (or residence) times `W*(t)`
+        aligned to the corresponding sample times.
+        Each element represents the average active duration of completed
+        items up to that time on the sample path.
+
+    lam_star : np.ndarray
+        Array of empirical arrival rates `λ*(t)`
+        aligned to the same sample times.
+        Each element represents the cumulative number of arrivals
+        per unit time observed up to that point.
+
+    Notes
+    -----
+    These quantities together form the empirical counterpart to Little’s Law:
+        L*(t) = λ*(t) · W*(t)
+    where `L*(t)` is the computed average work-in-process within the window
+    ending at time `t`.
+
+    The process is fully convergent when `L*(T) = L(T)`, i.e., when the empirical
+    value matches the observed time-average of work-in-process.
+
+    These metrics are used in convergence checks that compare the values
+    returned by the `FlowMetricsResult` for an observation window
+    against these empirical series.
+
+    The arrays are element-wise aligned and can be safely combined with
+    corresponding `times` vectors in downstream analysis or visualization.
+    """
+
+    times:  List[pd.Timestamp]
+    W_star: np.ndarray
+    lam_star: np.ndarray
+
+
+
+
+def compute_elementwise_empirical_metrics(df: pd.DataFrame,
+                                          times: List[pd.Timestamp]) -> Tuple[np.ndarray, np.ndarray]:
     """Return W*(t) and λ*(t) aligned to `times`."""
     n = len(times)
     W_star = np.full(n, np.nan, dtype=float)
