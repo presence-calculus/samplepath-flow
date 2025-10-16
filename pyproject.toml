@@ -44,3 +44,52 @@ pdoc = "^15.0.3"
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+# pyproject.toml
+
+[tool.pytest.ini_options]
+# Limit collection to  test dir and enable coverage by default
+testpaths = ["test/spath"]
+addopts = [
+  "--cov=spath.metrics",          # only measure spath/metrics.py (and imports within that module)
+  "--cov-report=term-missing",    # show missing lines inline
+  "--cov-report=html",            # htmlcov/index.html
+  "--cov-report=xml",             # coverage.xml (for CI/diff-cover)
+  "-q"
+]
+# Optional markers you’re already using
+markers = [
+  "slow: long-running or property tests"
+]
+# Ensure local package import works (so `from spath.metrics import ...` succeeds)
+pythonpath = ["."]
+# (Optional) tighten warnings
+# filterwarnings = ["error"]
+
+[tool.coverage.run]
+branch = true
+source = ["spath.metrics"]                # measure only your package
+# If you want to completely ignore some files from measurement:
+omit = [
+  "test/*",
+  "**/__init__.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+precision = 2
+fail_under = 90                  # ← set your desired minimum coverage
+# Lines you never want to count as missing
+exclude_lines = [
+  "pragma: no cover",
+  "if TYPE_CHECKING:",
+  "if __name__ == .__main__.:",
+  "raise NotImplementedError",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.xml]
+output = "coverage.xml"
