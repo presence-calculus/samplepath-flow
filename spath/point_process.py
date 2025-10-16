@@ -16,6 +16,8 @@ From these primitives, we can define stochastic processes such as N(t) — the
 number of items in a queue at time t — and study their sample paths. This module
 provides the core tools for building, sorting, and analyzing marked point processes.
 
+Currently we only model arrival departure processes. 
+
 In more concrete terms:
     - You have a list of event times: T1, T2, T3, ...
     - Each event carries a *mark* — data you care about, such as:
