@@ -15,7 +15,7 @@ import pandas as pd
 
 import cli
 from csv_loader import csv_to_dataframe
-from file_utils import ensure_output_dirs, write_cli_args_to_file
+from file_utils import ensure_output_dirs, write_cli_args_to_file, copy_input_csv_to_output
 from filter import FilterResult, apply_filters
 from metrics import compute_finite_window_flow_metrics, FlowMetricsResult
 from point_process import to_arrival_departure_process
@@ -44,6 +44,9 @@ def run_analysis(csv_path: str, args: Namespace, out_dir: str) -> List[str]:
 def main():
     parser, args = cli.parse_args()
     out_dir = ensure_output_dirs(args.csv, output_dir=args.output_dir, clean=args.clean)
+    if args.save_input:
+        copy_input_csv_to_output(args.csv, out_dir)
+
     write_cli_args_to_file(parser, args, out_dir)
     try:
         paths = run_analysis(

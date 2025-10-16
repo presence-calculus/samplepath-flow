@@ -60,7 +60,7 @@ def write_cli_args_to_file(parser: argparse.ArgumentParser,
     write_cli_args_to_file(parser, args, "cli_args.txt")
     """
 
-    output_path = Path(os.path.join(output_path, "input/cli_args.txt"))
+    output_path = Path(os.path.join(output_path, "parameters.txt"))
     lines = []
     lines.append("Scenario Parameters")
     lines.append("=" * 80)
@@ -91,3 +91,32 @@ def write_cli_args_to_file(parser: argparse.ArgumentParser,
 
     output_path.write_text("\n".join(lines))
     print(f"[INFO] Wrote CLI argument summary to {output_path.resolve()}")
+
+def copy_input_csv_to_output(input_path: str | Path, output_dir: str | Path) -> Path:
+    """
+    Copy the input CSV file to the output directory, preserving its filename.
+
+    Parameters
+    ----------
+    input_path : str or Path
+        Path to the input CSV file.
+    output_dir : str or Path
+        Directory where the file should be copied. Created if it doesn't exist.
+
+    Returns
+    -------
+    Path
+        Path to the copied file in the output directory.
+    """
+    input_path = Path(input_path)
+    output_dir = Path(os.path.join(output_dir, "input"))
+
+
+    if not input_path.exists():
+        raise FileNotFoundError(f"Input file not found: {input_path}")
+
+    dest_path = output_dir / input_path.name
+    shutil.copy2(input_path, dest_path)
+
+    print(f"[INFO] Copied input CSV to {dest_path.resolve()}")
+    return dest_path
