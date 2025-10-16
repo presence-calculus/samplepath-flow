@@ -43,7 +43,7 @@ def run_analysis(csv_path: str, args: Namespace, out_dir: str) -> List[str]:
 
 def main():
     parser, args = cli.parse_args()
-    out_dir = ensure_output_dirs(args.csv, output_dir=args.output_dir, clean=args.clean)
+    out_dir = ensure_output_dirs(args.csv, output_dir=args.output_dir, scenario_dir=args.scenario,  clean=args.clean)
     if args.save_input:
         copy_input_csv_to_output(args.csv, out_dir)
 

@@ -58,12 +58,17 @@ def parse_args():
                         help="Ignore this many initial days when assessing convergence - suppress the mixing period (default 28)")
 
     # output directory handling
+    parser.add_argument("--output-dir", type=lambda p: Path(p).expanduser().resolve(), default='charts',
+                        help="Root directory where charts will be written. Output will be written under a subdirectory of this directory named with the csv file name")
+
+    parser.add_argument("--scenario", type=str, default="latest",
+                        help="create the output under a named folder. The default is 'latest' under the output folder created under output-dir")
+    
     parser.add_argument("--save-input", action='store_true', default=True,
                         help="Copy the input csv to the output path (saved under input subdirectory)")
     parser.add_argument("--clean", action="store_true", default=False,
                         help="removing existing charts in output directory")
-    parser.add_argument("--output-dir", type=lambda p: Path(p).expanduser().resolve(), default='charts',
-                        help="Root directory where charts will be written")
+
 
     args = parser.parse_args()
     validate_args(args)

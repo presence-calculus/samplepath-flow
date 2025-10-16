@@ -17,19 +17,44 @@ def make_fresh_dir(path):
     return p
 
 
-def make_root_dir(csv_path, output_dir, clean):
-    base = os.path.basename(csv_path)
-    stem = os.path.splitext(base)[0]
-    out_dir = os.path.join(output_dir, stem)
+import os
+
+def make_root_dir(csv_path, output_dir, scenario_dir, clean):
+    """
+    Create/use <output_dir>/<csv_stem>/<scenario_dir> and return that path.
+
+    Rules:
+      - Ensure <output_dir>/<csv_stem> exists (never cleaned here).
+      - Create/use a subdirectory named <scenario_dir> under it.
+      - If clean=True, recreate the scenario subdirectory fresh.
+      - Return the scenario directory path.
+
+    Notes:
+      - `scenario_dir` is treated as a name (basename taken).
+      - Caller guarantees a default like "latest" is always provided.
+    """
+    # Top-level: <output_dir>/<csv_stem>
+    csv_base = os.path.basename(csv_path)
+    csv_stem, _ = os.path.splitext(csv_base)
+    top_dir = os.path.join(output_dir, csv_stem)
+    os.makedirs(top_dir, exist_ok=True)
+
+    # Scenario dir under the stem
+    scenario_name = os.path.basename(str(scenario_dir))
+    out_dir = os.path.join(top_dir, scenario_name)
+
     if clean:
+        # make_fresh_dir must do an rm -rf + mkdir -p
         make_fresh_dir(out_dir)
     else:
         os.makedirs(out_dir, exist_ok=True)
+
     return out_dir
 
 
-def ensure_output_dirs(csv_path: str, output_dir=None, clean=False) -> str:
-    out_dir = make_root_dir(csv_path, output_dir, clean)
+
+def ensure_output_dirs(csv_path: str, output_dir=None, scenario_dir='latest', clean=False) -> str:
+    out_dir = make_root_dir(csv_path, output_dir,scenario_dir,  clean)
     for chart_dir in ['input', 'core',  'convergence', 'convergence/panels', 'stability/panels', 'advanced', 'misc']:
         sub_dir = os.path.join(out_dir, chart_dir)
         os.makedirs(sub_dir, exist_ok=True)
