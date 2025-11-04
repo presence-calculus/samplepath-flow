@@ -137,7 +137,7 @@ def test_f_outlier_iqr_two_sided_with_large_sample():
     df = pd.DataFrame(
         {
             "duration_hr": [1, 2, 3, 4, 5, 6, 7, 8],
-            "end_ts": pd.date_range("2024-01-01", periods=8, freq="H"),
+            "end_ts": pd.date_range("2024-01-01", periods=8, freq="h"),
         }
     )
     spec = FilterSpec(outlier_iqr=1.5, outlier_iqr_two_sided=True)

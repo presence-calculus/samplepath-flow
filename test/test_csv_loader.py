@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
-# -*- coding: utf-8 -*-
-# test/spath/io/test_csv_loader.py
 
-import io
-import os
 import pandas as pd
-import numpy as np
 import pytest
 
 from spath.csv_loader import CSVLoader
@@ -23,6 +18,9 @@ def _write(tmp_path, name, text):
 # Autodetect delimiter across common cases
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+
+@pytest.mark.filterwarnings("ignore:.*:RuntimeWarning")
+@pytest.mark.filterwarnings("ignore: DataFrame is empty after loading/cleaning")
 @pytest.mark.parametrize("sep", [",", "\t", ";", "|", ":"])
 def test_autodetect_delimiter_common_separators(tmp_path, sep):
     csv = f"id{sep}start_ts{sep}end_ts\nA{sep}2024-01-01 00:00{sep}2024-01-01 01:00\n"
@@ -68,13 +66,14 @@ def test_parse_dates_are_datetime64(tmp_path):
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # NaT on unparsable timestamps (graceful coercion)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
+@pytest.mark.filterwarnings("ignore:.*:RuntimeWarning")
+@pytest.mark.filterwarnings("ignore:1 rows have invalid/missing 'start_ts' (set to NaT)")
 def test_unparsable_timestamps_raise_when_all_invalid(tmp_path):
     csv = "id,start_ts,end_ts\nA,not-a-time,2024-01-01 01:00\n"
     path = _write(tmp_path, "bad_time.csv", csv)
     with pytest.raises(ValueError):
         CSVLoader(parse_dates=("start_ts", "end_ts")).load(str(path))
-    assert True  # single-assertion pattern
+
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
