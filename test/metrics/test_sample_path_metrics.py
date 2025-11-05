@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
-# test/spath/metrics/test_sample_path_metrics.py
+# test/samplepath/metrics/test_sample_path_metrics.py
 import numpy as np
 import pandas as pd
 import pytest
 
-from spath.metrics import compute_sample_path_metrics
+from samplepath.metrics import compute_sample_path_metrics
 
 
 def _t(s: str) -> pd.Timestamp:

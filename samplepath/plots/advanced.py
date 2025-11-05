@@ -7,8 +7,8 @@ from typing import Optional, Tuple, List
 
 import pandas as pd
 
-from spath.filter import FilterResult
-from spath.metrics import FlowMetricsResult
+from samplepath.filter import FilterResult
+from samplepath.metrics import FlowMetricsResult
 
 
 def plot_llaw_manifold_3d(

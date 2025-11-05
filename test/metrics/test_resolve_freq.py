@@ -2,7 +2,7 @@
 import pytest
 import pandas as pd
 
-from spath.metrics import _resolve_freq
+from samplepath.metrics import _resolve_freq
 
 
 @pytest.mark.parametrize(

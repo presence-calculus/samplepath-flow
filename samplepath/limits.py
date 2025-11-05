@@ -11,7 +11,7 @@ from dataclasses import dataclass
 import pandas as pd
 from pathlib import Path
 
-from spath.metrics import FlowMetricsResult, ElementWiseEmpiricalMetrics
+from samplepath.metrics import FlowMetricsResult, ElementWiseEmpiricalMetrics
 
 MetricKind = Literal["time_average", "cumulative_rate", "empirical_rate", "bounded_mean"]
 

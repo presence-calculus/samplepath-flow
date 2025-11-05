@@ -20,13 +20,13 @@ from file_utils import ensure_output_dirs, write_cli_args_to_file, copy_input_cs
 from filter import FilterResult, apply_filters
 from metrics import compute_finite_window_flow_metrics, FlowMetricsResult
 from point_process import to_arrival_departure_process
-from spath.limits import write_limits
-from spath.metrics import ElementWiseEmpiricalMetrics, compute_elementwise_empirical_metrics
-from spath.plots.advanced import plot_advanced_charts
-from spath.plots.convergence import plot_convergence_charts
-from spath.plots.core import plot_core_flow_metrics_charts
-from spath.plots.misc import plot_misc_charts
-from spath.plots.stability import plot_stability_charts
+from samplepath.limits import write_limits
+from samplepath.metrics import ElementWiseEmpiricalMetrics, compute_elementwise_empirical_metrics
+from samplepath.plots.advanced import plot_advanced_charts
+from samplepath.plots.convergence import plot_convergence_charts
+from samplepath.plots.core import plot_core_flow_metrics_charts
+from samplepath.plots.misc import plot_misc_charts
+from samplepath.plots.stability import plot_stability_charts
 
 
 def produce_all_charts(df,  args, filter_result, metrics, empirical_metrics, out_dir):

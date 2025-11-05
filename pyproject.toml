@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "spath"
+name = "samplepath"
 version = "0.1.0"
 description = "Sample Path Analysis Library"
 authors = ["Krishna Kumar <kkumar@exathink.com>"]
@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 homepage = "https://py.pcalc.org"
 repository = "https://github.com/krishnaku/pypcalc"
-packages = [{ include = "spath" }]
+packages = [{ include = "samplepath" }]
 keywords = ["presence", "flow", "queueing", "analytics"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -19,9 +19,8 @@ classifiers = [
 [tool.poetry.dependencies]
 python = ">=3.11"
 numpy = ">=1.26,<2.0"
-pandas = { version = ">=2.2,<3.0", optional = true }
-polars = { version = ">=0.20,<0.21", optional = true }
-matplotlib = { version = ">=3.8,<4.0", optional = true }
+pandas = { version = ">=2.2,<3.0" }
+matplotlib = { version = ">=3.8,<4.0"}
 sortedcontainers = "^2.4.0"
 
 [tool.poetry.extras]
@@ -51,7 +50,7 @@ build-backend = "poetry.core.masonry.api"
 # Limit collection to  test dir and enable coverage by default
 testpaths = ["test"]
 addopts = [
-    "--cov=spath",
+    "--cov=samplepath",
     "--cov-report=term-missing", # show missing lines inline
     "--cov-report=html", # htmlcov/index.html
     "--cov-report=xml", # coverage.xml (for CI/diff-cover)
@@ -61,14 +60,14 @@ addopts = [
 markers = [
     "slow: long-running or property tests"
 ]
-# Ensure local package import works (so `from spath.metrics import ...` succeeds)
+# Ensure local package import works (so `from samplepath.metrics import ...` succeeds)
 pythonpath = ["."]
 # (Optional) tighten warnings
 # filterwarnings = ["error"]
 
 [tool.coverage.run]
 branch = true
-source = ["spath"]
+source = ["samplepath"]
 # If you want to completely ignore some files from measurement:
 omit = [
     "**/__init__.py",

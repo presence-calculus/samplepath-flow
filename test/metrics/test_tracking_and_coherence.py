@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
-# test/spath/metrics/test_tracking_and_coherence.py
+# test/samplepath/metrics/test_tracking_and_coherence.py
 import numpy as np
 import pandas as pd
 import pytest
 
-from spath.metrics import compute_tracking_errors, compute_coherence_score
+from samplepath.metrics import compute_tracking_errors, compute_coherence_score
 
 
 def _make_times(n=4, start="2024-01-01 00:00", step_hours=1):

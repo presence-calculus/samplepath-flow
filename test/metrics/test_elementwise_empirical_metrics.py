@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
-# test/spath/metrics/test_empirical_series.py
+# test/samplepath/metrics/test_empirical_series.py
 import numpy as np
 import pandas as pd
 import pytest
 
-from spath.metrics import compute_elementwise_empirical_metrics
+from samplepath.metrics import compute_elementwise_empirical_metrics
 
 
 def _t(s: str) -> pd.Timestamp:

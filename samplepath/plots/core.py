@@ -10,10 +10,10 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from spath.filter import FilterResult
-from spath.metrics import FlowMetricsResult
+from samplepath.filter import FilterResult
+from samplepath.metrics import FlowMetricsResult
 
-from spath.plots.helpers import init_fig_ax, format_and_save, add_caption, _clip_axis_to_percentile, format_date_axis, \
+from samplepath.plots.helpers import init_fig_ax, format_and_save, add_caption, _clip_axis_to_percentile, format_date_axis, \
     draw_step_chart, draw_line_chart
 
 

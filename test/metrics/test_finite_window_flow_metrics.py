@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
-# test/spath/metrics/test_finite_window_flow_metrics.py
-# test/spath/metrics/test_finite_window_flow_metrics.py
+# test/samplepath/metrics/test_finite_window_flow_metrics.py
+# test/samplepath/metrics/test_finite_window_flow_metrics.py
 import numpy as np
 import pandas as pd
 import pytest
 
-from spath.metrics import compute_finite_window_flow_metrics
+from samplepath.metrics import compute_finite_window_flow_metrics
 
 def _t(s: str) -> pd.Timestamp:
     return pd.Timestamp(s)

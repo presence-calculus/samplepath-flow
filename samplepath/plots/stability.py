@@ -10,9 +10,9 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from spath.filter import FilterResult
-from spath.metrics import compute_elementwise_empirical_metrics, FlowMetricsResult
-from spath.plots.helpers import format_date_axis, _clip_axis_to_percentile, add_caption
+from samplepath.filter import FilterResult
+from samplepath.metrics import compute_elementwise_empirical_metrics, FlowMetricsResult
+from samplepath.plots.helpers import format_date_axis, _clip_axis_to_percentile, add_caption
 
 
 def compute_total_active_age_series(

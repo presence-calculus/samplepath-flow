@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: MIT
-# test/spath/test_file_utils.py
+# test/samplepath/test_file_utils.py
 
 import os
 from pathlib import Path
@@ -8,7 +8,7 @@ import argparse
 import pandas as pd
 import pytest
 
-from spath.file_utils import (
+from samplepath.file_utils import (
     make_fresh_dir,
     make_root_dir,
     ensure_output_dirs,

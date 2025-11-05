@@ -8,10 +8,10 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from spath.filter import FilterResult
-from spath.metrics import compute_elementwise_empirical_metrics, FlowMetricsResult, ElementWiseEmpiricalMetrics, \
+from samplepath.filter import FilterResult
+from samplepath.metrics import compute_elementwise_empirical_metrics, FlowMetricsResult, ElementWiseEmpiricalMetrics, \
     compute_tracking_errors, compute_coherence_score, compute_end_effect_series
-from spath.plots.helpers import format_date_axis, add_caption, _clip_axis_to_percentile, init_fig_ax
+from samplepath.plots.helpers import format_date_axis, add_caption, _clip_axis_to_percentile, init_fig_ax
 
 
 def draw_residence_time_convergence_panel(times: List[pd.Timestamp],

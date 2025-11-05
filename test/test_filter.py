@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: MIT
-# test/spath/test_filter.py
+# test/samplepath/test_filter.py
 
 import numpy as np
 import pandas as pd
 import pytest
 import argparse
 
-from spath.filter import (
+from samplepath.filter import (
     _parse_classes,
     _completed_base_label,
     _require_cols,

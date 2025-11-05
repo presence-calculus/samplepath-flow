@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
-# test/spath/metrics/test_end_effects.py
+# test/samplepath/metrics/test_end_effects.py
 import numpy as np
 import pandas as pd
 import pytest
 
-from spath.metrics import (
+from samplepath.metrics import (
     compute_end_effect_series,
     compute_sample_path_metrics,
     compute_elementwise_empirical_metrics,

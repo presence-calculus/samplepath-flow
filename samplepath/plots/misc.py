@@ -8,10 +8,10 @@ from typing import Optional, List
 
 import pandas as pd
 
-from spath.filter import FilterResult
-from spath.metrics import FlowMetricsResult
+from samplepath.filter import FilterResult
+from samplepath.metrics import FlowMetricsResult
 
-from spath.plots.core import draw_five_panel_column, draw_five_panel_column_with_scatter
+from samplepath.plots.core import draw_five_panel_column, draw_five_panel_column_with_scatter
 
 
 def plot_five_column_stacks(df, args, filter_result, metrics, out_dir):

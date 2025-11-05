@@ -5,7 +5,7 @@
 import pandas as pd
 import pytest
 
-from spath.csv_loader import CSVLoader
+from samplepath.csv_loader import CSVLoader
 
 
 def _write(tmp_path, name, text):
