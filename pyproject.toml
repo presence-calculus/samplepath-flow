@@ -6,27 +6,29 @@ authors = ["Krishna Kumar <kkumar@exathink.com>"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://py.pcalc.org"
-repository = "https://github.com/krishnaku/pypcalc"
+repository = "https://github.com/krishnaku/samplepath"
 packages = [{ include = "samplepath" }]
 keywords = ["presence", "flow", "queueing", "analytics"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
-    "Operating System :: OS Independent"
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries"
 ]
 
 [tool.poetry.dependencies]
 python = ">=3.11"
-numpy = ">=1.26,<2.0"
+numpy = ">=1.26,<3.0"
 pandas = { version = ">=2.2,<3.0" }
-matplotlib = { version = ">=3.8,<4.0"}
+matplotlib = { version = ">=3.8,<4.0" }
 sortedcontainers = "^2.4.0"
 
+# Keep only truly optional deps here. If pandas/matplotlib are required, leave them above and
+# remove them from extras. If optional, move them here and delete from dependencies.
 [tool.poetry.extras]
-pandas = ["pandas"]
-polars = ["numpy"]
-matplotlib = ["matplotlib"]
+polars = ["polars"]
 docs = ["pandas", "numpy", "matplotlib"]
 
 [tool.poetry.group.dev.dependencies]
@@ -44,41 +46,38 @@ pdoc = "^15.0.3"
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-# pyproject.toml
+# -----------
+# Scripts
+# ------------
+[tool.poetry.scripts]
+samplepath = "samplepath.cli:main"
 
+# -------------------------
+# Testing & Coverage
+# -------------------------
 [tool.pytest.ini_options]
-# Limit collection to  test dir and enable coverage by default
 testpaths = ["test"]
 addopts = [
     "--cov=samplepath",
-    "--cov-report=term-missing", # show missing lines inline
-    "--cov-report=html", # htmlcov/index.html
-    "--cov-report=xml", # coverage.xml (for CI/diff-cover)
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
     "-q"
 ]
-# Optional markers you’re already using
-markers = [
-    "slow: long-running or property tests"
-]
-# Ensure local package import works (so `from samplepath.metrics import ...` succeeds)
+markers = ["slow: long-running or property tests"]
+# Root layout: allow `pytest` (outside Poetry) to import local package
 pythonpath = ["."]
-# (Optional) tighten warnings
-# filterwarnings = ["error"]
 
 [tool.coverage.run]
 branch = true
 source = ["samplepath"]
-# If you want to completely ignore some files from measurement:
-omit = [
-    "**/__init__.py",
-]
+omit = ["**/__init__.py"]
 
 [tool.coverage.report]
 show_missing = true
 skip_covered = false
 precision = 2
-#fail_under = 90                  # ← set your desired minimum coverage
-# Lines you never want to count as missing
+# fail_under = 90
 exclude_lines = [
     "pragma: no cover",
     "if TYPE_CHECKING:",
