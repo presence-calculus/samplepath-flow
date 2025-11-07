@@ -12,18 +12,16 @@ complex adaptive systems.
 
 ## 🔍 Overview
 
-**samplepath** is a Python library for **empirical analysis of flow processes** 
+**samplepath** is a Python library for the analysis of stability of flow processes
 using the finite-window formulation of **Little’s Law**.  
 
 It provides deterministic, pathwise measurement tools for analyzing long run
 flow process dynamics: arrival/departure equilibrium, process time coherence, and
 process stability along an observed sample path.
 
-The package implements parts of a general computation framework for measuring
-and modeling flow processes: [The Presence Calculus Project](https://docs.pcalc.org)
+The package implements components of [The Presence Calculus Project](https://docs.pcalc.org): a computational toolkit for modeling
+and measuring flow processes.
 
-In this library we focus on tools to reason about **equilibrium**, **coherence**, and **stability**
-of flow processes from observed event timelines.
 
 ### Background
 
