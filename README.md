@@ -1,4 +1,3 @@
-# samplepath  
 # The Sample Path Analysis Library and Toolkit
 
 A reference implementation of sample-path–based flow metrics, convergence analysis, and stability diagnostics for flow processes in 
