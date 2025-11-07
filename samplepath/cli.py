@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
+
 import argparse
 import sys
 from pathlib import Path
+
+from .file_utils import ensure_output_dirs, copy_input_csv_to_output, write_cli_args_to_file
+from .sample_path_analysis import run_analysis
+
 
 def validate_args(args):
     error = False
@@ -80,3 +86,25 @@ def get_class_filters(classes):
     if classes:
         class_filters = [c for c in classes.split(',') if c.strip() != '']
     return class_filters
+
+
+def main():
+    parser, args = parse_args()
+    out_dir = ensure_output_dirs(args.csv, output_dir=args.output_dir, scenario_dir=args.scenario,  clean=args.clean)
+    if args.save_input:
+        copy_input_csv_to_output(args.csv, out_dir)
+
+    write_cli_args_to_file(parser, args, out_dir)
+    try:
+        paths = run_analysis(
+            args.csv,
+            args,
+            out_dir
+        )
+        print("Wrote charts:\n" + "\n".join(paths))
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()

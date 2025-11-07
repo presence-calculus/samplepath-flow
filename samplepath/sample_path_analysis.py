@@ -13,20 +13,14 @@ from argparse import Namespace
 from typing import List, Tuple
 
 import pandas as pd
+from .csv_loader import csv_to_dataframe
+from .file_utils import ensure_output_dirs, write_cli_args_to_file, copy_input_csv_to_output
+from .filter import FilterResult, apply_filters
+from .metrics import compute_finite_window_flow_metrics, FlowMetricsResult, ElementWiseEmpiricalMetrics, compute_elementwise_empirical_metrics
+from .point_process import to_arrival_departure_process
+from .limits import write_limits
 
-import cli
-from csv_loader import csv_to_dataframe
-from file_utils import ensure_output_dirs, write_cli_args_to_file, copy_input_csv_to_output
-from filter import FilterResult, apply_filters
-from metrics import compute_finite_window_flow_metrics, FlowMetricsResult
-from point_process import to_arrival_departure_process
-from samplepath.limits import write_limits
-from samplepath.metrics import ElementWiseEmpiricalMetrics, compute_elementwise_empirical_metrics
-from samplepath.plots.advanced import plot_advanced_charts
-from samplepath.plots.convergence import plot_convergence_charts
-from samplepath.plots.core import plot_core_flow_metrics_charts
-from samplepath.plots.misc import plot_misc_charts
-from samplepath.plots.stability import plot_stability_charts
+from .plots import plot_advanced_charts, plot_convergence_charts, plot_core_flow_metrics_charts, plot_misc_charts, plot_stability_charts
 
 
 def produce_all_charts(df,  args, filter_result, metrics, empirical_metrics, out_dir):
@@ -58,27 +52,7 @@ def run_analysis(csv_path: str, args: Namespace, out_dir: str) -> List[str]:
     return produce_all_charts(df, args, filter_result, metrics, empirical_metrics, out_dir)
 
 
-def main():
-    parser, args = cli.parse_args()
-    out_dir = ensure_output_dirs(args.csv, output_dir=args.output_dir, scenario_dir=args.scenario,  clean=args.clean)
-    if args.save_input:
-        copy_input_csv_to_output(args.csv, out_dir)
 
-    write_cli_args_to_file(parser, args, out_dir)
-    try:
-        paths = run_analysis(
-            args.csv,
-            args,
-            out_dir
-        )
-        print("Wrote charts:\n" + "\n".join(paths))
-    except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
 
 
 
