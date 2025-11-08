@@ -44,7 +44,7 @@ metadata (called marks) to describe those effects.
 
 The current version only supports the analysis of binary flow processes. These are
 flow processes where the marks denote the start or end of an observed presence of a domain element within some system boundary. 
-They are governed by L=λW form of Little's Law.
+They are governed by the L=λW form of Little's Law.
 
 These are simplest kind of flow processes we analyze in the presence calculus, but they cover the vast 
 majority of operational use cases we currently model in software delivery, so we will start there.
