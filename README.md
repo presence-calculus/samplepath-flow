@@ -32,7 +32,7 @@ our posts continuing series on Little's Law and sample path analysis at
 - [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive)
 
 The analyses in these posts  were produced using this toolkit 
-and can be found in the [examples](./examples/polaris_1) directory together with their original source data.
+and can be found in the [examples](./examples/polaris) directory together with their original source data.
 
 Please subscribe to The Polaris Flow Dispatch, if you are interested in this topic. 
 
