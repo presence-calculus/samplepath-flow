@@ -61,6 +61,9 @@ samplepath = "samplepath.cli:main"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+exclude = [".venv*", "dist", "build", ".pytest_cache", ".mypy_cache", "__pycache__"]
+
 # -------------------------
 # Testing & Coverage
 # -------------------------
