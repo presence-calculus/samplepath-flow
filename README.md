@@ -1,18 +1,18 @@
 # The Sample Path Analysis Library and Toolkit
 
-A reference implementation of sample-path–based flow metrics, convergence analysis, and stability diagnostics for flow processes in 
+A reference implementation of sample-path–based flow metrics, convergence analysis, and stability diagnostics for flow processes in
 complex adaptive systems.
 
 [![PyPI](https://img.shields.io/pypi/v/samplepath.svg)](https://pypi.org/project/samplepath/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-online-blue.svg)](https://py.pcalc.org)
 
----
+______________________________________________________________________
 
-# 🔍 Overview
+## 🔍 Overview
 
 **samplepath** is a Python library for the analysis of stability of flow processes
-using the finite-window formulation of **Little’s Law**.  
+using the finite-window formulation of **Little’s Law**.
 
 It provides deterministic, pathwise measurement tools for analyzing long run
 flow process dynamics: arrival/departure equilibrium, process time coherence, and
@@ -21,38 +21,38 @@ process stability along an observed sample path.
 The package implements components of [The Presence Calculus Project](https://docs.pcalc.org): a computational toolkit for modeling
 and measuring flow processes.
 
-
 ## Background
 
-For an overview of the key concepts behind this library and how they can be applied in practice, please see 
-our posts continuing series on Little's Law and sample path analysis at 
+For an overview of the key concepts behind this library and how they can be applied in practice, please see
+our posts continuing series on Little's Law and sample path analysis at
 
-[The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com)
+[The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com):
+
 - [The Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law).
 - [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive)
 
-The analyses in these posts  were produced using this toolkit 
+The analyses in these posts were produced using this toolkit
 and can be found in the [examples](./examples/polaris) directory together with their original source data.
 
-Please subscribe to The Polaris Flow Dispatch, if you are interested in this topic. 
+Please subscribe to The Polaris Flow Dispatch, if you are interested in this topic.
 
 ## Core capabilities
 
 A [flow process](https://www.polaris-flow-dispatch.com/i/172332418/flow-processes) is simply a timeline of events from some underlying domain, where
 events have *effects* that persist beyond the time of the event. These effects are encoded using
-metadata (called marks) to describe those effects. 
+metadata (called marks) to describe those effects.
 
 The current version only supports the analysis of binary flow processes. These are
-flow processes where the marks denote the start or end of an observed presence of a domain element within some system boundary. 
+flow processes where the marks denote the start or end of an observed presence of a domain element within some system boundary.
 They are governed by the L=λW form of Little's Law.
 
-These are simplest kind of flow processes we analyze in the presence calculus, but they cover the vast 
+These are simplest kind of flow processes we analyze in the presence calculus, but they cover the vast
 majority of operational use cases we currently model in software delivery, so we will start there.
 
 ## Data Requirements
 
-The data requirements for this analysis are  minimal: a csv file that represents 
-the observed timeline of a binary flow process: with element id, start and end date columns. 
+The data requirements for this analysis are minimal: a csv file that represents
+the observed timeline of a binary flow process: with element id, start and end date columns.
 
 - The start and end dates may be empty, but for a meaningful analysis, we
   require at least some of these dates be non-empty. Empty end dates denote
@@ -66,77 +66,81 @@ Given this input, the toolkit provides
 A. Core python modules that implement the computations for sample path construction and analysis:
 
 - Time-averaged flow metrics governed by the finite version of Little's Law
-   `N(t), L(T)`,`Λ(T)`, `w(T)`, `λ*(T)`, `W*(T)` 
+  `N(t), L(T)`,`Λ(T)`, `w(T)`, `λ*(T)`, `W*(T)`
 - Performing *equilibrium* and **coherence** calculations (e.g., verifying `L(T) ≈ λ*(T)·W*(T)`)
 - Estimating empirical **limits** with uncertainty and **tail** checks to verify stability (alpha)
 
-Please see [Sample Path Construction](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-construction-for-lλw)
-for background. 
+Please see [Sample Path Construction](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-construction-for-l%CE%BBw)
+for background.
 
 B. Command line tools provide utilities that that wrap these calculations
 
 - Simple workflows that take csv files as input to run sample path analysis with a rich set of parameters and options.
-- Generate publication-ready **charts and panel visualizations** as static png files. 
+- Generate publication-ready **charts and panel visualizations** as static png files.
 - The ability to save different parametrized analyses from a single csv file as named scenarios.
 
-This toolkit provides the computational foundation for analyzing flow dynamics in 
+This toolkit provides the computational foundation for analyzing flow dynamics in
 software delivery, operations, and other knowledge-work systems.
 
 ## 🧠 Key Metrics
 
 Deterministic, sample-path analogues of Little’s Law:
 
-| Quantity | Meaning |
-|-----------|----------|
-| `L(T)` | Average work-in-process over window `T` |
-| `Λ(T)` | Cumulative arrivals per unit time up to `T` |
-| `w(T)` | Average residence time over window `T` |
-| `λ*(T)` | Empirical arrival rate up to `T` |
-| `W*(T)` | Empirical mean sojourn time of items completed by `T` |
+| Quantity | Meaning                                               |
+| -------- | ----------------------------------------------------- |
+| `L(T)`   | Average work-in-process over window `T`               |
+| `Λ(T)`   | Cumulative arrivals per unit time up to `T`           |
+| `w(T)`   | Average residence time over window `T`                |
+| `λ*(T)`  | Empirical arrival rate up to `T`                      |
+| `W*(T)`  | Empirical mean sojourn time of items completed by `T` |
 
 These quantities enable rigorous study of **equilibrium** (arrival/departure rate convergence), **coherence** (residence time/sojourn time convergence), and **stability** (convergence of process measures to limits) even when processes operate far from steady state.
 
----
+______________________________________________________________________
 
-# 🚀 Installation (End Users)
+## 🚀 Installation (End Users)
 
-Pre-requisites Python 3 (3.11 or higher at present).
+### Quick Start with uv (Recommended)
 
-## Quick Start
+**uv** is a fast, modern Python package manager that handles everything - no need to install Python, pip, or pipx separately!
 
-**1. Install Python (≥ 3.11)**  
-- **macOS:**  
+### 1. Install uv
+
+- **macOS / Linux:**
+
   ```bash
-  brew install python@3.11
+  curl -LsSf https://astral.sh/uv/install.sh | sh
   ```
-- **Windows / Linux:**  
-  Download from [python.org/downloads](https://www.python.org/downloads) and follow the installer.
 
+- **Windows:**
 
+  ```bash
+  powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+  ```
 
-**2. Install pipx** *(recommended for CLI tools)*  
+### 2. Install the samplepath CLI globally
+
 ```bash
-pip install --user pipx
-pipx ensurepath
-```
-Then restart your terminal so the new PATH takes effect.
-
-
-
-**3. Install the CLI**
-```bash
-pipx install samplepath
+uv tool install samplepath
 ```
 
+This will install Python automatically if needed and make `samplepath` available globally.
 
+### 3. Verify installation
 
-**4. Verify installation**
 ```bash
 samplepath --help
 ```
 
-If this prints the help message, you’re ready to go.
+If this prints the help message, you're ready to go.
 
+### Alternative: Run without installation
+
+You can also run samplepath directly without installing it globally using `uvx`:
+
+```bash
+uvx samplepath events.csv --help
+```
 
 ## 🧩 Example Usage
 
@@ -162,7 +166,7 @@ Results and charts are saved to the output directory as following
 
 For input `events.csv`, output is organized as:
 
-```
+```bash
 <output-dir>/
 └── events/
     └── <scenario>/                 # e.g., latest
@@ -175,54 +179,69 @@ For input `events.csv`, output is organized as:
         └── misc/                   # ancillary artifacts
 ```
 
+## 🛠 Development Setup (for Contributors)
 
-# 🛠 Development Setup (for Contributors)
-Developers working on **samplepath** use [Poetry](https://python-poetry.org/) for dependency and build management.
+Developers working on **samplepath** use [uv](https://docs.astral.sh/uv/) for dependency and build management - a single tool that replaces pip, poetry, pyenv, virtualenv, and more.
+
+### Prerequisites
+
+Install uv following the [Quick Start](#quick-start-with-uv-recommended) section above.
 
 ### 1. Clone and enter the repository
+
 ```bash
 git clone https://github.com/krishnaku/samplepath.git
 cd samplepath
 ```
 
-### 2. Install development dependencies
+### 2. Sync development dependencies
+
 ```bash
-poetry install
+uv sync --all-extras
 ```
 
-### 3. Activate the virtual environment
+This creates a virtual environment and installs all dependencies (including dev dependencies) based on `uv.lock`.
+
+### 3. Run tests
+
 ```bash
-poetry shell
+uv run pytest
 ```
 
-### 4. Run tests
+### 4. Code quality checks
+
 ```bash
-pytest
+uv run black samplepath/      # Format Python code
+uv run isort samplepath/      # Sort imports
+uv run mypy samplepath/       # Type checking
+uv run mdformat .             # Format markdown files
 ```
 
-### 5. Code quality checks
+### 5. Run the CLI from source
+
+During development, run samplepath directly from the source code:
+
 ```bash
-black samplepath/
-isort samplepath/
-mypy samplepath/
+uv run samplepath examples/polaris/csv/work_tracking.csv --help
 ```
 
 ### 6. Build and publish (maintainers)
+
 To build the distributable wheel and sdist:
 
 ```bash
-poetry build
+uv build
 ```
 
 To upload to PyPI (maintainers only):
 
 ```bash
-poetry publish --build
+uv publish
 ```
 
 ## 📦 Package Layout
 
-```
+```bash
 samplepath/
 ├── cli.py               # Command-line interface
 ├── csv_loader.py        # CSV import utilities
@@ -232,16 +251,16 @@ samplepath/
 └── tests/               # Pytest suite
 ```
 
----
+______________________________________________________________________
 
 ## 📚 Documentation
 
 Further documentation, will be added to this repo. In the meantime, use the
 documentation links provided at the top of this README.
 
----
+______________________________________________________________________
 
 ## 📝 License
 
-Licensed under the **MIT License**.  
+Licensed under the **MIT License**.\
 See `LICENSE` for details.

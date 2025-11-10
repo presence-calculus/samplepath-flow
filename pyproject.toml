@@ -1,13 +1,13 @@
-[tool.poetry]
+[project]
 name = "samplepath"
 version = "0.1.1"
 description = "Sample Path Analysis Library"
-authors = ["Krishna Kumar <kkumar@exathink.com>"]
-license = "MIT"
+authors = [
+    { name = "Krishna Kumar", email = "kkumar@exathink.com" }
+]
+license = { text = "MIT" }
 readme = "README.md"
-homepage = "https://docs.pcalc.org"
-repository = "https://github.com/presence-calculus/samplepath"
-packages = [{ include = "samplepath" }]
+requires-python = ">=3.11"
 keywords = ["presence", "flow", "queueing", "analytics"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -17,39 +17,49 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development :: Libraries"
 ]
+dependencies = [
+    "numpy>=1.26,<3.0",
+    "pandas>=2.2,<3.0",
+    "matplotlib>=3.8,<4.0",
+    "sortedcontainers>=2.4.0,<3.0.0",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.11"
-numpy = ">=1.26,<3.0"
-pandas = { version = ">=2.2,<3.0" }
-matplotlib = { version = ">=3.8,<4.0" }
-sortedcontainers = "^2.4.0"
-
-# Keep only truly optional deps here. If pandas/matplotlib are required, leave them above and
-# remove them from extras. If optional, move them here and delete from dependencies.
-[tool.poetry.extras]
+[project.optional-dependencies]
 polars = ["polars"]
+dev = [
+    # Testing
+    "pytest",
+    "pytest-cov",
 
-[tool.poetry.group.dev.dependencies]
-notebook = "*"
-ipykernel = "*"
-pytest = "*"
-pytest-cov = "*"
-black = "*"
-isort = "*"
-mypy = "*"
-pre-commit = "*"
-pdoc = "^15.0.3"
+    # Code quality
+    "black",
+    "isort",
+    "mypy",
+    "pre-commit",
+
+    # Documentation
+    "pdoc>=15.0.3,<16.0.0",
+
+    # Jupyter/Notebooks
+    "notebook",
+    "ipykernel",
+
+    # Markdown tools
+    "mdformat",
+    "mdformat-gfm",
+    "mdformat-black",
+]
+
+[project.urls]
+Homepage = "https://docs.pcalc.org"
+Repository = "https://github.com/presence-calculus/samplepath"
+
+[project.scripts]
+samplepath = "samplepath.cli:main"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-# -----------
-# Scripts
-# ------------
-[tool.poetry.scripts]
-samplepath = "samplepath.cli:main"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 # -------------------------
 # Testing & Coverage
