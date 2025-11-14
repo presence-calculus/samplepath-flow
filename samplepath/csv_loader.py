@@ -20,10 +20,12 @@ class CSVLoader:
     """
     Robust CSV -> DataFrame loader for event/sample-path data.
 
-    CSV Contract:
+    CSV Columns:
       - 'id' - string representing the id of an item - need not be unique across all rows (ie - same id can appear multiple times)
       - 'start_ts' and 'end_ts' - strings in a format that can be parsed with <a href=https://dateutil.readthedocs.io/en/stable/parser.html>dateutil.parser.parse</a>
+         Default column names can be overridden by passing start_column/end_column on the command line.
       - Optional 'class' attribute - string
+
 
     DataFrame Contract:
       - 'start_ts' and 'end_ts' are pandas datetimes (tz-normalized per config)
@@ -44,10 +46,13 @@ class CSVLoader:
       - Optional empty-frame and all-NaT checks
     """
 
-    # --- configuration ---
-    required_columns: Tuple[str, str, str] = ("id", "start_ts", "end_ts")
+    # --- csv input columns configuration ---
+    start_column: str = 'start_ts'
+    end_column: str = 'end_ts'
     class_column: str = "class"
-    parse_dates: Tuple[str, str] = ("start_ts", "end_ts")
+    required_columns: Tuple[str] = ('id', 'start_ts', 'end_ts')
+    parse_dates: Tuple[str] = ('start_ts', 'end_ts')
+
 
     # csv delimiter
     delimiter: Optional[str] = None
@@ -211,6 +216,10 @@ class CSVLoader:
             sep = ","
         # --- read CSV ---
         df = pd.read_csv(path, sep=sep)
+        df.columns = df.columns.str.strip()
+
+        # Map user-provided column names → canonical ones
+        df = self.map_to_canonical_start_end_date_columns(df)
 
         # --- column presence checks ---
         df.columns = df.columns.str.strip()
@@ -303,6 +312,24 @@ class CSVLoader:
 
         return df
 
+    def map_to_canonical_start_end_date_columns(self, df):
+        rename_map = {}
+        if self.start_column != "start_ts":
+            if "start_ts" in df.columns:
+                rename_map["start_ts"] = "_start_ts"
+
+            rename_map[self.start_column] = "start_ts"
+
+        if self.end_column != "end_ts":
+            if "end_ts" in df.columns:
+                rename_map["end_ts"] = "_end_ts"
+
+            rename_map[self.end_column] = "end_ts"
+        if rename_map:
+            df = df.rename(columns=rename_map)
+        return df
+
+
 def csv_to_dataframe(
     csv_path: str,
     normalize_tz: bool = True,
@@ -318,6 +345,8 @@ def csv_to_dataframe(
         date_format=args.date_format,
         dayfirst=args.dayfirst,
         delimiter=args.delimiter,
+        start_column=args.start_column,
+        end_column=args.end_column
     )
     df = loader.load(csv_path)
     df = df.sort_values("start_ts").reset_index(drop=True)

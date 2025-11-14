@@ -39,6 +39,27 @@ def test_explicit_delimiter_overrides_autodetect(tmp_path):
     df = CSVLoader(autodetect_delimiter=False, delimiter="|").load(str(path))
     assert list(df.columns[:3]) == ["id", "start_ts", "end_ts"]
 
+def test_extra_whitespace_in_columns_stripped(tmp_path):
+    csv = "id| start_ts|end_ts \nA|2024-01-01 00:00|2024-01-01 01:00\n"
+    path = _write(tmp_path, "events_pipe.csv", csv)
+    df = CSVLoader(autodetect_delimiter=False, delimiter="|").load(str(path))
+    assert list(df.columns[:3]) == ["id", "start_ts", "end_ts"]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Explicit start_column/end_column overrides
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+def test_start_end_column_overrides(tmp_path):
+    csv = "id,arrival_ts,departure_ts\nA,2024-01-01 00:00,2024-01-01 01:00\n"
+    path = _write(tmp_path, "events_pipe.csv", csv)
+    df = CSVLoader(autodetect_delimiter=False, start_column="arrival_ts", end_column="departure_ts").load(str(path))
+    assert list(df.columns[:3]) == ["id", "start_ts", "end_ts"]
+
+def test_overrides_rename_existing_canonicals(tmp_path):
+    csv = "id,arrival_ts,start_ts,departure_ts,end_ts\nA,2024-01-01 00:00,2024-01-01 01:00,2024-01-01 00:00,2024-01-01 01:00\n"
+    path = _write(tmp_path, "events_pipe.csv", csv)
+    df = CSVLoader(autodetect_delimiter=False, start_column="arrival_ts", end_column="departure_ts").load(str(path))
+    assert list(df.columns[:5]) == ["id", "start_ts", "_start_ts", "end_ts", "_end_ts"]
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Required columns enforcement

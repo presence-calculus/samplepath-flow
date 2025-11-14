@@ -20,10 +20,17 @@ def validate_args(args):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Sample Path Analysis with Little's Law")
+    parser = argparse.ArgumentParser(
+        description="Finite-window Little’s Law charts from intervals CSV",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     # -- CSV Parsing --- #
     parser.add_argument("csv", type=str,
                         help="Path to CSV (id,start_ts,end_ts[,class])")
+    parser.add_argument("--start_column", type=str, help="Name of csv column representing start time",
+                        default="start_ts")
+    parser.add_argument("--end_column", type=str, help="Name of csv column representing end time", default="end_ts")
+
     parser.add_argument("--date-format", type=str, default=None,
         help="Optional explicit datetime format string for parsing CSV timestamps (e.g. '%%d/%%m/%%Y %%H:%%M').")
     parser.add_argument("--delimiter", type=str, default=None,

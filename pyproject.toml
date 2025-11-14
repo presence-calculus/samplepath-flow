@@ -26,6 +26,8 @@ dependencies = [
 
 [project.optional-dependencies]
 polars = ["polars"]
+
+[dependency-groups]
 dev = [
     # Testing
     "pytest",
