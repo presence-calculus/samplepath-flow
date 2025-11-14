@@ -202,6 +202,7 @@ For input `events.csv`, output is organized as:
         ├── advanced/               # optional deep-dive charts
         └── misc/                   # ancillary artifacts
 ```
+A complete reference to the charts can be found [here](./docs/chart_reference.md)
 
 ## 🛠 Development Setup (for Contributors)
 
