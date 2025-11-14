@@ -166,6 +166,8 @@ pipx upgrade samplepath
 
 # 🧩 Usage
 
+The complete cli documentation is [here](./docs/cli.md). Here are a few examples.
+
 ```bash
 # Analyze completed items, save analysis to the output-dir under the scenario name shipped. Clean existing output directories
 samplepath events.csv --output-dir spath-analysis --scenario shipped --completed --clean
