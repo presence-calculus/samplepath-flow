@@ -4,7 +4,10 @@ This reference describes every chart produced by the `samplepath` CLI, grouped
 by chart type. Each section includes cross-links back to the relevant CLI option
 groups.
 
+The examples charts drawn from the Polaris example scenario [complete-stories-outliers-removed](../examples/polaris/flow-of-work/complete-stories-outliers-removed) 
+This scenario is discussed in more detail in our post [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-analysis-a-worked-example)
 ## Scenario root (top-level under `<scenario>/`)
+
 
 | File | What it shows | What it means                                                                                                                                         |
 | --- | --- |-------------------------------------------------------------------------------------------------------------------------------------------------------|
