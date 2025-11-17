@@ -4,7 +4,13 @@ This reference describes every chart produced by the `samplepath` CLI, grouped
 by chart type. Each section includes cross-links back to the relevant CLI option
 groups.
 
-## Scenario root (top-level under `<scenario>/`)
+The example charts in each section below are drawn from the Polaris scenario
+[completed-stories-outliers-removed](../examples/polaris/flow-of-work/complete-stories-outliers-removed).
+This example is discussed in detail in our post [Little's Law in a complex adaptive system](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-analysis-a-worked-example)
+
+## Overview of charts and their layout
+
+### Scenario root (top-level under `<scenario>/`)
 
 | File | What it shows | What it means                                                                                                                                         |
 | --- | --- |-------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -57,7 +63,10 @@ groups.
 
 ---
 
-# Core Charts
+# Chart details
+Note that all calculations are done in *continuous time* and all charts report time accumulations in hours. 
+
+## Core
 
 Written under:
 
@@ -66,40 +75,127 @@ Written under:
 ```
 
 ## `sample_path_N.png`
-Instantaneous WIP `N(t)` as a step chart.  
-Shows congestion, bursts, and idle periods.
+Instantaneous WIP `N(t)`. This shows the number of items observed
+at time t. 
+
+Since we measure in continuous time, this chart
+is a *step chart*. 
+- The line will go up with each arrival and go down with each departure. 
+- The line will stay steady if departures and arrivals balance each other at a given instant. 
+- In between arrivals and departures, the line will stay flat. 
+
+This is a real time chart that reveals current congestion, bursts, and idle periods.
+
+![Sample Path](../examples/polaris/flow-of-work/complete-stories-outliers-removed/core/sample_path_N.png)
+
+## The area under the sample path
+A key quantity in sample path analysis is the *area under the sample path*.
+This is calculated as the definite integral of the sample path curve over [0,T] 
+
+```
+H(T) = ∫₀ᵀ N(t) dt
+```
+
+Since the area is a product of the number of times over time, the units of H(T) are in item-time.
+
+H(T) is itself not very interesting to chart since this is simply a monotonically increasing function of time. 
+
+Rather, the parameters that drive flow-process dynamics are the time and item averages
+of H(T): L(T) and w(T).  These continuous functions of time are 
+the key quantities in the _finite version of Little’s Law_. 
+
+### Note: This is not statistics!
+
+Sample path analysis is *not* statistical analysis. It measures continuous real-valued ,
+characteristic of a flow process based on observable behavior. The tools are those of real
+analysis: integrals, derivatives, limits, convergence—not statistical concepts
+like averages, variances, or percentiles of assumed distributions.
+
+This matters especially in stochastic process with
+state, history and feedback mechanisms at play. This is common for flow processes
+in complex adaptive systems.
+
+Here, statistical distributions are non-stationary and their moments shift continuously. In such
+domains, sample path analysis and Little’s Law shine because they rely on
+physical conservation principles that constrain *how these averages can evolve
+over time*, regardless of the _nature of the underlying process_. 
+
+A side effect of sample path analysis is that we can
+observe a process as a black box and rigorously apply flow analysis even when a process
+is not stable. In fact, we can determine how close or far away the process is to stability,
+and thus determine whether standard statistical or probabilistic inference techniques can be applied. 
+
+For flow processes in complex adaptive systems, particularly ones with humans in the loop, the answer is often no—but
+Little’s Law _still_ allows rigorous reasoning about the dynamics of the processes anyway.
 
 ## `time_average_N_L.png`
 Time-average WIP:
 
+This is the time average of the area under the sample path. May also be viewed as the rate at which the area H(T) grows. 
+Its units are in items. 
+
 ```
-L(T) = (1/T) ∫ N(t) dt
+L(T) = (1/T) H(T)
 ```
 
-Reveals whether average WIP stabilizes or drifts.
+Reveals whether average WIP diverges or converges. This is the key top level indicator of process stability. A flat line here indicates
+a stable process. 
+
+Please note once again that this is _not a statistical average_. 
+
+![Time Average of WIP](../examples/polaris/flow-of-work/complete-stories-outliers-removed/core/time_average_N_L.png)
 
 ## `cumulative_arrival_rate_Lambda.png`
-Window-average arrival rate:
+ Arrival rate of items that have arrived up to T (may include items that started before the window):
 
 ```
 Λ(T) = A(T) / (T − t0)
 ```
+If WIP was zero at the beginning of the obervation window, then this is the same as the arrival rate, otherwise
+this over-counts the arrival rate at the start, but as we observe the process for longer periods, those initial
+end-effects get averaged out. 
 
-Supports warmup removal and percentile clipping.
+![Cumulative Arrival Rate](../examples/polaris/flow-of-work/complete-stories-outliers-removed/core/time_average_N_L.png)
+
+
 
 ## `average_residence_time_w.png`
-Finite-window residence time:
+Average time items are observed as spending in the observation window up to time T (clips the time that is spent outside the window and thus
+not observed). 
+
 
 ```
-w(T) = (1/T) ∫ R(t) dt
+w(T) = (1/A(T)) H(T)
 ```
 
-Tracks how “time in system” evolves over the sample path.
+Tracks how “observed time in system” evolves over the sample path.
+
+Please see our posts [What is Residence Time](https://www.polaris-flow-dispatch.com/p/what-is-residence-time)
+and [How long does it take](https://www.polaris-flow-dispatch.com/p/how-long-does-it-take) for an explanation
+of what this metric means. 
+
+Understanding the difference and relationship between residence time and familiar
+metrics like Lead Time, Cycle Time and Work Item Age is crucial for understanding why sample path analysis works
+and these posts explain this. 
+
+![Average Residence Time](../examples/polaris/flow-of-work/complete-stories-outliers-removed/core/average_residence_time_w.png)
+
 
 ## `littles_law_invariant.png`
 Scatter of `L(T)` vs `Λ(T)·w(T)` with `y = x`.  
 Direct Little’s Law invariance check.
 
+This plot visualizes the [finite version of Little's Law](https://www.polaris-flow-dispatch.com/i/172332418/the-finite-version-of-littles-law) at work. 
+
+It states that for all T, `L(T)=Λ(T)·w(T)`.
+
+We verify this by showing that when we plot `L(T)` vs `Λ(T)·w(T)` on a scatter plot, 
+all the points will lie on the with `y = x`.  
+
+Notice how points cluster around certain values of L(T). These are significant operating
+modes for the process as it moves towards a stable states. 
+
+![Little's Law Invariant](../examples/polaris/flow-of-work/complete-stories-outliers-removed/core/littles_law_invariant.png)
 ---
 
 # Scenario-Level Summary
