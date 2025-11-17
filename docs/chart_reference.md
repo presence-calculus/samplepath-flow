@@ -96,7 +96,7 @@ This is calculated as the definite integral of the sample path curve over [0,T]
 H(T) = ∫₀ᵀ N(t) dt
 ```
 
-Since the area is a product of the number of times over time, the units of H(T) are in item-time.
+Since the area is a product of the number of items present over time, the units of H(T) are in item-time.
 
 H(T) is itself not very interesting to chart since this is simply a monotonically increasing function of time. 
 
