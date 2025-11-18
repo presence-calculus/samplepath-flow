@@ -9,33 +9,36 @@ groups.
 ### Note: This is not statistics!
 
 Sample path analysis is *not* statistical analysis. It takes continuous real-valued
-measurements over a flow process based on observable behavior. These are functions that we reason about using the
+measurements over a flow process based on observable behavior. We reason about the behavior of functions ausing the
 tools of real
-analysis: integrals, derivatives, limits, convergence—not statistical concepts
-like averages, variances, or percentiles of assumed distributions.
+analysis: integrals, derivatives, limits, convergence—rather than the behavior of process samples or distributions
+using measures like averages, variances, or percentiles.
 
 This matters especially in stochastic process with
 state, history and feedback mechanisms at play. This is common for flow processes
-in complex adaptive systems. Here, statistical distributions are non-stationary and their moments shift continuously. In such
-domains, sample path analysis and Little’s Law shine because they rely on
-physical conservation principles that constrain *how these averages can evolve
+in complex adaptive systems. Here, statistical distributions are non-stationary and their moments shift continuously and may not even
+be well-defined in many cases. In such
+domains, sample path analysis and Little’s Law shine because it relies on
+physical conservation principles that constrain *how these non-stationary averages can evolve
 over time*, regardless of the _nature of the underlying process_. 
 
 A side effect of sample path analysis is that we can
 observe a process as a black box and rigorously apply flow analysis even when a process
-is not stable. In fact, we can determine how close or far away the process is to stability,
+is _not_ stable or at equilibrium. 
+
+In fact, we can determine how close or far away the process is to stability,
 and thus determine whether standard statistical or probabilistic inference techniques can be applied. 
 
 For flow processes in complex adaptive systems, particularly ones with humans in the loop, this
-allows us to use Little’s Law for rigorous reasoning about the dynamics of the processes starting from 
-_any_ arbitrary observation point. 
-
-Note: All calculations are done in *continuous time* and all charts report time accumulations in hours.
-
+allows us to use Little’s Law for rigorous reasoning about the internal dynamics of processes and their evolution starting from 
+_any_ arbitrary point in time. 
 
 The example charts in each section below are drawn from the Polaris scenario
 [completed-stories-outliers-removed](../examples/polaris/flow-of-work/complete-stories-outliers-removed).
 This example is discussed in detail in our post [Little's Law in a complex adaptive system](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-analysis-a-worked-example)
+
+Note: All calculations are done in *continuous time* and all charts report time accumulations in hours.
+
 
 ## Core Flow Metrics - Finite Version of Little's Law
 
@@ -60,8 +63,8 @@ Their detail descriptions follow.
 | --- | --- |--------------------------------------------------------------------------------------------------------------------------------|
 | `core/sample_path_N.png` | Step chart of `N(t)` (count of elements present in the boundary) vs time. | Raw sample path of WIP/presence: queues, surges, and droughts show up directly.                                                |
 | `core/time_average_N_L.png` | Line chart of `L(T)` = time-average of `N(t)` over `[0, T]`. | Tracks how average WIP over the observation window converges (or doesn’t). This is the “L” in Little’s Law, measured pathwise. |
-| `core/cumulative_arrival_rate_Lambda.png` | Line chart of `Λ(T)` (cumulative arrival rate `A(T)/(T−t₀)`), with optional percentile clipping and warmup exclusion. | Empirical demand rate over time, with tools to ignore early transients and outliers.                                           |
-| `core/average_residence_time_w.png` | Line chart of `w(T)` (average residence time over the window, in hours). | Shows how the time items spend in the boundary evolves; long tails and slow drainage show up as increasing `w(T)`.             |
+| `core/cumulative_arrival_rate_Lambda.png` | Line chart of `Λ(T)` (cumulative arrival rate `A(T)/(T−t₀)`), with optional percentile clipping and warmup exclusion. | Empirical arrival rate over time, with tools to ignore early transients and outliers.                                          |
+| `core/average_residence_time_w.png` | Line chart of `w(T)` (average residence time over the window, in hours). | Shows how the time items spend in the boundary evolves; long/fat tails and slow drainage show up as increasing `w(T)`.         |
 | `core/littles_law_invariant.png` | Scatter of `L(T)` (x-axis) vs `Λ(T)·w(T)` (y-axis) with `y=x` reference line, equal aspect ratio. | Pure Little’s Law invariant check: all finite points should lie near `y=x` if the metric calculations are consistent.          |
 
 
@@ -170,14 +173,7 @@ Notice how points cluster around certain values of L(T). These are significant o
 modes for the process as it moves towards a stable states.
 
 ### `sample_path_flow_metrics.png`
-Four-panel summary:
-
-1. `N(t)`
-2. `L(T)`
-3. `Λ(T)`
-4. `w(T)`
-
-The four charts are summarized at the top level in one single chart. 
+Four-panel summary: The four charts are summarized at the top level in one single chart. 
 
 ![Sample Path Flow Metrics](../examples/polaris/flow-of-work/complete-stories-outliers-removed/sample_path_flow_metrics.png)
 
@@ -185,16 +181,20 @@ In this chart the main thing to pay attention to are the _relationships_
 between the _changes_ in each of these component charts over time. 
 
 At any point in time, the relationship  `L(T)=Λ(T)·w(T)` holds, 
-so if `L(T)` changes Little's Law invariant states that it must be one of the following
+so if `L(T)` changes Little's Law invariant states that it must be because either `Λ(T)` or `w(T)` or both changed. 
+
+These are the possibilities. 
 
 - Arrival rate driven: more or fewer things are arriving.
-- Residence time driven: things are taking longer to finish. 
-- A combination of the two: since L(T) is the product of the two, even small changes in each one simultaneously can lead to apparently large changes in L(T)
+- Residence time driven: things are taking longer or shorter to finish. 
+- A combination of the two: since L(T) is the product of the two, if they move in the same direction they lead to apparently large changes in L(T)
 - Conversely, when Λ(T) and w(T) move in opposite directions, they cancel each other and L(T) appears flat. This happens often when there is a feedback loop at play in the process. 
 
-then it must be because either `Λ(T)` or `w(T)` or both changed. 
-This allows us to monitor changes in L(T) and then immediately investigate
-the cause of that change. 
+
+These causal relationships allows us to monitor changes in L(T) and then immediately investigate
+the cause of that change. See our post [The Causal Arrow in Little's Law](https://www.polaris-flow-dispatch.com/i/171471652/the-causal-mechanism) for more discussion on what this means. 
+
+
 
 All these different types of dynamics can be at play at different points in the evolution of the process. This chart is the place
 where all those long run dynamics will show most directly and clearly. 
