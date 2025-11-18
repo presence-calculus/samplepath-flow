@@ -38,7 +38,7 @@ our posts continuing series on Little's Law and sample path analysis at
 The analyses in these posts were produced using this toolkit
 and can be found in the [examples](./examples/polaris) directory together with their original source data.
 
-Please subscribe to [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com, if you are interested in staying
+Please subscribe to [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com), if you are interested in staying
 abreast of developments and applications of these concepts. 
 
 ## Core capabilities
