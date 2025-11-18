@@ -118,7 +118,7 @@ Please note once again that this is _not a statistical average_.
  `Λ(T)` is the arrival rate of items that have arrived up to T (may include items that started before the window):
 
 ```
-Λ(T) = A(T) / (T − t0)
+Λ(T) = A(T) / T
 ```
 
 It's units are items/time
@@ -137,7 +137,7 @@ not observed).
 
 
 ```
-w(T) = (1/A(T)) H(T)
+w(T) =  H(T)/A(T)
 ```
 
 Tracks how “observed time in system” evolves over the sample path. Its units are time/items
@@ -167,17 +167,7 @@ all the points will lie on the with `y = x`.
 ![Little's Law Invariant](../examples/polaris/flow-of-work/complete-stories-outliers-removed/core/littles_law_invariant.png)
 
 Notice how points cluster around certain values of L(T). These are significant operating
-modes for the process as it moves towards a stable states. 
-
----
-
-## Scenario-Level Summary
-
-Written directly under:
-
-```
-<scenario>/
-```
+modes for the process as it moves towards a stable states.
 
 ### `sample_path_flow_metrics.png`
 Four-panel summary:
@@ -192,7 +182,7 @@ The four charts are summarized at the top level in one single chart.
 ![Sample Path Flow Metrics](../examples/polaris/flow-of-work/complete-stories-outliers-removed/sample_path_flow_metrics.png)
 
 In this chart the main thing to pay attention to are the _relationships_
-between the changes in each of these component charts over time. 
+between the _changes_ in each of these component charts over time. 
 
 At any point in time, the relationship  `L(T)=Λ(T)·w(T)` holds, 
 so if `L(T)` changes Little's Law invariant states that it must be one of the following
