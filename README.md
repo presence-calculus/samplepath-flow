@@ -34,7 +34,12 @@ our posts continuing series on Little's Law and sample path analysis at
 The analyses in these posts were produced using this toolkit
 and can be found in the [examples](./examples/polaris) directory together with their original source data.
 
-Please subscribe to The Polaris Flow Dispatch, if you are interested in this topic.
+The formal theory behind the concepts we implement in this toolkit can be found
+in the reference textbook [Sample Path Analysis of Queueing Systems](https://www.researchgate.net/publication/303785171_Sample-Path_Analysis_of_Queueing_Systems)
+by Muhammed El-Taha and Shaler Stidham (a downloadable PDF is available at the link).
+
+Please subscribe to [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com, if you are interested in staying
+abreast of developments and applications of these concepts. 
 
 ## Core capabilities
 
@@ -50,6 +55,8 @@ These are simplest kind of flow processes we analyze in the presence calculus, b
 majority of operational use cases we currently model in software delivery, so we will start there.
 
 ## Data Requirements
+
+###Please Note: [sample path analysis is not a statistical method](./docs/not_statistics.md).
 
 The data requirements for this analysis are minimal: a csv file that represents
 the observed timeline of a binary flow process: with element id, start and end date columns.
