@@ -54,7 +54,7 @@ stream management, developer platforms, lean continuous process improvement etc.
 ## Background
 
 For an overview of the key concepts behind this library and how they can be applied in practice, please see
-our posts continuing series on Little's Law and sample path analysis at
+our continuing series on Little's Law and sample path analysis at
 
 [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com):
 
@@ -67,7 +67,7 @@ and can be found in the [examples](./examples/polaris) directory together with t
 Please subscribe to [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com), if you are interested in staying
 abreast of developments and applications of these concepts. 
 
-## Core capabilities
+## Core concepts
 
 A [flow process](https://www.polaris-flow-dispatch.com/i/172332418/flow-processes) is simply a timeline of events from some underlying domain, where
 events have *effects* that persist beyond the time of the event. These effects are encoded using
@@ -141,7 +141,7 @@ These quantities enable rigorous study of **equilibrium** (arrival/departure rat
 
 ## Chart Reference 
 
-For a detailed reference of the charts and visualizations produced by sample path
+For a detailed reference of the computations, charts and visualizations produced by sample path
 analysis and what they mean please see the [Chart Reference](docs/src/chart_reference.md).
 
 ______________________________________________________________________
