@@ -35,7 +35,7 @@ often dont exist, and this allows us to apply these powerful techniques
 rigorously in a vastly larger set of domains.
 
 Our focus is operations management in software development, but the techniques
-here are much more general nor are they new. The formal theory has been worked out thoroughly by researchers in stochastic process theory
+here are much more general, and they are not new. The formal theory has been worked out thoroughly by researchers in stochastic process theory
 and have been stable for over 30 years. They are just not familiar in the
 software industry.
 
