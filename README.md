@@ -30,12 +30,11 @@ for more details.
 
 As a result, this technique allows us to extend many results from stochastic
 process theory to processes operating in complex adaptive systems, where stable
-statistical distributions often don't exist. This allows us to apply these
-powerful techniques rigorously in a vastly larger set of domains. Our focus is
+statistical distributions often don't exist. Our focus is
 operations management in software development, but the techniques here are much
 more general.
 
-They are also not new. The formal theory has been worked out thoroughly by researchers in stochastic process theory
+The ideas are also not new. The formal theory has been worked out thoroughly by researchers in stochastic process theory
 and has been stable for over 30 years. They are just not familiar in the
 software industry. The canonical reference is the
 textbook [Sample Path Analysis of Queueing Systems](https://www.researchgate.net/publication/303785171_Sample-Path_Analysis_of_Queueing_Systems)
@@ -51,15 +50,16 @@ stream management, developer experience and platforms, and lean continuous proce
 
 ## Background
 
-For an accessible overview of the key concepts behind this library and how they can be applied in practice, please see
-our continuing series on Little's Law and sample path analysis at [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com):
+Please see
+our continuing series on Little's Law and sample path analysis at [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com) for
+accessible overviews of the theory.
 
 In particular,
 
 - [The Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law).
 - [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive)
 
-cover most of the theory needed to work with this library.
+cover most of the theory needed to work with this library at a high level.
 
 The example analyses in these posts were produced using this toolkit
 and can be found in the [examples](./examples/polaris) directory together with their original source data.
@@ -113,14 +113,15 @@ A. Core Python modules that implement the computations for sample path construct
 - Performing *equilibrium* and **coherence** calculations (e.g., verifying `L(T) ≈ λ*(T)·W*(T)`)
 - Estimating empirical **limits** with uncertainty and **tail** checks to verify stability (alpha)
 
-Please see [Sample Path Construction](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-construction-for-l%CE%BBw)
-for background.
 
 B. Command line tools provide utilities that wrap these calculations
 
 - Simple workflows that take CSV files as input to run sample path analysis with a rich set of parameters and options.
 - Generate publication-ready **charts and panel visualizations** as static png files.
 - The ability to save different parametrized analyses from a single CSV file as named scenarios.
+
+Please see [Sample Path Construction](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-construction-for-l%CE%BBw)
+for background.
 
 ## Key Metrics
 
