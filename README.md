@@ -12,118 +12,120 @@ ______________________________________________________________________
 ## Overview
 
 **samplepath** is a Python library for analyzing _macro dynamics_ of flow
-processes in complex adaptive systems: arrival/departure equilibrium, process
-time coherence, and process stability over long timescales.
+processes in complex adaptive systems. It provides 
+deterministic tools to precisely describe the _long run_ behavior of stochastic flow
+processes ---  arrival/departure equilibrium, process
+time coherence, and process stability --- using the finite-window formulation of **Little’s Law**.
 
-It provides a set of deterministic, pathwise measurement tools to characterize
-behavior of flow processes using using the finite-window formulation of **Little’s Law**.
-
-The focus of the analysis is a single 
-_sample path:_
-a continuous real-valued function that describes a particular process behavior
+The focus of the analysis is a single
+_sample path_ of a flow process:
+a _continuous_ real-valued function that describes a particular process behavior
 when observed over a finite, but long period of time.
 
-A key aspect of this technique is that it is _distribution free_. It does not
-require well defined statistical or probability distributions to reason about a
-flow process. Please
+A key aspect of this
+technique is that it is _distribution-free_. It does not require well-defined
+statistical or probability distributions to reason about a flow process. Please
 see [sample path analysis is not a statistical method](docs/src/not_statistics.md)
 for more details.
 
-This allows us to extend results from queueing theory etc. to processes
-operating in complex adaptive systems, where stable statistical distributions
-often dont exist, and this allows us to apply these powerful techniques
-rigorously in a vastly larger set of domains.
+As a result, this technique allows us to extend many results from stochastic process
+theory to processes operating in complex adaptive systems, where stable
+statistical distributions often don't exist.  
 
+This allows us to apply these
+powerful techniques rigorously in a vastly larger set of domains.
 Our focus is operations management in software development, but the techniques
-here are much more general, and they are not new. The formal theory has been worked out thoroughly by researchers in stochastic process theory
-and have been stable for over 30 years. They are just not familiar in the
-software industry.
+here are much more general. 
 
-The canonical reference is the
+They are also not new. The formal theory has been worked out thoroughly by researchers in stochastic process theory
+and has been stable for over 30 years. They are just not familiar in the
+software industry. The canonical reference is the
 textbook [Sample Path Analysis of Queueing Systems](https://www.researchgate.net/publication/303785171_Sample-Path_Analysis_of_Queueing_Systems)
 by Muhammed El-Taha and Shaler Stidham (a downloadable PDF is available at the
 link).
 
 This package is a part
 of [The Presence Calculus Project](https://docs.pcalc.org): an open source
-computational toolkit that is intended to make these methods and concepts more
+computational toolkit that is intended to make sample path methods and concepts more
 accessible to practitioners working on operations management problems in the software
 industry including engineering/product/sales/marketing operations and related disciplines: value
-stream management, developer platforms, lean continuous process improvement etc.
+stream management, developer experience and platforms, and lean continuous process improvement.
 
 ## Background
 
-For an overview of the key concepts behind this library and how they can be applied in practice, please see
-our continuing series on Little's Law and sample path analysis at
+For an accessible overview of the key concepts behind this library and how they can be applied in practice, please see
+our continuing series on Little's Law and sample path analysis at [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com):
 
-[The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com):
+In particular, 
 
 - [The Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law).
 - [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive)
 
-The analyses in these posts were produced using this toolkit
+cover most of the theory needed to work with this library. 
+
+The example analyses in these posts were produced using this toolkit
 and can be found in the [examples](./examples/polaris) directory together with their original source data.
 
-Please subscribe to [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com), if you are interested in staying
+Please subscribe to [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com) if you are interested in staying
 abreast of developments and applications of these concepts. 
 
 ## Core concepts
 
 A [flow process](https://www.polaris-flow-dispatch.com/i/172332418/flow-processes) is simply a timeline of events from some underlying domain, where
 events have *effects* that persist beyond the time of the event. These effects are encoded using
-metadata (called marks) to describe those effects. Typically these are extracted from transaction logs
-of digital operations tools. 
+metadata (called marks) to describe those effects. 
+
 
 The current version of the library only supports the analysis of _binary flow processes_. These are
 flow processes where the marks denote the start or end of an observed presence of a domain element within some system boundary.
 
 All queueing processes fall into this category, as do a much larger class of general input-output processes.
-These are simplest kind of flow processes we analyze in the presence calculus, but they cover the vast
+These are the simplest kind of flow processes we analyze in the presence calculus, but they cover the vast
 majority of operational use cases we currently model in software delivery, so we will start there.
 They are governed by the L=λW form of Little's Law.
 
-On our roadmap we also plan to extend this library to support the analysis of 
-general flow processes which are governed by the H=λG form of Little's Law.
-
-This will allow us to directly model the economic impacts of flow processes. 
+On our roadmap we also plan to extend this library to support the analysis of
+general flow processes, which are governed by the H=λG form of Little's Law. This
+will allow us to directly model the economic impacts of flow processes.
 
 We highly recommend reading [The Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law) for background on these concepts. 
 
-
 ## Data Requirements
 
-
-
-The data requirements for this analysis are minimal: a csv file that represents
-the observed timeline of a binary flow process: with element id, start and end date columns.
+Typically data for analyzing a flow process are extracted from transaction logs
+of digital operations management tools. The data requirements for the analysis
+of a _single flow process_ are minimal: a CSV file that represents the observed
+timeline of a binary flow process with element ID, start, and end date columns.
 
 - The start and end dates may be empty, but for a meaningful analysis, we
   require at least some of these dates be non-empty. Empty end dates denote
   elements that have started but not ended. Empty start dates denote items whose
   start date is unknown. Both are considered elements currently present in the
   boundary.
-- The system boundary is optional (the name of csv file becomes the default name of the boundary)
+- The system boundary is optional (the name of the CSV file becomes the default name
+  of the boundary). Boundaries become useful when we start to model the dynamics
+  of interconnected flow processes. This is beyond the scope of this library.
 
-Given this input, the toolkit provides
+Given this input, this library implements:
 
-A. Core python modules that implement the computations for sample path construction and analysis:
+A. Core Python modules that implement the computations for sample path construction and analysis:
 
 - Time-averaged flow metrics governed by the finite version of Little's Law
-  `N(t), L(T)`,`Λ(T)`, `w(T)`, `λ*(T)`, `W*(T)`
+  `N(t)`, `L(T)`, `Λ(T)`, `w(T)`, `λ*(T)`, `W*(T)`
 - Performing *equilibrium* and **coherence** calculations (e.g., verifying `L(T) ≈ λ*(T)·W*(T)`)
 - Estimating empirical **limits** with uncertainty and **tail** checks to verify stability (alpha)
 
 Please see [Sample Path Construction](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-construction-for-l%CE%BBw)
 for background.
 
-B. Command line tools provide utilities that that wrap these calculations
+B. Command line tools provide utilities that wrap these calculations
 
-- Simple workflows that take csv files as input to run sample path analysis with a rich set of parameters and options.
+- Simple workflows that take CSV files as input to run sample path analysis with a rich set of parameters and options.
 - Generate publication-ready **charts and panel visualizations** as static png files.
-- The ability to save different parametrized analyses from a single csv file as named scenarios.
+- The ability to save different parametrized analyses from a single CSV file as named scenarios.
 
-This toolkit provides the computational foundation for analyzing flow dynamics in
-software delivery, operations, and other knowledge-work systems.
+This library provides the computational foundation for analyzing flow dynamics for
+a _single flow process_ in software delivery, operations, and other knowledge-work systems.
 
 ## Key Metrics
 
@@ -139,10 +141,12 @@ Deterministic, sample-path analogues of Little’s Law:
 
 These quantities enable rigorous study of **equilibrium** (arrival/departure rate convergence), **coherence** (residence time/sojourn time convergence), and **stability** (convergence of process measures to limits) even when processes operate far from steady state.
 
+Please see [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive) for more details. 
+
 ## Chart Reference 
 
 For a detailed reference of the computations, charts and visualizations produced by sample path
-analysis and what they mean please see the [Chart Reference](docs/src/chart_reference.md).
+analysis and what they mean, please see the [Chart Reference](docs/src/chart_reference.md).
 
 ______________________________________________________________________
 
