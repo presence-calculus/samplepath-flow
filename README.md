@@ -1,4 +1,4 @@
-# The Sample Path Analysis Library and Toolkit
+# The Sample Path Analysis Library
 
 A reference implementation of sample-path–based flow metrics, convergence analysis, and stability diagnostics for flow processes in
 complex adaptive systems.
@@ -20,11 +20,11 @@ time coherence, and process stability --- using the finite-window formulation of
 The focus of the analysis is a single
 _sample path_ of a flow process:
 a _continuous_ real-valued function that describes a particular process behavior
-when observed over a finite, but long period of time.
+when observed over a long, but finite period of time.
 
 A key aspect of this
 technique is that it is _distribution-free_. It does not require well-defined
-statistical or probability distributions to reason about a flow process. Please
+statistical or probability distributions to reason rigorously about a flow process. Please
 see [sample path analysis is not a statistical method](docs/src/not_statistics.md)
 for more details.
 
@@ -59,9 +59,9 @@ In particular,
 - [The Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law).
 - [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive)
 
-cover most of the theory needed to work with this library at a high level.
+cover most of the background needed to work with this library at a high level.
 
-The example analyses in these posts were produced using this toolkit
+The example analyses in these posts were produced using this library
 and can be found in the [examples](./examples/polaris) directory together with their original source data.
 
 Please subscribe to [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com) if you are interested in staying
@@ -71,7 +71,8 @@ abreast of developments and applications of these concepts.
 
 A [flow process](https://www.polaris-flow-dispatch.com/i/172332418/flow-processes) is simply a timeline of events from some underlying domain, where
 events have *effects* that persist beyond the time of the event. These effects are encoded using
-metadata (called marks) to describe them.
+metadata (called marks) to describe them. The generality of the model comes from the fact that marks
+can be arbitrary real-valued functions of time that meet some very weak requirements.
 
 
 The current version of the library only supports the analysis of _binary flow processes_. These are
@@ -83,7 +84,7 @@ majority of operational use cases we currently model in software delivery, so we
 They are governed by the L=λW form of Little's Law.
 
 On our roadmap, we also plan to extend this library to support the analysis of
-general flow processes, which are governed by the H=λG form of Little's Law. This
+general flow processes, which allow arbitrary functions as marks, and are governed by the H=λG form of Little's Law. This
 will allow us to directly model the economic impacts of flow processes.
 
 We highly recommend reading [The Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law) for background on these concepts.
@@ -120,8 +121,7 @@ B. Command line tools provide utilities that wrap these calculations
 - Generate publication-ready **charts and panel visualizations** as static png files.
 - The ability to save different parametrized analyses from a single CSV file as named scenarios.
 
-Please see [Sample Path Construction](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-construction-for-l%CE%BBw)
-for background.
+
 
 ## Key Metrics
 
@@ -137,12 +137,16 @@ Deterministic, sample-path analogues of Little’s Law:
 
 These quantities enable rigorous study of **equilibrium** (arrival/departure rate convergence), **coherence** (residence time/sojourn time convergence), and **stability** (convergence of process measures to limits) even when processes operate far from steady state.
 
-Please see [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive) for more details. 
+Please see [Sample Path Construction](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-construction-for-l%CE%BBw)
+for background on what these metrics mean. 
+
+Please see [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive) for a worked example
+on how to apply the concepts.
 
 ## Chart Reference 
 
 For a detailed reference of the computations, charts and visualizations produced by sample path
-analysis and what they mean, please see the [Chart Reference](docs/src/chart_reference.md).
+analysis, please see the [Chart Reference](docs/src/chart_reference.md).
 
 ______________________________________________________________________
 
