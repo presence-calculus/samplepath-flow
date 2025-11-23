@@ -12,9 +12,9 @@ ______________________________________________________________________
 ## Overview
 
 **samplepath** is a Python library for analyzing _macro dynamics_ of flow
-processes in complex adaptive systems. It provides 
-deterministic tools to precisely describe the _long run_ behavior of stochastic flow
-processes ---  arrival/departure equilibrium, process
+processes in complex adaptive systems. It provides
+deterministic tools to precisely describe the _long-run_ behavior of stochastic flow
+processes --- arrival/departure equilibrium, process
 time coherence, and process stability --- using the finite-window formulation of **Little’s Law**.
 
 The focus of the analysis is a single
@@ -30,12 +30,11 @@ for more details.
 
 As a result, this technique allows us to extend many results from stochastic process
 theory to processes operating in complex adaptive systems, where stable
-statistical distributions often don't exist.  
+statistical distributions often don't exist.
 
-This allows us to apply these
-powerful techniques rigorously in a vastly larger set of domains.
+This allows us to apply these powerful techniques rigorously in a vastly larger set of domains.
 Our focus is operations management in software development, but the techniques
-here are much more general. 
+here are much more general.
 
 They are also not new. The formal theory has been worked out thoroughly by researchers in stochastic process theory
 and has been stable for over 30 years. They are just not familiar in the
@@ -56,12 +55,12 @@ stream management, developer experience and platforms, and lean continuous proce
 For an accessible overview of the key concepts behind this library and how they can be applied in practice, please see
 our continuing series on Little's Law and sample path analysis at [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com):
 
-In particular, 
+In particular,
 
 - [The Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law).
 - [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive)
 
-cover most of the theory needed to work with this library. 
+cover most of the theory needed to work with this library.
 
 The example analyses in these posts were produced using this toolkit
 and can be found in the [examples](./examples/polaris) directory together with their original source data.
@@ -73,7 +72,7 @@ abreast of developments and applications of these concepts.
 
 A [flow process](https://www.polaris-flow-dispatch.com/i/172332418/flow-processes) is simply a timeline of events from some underlying domain, where
 events have *effects* that persist beyond the time of the event. These effects are encoded using
-metadata (called marks) to describe those effects. 
+metadata (called marks) to describe them.
 
 
 The current version of the library only supports the analysis of _binary flow processes_. These are
@@ -84,11 +83,11 @@ These are the simplest kind of flow processes we analyze in the presence calculu
 majority of operational use cases we currently model in software delivery, so we will start there.
 They are governed by the L=λW form of Little's Law.
 
-On our roadmap we also plan to extend this library to support the analysis of
+On our roadmap, we also plan to extend this library to support the analysis of
 general flow processes, which are governed by the H=λG form of Little's Law. This
 will allow us to directly model the economic impacts of flow processes.
 
-We highly recommend reading [The Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law) for background on these concepts. 
+We highly recommend reading [The Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law) for background on these concepts.
 
 ## Data Requirements
 
@@ -195,8 +194,8 @@ uvx samplepath events.csv --help
 ```
 
 ### Alternative: Use pip and pipx
-If you already have python 3.11+ environment and dont want to switch package managers, 
-the standard installs via pip and pipx will also work
+If you already have a Python 3.11+ environment and don't want to switch package managers,
+the standard installs via pip and pipx will also work.
 
 Using pip
 ```bash
@@ -218,27 +217,27 @@ pipx upgrade samplepath
 
 # 🧩 Usage
 
-The complete cli documentation is [here](./docs/cli.md). Here are a few examples.
+The complete CLI documentation is [here](./docs/cli.md). Here are a few examples.
 
 ```bash
 # Analyze completed items, save analysis to the output-dir under the scenario name shipped. Clean existing output directories
 samplepath events.csv --output-dir spath-analysis --scenario shipped --completed --clean
 
-# Pass an explicit date format (example below shows the typical case for non-US date formats). 
-# We use standard python date formats: https://docs.python.org/3/library/datetime.html#format-codes
+# Pass an explicit date format (example below shows the typical case for non-US date formats).
+# We use standard Python date formats: https://docs.python.org/3/library/datetime.html#format-codes
 
 samplepath events.csv --date-format "%d/%m/%Y" --output-dir spath-analysis --scenario shipped --completed --clean
 
 # Limit analysis to elements with class story
 samplepath events.csv --class story
 
-# Apply Tukey filter to remove items with outlier soujourn times before analysis of completed items
+# Apply Tukey filter to remove items with outlier sojourn times before analysis of completed items
 samplepath events.csv  --outlier-iqr 1.5 --completed
 ```
 
 ### 📂 Output Layout
 
-Results and charts are saved to the output directory as following
+Results and charts are saved to the output directory as follows:
 
 For input `events.csv`, output is organized as:
 
@@ -254,7 +253,7 @@ For input `events.csv`, output is organized as:
         ├── advanced/               # optional deep-dive charts
         └── misc/                   # ancillary artifacts
 ```
-A complete reference to the charts can be found [here](docs/src/chart_reference.md)
+A complete reference to the charts can be found [here](docs/src/chart_reference.md).
 
 ## 🛠 Development Setup (for Contributors)
 
@@ -332,7 +331,7 @@ ______________________________________________________________________
 
 ## 📚 Documentation
 
-Further documentation, will be added to this repo. In the meantime, use the
+Further documentation will be added to this repo. In the meantime, use the
 documentation links provided at the top of this README.
 
 ______________________________________________________________________
