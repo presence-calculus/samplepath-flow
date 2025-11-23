@@ -11,19 +11,45 @@ ______________________________________________________________________
 
 ## Overview
 
-**samplepath** is a Python library for the analysis of stability of flow processes
-using the finite-window formulation of **Little’s Law**.
+**samplepath** is a Python library for analyzing _macro dynamics_ of flow
+processes in complex adaptive systems: arrival/departure equilibrium, process
+time coherence, and process stability over long timescales.
 
-It provides deterministic, pathwise measurement tools for analyzing long run
-flow process dynamics: arrival/departure equilibrium, process time coherence, and
-process stability along an observed sample path.
+It provides a set of deterministic, pathwise measurement tools to characterize
+behavior of flow processes using using the finite-window formulation of **Little’s Law**.
 
-The formal theory behind the concepts we implement in this toolkit can be found
-in the reference textbook [Sample Path Analysis of Queueing Systems](https://www.researchgate.net/publication/303785171_Sample-Path_Analysis_of_Queueing_Systems)
-by Muhammed El-Taha and Shaler Stidham (a downloadable PDF is available at the link).
+The focus of the analysis is a single 
+_sample path:_
+a continuous real-valued function that describes a particular process behavior
+when observed over a finite, but long period of time.
 
-This package is a part of [The Presence Calculus Project](https://docs.pcalc.org): a computational toolkit for modeling
-and measuring flow processes, based on sample path analysis.
+A key aspect of this technique is that it is _distribution free_. It does not
+require well defined statistical or probability distributions to reason about a
+flow process. Please
+see [sample path analysis is not a statistical method](docs/src/not_statistics.md)
+for more details.
+
+This allows us to extend results from queueing theory etc. to processes
+operating in complex adaptive systems, where stable statistical distributions
+often dont exist, and this allows us to apply these powerful techniques
+rigorously in a vastly larger set of domains.
+
+Our focus is operations management in software development, but the techniques
+here are much more general nor are they new. The formal theory has been worked out thoroughly by researchers in stochastic process theory
+and have been stable for over 30 years. They are just not familiar in the
+software industry.
+
+The canonical reference is the
+textbook [Sample Path Analysis of Queueing Systems](https://www.researchgate.net/publication/303785171_Sample-Path_Analysis_of_Queueing_Systems)
+by Muhammed El-Taha and Shaler Stidham (a downloadable PDF is available at the
+link).
+
+This package is a part
+of [The Presence Calculus Project](https://docs.pcalc.org): an open source
+computational toolkit that is intended to make these methods and concepts more
+accessible to practitioners working on operations management problems in the software
+industry including engineering/product/sales/marketing operations and related disciplines: value
+stream management, developer platforms, lean continuous process improvement etc.
 
 ## Background
 
@@ -45,18 +71,28 @@ abreast of developments and applications of these concepts.
 
 A [flow process](https://www.polaris-flow-dispatch.com/i/172332418/flow-processes) is simply a timeline of events from some underlying domain, where
 events have *effects* that persist beyond the time of the event. These effects are encoded using
-metadata (called marks) to describe those effects.
+metadata (called marks) to describe those effects. Typically these are extracted from transaction logs
+of digital operations tools. 
 
-The current version only supports the analysis of binary flow processes. These are
+The current version of the library only supports the analysis of _binary flow processes_. These are
 flow processes where the marks denote the start or end of an observed presence of a domain element within some system boundary.
-They are governed by the L=λW form of Little's Law.
 
+All queueing processes fall into this category, as do a much larger class of general input-output processes.
 These are simplest kind of flow processes we analyze in the presence calculus, but they cover the vast
 majority of operational use cases we currently model in software delivery, so we will start there.
+They are governed by the L=λW form of Little's Law.
+
+On our roadmap we also plan to extend this library to support the analysis of 
+general flow processes which are governed by the H=λG form of Little's Law.
+
+This will allow us to directly model the economic impacts of flow processes. 
+
+We highly recommend reading [The Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law) for background on these concepts. 
+
 
 ## Data Requirements
 
-### Please Note: [sample path analysis is not a statistical method](docs/src/not_statistics.md).
+
 
 The data requirements for this analysis are minimal: a csv file that represents
 the observed timeline of a binary flow process: with element id, start and end date columns.
