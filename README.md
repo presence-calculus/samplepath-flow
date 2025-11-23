@@ -28,13 +28,12 @@ statistical or probability distributions to reason about a flow process. Please
 see [sample path analysis is not a statistical method](docs/src/not_statistics.md)
 for more details.
 
-As a result, this technique allows us to extend many results from stochastic process
-theory to processes operating in complex adaptive systems, where stable
-statistical distributions often don't exist.
-
-This allows us to apply these powerful techniques rigorously in a vastly larger set of domains.
-Our focus is operations management in software development, but the techniques
-here are much more general.
+As a result, this technique allows us to extend many results from stochastic
+process theory to processes operating in complex adaptive systems, where stable
+statistical distributions often don't exist. This allows us to apply these
+powerful techniques rigorously in a vastly larger set of domains. Our focus is
+operations management in software development, but the techniques here are much
+more general.
 
 They are also not new. The formal theory has been worked out thoroughly by researchers in stochastic process theory
 and has been stable for over 30 years. They are just not familiar in the
@@ -93,7 +92,7 @@ We highly recommend reading [The Many Faces of Little's Law](https://www.polaris
 
 Typically data for analyzing a flow process are extracted from transaction logs
 of digital operations management tools. The data requirements for the analysis
-of a _single flow process_ are minimal: a CSV file that represents the observed
+of a flow process are minimal: a CSV file that represents the observed
 timeline of a binary flow process with element ID, start, and end date columns.
 
 - The start and end dates may be empty, but for a meaningful analysis, we
@@ -103,7 +102,7 @@ timeline of a binary flow process with element ID, start, and end date columns.
   boundary.
 - The system boundary is optional (the name of the CSV file becomes the default name
   of the boundary). Boundaries become useful when we start to model the dynamics
-  of interconnected flow processes. This is beyond the scope of this library.
+  of interconnected flow processes. 
 
 Given this input, this library implements:
 
@@ -122,9 +121,6 @@ B. Command line tools provide utilities that wrap these calculations
 - Simple workflows that take CSV files as input to run sample path analysis with a rich set of parameters and options.
 - Generate publication-ready **charts and panel visualizations** as static png files.
 - The ability to save different parametrized analyses from a single CSV file as named scenarios.
-
-This library provides the computational foundation for analyzing flow dynamics for
-a _single flow process_ in software delivery, operations, and other knowledge-work systems.
 
 ## Key Metrics
 
