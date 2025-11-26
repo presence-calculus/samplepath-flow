@@ -14,8 +14,13 @@ ______________________________________________________________________
 **samplepath** is a Python library for analyzing _macro dynamics_ of flow
 processes in complex adaptive systems. It provides
 deterministic tools to precisely describe the _long-run_ behavior of stochastic flow
-processes: arrival/departure equilibrium, process
-time coherence, and process stability, using the finite-window formulation of 
+processes: 
+
+- Arrival/departure equilibrium
+- Process time coherence, and 
+- Process stability 
+
+using the finite-window formulation of 
 **Little’s Law**.
 
 The focus of the analysis is a single
@@ -42,7 +47,7 @@ worked out thoroughly by researchers in stochastic process theory
 and has been stable for over 30 years. They are just not familiar in the
 software industry. 
 
-Dr. Shaler Stidham originated the sample path analysis technique when
+Dr. Shaler Stidham discovered the technique when
 he provided the first deterministic proof of Little's Law in 1972. So the 
 core ideas here are nearly 60 years old! See our post
 [A Brief History of Little's Law](https://www.polaris-flow-dispatch.com/p/a-brief-history-of-littles-law)
@@ -60,6 +65,8 @@ textbook [Sample Path Analysis of Queueing Systems](https://www.researchgate.net
 by Muhammed El-Taha and Shaler Stidham (a downloadable PDF is available at the
 link). 
 
+This package directly implements many of the concepts in this textbook. 
+
 ## Why this is significant
 
 Conditions like non-stationarity and non-ergodic behavior and lack of stable
@@ -70,17 +77,16 @@ ordered systems when viewed from an operations management lens.
 There are several capabilities we get from this: 
 
 - We can precisely define, measure and reason about properties such as 
-  equilibrium,  coherence and stability, using real-world operational data. 
+  equilibrium,  coherence and stability, using real-world operational data 
+  from complex adaptive systems. 
 - We can retrospectively reason about cause and effect in observed behavior 
-  of real-world operational processes, and do so in a deterministic fashion. 
+  of these operational processes, and do so in a deterministic fashion. 
 - Naturally handle processes with state, history and path dependent 
-  behavior. 
+  behavior which are the norm in software development.  
 
 Thus sample path analysis is _the_ technical bridge to rigorously model and 
 measure flow processes in complex
-adaptive systems and bring formal mathematical tools and measurement 
-techniques to analyzing real world operational processes in operating with 
-complex adaptive systems. 
+adaptive systems. 
 
 ---
 
