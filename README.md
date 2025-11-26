@@ -14,8 +14,9 @@ ______________________________________________________________________
 **samplepath** is a Python library for analyzing _macro dynamics_ of flow
 processes in complex adaptive systems. It provides
 deterministic tools to precisely describe the _long-run_ behavior of stochastic flow
-processes --- arrival/departure equilibrium, process
-time coherence, and process stability --- using the finite-window formulation of **Little’s Law**.
+processes: arrival/departure equilibrium, process
+time coherence, and process stability, using the finite-window formulation of 
+**Little’s Law**.
 
 The focus of the analysis is a single
 _sample path_ of a flow process:
