@@ -276,9 +276,10 @@ For input `events.csv`, output is organized as:
 ```
 A complete reference to the charts can be found [here](docs/src/chart_reference.md).
 
-## 🛠 Development Setup (for Contributors)
+# 🛠 Development Setup (for Contributors)
 
-Developers working on **samplepath** use [uv](https://docs.astral.sh/uv/) for dependency and build management - a single tool that replaces pip, poetry, pyenv, virtualenv, and more.
+Developers working on **samplepath** use [uv](https://docs.astral.sh/uv/) 
+for dependency and build management.
 
 ### Prerequisites
 
