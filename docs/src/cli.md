@@ -189,4 +189,4 @@ For input `events.csv`, output is organized as:
 --
 
 A complete reference to the charts produced can be found in [The Chart 
-Reference](. /chart_reference.md).
+Reference](./chart_reference.md).
