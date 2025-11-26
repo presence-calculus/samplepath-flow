@@ -339,9 +339,14 @@ accessible to practitioners working on operations management problems in the sof
 industry including engineering/product/sales/marketing operations and related disciplines: value
 stream management, developer experience and platforms, and lean continuous process improvement.
 
-This library and toolkit is intended to be used by practitioners to _develop their intuition about the dynamics of flow processes_, using 
-their own operational data.  It is not ready nor intended to support production 
-quality operations management tooling. 
+This library and toolkit is intended to be used by practitioners to 
+understand the theory and _develop their intuition about the dynamics of flow 
+processes_, using their own environments.  Understanding the context behind 
+the data greatly helps makes the abstract ideas here concerete and there in 
+no substitute for getting your hands dirty and trying things out directly. 
+This toolkit is designed for that. 
+
+It is not ready nor intended to support production quality operations management tooling. 
 
 ## In Scope
 
@@ -351,15 +356,15 @@ evolve using the machinery of this package and learning how to model them.
 
 The toolkit is intentionally designed to be low-tech and force you think
 about how to model flow processes in a complex system more broadly before 
-jumping to measurement and building dashboards.
+jumping to talking about metrics and building dashboards.
 
 You should be able to apply it anywhere you can extract a csv file with 
 start and end dates for various operational processes using the native 
-reporting tools built into your production tools. 
+reporting tools built into the production tools you use today.  
 
 Compare what you see here, with whatever your current operational dashboards 
 show today and think about the differences. It will soon become apparent 
-why this sample path analysis represents a fundamentally different way of thinking about flow and operations management.
+why sample path analysis represents a fundamentally different way of thinking about flow and operations management.
 
 We will continues to provide more examples and talking about applications
 in The Polaris Flow Dispatch so it becomes easier to imagine the possibilities.
@@ -368,7 +373,7 @@ from others who have interesting examples to show once they grasp the ideas
 here and understand why they matter.
 
 The barrier to modeling and measuring a flow process using this toolkit are
-minimal. So please try it out and see what you find.  We would love to publish 
+minimal. So please try it out and see what you find.  I would love to publish 
 your use  cases. Please raise a 
 PR to tell us if you have a novel use case and show us how you are using 
 these techniques.
@@ -476,3 +481,5 @@ ______________________________________________________________________
 
 Licensed under the **MIT License**.\
 See `LICENSE` for details.
+
+Copyright (c) 2025 Dr. Krishna Kumar
