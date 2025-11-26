@@ -268,7 +268,7 @@ pipx upgrade samplepath
 
 # 4. Usage
 
-The complete CLI documentation is [here](./docs/cli.md). Here are a few examples.
+The complete CLI documentation is [here](docs/src/cli.md). Here are a few examples.
 
 ```bash
 # Analyze completed items, save analysis to the output-dir under the scenario name shipped. Clean existing output directories
@@ -306,7 +306,7 @@ Results and charts are saved to the output directory as follows:
 - The default output directory is  "charts" in your current directory.
 - You can override this with the --output-dir argument. 
 
-See the [CLI Documentation](./docs/cli.md) for the full list of command line options. 
+See the [CLI Documentation](docs/src/cli.md) for the full list of command line options. 
 
 ## 📂 Output Layout
 

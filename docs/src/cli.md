@@ -1,3 +1,17 @@
+---
+title: "<strong>Command Line Reference</strong>"
+author: |
+  <a href="https://github.com/presence-calculus/samplepath"><em>The Samplepath Analysis Toolkit</em></a>
+
+figures-numbered: true
+link-citations: true
+toc-title: "Contents"
+toc-depth: 2
+
+figPrefix: "Figure"
+numberSections: true
+sectionsDepth: 2
+---
 # Samplepath CLI Documentation
 
 This tool generates finite-window Little’s Law charts from an CSV file containing `id`, `start_ts`, `end_ts`, and optionally a `class` column. 
