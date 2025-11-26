@@ -1,6 +1,6 @@
 # The Sample Path Analysis Library and Toolkit
 
-A reference implementation of sample-path–based flow metrics, convergence analysis, and stability diagnostics for flow processes in
+A reference implementation of sample-path–based metrics, convergence analysis, and stability diagnostics for flow processes in
 complex adaptive systems.
 
 [![PyPI](https://img.shields.io/pypi/v/samplepath.svg)](https://pypi.org/project/samplepath/)
