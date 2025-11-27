@@ -8,6 +8,7 @@ complex adaptive systems.
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-online-blue.svg)](https://py.pcalc.org)
 
+![Sample Path Flow Metrics](docs/assets/sample_path_flow_metrics.png)
 ______________________________________________________________________
 
 # 1. Overview
