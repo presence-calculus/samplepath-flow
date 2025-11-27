@@ -8,7 +8,7 @@ shopt -s nullglob
 #   pcalc/docs/*.md              → docs/pandoc/*.html
 #   pcalc/docs/<sub>/*.md        → docs/pandoc/<sub>/*.html
 PAIRS=(
-  "docs/src:docs/site/html"
+  "docs/src:docs/html"
   ".:.local/html"
 )
 
