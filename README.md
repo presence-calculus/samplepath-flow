@@ -476,8 +476,7 @@ ______________________________________________________________________
 
 # 7. Documentation
 
-Further documentation will be added to this repo. In the meantime, use the
-documentation links provided at the top of this README.
+Please see our [documentation site](https://samplepath.pcalc.org) 
 
 ______________________________________________________________________
 
