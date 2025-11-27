@@ -484,4 +484,4 @@ ______________________________________________________________________
 Licensed under the **MIT License**.\
 See `LICENSE` for details.
 
-Copyright (c) 2025 Dr. Krishna Kumar
+Copyright (c) 2025 Krishna Kumar
