@@ -90,7 +90,8 @@ There are several capabilities we get from this:
   dependent behavior which are the norm in complex systems.  
 
 These are precisely the conditions that confound traditional statistical and
-probabilistic reasoning about operational processes in complex systems. Thus
+probabilistic reasoning about operational processes in complex adaptive 
+systems. Thus
 sample path analysis is _the_ technical bridge to rigorously model and 
 measure flow processes in such contexts.
 
