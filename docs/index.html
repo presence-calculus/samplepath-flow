@@ -109,6 +109,26 @@
       font-size: 0.9rem;
       color: #888;
     }
+    #presence-link {
+      position: fixed;
+      top: 0.5rem;
+      right: 1rem;
+      font-size: 0.9rem;
+      background: #f9f9f9;
+      padding: 0.3rem 0.6rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      z-index: 1000;
+    }
+
+    #presence-link a {
+      text-decoration: none;
+      color: #444;
+    }
+
+    #presence-link a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -117,7 +137,12 @@
       <h1>The Sample Path Analysis Toolkit</h1>
       <p class="subtitle">Analyzing macro dynamics of flow processes</p>
     </header>
-
+    <div id="presence-link">
+      <a href="https://docs.pcalc.org" target="_blank">The Presence Calculus Project</a>
+      <div style="text-align: center; font-size: 80%;">
+        © 2025 Krishna Kumar. All rights reserved.
+      </div>
+    </div>
     <div class="image-card">
       <img src="./assets/sample_path_flow_metrics.png" alt="Sample Path Flow Metrics" />
       <div class="caption">Figure: Sample Path Flow Metrics</div>
