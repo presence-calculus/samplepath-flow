@@ -2,7 +2,7 @@
 
 A reference implementation of sample-path flow metrics, convergence 
 analysis, and stability diagnostics for flow processes in
-complex adaptive systems using the finite window formulation of Little's Law. 
+complex adaptive systems using the finite window formulation of **Little's Law**. 
 
 See documentation [here](https://samplepath.pcalc.org).
 
