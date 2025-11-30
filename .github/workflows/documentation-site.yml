@@ -35,14 +35,13 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Prepare site directory
         run: |
-          mkdir -p dist
-          cp -r docs/html/* dist/html/
-          cp -r docs/assets/* dist/assets/
+          rsync -av docs/ site/ --exclude 'src/'
+          
       - name: Upload pages
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload html sources
-          path: 'dist'
+          path: 'site'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
