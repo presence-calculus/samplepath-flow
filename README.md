@@ -2,7 +2,7 @@
 
 A reference implementation of sample-path flow metrics, convergence 
 analysis, and stability diagnostics for flow processes in
-complex adaptive systems.
+complex adaptive systems. See documentation [here](https://samplepath.pcalc.org).
 
 [![PyPI](https://img.shields.io/pypi/v/samplepath.svg)](https://pypi.org/project/samplepath/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
