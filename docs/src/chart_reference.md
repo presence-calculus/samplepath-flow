@@ -5,12 +5,16 @@ author: |
 
 figures-numbered: true
 link-citations: true
+
+header-image: "../assets/sample_path_flow_metrics.png"
+
 toc-title: "Contents"
 toc-depth: 2
 
 figPrefix: "Figure"
 numberSections: true
 sectionsDepth: 2
+
 ---
 
 
