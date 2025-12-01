@@ -6,5 +6,5 @@ and what we can conclude about flow process dynamics using this technique.
 Many of these examples have accompanying posts in [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com)
 that go more into the context and background for why these are relevant.
 
-- [Case Study: Polaris (New Product Development)](./polaris)
+- [Case Study: Polaris (New Product Development)](https://samplepath.pcalc.org/examples/polaris)
 -
