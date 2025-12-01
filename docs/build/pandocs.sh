@@ -9,7 +9,6 @@ shopt -s nullglob  # allow empty globs without errors
 #   "docs-src:docs"       # only top-level + immediate subdirs (flat)
 PAIRS=(
   "docs/src:docs/html"
-  ".:.local/html"
   "examples/**:docs/html/examples"
 )
 
@@ -80,9 +79,9 @@ pandoc_for_file() {
 
   local dir repo_root=""
   dir="$(dirname "$file")"
-  if [[ "$GIT_AWARE" -eq 1 ]]; then
-    repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
-  fi
+
+  repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+
 
   # Find resources with fallback order: file dir -> src_root -> git root
   local bib csl tpl
@@ -97,12 +96,12 @@ pandoc_for_file() {
   tpl="$(first_existing \
         "$dir/pandoc_template.html" \
         "$src_root/pandoc_template.html" \
-        ${repo_root:+$repo_root/build/pandoc_template.html} 2>/dev/null || true)"
+        ${repo_root:+$repo_root/docs/build/pandoc_template.html} 2>/dev/null || true)"
 
   # Build args safely under `set -u`
   local -a args=(
     --filter pandoc-crossref
-    --lua-filter="$repo_root/docs/src/md2html-links.lua"
+    --lua-filter="$repo_root/docs/build/md2html-links.lua"
     --number-sections
     --toc
     --citeproc
