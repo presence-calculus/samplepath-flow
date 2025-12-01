@@ -1,18 +1,35 @@
 #!/usr/bin/env bash
 set -euo pipefail
-shopt -s nullglob
+shopt -s nullglob  # allow empty globs without errors
 
 # -------- Configuration --------
-# Map each SOURCE_DIR to a TARGET_DIR (non-recursive, mirrors only one level)
-# Example: "pcalc/docs:docs/pandoc" means:
-#   pcalc/docs/*.md              → docs/pandoc/*.html
-#   pcalc/docs/<sub>/*.md        → docs/pandoc/<sub>/*.html
+# Map each SOURCE_DIR to a TARGET_DIR.
+# You can mark a source as recursive by appending '/**' to it, e.g.:
+#   "docs-src/**:docs"    # walk docs-src recursively
+#   "docs-src:docs"       # only top-level + immediate subdirs (flat)
 PAIRS=(
   "docs/src:docs/html"
   ".:.local/html"
+  "examples/**:docs/html/examples"
 )
 
 MATH_ENGINE="--mathjax"     # e.g., "--mathjax" or leave empty ""
+
+# File extensions treated as static assets (copied as-is, not run through pandoc)
+ASSET_EXTENSIONS=("png" "jpg" "jpeg" "gif" "svg" "css" "js" "pdf")
+
+is_asset() {
+  local f="$1"
+  local ext="${f##*.}"
+  ext="$(printf '%s' "$ext" | tr 'A-Z' 'a-z')"
+  local a
+  for a in "${ASSET_EXTENSIONS[@]}"; do
+    if [[ "$ext" == "$a" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
 
 # -------- Git helpers --------
 # Allow overriding from the command line, e.g.:
@@ -27,6 +44,7 @@ fi
 git_file_changed() {
   local f="$1"
   [[ "$GIT_AWARE" -eq 1 ]] || return 0
+
   # Untracked?
   if ! git ls-files --error-unmatch -- "$f" >/dev/null 2>&1; then
     return 0
@@ -71,20 +89,21 @@ pandoc_for_file() {
   bib="$(first_existing \
         "$dir/references.bib" \
         "$src_root/references.bib" \
-        "${repo_root:+$repo_root/references.bib}" || true)"
+        ${repo_root:+$repo_root/references.bib} 2>/dev/null || true)"
   csl="$(first_existing \
         "$dir/ieee.csl" \
         "$src_root/ieee.csl" \
-        "${repo_root:+$repo_root/ieee.csl}" || true)"
+        ${repo_root:+$repo_root/ieee.csl} 2>/dev/null || true)"
   tpl="$(first_existing \
         "$dir/pandoc_template.html" \
         "$src_root/pandoc_template.html" \
-        "${repo_root:+$repo_root/pandoc_template.html}" || true)"
+        ${repo_root:+$repo_root/build/pandoc_template.html} 2>/dev/null || true)"
 
   # Build args safely under `set -u`
   local -a args=(
     --filter pandoc-crossref
-    --lua-filter docs/src/md2html-links.lua
+    --lua-filter="$repo_root/docs/src/md2html-links.lua"
+    --number-sections
     --toc
     --citeproc
     --wrap=auto
@@ -95,6 +114,7 @@ pandoc_for_file() {
   [[ -n "${csl:-}" ]] && args+=( --csl="$csl" )
   [[ -n "${tpl:-}" ]] && args+=( --template="$tpl" )
 
+
   args+=( -s "$file" -o "$out_html" )
 
   if [[ -n "${MATH_ENGINE:-}" ]]; then
@@ -104,12 +124,21 @@ pandoc_for_file() {
     args+=( "${math_tokens[@]}" )
   fi
 
+  echo "${args[@]}"
   pandoc "${args[@]}"
 }
 
 # -------- Processing --------
 for pair in "${PAIRS[@]}"; do
-  IFS=":" read -r SRC_ROOT TGT_ROOT <<<"$pair"
+  IFS=":" read -r SRC_SPEC TGT_ROOT <<<"$pair"
+
+  # Per-pair recursion: "src/**:dst" means recursive under src
+  RECURSIVE=0
+  SRC_ROOT="$SRC_SPEC"
+  if [[ "$SRC_SPEC" == *"/**" ]]; then
+    RECURSIVE=1
+    SRC_ROOT="${SRC_SPEC%"/**"}"
+  fi
 
   if [[ ! -d "$SRC_ROOT" ]]; then
     echo "⚠️  Skipping missing source dir: $SRC_ROOT"
@@ -118,32 +147,85 @@ for pair in "${PAIRS[@]}"; do
 
   mkdir -p "$TGT_ROOT"
 
-  # Top-level files in SRC_ROOT → TGT_ROOT
-  for file in "$SRC_ROOT"/*.md; do
-    if git_file_changed "$file"; then
-      filename="$(basename "$file" .md)"
-      out_html="$TGT_ROOT/${filename}.html"
-      pandoc_for_file "$file" "$out_html" "$SRC_ROOT"
-      echo "✓ Converted $file → $out_html"
-    fi
-  done
-
-  # Immediate subdirectories ONLY
-  for subdir in "$SRC_ROOT"/*/; do
-    [[ -d "$subdir" ]] || continue
-    subname="$(basename "$subdir")"
-    out_dir="$TGT_ROOT/$subname"
-    mkdir -p "$out_dir"
-
-    for file in "$subdir"/*.md; do
+  if [[ "$RECURSIVE" -eq 1 ]]; then
+    # Recursive: walk entire tree under SRC_ROOT for markdown
+    while IFS= read -r -d '' file; do
+      [[ -f "$file" ]] || continue
+      if git_file_changed "$file"; then
+        rel="${file#$SRC_ROOT/}"
+        out_html="$TGT_ROOT/${rel%.md}.html"
+        mkdir -p "$(dirname "$out_html")"
+        pandoc_for_file "$file" "$out_html" "$SRC_ROOT"
+        echo "✓ Converted $file → $out_html"
+      fi
+    done < <(find "$SRC_ROOT" -type f -name '*.md' -print0)
+  else
+    # Flat mode: top-level files in SRC_ROOT → TGT_ROOT
+    for file in "$SRC_ROOT"/*.md; do
+      [[ -f "$file" ]] || continue
       if git_file_changed "$file"; then
         filename="$(basename "$file" .md)"
-        out_html="$out_dir/${filename}.html"
+        out_html="$TGT_ROOT/${filename}.html"
         pandoc_for_file "$file" "$out_html" "$SRC_ROOT"
         echo "✓ Converted $file → $out_html"
       fi
     done
-  done
+
+    # Immediate subdirectories ONLY
+    for subdir in "$SRC_ROOT"/*/; do
+      [[ -d "$subdir" ]] || continue
+      subname="$(basename "$subdir")"
+      out_dir="$TGT_ROOT/$subname"
+      mkdir -p "$out_dir"
+
+      for file in "$subdir"/*.md; do
+        [[ -f "$file" ]] || continue
+        if git_file_changed "$file"; then
+          filename="$(basename "$file" .md)"
+          out_html="$out_dir/${filename}.html"
+          pandoc_for_file "$file" "$out_html" "$SRC_ROOT"
+          echo "✓ Converted $file → $out_html"
+        fi
+      done
+    done
+  fi
+
+  # -------- Asset copying (per pair) --------
+  if [[ "$RECURSIVE" -eq 1 ]]; then
+    # Recursive assets: all files excluding .md, filtered by ASSET_EXTENSIONS
+    while IFS= read -r -d '' src; do
+      [[ -f "$src" ]] || continue
+      [[ "$src" == *.md ]] && continue
+      if ! is_asset "$src"; then
+        continue
+      fi
+      if ! git_file_changed "$src"; then
+        continue
+      fi
+      rel="${src#$SRC_ROOT/}"
+      dst="$TGT_ROOT/$rel"
+      mkdir -p "$(dirname "$dst")"
+      cp "$src" "$dst"
+      echo "✓ Copied asset $src → $dst"
+    done < <(find "$SRC_ROOT" -type f -print0)
+  else
+    # Flat assets: top + one level
+    for src in "$SRC_ROOT"/* "$SRC_ROOT"/*/*; do
+      [[ -f "$src" ]] || continue
+      [[ "$src" == *.md ]] && continue
+      if ! is_asset "$src"; then
+        continue
+      fi
+      if ! git_file_changed "$src"; then
+        continue
+      fi
+      rel="${src#$SRC_ROOT/}"
+      dst="$TGT_ROOT/$rel"
+      mkdir -p "$(dirname "$dst")"
+      cp "$src" "$dst"
+      echo "✓ Copied asset $src → $dst"
+    done
+  fi
 done
 
 echo "✅ Done. Outputs written under the specified target directories."
