@@ -35,7 +35,7 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Prepare deploy directory
         run: |
-          rsync -av docs/site site-dist --exclude 'drafts/'
+          rsync -av docs/site/ site-dist/ --exclude 'drafts/'
 
       - name: Upload pages
         uses: actions/upload-pages-artifact@v3
