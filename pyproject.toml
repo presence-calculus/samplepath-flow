@@ -108,6 +108,13 @@ output = "coverage.xml"
 #----------------------
 # Publishing end points
 # ---------------------
+[tool.bumpver]
+# uvx bumpver update --patch (for example)
+current_version = "0.3.0"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit = true
+tag = true
+push = false  # good for safety; you push manually
 
 [[tool.uv.index]]
 name = "pypi"
