@@ -10,7 +10,7 @@ See documentation [here](https://samplepath.pcalc.org).
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-online-blue.svg)](https://py.pcalc.org)
 
-![Sample Path Flow Metrics](docs/assets/sample_path_flow_metrics.png)
+![Sample Path Flow Metrics](docs/assets/sample_path_N.png)
 ______________________________________________________________________
 
 # 1. Overview
@@ -24,8 +24,8 @@ processes:
 - Process time coherence, and 
 - Process stability 
 
-using the finite-window formulation of 
-**Little’s Law**.
+using the finite-window formulation of
+[**Little’s Law**](https://docs.pcalc.org/articles/littles-law).
 
 The focus of the analysis is a single
 _sample path_ of a flow process:
@@ -40,110 +40,23 @@ for more details.
 
 As a result, this technique allows us to extend many results from stochastic
 process theory to processes operating in complex adaptive systems, where stable
-statistical distributions often don't exist. Our focus is
+statistical distributions often don't exist.
+
+If you are new to Little's Law or are only familiar with the traditional idea of
+Little's Law from manufacuring applications, please see our overview article
+on [**Little’s Law**](https://docs.pcalc.org/articles/littles-law).
+
+Our focus is
 operations management in software development, but the techniques here are much
 more general.
 
-## History and Origins
-
-The ideas behind sample path analysis are not new. The formal theory has been 
-worked out thoroughly by researchers in stochastic process theory
-and has been stable for over 30 years. They are just not familiar in the
-software industry. 
-
-Dr. Shaler Stidham discovered the technique when
-he provided the first deterministic proof of Little's Law in 1972. So the 
-core ideas here are nearly 60 years old! See our post
-[A Brief History of Little's Law](https://www.polaris-flow-dispatch.com/p/a-brief-history-of-littles-law)
-for a high level overview of the origins of this technique and it's
-deep connection to Little's Law.
-
-In the years since Dr. Stidham and other 
-researchers in stochastic process theory have shown the power and versatility
-of this technique to provide deterministic sample path oriented results
-of many classical results in queueing theory that required very stringent 
-probabilistic assumptions like stationarity and ergodicity to prove previously. 
-
-The canonical reference detailing this work is the
-textbook [Sample Path Analysis of Queueing Systems](https://www.researchgate.net/publication/303785171_Sample-Path_Analysis_of_Queueing_Systems)
-by Muhammed El-Taha and Shaler Stidham (a downloadable PDF is available at the
-link). 
-
-This package directly implements many of the concepts in this textbook. 
-
-## Why this is significant
-
-Conditions like non-stationarity and non-ergodic behavior and lack of stable
-distributions are
-_exactly_ the dividing line between complex adaptive systems and simpler,
-ordered systems when viewed from an operations management lens. 
-
-There are several capabilities we get from this: 
-
-- We can precisely define, measure and reason about properties such as 
-  equilibrium,  coherence and stability, using real-world operational data 
-  from complex adaptive systems. 
-- We can do so _not just for stable processes_ but for processes that 
-  operate far from stable equilibrium.
-- We can retrospectively reason about cause and effect in observed behavior 
-  of these operational processes, and do so in a deterministic fashion - 
-  _even for process that are not stable_.  
-- Naturally model and reason about processes with state, history and path 
-  dependent behavior which are the norm in complex systems.  
-
-These are precisely the conditions that confound traditional statistical and
-probabilistic reasoning about operational processes in complex adaptive 
-systems. Thus
-sample path analysis is _the_ technical bridge to rigorously model and 
-measure flow processes in such contexts.
+[More background and history is here ...](https://samplepath.pcalc.org/articles/package-overview)
 
 ---
 
-# 2. Core Concepts
+# 2. Data Requirements and Key Metrics
 
-Please see
-our continuing series on Little's Law and sample path analysis at [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com) for
-accessible overviews of the theory.
-
-In particular,
-
-- [The Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law).
-- [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive)
-
-cover most of the background needed to work with this library at a high level.
-
-The example analyses in these posts were produced using this library
-and can be found in the [examples](./examples/polaris) directory together with their original source data.
-
-Please subscribe to [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com) if you are interested in staying
-abreast of developments and applications of these concepts. 
-
-## Flow processes
-
-A [flow process](https://www.polaris-flow-dispatch.com/i/172332418/flow-processes) is simply a timeline of events from some 
-underlying operational domain, where
-events have *effects* that persist beyond the time of the event. 
-The  effects are encoded using
-metadata (called marks) to describe them. The generality of the model comes from the fact that marks
-can be arbitrary real-valued functions of time that meet some very weak requirements.
-
-Typically data for analyzing a flow process are extracted from 
-real-time transaction logs of digital operations management tools.
-
-The current version of the library only supports the _offline_ analysis of 
-_binary flow processes_. These are
-flow processes where the marks denote the start or end of an observed presence of a domain element within some system boundary.
-
-All queueing processes fall into this category, as do a much larger class of general input-output processes.
-These are the simplest kind of flow processes we analyze in the presence calculus, but they cover the vast
-majority of operational use cases we currently model in software delivery, so we will start there.
-They are governed by the L=λW form of Little's Law.
-
-We highly recommend reading [The Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law) for background on these concepts.
-
-## Data Requirements
-
-The data requirements for the analysis
+The data requirements for the sample path analysis
 of a flow process are minimal: a CSV file that represents the observed
 timeline of a binary flow process with element ID, start, and end date columns.
 
@@ -172,11 +85,9 @@ B. Command line tools provide utilities that wrap these calculations
 - Generate publication-ready **charts and panel visualizations** as static png files.
 - The ability to save different parametrized analyses from a single CSV file as named scenarios.
 
+## Sample Path Flow Metrics
 
-
-## Key Metrics
-
-Deterministic, sample-path analogues of Little’s Law:
+Deterministic, finite-window analogues of Little’s Law:
 
 | Quantity | Meaning                                               |
 | -------- | ----------------------------------------------------- |
@@ -194,7 +105,7 @@ for background on what these metrics mean.
 Please see [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive) for a worked example
 on how to apply the concepts.
 
-## Chart Reference 
+## Computations and Charts
 
 For a detailed reference of the computations, charts and visualizations produced by sample path
 analysis, please see the [Chart Reference](http://samplepath.pcalc.org/articles/chart-reference).
@@ -203,7 +114,7 @@ For complete documentation, see our [documentation site](http://samplepath.pcalc
 
 ---
 
-# 3. Goals for this toolkit
+# 3. Package Scope
 
 This package is a part
 of [The Presence Calculus Project](https://docs.pcalc.org): an open source
@@ -214,60 +125,15 @@ stream management, developer experience and platforms, and lean continuous proce
 
 This library and toolkit is intended to be used by practitioners to 
 understand the theory and _develop their intuition about the dynamics of flow 
-processes_, using their own environments.  Understanding the context behind 
-the data greatly helps makes the abstract ideas here concerete and there in 
-no substitute for getting your hands dirty and trying things out directly. 
+processes_, using their own environments.  Understanding the context behind the
+data greatly helps makes the abstract ideas here concrete and there in no substitute for getting your hands dirty and trying things out directly. 
 This toolkit is designed for that. 
 
 It is not ready nor intended to support production quality operations management tooling. 
 
-## In Scope
-
-You will get the most benefits out of this library in the near term by using 
-it to  look closely and carefully, at how flow processes in your environment behave and 
-evolve using the machinery of this package and learning how to model them. 
-
-The toolkit is intentionally designed to be low-tech and force you think
-about how to model flow processes in a complex system more broadly before 
-jumping to talking about metrics and building dashboards.
-
-You should be able to apply it anywhere you can extract a csv file with 
-start and end dates for various operational processes using the native 
-reporting tools built into the production tools you use today.  
-
-Compare what you see here, with whatever your current operational dashboards 
-show today and think about the differences. It will soon become apparent 
-why sample path analysis represents a fundamentally different way of thinking about flow and operations management.
-
-We will continues to provide more examples and talking about applications
-in The Polaris Flow Dispatch so it becomes easier to imagine the possibilities.
-But the potential applications are really very large so we welcome contributions
-from others who have interesting examples to show once they grasp the ideas
-here and understand why they matter.
-
-The barrier to modeling and measuring a flow process using this toolkit are
-minimal. So please try it out and see what you find.  I would love to publish 
-your use  cases. Please raise a 
-PR to tell us if you have a novel use case and show us how you are using 
-these techniques.
-
-We plan to extend this library to support the analysis of
-general flow processes, which allow arbitrary functions as marks, and are governed by the H=λG form of Little's Law. This
-will allow us to directly model the economic impacts of flow processes.
-
-## Out of scope
-
-We do _not_ plan to directly implement online analysis of real time flow 
-processes in this package nor build web apps or UIs here in this package. It will remain an 
-offline, command line toolkit for the foreseeable future.  
-
-However, the underlying modules implement the low-level machinery and 
-code required to build these more production ready and richer applications, and 
-our licensing permits you to build those applications using the concepts in this package if 
-you so desire.
+[See more..](https://samplepath.pcalc.org/package-overview/goals.html)
 
 ---
-
 # 4. Installation (End Users)
 
 ## Quick Start with uv (Recommended)
