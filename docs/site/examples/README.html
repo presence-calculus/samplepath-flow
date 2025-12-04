@@ -284,23 +284,47 @@
     }
 
     #presence-link {
-      position: fixed;
-      top: 0.5rem;
-      right: 1rem;
-      font-size: 0.9rem;
+      margin: 3rem auto 0;
+      padding: 1.25rem 1rem 1.5rem;
+      text-align: center;
+      font-size: 0.95rem;
+      color: #444;
+      border-top: 1px solid #e5e7ea;
       background: #f9f9f9;
-      padding: 0.3rem 0.6rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      z-index: 1000;
+      border-radius: 8px 8px 0 0;
     }
 
     #presence-link a {
       text-decoration: none;
-      color: #444;
+      color: #222;
+      font-weight: 600;
     }
 
     #presence-link a:hover {
+      text-decoration: underline;
+    }
+
+    .site-nav {
+      margin: 0 auto 2rem;
+      padding: 0.75rem 1rem;
+      background: #f6f7f8;
+      border: 1px solid #e5e7ea;
+      border-radius: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      justify-content: center;
+      font-size: 0.98rem;
+    }
+
+    .site-nav a {
+      color: #222;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.2rem 0.35rem;
+    }
+
+    .site-nav a:hover {
       text-decoration: underline;
     }
 
@@ -315,53 +339,46 @@
       }
     }
 
-    @media screen and (max-width: 768px), (max-device-width: 768px) {
-      #presence-link {
-        position: static;
-        margin: 1rem auto;
-        text-align: center;
-        display: block;
-      }
-    }
   </style>
-  <script
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
-  type="text/javascript"></script>
 </head>
 <body>
-<div id="presence-link">
-  <a href="https://samplepath.pcalc.org" target="_blank">The Sample Path Analysis Toolkit</a>
-  <div style="text-align: center; font-size: 80%;">
-    © 2025 Krishna Kumar. All rights reserved.
-  </div>
-</div>
   <div class="wrapper">
     <div id="page">
-                              <nav id="TOC" role="doc-toc">
-        
-        <ul>
-        <li><a href="#examples-and-case-studies"
-        id="toc-examples-and-case-studies"><span
-        class="toc-section-number">1</span> Examples and Case
-        Studies</a></li>
-        </ul>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="https://samplepath.pcalc.org/index.html">Home</a>
+        <a href="https://samplepath.pcalc.org/articles/package-overview/index.html">Package Overview</a>
+        <a href="https://samplepath.pcalc.org/articles/cli/index.html">Command Line</a>
+        <a href="https://samplepath.pcalc.org/articles/chart-reference/index.html">Chart Reference</a>
+        <a href="https://samplepath.pcalc.org/examples/README.html">Examples</a>
       </nav>
-            <h1 data-number="1" id="examples-and-case-studies"><span
-            class="header-section-number">1</span> Examples and Case
-            Studies</h1>
-            <p>Each of the following examples highlights specific
-            aspects of sample path analysis and what we can conclude
-            about flow process dynamics using this technique.</p>
-            <p>Many of these examples have accompanying posts in <a
-            href="https://www.polaris-flow-dispatch.com">The Polaris
-            Flow Dispatch</a> that go more into the context and
-            background for why these are relevant.</p>
-            <ul>
-            <li><a href="./polaris/readme.html">Case Study: Polaris (New
-            Product Development)</a></li>
-            <li></li>
-            </ul>
-          </div>
+                              <h1
+                              id="examples-and-case-studies">Examples
+                              and Case Studies</h1>
+                              <p>Each of the following examples
+                              highlights specific aspects of sample path
+                              analysis and what we can conclude about
+                              flow process dynamics using this
+                              technique.</p>
+                              <p>Many of these examples have
+                              accompanying posts in <a
+                              href="https://www.polaris-flow-dispatch.com">The
+                              Polaris Flow Dispatch</a> that go more
+                              into the context and background for why
+                              these are relevant.</p>
+                              <ul>
+                              <li><a
+                              href="https://samplepath.pcalc.org/examples/polaris">Case
+                              Study: Polaris (New Product
+                              Development)</a></li>
+                              <li></li>
+                              </ul>
+            <footer id="presence-link" role="contentinfo">
+        <a href="https://samplepath.pcalc.org" target="_blank" rel="noreferrer">The Sample Path Analysis Toolkit</a>
+        <div style="margin-top: 0.35rem; font-size: 0.85rem; color: #555;">
+          © 2025 Krishna Kumar. All rights reserved.
+        </div>
+      </footer>
+    </div>
   </div>
 </body>
 </html>
