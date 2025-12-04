@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Package Overview</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+
+    html {
+      box-sizing: border-box;
+      font-size: 100%;
+    }
+
+    *, *:before, *:after {
+      box-sizing: inherit;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Nunito, Arial, sans-serif;
+      font-size: 1.1rem;
+      line-height: 1.75;
+      background: #fff;
+      color: #111;
+
+      /* Remove Pandoc's injected width restrictions */
+      max-width: none !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+
+    .wrapper {
+      display: flex;
+      justify-content: center;
+    }
+
+    #page {
+      max-width: 880px;
+      width: 100%;
+      padding: 2rem 1rem;
+    }
+
+    h1, h2, h3, h4 {
+      font-weight: bold;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+
+    p {
+      margin: 1.25rem 0;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 2rem auto;
+    }
+
+    pre {
+      background: #f8f8f8;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+    }
+
+    code {
+      font-family: SFMono-Regular, Consolas, monospace;
+      background: #f5f5f5;
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+    }
+
+    blockquote {
+      margin: 2rem 0;
+      padding-left: 1rem;
+      border-left: 4px solid #ddd;
+      color: #666;
+      font-style: italic;
+    }
+
+    .subtitle, .author, .date {
+      color: #666;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+
+    nav#TOC {
+      margin: 2rem 0;
+      padding: 1rem;
+      border: 1px solid #eee;
+      background: #fafafa;
+      overflow-x: auto;
+    }
+
+    figure {
+      margin: 2rem auto;
+      text-align: center;
+    }
+
+    figure img {
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 2rem auto;
+    }
+
+    figcaption {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 0.75rem;
+    }
+
+    header#title-block-header {
+      text-align: center;
+    }
+
+    #presence-link {
+      position: fixed;
+      top: 0.5rem;
+      right: 1rem;
+      font-size: 0.9rem;
+      background: #f9f9f9;
+      padding: 0.3rem 0.6rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      z-index: 1000;
+    }
+
+    #presence-link a {
+      text-decoration: none;
+      color: #444;
+    }
+
+    #presence-link a:hover {
+      text-decoration: underline;
+    }
+
+
+    @media screen and (min-width: 1024px) {
+      body {
+        font-size: 1.15rem;
+      }
+
+      #page {
+        padding: 3rem 2rem;
+      }
+    }
+
+    @media screen and (max-width: 768px), (max-device-width: 768px) {
+      #presence-link {
+        position: static;
+        margin: 1rem auto;
+        text-align: center;
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+<div id="presence-link">
+  <a href="https://samplepath.pcalc.org" target="_blank">The Sample Path Analysis Toolkit</a>
+  <div style="text-align: center; font-size: 80%;">
+    © 2025 Krishna Kumar. All rights reserved.
+  </div>
+</div>
+  <div class="wrapper">
+    <div id="page">
+                  <header id="title-block-header">
+        <h1 class="title"><strong>Package Overview</strong></h1>
+        <p class="subtitle">true</p>
+        <p class="author"><p><a href=""><em>Sample Path Analysis
+Toolkit</em></a></p></p>
+        
+              </header>
+                  <div class="header-image">
+        <img src="../../assets/sample_path_N.png" alt="Header image"/>
+      </div>
+                  <h1 id="sample-path-analysis">Sample Path
+                  Analysis</h1>
+                  <p>This library implements <em>sample path
+                  analysis,</em> a technique for analyzing <em>macro
+                  dynamics</em> of flow processes in complex adaptive
+                  systems. It provides deterministic tools to analyze
+                  the <em>long-run</em> behavior of stochastic flow
+                  processes:</p>
+                  <ul>
+                  <li>Arrival/departure equilibrium</li>
+                  <li>Process time coherence, and</li>
+                  <li>Process stability</li>
+                  </ul>
+                  <p>The relies on the finite-window formulation of <a
+                  href="https://docs.pcalc.org/articles/littles-law"><strong>Little’s
+                  Law</strong></a>.</p>
+                  <p>The focus of the analysis is a single <em>sample
+                  path</em> of a flow process: a <em>continuous</em>
+                  real-valued function that describes a particular
+                  process behavior when observed over a long, but finite
+                  period of time (see figure).</p>
+                  <p>A key aspect of this technique is that it is
+                  <em>distribution-free</em>. It does not require
+                  well-defined statistical or probability distributions
+                  to reason rigorously about a flow process. Please see
+                  <a href="../not-statistics">sample path analysis is
+                  not a statistical method</a> for more details.</p>
+                  <p>As a result, this technique allows us to extend
+                  many results from stochastic process theory to
+                  processes operating in complex adaptive systems, where
+                  stable statistical distributions often don’t exist.
+                  Our focus is operations management in software
+                  development, but the techniques here are much more
+                  general.</p>
+                  <h2 id="history-and-origins">History and Origins</h2>
+                  <p>Sample path analysis is not new. The formal theory
+                  has been worked out thoroughly by researchers in
+                  stochastic process theory and has been stable for over
+                  30 years. They are just not familiar in the software
+                  industry.</p>
+                  <p>Dr. Shaler Stidham discovered the technique when he
+                  provided the first deterministic proof of Little’s Law
+                  in 1972. So the core ideas here are nearly 60 years
+                  old!</p>
+                  <p>In the years since Dr. Stidham and other
+                  researchers in stochastic process theory have shown
+                  the power and versatility of this technique to provide
+                  deterministic sample path oriented results of many
+                  classical results in queueing theory that required
+                  very stringent probabilistic assumptions like
+                  stationarity and ergodicity to prove previously.</p>
+                  <p>The canonical reference detailing this work is the
+                  textbook <a
+                  href="https://www.researchgate.net/publication/303785171_Sample-Path_Analysis_of_Queueing_Systems">Sample
+                  Path Analysis of Queueing Systems</a> by Muhammed
+                  El-Taha and Shaler Stidham (a downloadable PDF is
+                  available at the link). This package directly
+                  implements many of the concepts in this textbook.</p>
+                  <p>See our article on <a
+                  href="https://docs.pcalc.org/articles/littles-law">Little’s
+                  Law</a> for comprehensive background and source
+                  references.</p>
+                  <h2 id="why-this-is-significant">Why this is
+                  significant</h2>
+                  <p>Conditions like non-stationarity and non-ergodic
+                  behavior and lack of stable distributions are
+                  <em>exactly</em> the dividing line between complex
+                  adaptive systems and simpler, ordered systems when
+                  viewed from an operations management lens.</p>
+                  <p>This is the situation we face in digital operations
+                  management. The default assumptions that underpin
+                  operational analysis in ordered domains – that
+                  processes are stable and that steady state behavior
+                  can be observed and analyzed – breaks down in this
+                  environment.</p>
+                  <p>Sample path analysis allows us to adapt these
+                  principles to processes that operate far from
+                  equilibrium and whose behavior is history sensitive,
+                  path dependent and sensitive to initial conditions.
+                  All these are hallmarks of a CAS.</p>
+                  <p>There are several capabilities we get from
+                  this:</p>
+                  <ul>
+                  <li>We can precisely define, measure and reason about
+                  properties such as equilibrium, coherence and
+                  stability, of real-world process using transaction
+                  data from operations management tools.</li>
+                  <li>We can retrospectively reason about cause and
+                  effect in observed behavior of these operational
+                  processes, and do so in a deterministic fashion -
+                  <em>even for process that are not stable</em>.</li>
+                  </ul>
+                  <p>These are precisely the conditions that confound
+                  traditional statistical and probabilistic reasoning
+                  about operational processes in the digital domain.
+                  Thus sample path analysis is <em>the</em> technical
+                  bridge to rigorously model and measure flow processes
+                  in such contexts.</p>
+                  <hr />
+                  <h1 id="key-concepts">Key Concepts</h1>
+                  <p>Please see our continuing series on Little’s Law
+                  and sample path analysis at <a
+                  href="https://www.polaris-flow-dispatch.com">The
+                  Polaris Flow Dispatch</a> for accessible overviews of
+                  the theory.</p>
+                  <p>In particular,</p>
+                  <ul>
+                  <li><a
+                  href="https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law">The
+                  Many Faces of Little’s Law</a>.</li>
+                  <li><a
+                  href="https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive">Little’s
+                  Law in a Complex Adaptive System</a></li>
+                  </ul>
+                  <p>cover most of the background needed to work with
+                  this library at a high level.</p>
+                  <p>The example analyses in these posts were produced
+                  using this library and can be found in the <a
+                  href="./examples/polaris">examples</a> directory
+                  together with their original source data.</p>
+                  <p>Please subscribe to <a
+                  href="https://www.polaris-flow-dispatch.com">The
+                  Polaris Flow Dispatch</a> if you are interested in
+                  staying abreast of developments and applications of
+                  these concepts.</p>
+                  <h2 id="flow-processes">Flow processes</h2>
+                  <p>A <a
+                  href="https://www.polaris-flow-dispatch.com/i/172332418/flow-processes">flow
+                  process</a> is simply a timeline of events from some
+                  underlying operational domain, where events have
+                  <em>effects</em> that persist beyond the time of the
+                  event. The effects are encoded using metadata (called
+                  marks) to describe them. The generality of the model
+                  comes from the fact that marks can be arbitrary
+                  real-valued functions of time that meet some very weak
+                  requirements.</p>
+                  <p>Typically data for analyzing a flow process are
+                  extracted from real-time transaction logs of digital
+                  operations management tools.</p>
+                  <p>The current version of the library only supports
+                  the <em>offline</em> analysis of <em>binary flow
+                  processes</em>. These are flow processes where the
+                  marks denote the start or end of an observed presence
+                  of a domain element within some system boundary.</p>
+                  <p>All queueing processes fall into this category, as
+                  do a much larger class of general input-output
+                  processes. These are the simplest kind of flow
+                  processes we analyze in the presence calculus, but
+                  they cover the vast majority of operational use cases
+                  we currently model in software delivery, so we will
+                  start there. They are governed by the L=λW form of
+                  Little’s Law.</p>
+                  <p>We highly recommend reading <a
+                  href="https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law">The
+                  Many Faces of Little’s Law</a> for background on these
+                  concepts.</p>
+          </div>
+  </div>
+</body>
+</html>
