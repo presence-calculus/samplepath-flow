@@ -3,19 +3,20 @@ title: "<strong>Chart Reference</strong>"
 author: |
   <a href="https://github.com/presence-calculus/samplepath"><em>The Samplepath Analysis Toolkit</em></a>
 
-figures-numbered: true
-link-citations: true
-
 document-root: "../.."
 header-image: "$document-root/assets/sample_path_flow_metrics.png"
 
+# Configure TOC
+toc: true
 toc-title: "Contents"
 toc-depth: 3
-
-figPrefix: "Figure"
+# Configure section numbers
 numberSections: true
 sectionsDepth: 2
-
+# Configure figures
+figPrefix: "Figure"
+# Configure citations
+citations: false
 ---
 
 
