@@ -10,6 +10,7 @@ dist/
 build/
 *.egg-info/
 
+.mypy_cache/
 
 # Virtualenvs
 .env
@@ -53,3 +54,10 @@ pytest_cache/
 
 #local chart output
 charts
+
+#precommit
+.pre-commit/
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
