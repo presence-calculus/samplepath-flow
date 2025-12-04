@@ -2,11 +2,9 @@
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
 import argparse
-import os
 from pathlib import Path
 import shutil
 import textwrap
-from typing import LiteralString
 
 
 def make_fresh_dir(path):
