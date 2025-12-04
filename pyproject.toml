@@ -86,6 +86,7 @@ pythonpath = ["."]
 branch = true
 source = ["samplepath"]
 omit = ["**/__init__.py"]
+data_file = "coverage/.coverage"
 
 [tool.coverage.report]
 show_missing = true
@@ -100,10 +101,10 @@ exclude_lines = [
 ]
 
 [tool.coverage.html]
-directory = "htmlcov"
+directory = "coverage/htmlcov"
 
 [tool.coverage.xml]
-output = "coverage.xml"
+output = "coverage/coverage.xml"
 
 #----------------------
 # Publishing end points
