@@ -442,7 +442,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
         class="math inline">\(N(t)\)</span></a></li>
         <li><a href="#lambdat-cumulative-arrival-rate"
         id="toc-lambdat-cumulative-arrival-rate"><span
-        class="math inline">\(\Lambda(T)\)</span>: Cumulative arrival
+        class="math inline">\(\\Lambda(T)\)</span>: Cumulative arrival
         rate</a></li>
         <li><a href="#wt-average-residence-time"
         id="toc-wt-average-residence-time"><span
@@ -566,11 +566,11 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <li>Functions of lower-case <span
             class="math inline">\(t\)</span> are instantaneous
             measurements at a point in time <span
-            class="math inline">\(0 \le t \le T\)</span>.</li>
+            class="math inline">\(0 \\le t \\le T\)</span>.</li>
             <li>Functions of upper case T represent <em>aggregates</em>
             computed over the interval <span
             class="math inline">\([0,t]\)</span> for each <span
-            class="math inline">\(0 \le t \le T\)</span>.</li>
+            class="math inline">\(0 \\le t \\le T\)</span>.</li>
             </ul>
             <p>There are four core time-varying functions</p>
             <ul>
@@ -580,16 +580,16 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <li>L(T): The time average of <span
             class="math inline">\(N(t)\)</span> (aka time average of
             WIP)</li>
-            <li><span class="math inline">\(\Lambda(T)\)</span>: The
+            <li><span class="math inline">\(\\Lambda(T)\)</span>: The
             cumulative arrival rate.</li>
             <li><span class="math inline">\(w(T)\)</span>: The average
             residence time</li>
             </ul>
             <p>The finite version of Little’s Law states that <span
-            class="math display">\[ L(T) = \Lambda(T).w(T) \]</span> for
-            <em>any</em> finite observation window <span
+            class="math display">\[ L(T) = \\Lambda(T).w(T) \]</span>
+            for <em>any</em> finite observation window <span
             class="math inline">\([0,T]\)</span> with <span
-            class="math inline">\(0 \lt T \lt \infty\)</span>.</p>
+            class="math inline">\(0 \\lt T \\lt \\infty\)</span>.</p>
             <p>This means that last three functions <em>always</em>
             change in time in such a way that this identity holds. This
             constraints governs the global dynamics of the flow process
@@ -600,9 +600,9 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <code>&lt;scenario&gt;/</code></p>
             <table>
             <colgroup>
-            <col style="width: 14%" />
+            <col style="width: 13%" />
             <col style="width: 37%" />
-            <col style="width: 48%" />
+            <col style="width: 49%" />
             </colgroup>
             <thead>
             <tr>
@@ -638,21 +638,21 @@ Samplepath Analysis Toolkit</em></a></p></p>
             flat.</li>
             <li>If it is changing then the finite version of Little’s
             Law tells us that this must be because at least one of <span
-            class="math inline">\(\Lambda(T)\)</span> or <span
+            class="math inline">\(\\Lambda(T)\)</span> or <span
             class="math inline">\(w(T)\)</span> changed.</li>
             </ul>
             <p>It means that these are the <em>only</em> possible
             explanations:</p>
             <ul>
-            <li><span class="math inline">\(\Lambda(T)\)</span> changed:
-            more or fewer things are arriving.</li>
+            <li><span class="math inline">\(\\Lambda(T)\)</span>
+            changed: more or fewer things are arriving.</li>
             <li><span class="math inline">\(w(T)\)</span> changed:
             things are taking more or less time to finish.</li>
             <li>A combination of the two.</li>
             </ul>
             <p>In the last case there are two possibilities.</p>
             <p>Since <span class="math inline">\(L(T)\)</span> is the
-            product of <span class="math inline">\(\Lambda(T)\)</span>
+            product of <span class="math inline">\(\\Lambda(T)\)</span>
             and <span class="math inline">\(w(T)\)</span>:</p>
             <ul>
             <li>If they move in the same direction they lead to
@@ -796,7 +796,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             WIP</figcaption>
             </figure>
             <h3 id="lambdat-cumulative-arrival-rate"><span
-            class="math inline">\(\Lambda(T)\)</span>: Cumulative
+            class="math inline">\(\\Lambda(T)\)</span>: Cumulative
             arrival rate</h3>
             <p><code>cumulative_arrival_rate_Lambda.png</code></p>
             <p><code>Λ(T)</code> is the arrival rate of items that have
@@ -1083,7 +1083,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <colgroup>
             <col style="width: 15%" />
             <col style="width: 38%" />
-            <col style="width: 45%" />
+            <col style="width: 46%" />
             </colgroup>
             <thead>
             <tr>

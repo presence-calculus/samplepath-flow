@@ -1,10 +1,10 @@
 ---
-title: "<strong>Package Overview</strong>"
+title: <strong>Package Overview</strong>
 author: |
   <a href=""><em>Sample Path Analysis Toolkit</em></a>
 
-document-root: "../.."
-header-image: "$document-root/assets/sample_path_N.png"
+document-root: ../..
+header-image: $document-root/assets/sample_path_N.png
 ---
 
 # Sample Path Analysis
@@ -59,23 +59,23 @@ by Muhammed El-Taha and Shaler Stidham (a downloadable PDF is available at the
 link). This package directly implements many of the concepts in this textbook.
 
 See our article on [Little's Law](https://docs.pcalc.org/articles/littles-law) for
-comprehensive background and source references. 
+comprehensive background and source references.
 
 ## Why this is significant
 
 Conditions like non-stationarity and non-ergodic behavior and lack of stable
 distributions are
 _exactly_ the dividing line between complex adaptive systems and simpler,
-ordered systems when viewed from an operations management lens. 
+ordered systems when viewed from an operations management lens.
 
-This is the situation we face in digital operations management. 
+This is the situation we face in digital operations management.
 The default assumptions that underpin operational analysis in ordered domains -- that processes are
 stable and that steady state behavior can be observed and analyzed --
-breaks down in this environment. 
+breaks down in this environment.
 
 Sample path analysis allows us to adapt these principles to processes that
-operate far from equilibrium and whose behavior is history sensitive, path dependent 
-and sensitive to initial conditions. All these are hallmarks of a CAS. 
+operate far from equilibrium and whose behavior is history sensitive, path dependent
+and sensitive to initial conditions. All these are hallmarks of a CAS.
 
 There are several capabilities we get from this:
 
@@ -91,8 +91,7 @@ probabilistic reasoning about operational processes in the digital domain.
 Thus sample path analysis is _the_ technical bridge to rigorously model and
 measure flow processes in such contexts.
 
-
----
+______________________________________________________________________
 
 # Key Concepts
 

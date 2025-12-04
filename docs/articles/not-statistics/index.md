@@ -5,7 +5,6 @@ number-sections: false
 
 ## Technical Note: Sample path analysis is not statistics.
 
-
 It works with real-valued time-varying functions of a flow process derived from
 its observed history. We study the behavior of these continuous functions using
 the machinery of real analysis: integrals, derivatives, limits, convergence.
