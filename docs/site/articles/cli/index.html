@@ -412,50 +412,37 @@ Samplepath Analysis Toolkit</em></a></p></p>
                         <nav id="TOC" role="doc-toc">
         <h2 id="toc-title">Contents</h2>
         <ul>
-        <li><a href="#invocation" id="toc-invocation"><span
-        class="toc-section-number">1</span> 1 Invocation</a></li>
-        <li><a href="#options" id="toc-options"><span
-        class="toc-section-number">2</span> 2 Options</a>
+        <li><a href="#invocation" id="toc-invocation">1
+        Invocation</a></li>
+        <li><a href="#options" id="toc-options">2 Options</a>
         <ul>
-        <li><a href="#csv-parsing" id="toc-csv-parsing"><span
-        class="toc-section-number">2.1</span> 2.1 CSV Parsing</a></li>
-        <li><a href="#data-filters" id="toc-data-filters"><span
-        class="toc-section-number">2.2</span> 2.2 Data Filters</a></li>
-        <li><a href="#outlier-trimming" id="toc-outlier-trimming"><span
-        class="toc-section-number">2.3</span> 2.3 Outlier
-        Trimming</a></li>
+        <li><a href="#csv-parsing" id="toc-csv-parsing">CSV
+        Parsing</a></li>
+        <li><a href="#data-filters" id="toc-data-filters">Data
+        Filters</a></li>
+        <li><a href="#outlier-trimming"
+        id="toc-outlier-trimming">Outlier Trimming</a></li>
         <li><a href="#lambda-fine-tuning"
-        id="toc-lambda-fine-tuning"><span
-        class="toc-section-number">2.4</span> 2.4 Lambda Fine
-        Tuning</a></li>
+        id="toc-lambda-fine-tuning">Lambda Fine Tuning</a></li>
         <li><a href="#convergence-thresholds"
-        id="toc-convergence-thresholds"><span
-        class="toc-section-number">2.5</span> 2.5 Convergence
-        Thresholds</a></li>
+        id="toc-convergence-thresholds">Convergence Thresholds</a></li>
         <li><a href="#output-configuration"
-        id="toc-output-configuration"><span
-        class="toc-section-number">2.6</span> 2.6 Output
-        Configuration</a></li>
+        id="toc-output-configuration">Output Configuration</a></li>
         <li><a href="#what-the-command-does"
-        id="toc-what-the-command-does"><span
-        class="toc-section-number">2.7</span> 2.7 What the command
-        does</a></li>
-        <li><a href="#example" id="toc-example"><span
-        class="toc-section-number">2.8</span> 2.8 Example</a></li>
+        id="toc-what-the-command-does">What the command does</a></li>
+        <li><a href="#example" id="toc-example">Example</a></li>
         </ul></li>
-        <li><a href="#inputs-and-outputs"
-        id="toc-inputs-and-outputs"><span
-        class="toc-section-number">3</span> 3 Inputs and Outputs</a>
+        <li><a href="#inputs-and-outputs" id="toc-inputs-and-outputs">3
+        Inputs and Outputs</a>
         <ul>
-        <li><a href="#input-format" id="toc-input-format"><span
-        class="toc-section-number">3.1</span> 3.1 Input Format</a></li>
-        <li><a href="#output-layout" id="toc-output-layout"><span
-        class="toc-section-number">3.2</span> 3.2 Output Layout</a></li>
+        <li><a href="#input-format" id="toc-input-format">Input
+        Format</a></li>
+        <li><a href="#output-layout" id="toc-output-layout">Output
+        Layout</a></li>
         </ul></li>
         </ul>
       </nav>
-            <h1 data-number="1" id="invocation"><span
-            class="header-section-number">1</span> 1 Invocation</h1>
+            <h1 id="invocation">1 Invocation</h1>
             <p>This tool generates finite-window Little’s Law charts
             from an CSV file containing <code>id</code>,
             <code>start_ts</code>, <code>end_ts</code>, and optionally a
@@ -465,11 +452,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <p>Invoke it on the command line with</p>
             <div class="sourceCode" id="cb1"><pre
             class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samplepath</span> <span class="op">&lt;</span>csv-file<span class="op">&gt;</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span></span></code></pre></div>
-            <h1 data-number="2" id="options"><span
-            class="header-section-number">2</span> 2 Options</h1>
-            <h2 data-number="2.1" id="csv-parsing"><span
-            class="header-section-number">2.1</span> 2.1 CSV
-            Parsing</h2>
+            <h1 id="options">2 Options</h1>
+            <h2 id="csv-parsing">CSV Parsing</h2>
             <ul>
             <li><p><strong>csv</strong> <em>(positional)</em><br />
             Path to the CSV. Should contain at least the columns
@@ -488,9 +472,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             Explicit datetime format string for parsing</p></li>
             </ul>
             <hr />
-            <h2 data-number="2.2" id="data-filters"><span
-            class="header-section-number">2.2</span> 2.2 Data
-            Filters</h2>
+            <h2 id="data-filters">Data Filters</h2>
             <p>Drop rows from the CSV before running the analysis.
             Useful for isolating subprocesses in the main file. Use with
             <code>--scenario</code> to save subprocess results.</p>
@@ -506,9 +488,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             Comma-separated list of class tags to include</p></li>
             </ul>
             <hr />
-            <h2 data-number="2.3" id="outlier-trimming"><span
-            class="header-section-number">2.3</span> 2.3 Outlier
-            Trimming</h2>
+            <h2 id="outlier-trimming">Outlier Trimming</h2>
             <p>Remove outliers to see whether the remaining process
             converges.</p>
             <ul>
@@ -531,9 +511,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <code>--outlier-iqr</code></p></li>
             </ul>
             <hr />
-            <h2 data-number="2.4" id="lambda-fine-tuning"><span
-            class="header-section-number">2.4</span> 2.4 Lambda Fine
-            Tuning</h2>
+            <h2 id="lambda-fine-tuning">Lambda Fine Tuning</h2>
             <p>Sometimes it helps to drop early points in the λ(T) chart
             so the remainder displays on a more meaningful scale.</p>
             <ul>
@@ -550,9 +528,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             percentiles</p></li>
             </ul>
             <hr />
-            <h2 data-number="2.5" id="convergence-thresholds"><span
-            class="header-section-number">2.5</span> 2.5 Convergence
-            Thresholds</h2>
+            <h2 id="convergence-thresholds">Convergence Thresholds</h2>
             <ul>
             <li><p><strong>–epsilon</strong> <em>(default:
             <code>0.05</code>)</em><br />
@@ -563,9 +539,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             convergence</p></li>
             </ul>
             <hr />
-            <h2 data-number="2.6" id="output-configuration"><span
-            class="header-section-number">2.6</span> 2.6 Output
-            Configuration</h2>
+            <h2 id="output-configuration">Output Configuration</h2>
             <ul>
             <li><p><strong>–output-dir</strong> <em>(default:
             <code>charts</code>)</em><br />
@@ -581,9 +555,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             Remove existing charts before writing new results</p></li>
             </ul>
             <hr />
-            <h2 data-number="2.7" id="what-the-command-does"><span
-            class="header-section-number">2.7</span> 2.7 What the
-            command does</h2>
+            <h2 id="what-the-command-does">What the command does</h2>
             <ol type="1">
             <li>Parse CLI arguments<br />
             </li>
@@ -599,8 +571,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <li>Print paths to generated charts</li>
             </ol>
             <hr />
-            <h2 data-number="2.8" id="example"><span
-            class="header-section-number">2.8</span> 2.8 Example</h2>
+            <h2 id="example">Example</h2>
             <div class="sourceCode" id="cb2"><pre
             class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samplepath</span> events.csv <span class="dt">\</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--completed</span> <span class="dt">\</span></span>
@@ -610,12 +581,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--scenario</span> weekly_report <span class="dt">\</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--clean</span></span></code></pre></div>
             <hr />
-            <h1 data-number="3" id="inputs-and-outputs"><span
-            class="header-section-number">3</span> 3 Inputs and
-            Outputs</h1>
-            <h2 data-number="3.1" id="input-format"><span
-            class="header-section-number">3.1</span> 3.1 Input
-            Format</h2>
+            <h1 id="inputs-and-outputs">3 Inputs and Outputs</h1>
+            <h2 id="input-format">Input Format</h2>
             <p>The input format is simple.</p>
             <p>The csv requires three columns</p>
             <ul>
@@ -641,9 +608,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             –output-dir argument.</p>
             <p>See the <a href="docs/src/cli.html">CLI Documentation</a>
             for the full list of command line options.</p>
-            <h2 data-number="3.2" id="output-layout"><span
-            class="header-section-number">3.2</span> 3.2 Output
-            Layout</h2>
+            <h2 id="output-layout">Output Layout</h2>
             <p>For input <code>events.csv</code>, output is organized
             as:</p>
             <div class="sourceCode" id="cb3"><pre

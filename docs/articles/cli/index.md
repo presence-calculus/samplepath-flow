@@ -3,14 +3,17 @@ title: "<strong>Command Line Reference</strong>"
 author: |
   <a href="https://github.com/presence-calculus/samplepath"><em>The Samplepath Analysis Toolkit</em></a>
 
-figures-numbered: true
-link-citations: true
+# Configure TOC
+toc: true
 toc-title: "Contents"
-toc-depth: 2
-
-figPrefix: "Figure"
+toc-depth: 3
+# Configure section numbers
 numberSections: true
-sectionsDepth: 2
+sectionsDepth: 1
+# Configure figures
+figPrefix: "Figure"
+# Configure citations
+citations: false
 ---
 
 # Invocation
