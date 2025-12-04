@@ -18,6 +18,7 @@ env/
 venv/
 ENV/
 .venv.bak/
+.local/
 
 # VSCode
 .vscode/
@@ -49,5 +50,7 @@ pytest_cache/
 
 #data
 .csv
-/coverage.xml
+test/coverage.xml
 
+#local chart output
+charts
