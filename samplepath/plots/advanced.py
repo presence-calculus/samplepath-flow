@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import pandas as pd
 
@@ -13,14 +13,14 @@ from samplepath.metrics import FlowMetricsResult
 
 def plot_llaw_manifold_3d(
     df,
-    metrics,                           # FlowMetricsResult
+    metrics,  # FlowMetricsResult
     out_dir: str,
     title: str = "Manifold view: L = Λ · w (log-space plane z = x + y)",
     caption: Optional[str] = None,
     figsize: Tuple[int, int] = (9, 7),
     elev: float = 28.0,
     azim: float = -135.0,
-    alpha_surface: float = 0.22,       # kept in signature; not used explicitly
+    alpha_surface: float = 0.22,  # kept in signature; not used explicitly
     wireframe_stride: int = 6,
     point_size: int = 16,
 ) -> List[str]:
@@ -28,8 +28,9 @@ def plot_llaw_manifold_3d(
     Plots only the finite-time trajectory on a filled plane (no empirical series).
     """
     import os
-    import numpy as np
+
     import matplotlib.pyplot as plt
+    import numpy as np
     from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
     # ---- helpers ------------------------------------------------------------
@@ -63,9 +64,9 @@ def plot_llaw_manifold_3d(
     w_vals = np.asarray(metrics.w, dtype=float)
 
     # Logs for the finite trio
-    x_fin = _safe_log(Lam_vals)   # log Λ
-    y_fin = _safe_log(w_vals)     # log w
-    z_fin = _safe_log(L_vals)     # log L
+    x_fin = _safe_log(Lam_vals)  # log Λ
+    y_fin = _safe_log(w_vals)  # log w
+    z_fin = _safe_log(L_vals)  # log L
     mask_fin = _finite(x_fin, y_fin, z_fin)
 
     # ---- figure / axes ------------------------------------------------------
@@ -90,18 +91,17 @@ def plot_llaw_manifold_3d(
     Z = X + Y
 
     # Filled plane: darker grey, semi-opaque; no mesh lines
-    ax.plot_surface(
-        X, Y, Z,
-        color="dimgray",
-        alpha=0.5,
-        linewidth=0,
-        antialiased=True
-    )
+    ax.plot_surface(X, Y, Z, color="dimgray", alpha=0.5, linewidth=0, antialiased=True)
 
     # ---- finite-time trajectory (lies on the plane) -------------------------
     if mask_fin.any():
-        ax.plot(x_fin[mask_fin], y_fin[mask_fin], z_fin[mask_fin],
-                lw=1.6, label="(log Λ, log w, log L)")
+        ax.plot(
+            x_fin[mask_fin],
+            y_fin[mask_fin],
+            z_fin[mask_fin],
+            lw=1.6,
+            label="(log Λ, log w, log L)",
+        )
 
     # ---- labels / view / legend / caption ----------------------------------
     ax.set_xlabel("log Λ")
@@ -119,8 +119,18 @@ def plot_llaw_manifold_3d(
 
     # z-limits: include plane and line
     if np.isfinite(Z).any():
-        z_hi = np.nanmax([np.nanmax(Z), np.nanmax(z_fin[mask_fin]) if mask_fin.any() else np.nanmin(Z)])
-        z_lo = np.nanmin([np.nanmin(Z), np.nanmin(z_fin[mask_fin]) if mask_fin.any() else np.nanmax(Z)])
+        z_hi = np.nanmax(
+            [
+                np.nanmax(Z),
+                np.nanmax(z_fin[mask_fin]) if mask_fin.any() else np.nanmin(Z),
+            ]
+        )
+        z_lo = np.nanmin(
+            [
+                np.nanmin(Z),
+                np.nanmin(z_fin[mask_fin]) if mask_fin.any() else np.nanmax(Z),
+            ]
+        )
         ax.set_zlim(z_lo, z_hi)
 
     plt.tight_layout()

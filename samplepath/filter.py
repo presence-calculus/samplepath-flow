@@ -5,27 +5,29 @@
 # -*- coding: utf-8 -*-
 # filters.py
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Optional, List, Dict, Tuple
+
 from argparse import Namespace
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 
-
 # ---------- Spec / Result ----------
+
 
 @dataclass
 class FilterSpec:
     completed_only: bool = False
     incomplete_only: bool = False
-    classes: Optional[str] = None        # comma-separated string
+    classes: Optional[str] = None  # comma-separated string
     outlier_hours: Optional[float] = None
     outlier_pctl: Optional[float] = None
     outlier_iqr: Optional[float] = None
     outlier_iqr_two_sided: bool = False
     raise_on_empty_classes: bool = True
     copy_result: bool = False
+
 
 @dataclass
 class FilterResult:
@@ -39,12 +41,15 @@ class FilterResult:
     def display(self) -> str:
         return f"Filters: {self.label}"
 
+
 # ---------- Helpers ----------
+
 
 def _require_cols(df: pd.DataFrame, cols: List[str]) -> None:
     missing = [c for c in cols if c not in df.columns]
     if missing:
         raise ValueError(f"Missing required column(s): {missing}")
+
 
 def _parse_classes(s: Optional[str]) -> list[str] | None:
     if not s:
@@ -55,8 +60,10 @@ def _parse_classes(s: Optional[str]) -> list[str] | None:
     for p in parts:
         v = p.lower()
         if v not in seen:
-            seen.add(v); out.append(v)
+            seen.add(v)
+            out.append(v)
     return out or None
+
 
 def _completed_base_label(spec: FilterSpec) -> str:
     if spec.completed_only:
@@ -65,15 +72,20 @@ def _completed_base_label(spec: FilterSpec) -> str:
         return "open elements"
     return ""
 
+
 def _comp_mask(df: pd.DataFrame, cur_mask: pd.Series) -> pd.Series:
     return cur_mask & df["end_ts"].notna()
 
 
 # ---------- Individual filter functions (mask-first) ----------
 
+
 def _f_completed_only(
-    df: pd.DataFrame, mask: pd.Series, spec: FilterSpec,
-    applied: List[str], dropped: Dict[str, int]
+    df: pd.DataFrame,
+    mask: pd.Series,
+    spec: FilterSpec,
+    applied: List[str],
+    dropped: Dict[str, int],
 ) -> pd.Series:
     if not spec.completed_only:
         return mask
@@ -83,9 +95,13 @@ def _f_completed_only(
     applied.append("completed_only")
     return new_mask
 
+
 def _f_incomplete_only(
-    df: pd.DataFrame, mask: pd.Series, spec: FilterSpec,
-    applied: List[str], dropped: Dict[str, int]
+    df: pd.DataFrame,
+    mask: pd.Series,
+    spec: FilterSpec,
+    applied: List[str],
+    dropped: Dict[str, int],
 ) -> pd.Series:
     if not spec.incomplete_only:
         return mask
@@ -95,9 +111,13 @@ def _f_incomplete_only(
     applied.append("incomplete_only")
     return new_mask
 
+
 def _f_classes(
-    df: pd.DataFrame, mask: pd.Series, spec: FilterSpec,
-    applied: List[str], dropped: Dict[str, int]
+    df: pd.DataFrame,
+    mask: pd.Series,
+    spec: FilterSpec,
+    applied: List[str],
+    dropped: Dict[str, int],
 ) -> Tuple[pd.Series, Optional[str]]:
     norm = _parse_classes(spec.classes)
     if not norm:
@@ -112,9 +132,14 @@ def _f_classes(
     label_add = f", Classes: {','.join(norm)}"
     return new_mask, label_add
 
+
 def _f_outlier_hours(
-    df: pd.DataFrame, mask: pd.Series, spec: FilterSpec,
-    applied: List[str], dropped: Dict[str, int], outlier_tags: List[str]
+    df: pd.DataFrame,
+    mask: pd.Series,
+    spec: FilterSpec,
+    applied: List[str],
+    dropped: Dict[str, int],
+    outlier_tags: List[str],
 ) -> pd.Series:
     if spec.outlier_hours is None:
         return mask
@@ -128,17 +153,24 @@ def _f_outlier_hours(
         outlier_tags.append(f">{hrs:g}h")
     return new_mask
 
+
 def _f_outlier_pctl(
-    df: pd.DataFrame, mask: pd.Series, spec: FilterSpec,
-    applied: List[str], dropped: Dict[str, int], thresholds: Dict[str, float],
-    outlier_tags: List[str]
+    df: pd.DataFrame,
+    mask: pd.Series,
+    spec: FilterSpec,
+    applied: List[str],
+    dropped: Dict[str, int],
+    thresholds: Dict[str, float],
+    outlier_tags: List[str],
 ) -> pd.Series:
     if spec.outlier_pctl is None:
         return mask
     _require_cols(df, ["end_ts", "duration_hr"])
     p = float(spec.outlier_pctl)
     if not (0.0 < p < 100.0):
-        raise ValueError(f"--outlier-pctl must be between 0 and 100 (got {spec.outlier_pctl})")
+        raise ValueError(
+            f"--outlier-pctl must be between 0 and 100 (got {spec.outlier_pctl})"
+        )
     comp = _comp_mask(df, mask)
     if not comp.any():
         return mask
@@ -152,10 +184,15 @@ def _f_outlier_pctl(
         outlier_tags.append(f">p{p:g} (>{thresh:.2f}h)")
     return new_mask
 
+
 def _f_outlier_iqr(
-    df: pd.DataFrame, mask: pd.Series, spec: FilterSpec,
-    applied: List[str], dropped: Dict[str, int], thresholds: Dict[str, float],
-    outlier_tags: List[str]
+    df: pd.DataFrame,
+    mask: pd.Series,
+    spec: FilterSpec,
+    applied: List[str],
+    dropped: Dict[str, int],
+    thresholds: Dict[str, float],
+    outlier_tags: List[str],
 ) -> pd.Series:
     if spec.outlier_iqr is None:
         return mask
@@ -194,6 +231,7 @@ def _f_outlier_iqr(
 
 # ---------- Main driver ----------
 
+
 def run_filters(df: pd.DataFrame, spec: FilterSpec) -> FilterResult:
     _require_cols(df, ["start_ts", "end_ts", "duration_hr"])
 
@@ -228,7 +266,10 @@ def run_filters(df: pd.DataFrame, spec: FilterSpec) -> FilterResult:
     # Finalize label for outliers (only if anything actually dropped)
     if outlier_tags:
         # Confirm at least one outlier filter dropped rows
-        if any(dropped.get(k, 0) > 0 for k in ("outlier_hours", "outlier_pctl", "outlier_iqr")):
+        if any(
+            dropped.get(k, 0) > 0
+            for k in ("outlier_hours", "outlier_pctl", "outlier_iqr")
+        ):
             label += f", Outliers {' & '.join(outlier_tags)} removed"
 
     return FilterResult(
@@ -252,5 +293,3 @@ def apply_filters(df: pd.DataFrame, args: Namespace) -> FilterResult:
         copy_result=False,
     )
     return run_filters(df, spec)
-
-

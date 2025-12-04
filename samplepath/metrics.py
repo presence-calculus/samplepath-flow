@@ -1,11 +1,14 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import List, Tuple, Optional, Literal
+from typing import List, Literal, Optional, Tuple
+
 import numpy as np
 import pandas as pd
 from pandas._libs.tslibs.nattype import NaTType
 
 # ---------- Core sample path flow metrics construction ----------
+
 
 @dataclass
 class FlowMetricsResult:
@@ -40,6 +43,7 @@ class FlowMetricsResult:
     to_dataframe() -> pd.DataFrame
         Tabular view with columns: time, L, Lambda, w, N, A, Arrivals, Departures.
     """
+
     events: List[Tuple[pd.Timestamp, int, int]]
     times: List[pd.Timestamp]
     L: np.ndarray
@@ -68,11 +72,21 @@ class FlowMetricsResult:
             }
         )
 
-#--- Core Metrics Calculations
+
+# --- Core Metrics Calculations
 def compute_sample_path_metrics(
     events: List[Tuple[pd.Timestamp, int, int]],
     sample_times: List[pd.Timestamp],
-) -> Tuple[List[pd.Timestamp], np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[
+    List[pd.Timestamp],
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+]:
     """
     Compute Little’s Law–related metrics for a piecewise-constant sample path N(t)
     defined by an event log. Observation times need not be regular.
@@ -183,6 +197,7 @@ def compute_sample_path_metrics(
         np.array(out_Dep, dtype=float),
     )
 
+
 def compute_finite_window_flow_metrics(
     events: List[Tuple[pd.Timestamp, int, int]],
     *,
@@ -265,7 +280,9 @@ def compute_finite_window_flow_metrics(
         last_ev = ev_times[-1]
         start_aligned = (start if start is not None else first_ev).floor(resolved_freq)
         end_aligned = (end if end is not None else last_ev).floor(resolved_freq)
-        boundaries = pd.date_range(start=start_aligned, end=end_aligned, freq=resolved_freq)
+        boundaries = pd.date_range(
+            start=start_aligned, end=end_aligned, freq=resolved_freq
+        )
         if include_next_boundary:
             off = pd.tseries.frequencies.to_offset(resolved_freq)
             if len(boundaries) == 0:
@@ -295,7 +312,7 @@ def compute_finite_window_flow_metrics(
 
     # Zero-out arrival marks prior to t0; retain dN to set N(t0)
     events_prepped: List[Tuple[pd.Timestamp, int, int]] = []
-    for (t, dN, a) in events_sorted:
+    for t, dN, a in events_sorted:
         events_prepped.append((t, dN, 0 if t < t0 else a))
 
     # Compute metrics
@@ -354,7 +371,9 @@ def _resolve_freq(
         f"or one of {{day, week, month, quarter, year}}."
     )
 
-#-------- Element-wise empirical metrics ------
+
+# -------- Element-wise empirical metrics ------
+
 
 @dataclass
 class ElementWiseEmpiricalMetrics:
@@ -393,7 +412,7 @@ class ElementWiseEmpiricalMetrics:
     corresponding `times` vectors in downstream analysis or visualization.
     """
 
-    times:  List[pd.Timestamp]
+    times: List[pd.Timestamp]
     W_star: np.ndarray
     lam_star: np.ndarray
 
@@ -401,9 +420,12 @@ class ElementWiseEmpiricalMetrics:
         return self.W_star, self.lam_star
 
 
-def compute_elementwise_empirical_metrics(df: pd.DataFrame, times: List[pd.Timestamp]) -> ElementWiseEmpiricalMetrics:
-    def _compute_elementwise_empirical_metrics(df: pd.DataFrame,
-                                                  times: List[pd.Timestamp]) -> Tuple[np.ndarray, np.ndarray]:
+def compute_elementwise_empirical_metrics(
+    df: pd.DataFrame, times: List[pd.Timestamp]
+) -> ElementWiseEmpiricalMetrics:
+    def _compute_elementwise_empirical_metrics(
+        df: pd.DataFrame, times: List[pd.Timestamp]
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Return W*(t) and λ*(t) aligned to `times`."""
         n = len(times)
         W_star = np.full(n, np.nan, dtype=float)
@@ -412,7 +434,9 @@ def compute_elementwise_empirical_metrics(df: pd.DataFrame, times: List[pd.Times
             return W_star, lam_star
 
         comp = df[df["end_ts"].notna()].copy().sort_values("end_ts")
-        comp_durations = ((comp["end_ts"] - comp["start_ts"]).dt.total_seconds() / 3600.0).to_numpy()
+        comp_durations = (
+            (comp["end_ts"] - comp["start_ts"]).dt.total_seconds() / 3600.0
+        ).to_numpy()
         comp_end_times = comp["end_ts"].to_list()
 
         starts = df["start_ts"].sort_values().to_list()
@@ -442,18 +466,15 @@ def compute_elementwise_empirical_metrics(df: pd.DataFrame, times: List[pd.Times
         return W_star, lam_star
 
     W_star, lam_star = _compute_elementwise_empirical_metrics(df, times)
-    return ElementWiseEmpiricalMetrics(
-        times=times,
-        W_star=W_star,
-        lam_star=lam_star
-    )
+    return ElementWiseEmpiricalMetrics(times=times, W_star=W_star, lam_star=lam_star)
 
-#--------- Calculating end effects and tracking errors ------ #
 
-def compute_end_effect_series(df: pd.DataFrame,
-                              times: List[pd.Timestamp],
-                              A_vals: np.ndarray,
-                              W_star: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+# --------- Calculating end effects and tracking errors ------ #
+
+
+def compute_end_effect_series(
+    df: pd.DataFrame, times: List[pd.Timestamp], A_vals: np.ndarray, W_star: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Compute end-effect diagnostics over [t0, t]:
 
     Returns arrays aligned to `times`:
@@ -484,33 +505,48 @@ def compute_end_effect_series(df: pd.DataFrame,
         if not np.isfinite(A_T) or A_T <= 0:
             continue
 
-        mask_full = df_sorted_by_end["end_ts"].notna() & (df_sorted_by_end["end_ts"] <= t)
-        A_full = float(df_sorted_by_end.loc[mask_full, "duration_h"].sum()) if mask_full.any() else 0.0
+        mask_full = df_sorted_by_end["end_ts"].notna() & (
+            df_sorted_by_end["end_ts"] <= t
+        )
+        A_full = (
+            float(df_sorted_by_end.loc[mask_full, "duration_h"].sum())
+            if mask_full.any()
+            else 0.0
+        )
 
         E_T = max(A_T - A_full, 0.0)
         rA[i] = E_T / A_T if A_T > 0 else np.nan
 
-        mask_started = (df_sorted_by_start["start_ts"] <= t)
+        mask_started = df_sorted_by_start["start_ts"] <= t
         total_started = int(mask_started.sum())
-        mask_incomplete_by_t = mask_started & ((df_sorted_by_start["end_ts"].isna()) | (df_sorted_by_start["end_ts"] > t))
+        mask_incomplete_by_t = mask_started & (
+            (df_sorted_by_start["end_ts"].isna()) | (df_sorted_by_start["end_ts"] > t)
+        )
         B_T = int(mask_incomplete_by_t.sum())
         rB[i] = (B_T / total_started) if total_started > 0 else np.nan
 
-        Wstar_t = float(W_star[i]) if i < len(W_star) else float('nan')
-        rho[i] = (elapsed_h / Wstar_t) if np.isfinite(Wstar_t) and Wstar_t > 0 else np.nan
+        Wstar_t = float(W_star[i]) if i < len(W_star) else float("nan")
+        rho[i] = (
+            (elapsed_h / Wstar_t) if np.isfinite(Wstar_t) and Wstar_t > 0 else np.nan
+        )
 
     return rA, rB, rho
 
-def compute_tracking_errors(times: List[pd.Timestamp],
-                            w_vals: np.ndarray,
-                            lam_vals: np.ndarray,
-                            W_star: np.ndarray,
-                            lam_star: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+def compute_tracking_errors(
+    times: List[pd.Timestamp],
+    w_vals: np.ndarray,
+    lam_vals: np.ndarray,
+    W_star: np.ndarray,
+    lam_star: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     n = len(times)
     if n == 0:
         return np.array([]), np.array([]), np.array([])
     t0 = times[0]
-    elapsed_hours = np.array([(t - t0).total_seconds() / 3600.0 for t in times], dtype=float)
+    elapsed_hours = np.array(
+        [(t - t0).total_seconds() / 3600.0 for t in times], dtype=float
+    )
 
     eW = np.full(n, np.nan, dtype=float)
     eLam = np.full(n, np.nan, dtype=float)
@@ -524,15 +560,16 @@ def compute_tracking_errors(times: List[pd.Timestamp],
     return eW, eLam, elapsed_hours
 
 
-def compute_coherence_score(eW: np.ndarray,
-                            eLam: np.ndarray,
-                            elapsed_hours: np.ndarray,
-                            epsilon: float,
-                            horizon_hours: float) -> Tuple[float, int, int]:
+def compute_coherence_score(
+    eW: np.ndarray,
+    eLam: np.ndarray,
+    elapsed_hours: np.ndarray,
+    epsilon: float,
+    horizon_hours: float,
+) -> Tuple[float, int, int]:
     ok_idx = np.isfinite(eW) & np.isfinite(eLam) & (elapsed_hours >= horizon_hours)
     total = int(np.sum(ok_idx))
     if total == 0:
-        return float('nan'), 0, 0
+        return float("nan"), 0, 0
     coherent = int(np.sum(np.maximum(eW[ok_idx], eLam[ok_idx]) <= epsilon))
     return coherent / total, coherent, total
-

@@ -2,7 +2,9 @@
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
 from typing import List, Tuple
+
 import pandas as pd
+
 """
 point_process
 -------------
@@ -61,9 +63,9 @@ range of stochastic processes and their sample paths.
 """
 
 
-
-
-def to_arrival_departure_process(df: pd.DataFrame) -> List[Tuple[pd.Timestamp, int, int]]:
+def to_arrival_departure_process(
+    df: pd.DataFrame,
+) -> List[Tuple[pd.Timestamp, int, int]]:
     """
     Construct a sorted list of arrival and departure events from a time interval DataFrame.
 

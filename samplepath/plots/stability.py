@@ -11,13 +11,16 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from samplepath.filter import FilterResult
-from samplepath.metrics import compute_elementwise_empirical_metrics, FlowMetricsResult
-from samplepath.plots.helpers import format_date_axis, _clip_axis_to_percentile, add_caption
+from samplepath.metrics import FlowMetricsResult, compute_elementwise_empirical_metrics
+from samplepath.plots.helpers import (
+    _clip_axis_to_percentile,
+    add_caption,
+    format_date_axis,
+)
 
 
 def compute_total_active_age_series(
-    df: pd.DataFrame,
-    times: List[pd.Timestamp]
+    df: pd.DataFrame, times: List[pd.Timestamp]
 ) -> np.ndarray:
     """
     Return R(T) aligned to `times`: total age (HOURS) of ACTIVE elements at T.
@@ -40,7 +43,9 @@ def compute_total_active_age_series(
 
     # ----------------- Prepare start/end arrays -----------------
     # Starts (absolute for comparisons; sorted)
-    starts_dt = pd.to_datetime(df["start_ts"]).sort_values().to_numpy(dtype="datetime64[ns]")
+    starts_dt = (
+        pd.to_datetime(df["start_ts"]).sort_values().to_numpy(dtype="datetime64[ns]")
+    )
 
     # Ends: only completed items; keep their corresponding starts for subtraction
     ended = df[df["end_ts"].notna()].copy()
@@ -55,7 +60,9 @@ def compute_total_active_age_series(
     starts_rel_cumsum_h = np.cumsum(starts_rel_h, dtype=np.float64)
 
     ended_starts_ns = ended_starts_dt.astype("int64")
-    ended_starts_rel_h = np.maximum((ended_starts_ns - t0_ns) / 3.6e12, 0.0).astype(np.float64)
+    ended_starts_rel_h = np.maximum((ended_starts_ns - t0_ns) / 3.6e12, 0.0).astype(
+        np.float64
+    )
     ended_starts_rel_cumsum_h = np.cumsum(ended_starts_rel_h, dtype=np.float64)
 
     # Pointers over sorted arrays
@@ -96,9 +103,9 @@ def compute_total_active_age_series(
 
 def plot_rate_stability_charts(
     df: pd.DataFrame,
-    args,                 # kept for signature consistency
-    filter_result,        # may provide .title_prefix and .display
-    metrics,              # FlowMetricsResult with .times, .N, .t0, .w
+    args,  # kept for signature consistency
+    filter_result,  # may provide .title_prefix and .display
+    metrics,  # FlowMetricsResult with .times, .N, .t0, .w
     out_dir: str,
 ) -> List[str]:
     """
@@ -118,7 +125,9 @@ def plot_rate_stability_charts(
 
     # Elapsed hours since t0
     t0 = metrics.t0 if hasattr(metrics, "t0") and pd.notna(metrics.t0) else times[0]
-    elapsed_h = np.array([(t - t0).total_seconds() / 3600.0 for t in times], dtype=float)
+    elapsed_h = np.array(
+        [(t - t0).total_seconds() / 3600.0 for t in times], dtype=float
+    )
     denom = np.where(elapsed_h > 0.0, elapsed_h, np.nan)
 
     # Core rate series
@@ -143,22 +152,26 @@ def plot_rate_stability_charts(
 
     # Top: N(t) sample path (step plot)
     ax_top = axes[0]
-    ax_top.step(times, N_raw, where='post', label='N(t)', linewidth=1.5)
-    ax_top.set_ylabel('count')
-    ax_top.set_title('N(t) — Sample Path')
-    ax_top.legend(loc='best')
+    ax_top.step(times, N_raw, where="post", label="N(t)", linewidth=1.5)
+    ax_top.set_ylabel("count")
+    ax_top.set_title("N(t) — Sample Path")
+    ax_top.legend(loc="best")
     format_date_axis(ax_top)
 
     # Bottom: WIP Growth Rate N(T)/T
     ax = axes[1]
-    ax.plot(times, N_over_T, label='N(t)/T', linewidth=1.9, zorder=3)
+    ax.plot(times, N_over_T, label="N(t)/T", linewidth=1.9, zorder=3)
     ax.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
-    ax.axhline(1.0, linewidth=1.0, alpha=1.0, linestyle=':', zorder=1)
+    ax.axhline(1.0, linewidth=1.0, alpha=1.0, linestyle=":", zorder=1)
     format_date_axis(ax)
-    ax.set_xlabel('time')
-    ax.set_ylabel('rate')
-    ax.set_title(f"{title_prefix}: WIP Growth Rate - N(t)/T" if title_prefix else 'WIP Growth Rate - N(t)/T')
-    ax.legend(loc='best')
+    ax.set_xlabel("time")
+    ax.set_ylabel("rate")
+    ax.set_title(
+        f"{title_prefix}: WIP Growth Rate - N(t)/T"
+        if title_prefix
+        else "WIP Growth Rate - N(t)/T"
+    )
+    ax.legend(loc="best")
 
     finite_vals_N = N_over_T[np.isfinite(N_over_T)]
     if finite_vals_N.size:
@@ -177,23 +190,28 @@ def plot_rate_stability_charts(
 
     # Top: R(t) — total age of WIP at time t
     ax_top = axes[0]
-    ax_top.plot(times, R_raw, label='R(t) [hours]', linewidth=1.5, zorder=3)
-    ax_top.set_ylabel('hours')
-    ax_top.set_title('R(t) — Total age of WIP')
-    ax_top.legend(loc='best')
+    ax_top.plot(times, R_raw, label="R(t) [hours]", linewidth=1.5, zorder=3)
+    ax_top.set_ylabel("hours")
+    ax_top.set_title("R(t) — Total age of WIP")
+    ax_top.legend(loc="best")
     format_date_axis(ax_top)
 
     # Bottom: Total Age Growth Rate R(T)/T
     ax = axes[1]
     ax.plot(times, R_over_T, label="R(T)/T", linewidth=1.9, zorder=3)
     ax.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
-    ax.axhline(1.0, linewidth=1.0, alpha=1.0, linestyle=":", zorder=1)  # reference guide
+    ax.axhline(
+        1.0, linewidth=1.0, alpha=1.0, linestyle=":", zorder=1
+    )  # reference guide
 
     format_date_axis(ax)
     ax.set_xlabel("time")
     ax.set_ylabel("rate")
     ax.set_title(
-        f"{title_prefix}: Total Age Growth Rate - R(T)/T" if title_prefix else "Total Age Growth Rate - R(T)/T")
+        f"{title_prefix}: Total Age Growth Rate - R(T)/T"
+        if title_prefix
+        else "Total Age Growth Rate - R(T)/T"
+    )
     ax.legend(loc="best")
 
     finite_vals_R = R_over_T[np.isfinite(R_over_T)]
@@ -250,7 +268,9 @@ def plot_rate_stability_charts(
     # Clip like other charts
     try:
         _clip_axis_to_percentile(
-            axLam, times, lam_star_ts,
+            axLam,
+            times,
+            lam_star_ts,
             upper_p=getattr(args, "lambda_pctl", None),
             lower_p=getattr(args, "lambda_lower_pctl", None),
             warmup_hours=float(getattr(args, "lambda_warmup", 0.0) or 0.0),
@@ -260,8 +280,15 @@ def plot_rate_stability_charts(
 
     # Panel 4: W-coherence overlay
     axW = axes[3]
-    axW.plot(times, w_ts,        label="w(T) [hrs] (finite-window)", linewidth=1.9, zorder=3)
-    axW.plot(times, W_star_ts,   label="W*(T) [hrs] (completed mean)", linewidth=1.9, linestyle="--", zorder=3)
+    axW.plot(times, w_ts, label="w(T) [hrs] (finite-window)", linewidth=1.9, zorder=3)
+    axW.plot(
+        times,
+        W_star_ts,
+        label="W*(T) [hrs] (completed mean)",
+        linewidth=1.9,
+        linestyle="--",
+        zorder=3,
+    )
     axW.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
     format_date_axis(axW)
     axW.set_xlabel("time")

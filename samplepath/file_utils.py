@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
+import argparse
 import os
 import shutil
-import argparse
 import textwrap
 from pathlib import Path
 from typing import LiteralString
@@ -18,6 +18,7 @@ def make_fresh_dir(path):
 
 
 import os
+
 
 def make_root_dir(csv_path, output_dir, scenario_dir, clean):
     """
@@ -52,18 +53,28 @@ def make_root_dir(csv_path, output_dir, scenario_dir, clean):
     return out_dir
 
 
-
-def ensure_output_dirs(csv_path: str, output_dir=None, scenario_dir='latest', clean=False) -> str:
-    out_dir = make_root_dir(csv_path, output_dir,scenario_dir,  clean)
-    for chart_dir in ['input', 'core',  'convergence', 'convergence/panels', 'stability/panels', 'advanced', 'misc']:
+def ensure_output_dirs(
+    csv_path: str, output_dir=None, scenario_dir="latest", clean=False
+) -> str:
+    out_dir = make_root_dir(csv_path, output_dir, scenario_dir, clean)
+    for chart_dir in [
+        "input",
+        "core",
+        "convergence",
+        "convergence/panels",
+        "stability/panels",
+        "advanced",
+        "misc",
+    ]:
         sub_dir = os.path.join(out_dir, chart_dir)
         os.makedirs(sub_dir, exist_ok=True)
 
     return out_dir
 
-def write_cli_args_to_file(parser: argparse.ArgumentParser,
-                           args: argparse.Namespace,
-                           output_path: str | Path) -> None:
+
+def write_cli_args_to_file(
+    parser: argparse.ArgumentParser, args: argparse.Namespace, output_path: str | Path
+) -> None:
     """
     Write all CLI arguments, their help text, defaults, and actual values
     to a neatly formatted text file.
@@ -96,7 +107,9 @@ def write_cli_args_to_file(parser: argparse.ArgumentParser,
         if action.dest == "help":
             continue
 
-        name = ", ".join(action.option_strings) if action.option_strings else action.dest
+        name = (
+            ", ".join(action.option_strings) if action.option_strings else action.dest
+        )
         help_text = (action.help or "").strip()
         default = action.default if action.default != argparse.SUPPRESS else None
         value = getattr(args, action.dest, None)
@@ -117,6 +130,7 @@ def write_cli_args_to_file(parser: argparse.ArgumentParser,
     output_path.write_text("\n".join(lines))
     print(f"[INFO] Wrote CLI argument summary to {output_path.resolve()}")
 
+
 def copy_input_csv_to_output(input_path: str | Path, output_dir: str | Path) -> Path:
     """
     Copy the input CSV file to the output directory, preserving its filename.
@@ -135,7 +149,6 @@ def copy_input_csv_to_output(input_path: str | Path, output_dir: str | Path) -> 
     """
     input_path = Path(input_path)
     output_dir = Path(os.path.join(output_dir, "input"))
-
 
     if not input_path.exists():
         raise FileNotFoundError(f"Input file not found: {input_path}")

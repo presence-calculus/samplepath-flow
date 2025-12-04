@@ -12,24 +12,38 @@ from argparse import Namespace
 from typing import List, Tuple
 
 import pandas as pd
+
 from .csv_loader import csv_to_dataframe
 from .filter import FilterResult, apply_filters
-from .metrics import compute_finite_window_flow_metrics, FlowMetricsResult, ElementWiseEmpiricalMetrics, compute_elementwise_empirical_metrics
-from .point_process import to_arrival_departure_process
 from .limits import write_limits
+from .metrics import (
+    ElementWiseEmpiricalMetrics,
+    FlowMetricsResult,
+    compute_elementwise_empirical_metrics,
+    compute_finite_window_flow_metrics,
+)
+from .plots import (
+    plot_advanced_charts,
+    plot_convergence_charts,
+    plot_core_flow_metrics_charts,
+    plot_misc_charts,
+    plot_stability_charts,
+)
+from .point_process import to_arrival_departure_process
 
-from .plots import plot_advanced_charts, plot_convergence_charts, plot_core_flow_metrics_charts, plot_misc_charts, plot_stability_charts
 
-
-def produce_all_charts(df,  args, filter_result, metrics, empirical_metrics, out_dir):
+def produce_all_charts(df, args, filter_result, metrics, empirical_metrics, out_dir):
     written: List[str] = []
     # create plots
     written += plot_core_flow_metrics_charts(df, args, filter_result, metrics, out_dir)
-    written += plot_convergence_charts(df, args, filter_result, metrics, empirical_metrics, out_dir)
+    written += plot_convergence_charts(
+        df, args, filter_result, metrics, empirical_metrics, out_dir
+    )
     written += plot_stability_charts(df, args, filter_result, metrics, out_dir)
     written += plot_advanced_charts(df, args, filter_result, metrics, out_dir)
     written += plot_misc_charts(df, args, filter_result, metrics, out_dir)
     return written
+
 
 # -------------------------------
 # Orchestration
@@ -39,18 +53,20 @@ def run_analysis(csv_path: str, args: Namespace, out_dir: str) -> List[str]:
     filter_result: FilterResult = apply_filters(df, args)
     df = filter_result.df
     # Build arrival departure process
-    arrival_departure_process: List[Tuple[pd.Timestamp, int, int]] = to_arrival_departure_process(df)
+    arrival_departure_process: List[Tuple[pd.Timestamp, int, int]] = (
+        to_arrival_departure_process(df)
+    )
     # Compute core finite window flow metrics
-    metrics: FlowMetricsResult = compute_finite_window_flow_metrics(arrival_departure_process)
+    metrics: FlowMetricsResult = compute_finite_window_flow_metrics(
+        arrival_departure_process
+    )
 
     # Compute  ElementWiseMetrics once
-    empirical_metrics: ElementWiseEmpiricalMetrics = compute_elementwise_empirical_metrics(df, metrics.times)
+    empirical_metrics: ElementWiseEmpiricalMetrics = (
+        compute_elementwise_empirical_metrics(df, metrics.times)
+    )
 
     write_limits(metrics, empirical_metrics, out_dir)
-    return produce_all_charts(df, args, filter_result, metrics, empirical_metrics, out_dir)
-
-
-
-
-
-
+    return produce_all_charts(
+        df, args, filter_result, metrics, empirical_metrics, out_dir
+    )

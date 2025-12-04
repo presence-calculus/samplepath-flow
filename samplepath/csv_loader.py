@@ -3,17 +3,18 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
+import os
+import statistics
+import warnings
 from argparse import Namespace
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Iterable, Tuple, Optional
-import warnings
+from typing import Iterable, Optional, Tuple
+
 import numpy as np
 import pandas as pd
 from pandas.api.types import DatetimeTZDtype
 
-import os
-import statistics
 
 @dataclass
 class CSVLoader:
@@ -47,17 +48,22 @@ class CSVLoader:
     """
 
     # --- csv input columns configuration ---
-    start_column: str = 'start_ts'
-    end_column: str = 'end_ts'
+    start_column: str = "start_ts"
+    end_column: str = "end_ts"
     class_column: str = "class"
-    required_columns: Tuple[str] = ('id', 'start_ts', 'end_ts')
-    parse_dates: Tuple[str] = ('start_ts', 'end_ts')
-
+    required_columns: Tuple[str] = ("id", "start_ts", "end_ts")
+    parse_dates: Tuple[str] = ("start_ts", "end_ts")
 
     # csv delimiter
     delimiter: Optional[str] = None
     autodetect_delimiter: bool = True
-    delimiter_candidates: Tuple[str, ...] = ("\t", ",", ";", "|", ":")  # single-char only
+    delimiter_candidates: Tuple[str, ...] = (
+        "\t",
+        ",",
+        ";",
+        "|",
+        ":",
+    )  # single-char only
     delimiter_sample_bytes: int = 65536  # ~64KB header peek
 
     time_zone: str = "America/Los_Angeles"
@@ -80,17 +86,19 @@ class CSVLoader:
     @staticmethod
     @lru_cache(maxsize=256)
     def _detect_delimiter_cached(
-            path: str,
-            size: int,
-            mtime: int,
-            candidates: Tuple[str, ...],
-            sample_bytes: int,
+        path: str,
+        size: int,
+        mtime: int,
+        candidates: Tuple[str, ...],
+        sample_bytes: int,
     ) -> Optional[str]:
         # Cache key is (path, size, mtime, candidates, sample_bytes) via lru_cache args
         return CSVLoader.detect_delimiter(path, candidates, sample_bytes)
 
     @staticmethod
-    def detect_delimiter(path: str, candidates: Tuple[str, ...], sample_bytes: int) -> Optional[str]:
+    def detect_delimiter(
+        path: str, candidates: Tuple[str, ...], sample_bytes: int
+    ) -> Optional[str]:
         # Read a small header sample once
         with open(path, "rb") as f:
             sample = f.read(sample_bytes)
@@ -115,7 +123,7 @@ class CSVLoader:
             mode = max(set(counts), key=counts.count)
             frac = counts.count(mode) / len(counts)
             total = sum(counts)
-            spread = (max(counts) - min(counts))  # smaller is better
+            spread = max(counts) - min(counts)  # smaller is better
 
             # Rank by: higher consistency (frac), higher mode (fields-1), lower spread, higher total
             key = (frac, mode, -spread, total)
@@ -156,7 +164,9 @@ class CSVLoader:
         return parsed, n_missing_raw, n_parse_fail
 
     @staticmethod
-    def normalize_timezones(df: pd.DataFrame, cols: Tuple[str, str], target_tz: str) -> pd.DataFrame:
+    def normalize_timezones(
+        df: pd.DataFrame, cols: Tuple[str, str], target_tz: str
+    ) -> pd.DataFrame:
         """
         Normalize tz-naive and tz-aware columns to a single timezone.
 
@@ -228,9 +238,10 @@ class CSVLoader:
         # --- parse datetimes with targeted warnings ---
         id, start_ts, end_ts = self.required_columns  # start_ts, end_ts
 
-        df[start_ts], n_start_missing, n_start_fail = self.parse_dt_with_stats(df[start_ts])
+        df[start_ts], n_start_missing, n_start_fail = self.parse_dt_with_stats(
+            df[start_ts]
+        )
         df[end_ts], n_end_missing, n_end_fail = self.parse_dt_with_stats(df[end_ts])
-
 
         # start_ts: any NaT (missing or failed) is noteworthy
         if n_start_missing or n_start_fail:
@@ -264,7 +275,9 @@ class CSVLoader:
         if self.normalize_tz and not df.empty:
             for col in (start_ts, end_ts):
                 if not pd.api.types.is_datetime64_any_dtype(df[col]):
-                    raise TypeError(f"Column '{col}' must be datetime64[ns][tz] after parsing.")
+                    raise TypeError(
+                        f"Column '{col}' must be datetime64[ns][tz] after parsing."
+                    )
             df = self.normalize_timezones(df, (start_ts, end_ts), self.target_tz)
 
         # --- drop tzinfo for internal consistency ---
@@ -273,8 +286,10 @@ class CSVLoader:
                 df[col] = df[col].dt.tz_localize(None)
 
         # --- compute durations ---
-        df["duration_td"] = df[end_ts] - df[start_ts]                                # NaT when end_ts is NaT
-        df["duration_hr"] = df["duration_td"].dt.total_seconds() / 3600.0  # NaN when duration_td is NaT
+        df["duration_td"] = df[end_ts] - df[start_ts]  # NaT when end_ts is NaT
+        df["duration_hr"] = (
+            df["duration_td"].dt.total_seconds() / 3600.0
+        )  # NaN when duration_td is NaT
 
         # --- negative duration handling ---
         neg_mask = df["duration_hr"].notna() & (df["duration_hr"] < 0)
@@ -293,7 +308,9 @@ class CSVLoader:
             elif self.negative_duration_policy == "raise":
                 raise ValueError(msg)
             else:
-                raise ValueError("negative_duration_policy must be one of: 'drop' | 'nan' | 'raise'")
+                raise ValueError(
+                    "negative_duration_policy must be one of: 'drop' | 'nan' | 'raise'"
+                )
 
         # --- 'class' column to category (if present) ---
         if self.cast_class_to_category and self.class_column in df.columns:
@@ -346,7 +363,7 @@ def csv_to_dataframe(
         dayfirst=args.dayfirst,
         delimiter=args.delimiter,
         start_column=args.start_column,
-        end_column=args.end_column
+        end_column=args.end_column,
     )
     df = loader.load(csv_path)
     df = df.sort_values("start_ts").reset_index(drop=True)

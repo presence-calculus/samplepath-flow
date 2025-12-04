@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
-from typing import Optional, Tuple, Sequence, List
+from typing import List, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -126,12 +126,14 @@ def draw_step_chart(
     )
 
 
-def _clip_axis_to_percentile(ax: plt.Axes,
-                             times: List[pd.Timestamp],
-                             values: np.ndarray,
-                             upper_p: Optional[float] = None,
-                             lower_p: Optional[float] = None,
-                             warmup_hours: float = 0.0) -> None:
+def _clip_axis_to_percentile(
+    ax: plt.Axes,
+    times: List[pd.Timestamp],
+    values: np.ndarray,
+    upper_p: Optional[float] = None,
+    lower_p: Optional[float] = None,
+    warmup_hours: float = 0.0,
+) -> None:
     if upper_p is None and lower_p is None:
         return
     vals = np.asarray(values, dtype=float)
@@ -141,7 +143,7 @@ def _clip_axis_to_percentile(ax: plt.Axes,
     if warmup_hours and times:
         t0 = times[0]
         ages_hr = np.array([(t - t0).total_seconds() / 3600.0 for t in times])
-        mask &= (ages_hr >= float(warmup_hours))
+        mask &= ages_hr >= float(warmup_hours)
     data = vals[mask]
     if data.size == 0 or not np.isfinite(data).any():
         return

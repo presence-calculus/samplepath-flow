@@ -4,16 +4,18 @@
 from __future__ import annotations
 
 import os
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Literal, Optional, Tuple
 
 import numpy as np
-from typing import Dict, Optional, List, Literal, Tuple
-from dataclasses import dataclass
 import pandas as pd
-from pathlib import Path
 
-from samplepath.metrics import FlowMetricsResult, ElementWiseEmpiricalMetrics
+from samplepath.metrics import ElementWiseEmpiricalMetrics, FlowMetricsResult
 
-MetricKind = Literal["time_average", "cumulative_rate", "empirical_rate", "bounded_mean"]
+MetricKind = Literal[
+    "time_average", "cumulative_rate", "empirical_rate", "bounded_mean"
+]
 
 
 @dataclass
@@ -31,7 +33,9 @@ DEFAULTS_BY_KIND: Dict[MetricKind, ConvergenceCriteria] = {
     "time_average": ConvergenceCriteria(eps_abs=0.25, eps_rel=0.02),
     "empirical_rate": ConvergenceCriteria(eps_abs=0.05, eps_rel=0.02),
     "bounded_mean": ConvergenceCriteria(eps_abs=0.25, eps_rel=0.03),
-    "cumulative_rate": ConvergenceCriteria(eps_abs=1.0, eps_rel=None, max_rate_rmse=0.5),
+    "cumulative_rate": ConvergenceCriteria(
+        eps_abs=1.0, eps_rel=None, max_rate_rmse=0.5
+    ),
 }
 
 
@@ -46,13 +50,15 @@ class LimitResult:
 
 
 def estimate_limit(
-        T: np.ndarray,
-        Y: np.ndarray,
-        tail_frac: float = 0.35,  # use last 35% as the "tail"
-        eps_abs: float = 0.25,  # absolute tolerance for band/range tests (units of Y)
-        eps_rel: Optional[float] = 0.02,  # relative tolerance; final eps = max(eps_abs, eps_rel*max(limit,1))
-        slope_tol: Optional[float] = None,  # if None, set adaptively from tail scale
-        min_tail_points: int = 12
+    T: np.ndarray,
+    Y: np.ndarray,
+    tail_frac: float = 0.35,  # use last 35% as the "tail"
+    eps_abs: float = 0.25,  # absolute tolerance for band/range tests (units of Y)
+    eps_rel: Optional[
+        float
+    ] = 0.02,  # relative tolerance; final eps = max(eps_abs, eps_rel*max(limit,1))
+    slope_tol: Optional[float] = None,  # if None, set adaptively from tail scale
+    min_tail_points: int = 12,
 ) -> LimitResult:
     """
     Estimate the limit of Y(T) as T→∞ if it exists (numerically).
@@ -81,7 +87,7 @@ def estimate_limit(
             uncertainty=None,
             method="insufficient_tail",
             tests={},
-            tail_idx=k0
+            tail_idx=k0,
         )
     # --- Test 3: slope-to-zero on tail (finite diff)
     dT = np.diff(Tt)
@@ -94,7 +100,7 @@ def estimate_limit(
         horizon = Tt[-1] - Tt[0]
         slope_tol = 0.05 * scale / max(horizon, 1.0)  # ~5% of scale over tail span
 
-    slope_ok = (max_abs_slope <= slope_tol)
+    slope_ok = max_abs_slope <= slope_tol
 
     # --- 1/T regression on tail: Y ≈ β0 + β1*(1/T)
     x = 1.0 / Tt
@@ -104,7 +110,7 @@ def estimate_limit(
     beta0, beta1 = beta
     yhat = X @ beta
     resid = Yt - yhat
-    rmse = float(np.sqrt(np.mean(resid ** 2)))
+    rmse = float(np.sqrt(np.mean(resid**2)))
     limit_hat = float(beta0)
 
     # --- Tail spread tests (Cauchy & epsilon-band)
@@ -115,8 +121,8 @@ def estimate_limit(
         eps = max(eps, eps_rel * max(abs(limit_hat), 1.0))
 
     inside = np.abs(Yt - limit_hat) <= eps
-    band_ok = (inside.mean() >= 0.95)  # at least 95% of tail in the band
-    cauchy_ok = (tail_range <= 2 * eps)  # whole tail fits within a 2*eps slab
+    band_ok = inside.mean() >= 0.95  # at least 95% of tail in the band
+    cauchy_ok = tail_range <= 2 * eps  # whole tail fits within a 2*eps slab
 
     # --- Uncertainty estimate: robust tail MAD blended with regression RMSE
     mad = np.median(np.abs(Yt - np.median(Yt))) * 1.4826
@@ -142,7 +148,7 @@ def estimate_limit(
         uncertainty=unc if converged else None,
         method="1/T_intercept_with_tail_checks",
         tests=tests,
-        tail_idx=k0
+        tail_idx=k0,
     )
 
 
@@ -167,16 +173,16 @@ def _ols_two_param(x: np.ndarray, y: np.ndarray) -> Tuple[float, float, float, f
 
 
 def estimate_linear_rate(
-        T: np.ndarray,
-        C: np.ndarray,
-        tail_frac: float = 0.35,
-        min_tail_points: int = 12,
-        max_rate_rmse: float = 0.25,  # units of C
-        rate_rel_tol: float = 0.03,  # 3% relative stability tolerance on rho across the tail
-        curvature_improvement_tol: float = 0.05,  # adding 1/T must not improve RMSE by >5%
-        eps_abs: float = 1.0,  # not used directly; kept for uniform interface
-        eps_rel: Optional[float] = None,  # not used directly; kept for uniform interface
-        **_
+    T: np.ndarray,
+    C: np.ndarray,
+    tail_frac: float = 0.35,
+    min_tail_points: int = 12,
+    max_rate_rmse: float = 0.25,  # units of C
+    rate_rel_tol: float = 0.03,  # 3% relative stability tolerance on rho across the tail
+    curvature_improvement_tol: float = 0.05,  # adding 1/T must not improve RMSE by >5%
+    eps_abs: float = 1.0,  # not used directly; kept for uniform interface
+    eps_rel: Optional[float] = None,  # not used directly; kept for uniform interface
+    **_,
 ) -> LimitResult:
     """
     Estimate the asymptotic rate ρ from a cumulative series C(T) via tail OLS:
@@ -208,7 +214,7 @@ def estimate_linear_rate(
             uncertainty=None,
             method="rate_ols_insufficient_tail",
             tests={},
-            tail_idx=k0
+            tail_idx=k0,
         )
 
     # Main OLS: C ~ a + rho*T
@@ -231,12 +237,14 @@ def estimate_linear_rate(
     yhat_c = X_curv @ beta_c
     resid_c = Ct - yhat_c
     rmse_curv = float(np.sqrt((resid_c @ resid_c) / max(len(Tt) - 3, 1)))
-    rmse_improve = float((rmse - rmse_curv) / max(rmse, 1e-12))  # fractional improvement
+    rmse_improve = float(
+        (rmse - rmse_curv) / max(rmse, 1e-12)
+    )  # fractional improvement
 
     converged = (
-            rmse <= max_rate_rmse
-            and rho_diff_rel <= rate_rel_tol
-            and rmse_improve <= curvature_improvement_tol
+        rmse <= max_rate_rmse
+        and rho_diff_rel <= rate_rel_tol
+        and rmse_improve <= curvature_improvement_tol
     )
 
     tests = {
@@ -260,20 +268,20 @@ def estimate_linear_rate(
         uncertainty=float(se_rho) if converged else None,
         method="tail_OLS_rate (C ~ a + ρT)",
         tests=tests,
-        tail_idx=k0
+        tail_idx=k0,
     )
 
 
 def compare_series_tail(
-        T: np.ndarray,
-        Y1: np.ndarray,
-        Y2: np.ndarray,
-        tail_frac: float = 0.35,
-        min_tail_points: int = 12,
-        eps_abs: float = 0.25,
-        eps_rel: Optional[float] = 0.02,
-        band_coverage: float = 0.95,
-        **_
+    T: np.ndarray,
+    Y1: np.ndarray,
+    Y2: np.ndarray,
+    tail_frac: float = 0.35,
+    min_tail_points: int = 12,
+    eps_abs: float = 0.25,
+    eps_rel: Optional[float] = 0.02,
+    band_coverage: float = 0.95,
+    **_,
 ) -> LimitResult:
     """
     Tail agreement test between two series (e.g., L(T) vs λ*(T)·W*(T)).
@@ -304,7 +312,7 @@ def compare_series_tail(
             uncertainty=None,
             method="tail_agreement_insufficient_tail",
             tests={},
-            tail_idx=k0
+            tail_idx=k0,
         )
 
     # Scale for relative tolerance
@@ -342,14 +350,14 @@ def compare_series_tail(
         uncertainty=mad,
         method="tail_epsilon_band_agreement",
         tests=tests,
-        tail_idx=k0
+        tail_idx=k0,
     )
 
 
 def measure_process_limits(
     metrics: FlowMetricsResult,
     element: ElementWiseEmpiricalMetrics,
-    criteria_overrides: Optional[Dict[str, ConvergenceCriteria]] = None
+    criteria_overrides: Optional[Dict[str, ConvergenceCriteria]] = None,
 ) -> Dict[str, LimitResult]:
     """
     Top Level Driver:
@@ -358,7 +366,9 @@ def measure_process_limits(
       L(T), w(T), Λ(T) [rate], λ*(T), W*(T), and a coherence check for L vs λ*W.
     """
     times: List[pd.Timestamp] = metrics.times
-    T = np.array(pd.to_datetime(times).astype("int64") / 1e9 / 86400.0)  # days since epoch
+    T = np.array(
+        pd.to_datetime(times).astype("int64") / 1e9 / 86400.0
+    )  # days since epoch
     out: Dict[str, LimitResult] = {}
 
     def crit(name: str, kind: MetricKind) -> ConvergenceCriteria:
@@ -372,7 +382,7 @@ def measure_process_limits(
             eps_abs=c.eps_abs,
             eps_rel=c.eps_rel,
             slope_tol=c.slope_tol,
-            min_tail_points=c.min_tail_points
+            min_tail_points=c.min_tail_points,
         )
 
     # helper to extract only fields relevant to estimate_linear_rate
@@ -414,10 +424,11 @@ def measure_process_limits(
     # 5) Coherence: L(T) vs λ*(T)·W*(T)
     lamW = element.lam_star * element.W_star
     c = crit("coherence", "time_average")
-    out["coherence_L_vs_lamW"] = compare_series_tail(T, metrics.L, lamW, **coherence_kwargs(c))
+    out["coherence_L_vs_lamW"] = compare_series_tail(
+        T, metrics.L, lamW, **coherence_kwargs(c)
+    )
 
     return out
-
 
 
 def write_limit_results(results: Dict[str, LimitResult], filepath: str | Path) -> None:
@@ -439,7 +450,9 @@ def write_limit_results(results: Dict[str, LimitResult], filepath: str | Path) -
     lines.append(sep)
 
     for name, res in results.items():
-        lines.append(f"{name.upper():<20} {'✅' if res.converged else '❌'}  ({res.method})")
+        lines.append(
+            f"{name.upper():<20} {'✅' if res.converged else '❌'}  ({res.method})"
+        )
 
         if res.limit is not None:
             lines.append(f"    Limit:        {res.limit:,.6f}")
@@ -466,4 +479,4 @@ def write_limit_results(results: Dict[str, LimitResult], filepath: str | Path) -
 
 def write_limits(metrics, empirical_metrics, out_dir):
     limits = measure_process_limits(metrics, empirical_metrics)
-    write_limit_results(limits, os.path.join(out_dir, 'advanced/limits.txt'))
+    write_limit_results(limits, os.path.join(out_dir, "advanced/limits.txt"))
