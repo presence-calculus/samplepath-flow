@@ -1,6 +1,5 @@
 ---
 title: "<strong>Package Overview</strong>"
-subtitle: ""
 author: |
   <a href=""><em>Sample Path Analysis Toolkit</em></a>
 
