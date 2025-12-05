@@ -19,27 +19,28 @@ figPrefix: Figure
 citations: false
 ---
 
-This reference describes every chart produced by the `samplepath` CLI, grouped
-by chart type.
+This reference describes every chart produced by the `samplepath` CLI, grouped by chart
+type.
 
 # What is Sample Path Analysis?
 
-Sample path analysis is a _deterministic_ analysis that can be run on any
-observed flow process history.
+Sample path analysis is a _deterministic_ analysis that can be run on any observed flow
+process history.
 
-They let us reason
-about the dynamics and stability of flow processes over the long run, and also in real-time.
+They let us reason about the dynamics and stability of flow processes over the long run,
+and also in real-time.
 
-We use sample path analysis to determine whether a process is stable, and
-if not what the causes of instability are, and what needs to be done to move
-the process towards operationally acceptable range of stability.
+We use sample path analysis to determine whether a process is stable, and if not what
+the causes of instability are, and what needs to be done to move the process towards
+operationally acceptable range of stability.
 
-**Please see our technical note**: [Sample path analysis is not a statistical technique.](../not-statistics/index)
+**Please see our technical note**:
+[Sample path analysis is not a statistical technique.]($document-root/articles/not-statistics)
 
 ## The charts.
 
-The results of the analysis are a collection of charts that are written
-to an output directory.
+The results of the analysis are a collection of charts that are written to an output
+directory.
 
 For input `events.csv`, output is organized as follows:
 
@@ -57,38 +58,43 @@ For input `events.csv`, output is organized as follows:
 The example charts in each section below are drawn from the Polaris scenario
 [completed-stories-outliers-removed](https://github.com/presence-calculus/samplepath/tree/main/examples/polaris/flow-of-work/complete-stories-outliers-removed).
 
-This example is discussed in detail in our
-post [Little's Law in a complex adaptive system](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-analysis-a-worked-example)
+This example is discussed in detail in our post
+[Little's Law in a complex adaptive system](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-analysis-a-worked-example)
 
 Note: All calculations are done in *continuous time* and all charts report time
 accumulations in hours.
 
 # Core charts
 
-Time series charts showing the core functions that govern the dynamics of the flow process.
+Time series charts showing the core functions that govern the dynamics of the flow
+process.
 
 **Conventions:**
 
 - All functions are charted over a continuous finite interval of time $[0,T]$.
-- Functions of lower-case $t$
-  are instantaneous measurements at a point in time $0 \\le t \\le T$.
-- Functions of upper case T represent _aggregates_ computed over the interval $[0,t]$ for each $0 \\le t \\le T$.
+- Functions of lower-case $t$ are instantaneous measurements at a point in time
+  $0 \le t \le T$.
+- Functions of upper case T represent _aggregates_ computed over the interval $[0,t]$
+  for each $0 \le t \le T$.
 
 There are four core time-varying functions
 
 - The sample path $N(t)$ (aka _instantaneous WIP_)
 - L(T): The time average of $N(t)$ (aka time average of WIP)
-- $\\Lambda(T)$: The cumulative arrival rate.
+- $\Lambda(T)$: The cumulative arrival rate.
 - $w(T)$: The average residence time
 
 The finite version of Little's Law states that
-$$ L(T) = \\Lambda(T).w(T) $$
-for _any_ finite observation window $[0,T]$ with $0 \\lt T \\lt \\infty$.
 
-This means that last three functions _always_ change in time in such a way
-that this identity holds. This constraints governs the global dynamics of the
-flow process which is what we show in the very first chart you should look at
-after running the analysis.
+$$
+L(T) = \Lambda(T).w(T)
+$$
+
+for _any_ finite observation window $[0,T]$ with $0 \lt T \lt \infty$.
+
+This means that last three functions _always_ change in time in such a way that this
+identity holds. This constraints governs the global dynamics of the flow process which
+is what we show in the very first chart you should look at after running the analysis.
 
 ## Flow metrics summary
 
@@ -100,40 +106,41 @@ This chart can be found at the top level under `<scenario>/`
 
 ![Fig 1. Sample Path Flow Metrics](images/sample_path_flow_metrics.png)
 
-In this chart the main thing to pay attention to are the _relationships_
-between the _changes_ in each of these component charts over time.
+In this chart the main thing to pay attention to are the _relationships_ between the
+_changes_ in each of these component charts over time.
 
-- At any point in time review whether $L(T)$ the time average of $N(t)$ is changing or flat.
-- If it is changing then the finite version of Little's Law tells us that this must be because at least
-  one of $\\Lambda(T)$ or $w(T)$ changed.
+- At any point in time review whether $L(T)$ the time average of $N(t)$ is changing or
+  flat.
+- If it is changing then the finite version of Little's Law tells us that this must be
+  because at least one of $\Lambda(T)$ or $w(T)$ changed.
 
 It means that these are the _only_ possible explanations:
 
-- $\\Lambda(T)$ changed: more or fewer things are arriving.
+- $\Lambda(T)$ changed: more or fewer things are arriving.
 - $w(T)$ changed: things are taking more or less time to finish.
 - A combination of the two.
 
 In the last case there are two possibilities.
 
-Since $L(T)$ is the product of $\\Lambda(T)$
-and $w(T)$:
+Since $L(T)$ is the product of $\Lambda(T)$ and $w(T)$:
 
-- If they move
-  in the same direction they lead to proportionally large changes in L(T)
-- If they move in opposite directions, the changes cancel each
-  other and $L(T)$ tends to flatten.
+- If they move in the same direction they lead to proportionally large changes in L(T)
+- If they move in opposite directions, the changes cancel each other and $L(T)$ tends to
+  flatten.
 
-The last situation happens often when there is an internal feedback loop at play in the process.
+The last situation happens often when there is an internal feedback loop at play in the
+process.
 
 All these different types of dynamics can be at play at different points in the
-evolution of the process. This chart is the place where all those long run
-dynamics will show most directly and clearly.
+evolution of the process. This chart is the place where all those long run dynamics will
+show most directly and clearly.
 
 It helps us answer "how did the process evolve to produce the flow metrics we are seeing
-at any given moment in time?" These causal relationships allows us to monitor changes in L(T) and then
-immediately investigate the cause of that change.
+at any given moment in time?" These causal relationships allows us to monitor changes in
+L(T) and then immediately investigate the cause of that change.
 
-See our post [The Causal Arrow in Little's Law](https://www.polaris-flow-dispatch.com/i/171471652/the-causal-mechanism)
+See our post
+[The Causal Arrow in Little's Law](https://www.polaris-flow-dispatch.com/i/171471652/the-causal-mechanism)
 for more discussion on what this means.
 
 ______________________________________________________________________
@@ -165,31 +172,30 @@ Instantaneous WIP `N(t)`. This shows the number of items observed at time t.
 Since we measure in continuous time, this chart is a *step chart*.
 
 - The line will go up with each arrival and go down with each departure.
-- The line will stay steady if departures and arrivals balance each other at a
-  given instant.
+- The line will stay steady if departures and arrivals balance each other at a given
+  instant.
 - In between arrivals and departures, the line will stay flat.
 
-This is a real time chart that reveals current congestion, bursts, and idle
-periods.
+This is a real time chart that reveals current congestion, bursts, and idle periods.
 
 ![Sample Path](images/core/sample_path_N.png)
 
 ### The area under the sample path
 
-A key quantity in sample path analysis is the *area under the sample path*. This
-is calculated as the definite integral of the sample path curve over [0,T]
+A key quantity in sample path analysis is the *area under the sample path*. This is
+calculated as the definite integral of the sample path curve over [0,T]
 
 ```
 H(T) = ∫₀ᵀ N(t) dt
 ```
 
-Since the area is a product of the number of items present over time, the units
-of H(T) are in item-time. H(T) is itself not very interesting to chart since
-this is simply a monotonically increasing function of time.
+Since the area is a product of the number of items present over time, the units of H(T)
+are in item-time. H(T) is itself not very interesting to chart since this is simply a
+monotonically increasing function of time.
 
-Rather, the parameters that drive flow-process dynamics are the time and item
-averages of H(T): L(T) and w(T). These continuous functions of time are the key
-quantities in the _finite version of Little’s Law_.
+Rather, the parameters that drive flow-process dynamics are the time and item averages
+of H(T): L(T) and w(T). These continuous functions of time are the key quantities in the
+_finite version of Little’s Law_.
 
 ### $L(T)$: Time average of $N(t)$
 
@@ -197,8 +203,8 @@ quantities in the _finite version of Little’s Law_.
 
 Time-average WIP:
 
-`L(T)` is the time average of the area under the sample path. May also be viewed
-as the rate at which the area H(T) grows.
+`L(T)` is the time average of the area under the sample path. May also be viewed as the
+rate at which the area H(T) grows.
 
 Its units are in items.
 
@@ -206,20 +212,19 @@ Its units are in items.
 L(T) = (1/T) H(T)
 ```
 
-Reveals whether long run average WIP diverges or converges. This is the key top
-level indicator of process stability. A flat line here indicates a stable
-process.
+Reveals whether long run average WIP diverges or converges. This is the key top level
+indicator of process stability. A flat line here indicates a stable process.
 
 Please note once again that this is _not a statistical average_.
 
 ![Time Average of WIP](images/core/time_average_N_L.png)
 
-### $\\Lambda(T)$: Cumulative arrival rate
+### $\Lambda(T)$: Cumulative arrival rate
 
 `cumulative_arrival_rate_Lambda.png`
 
-`Λ(T)` is the arrival rate of items that have arrived up to T (may include items
-that started before the window):
+`Λ(T)` is the arrival rate of items that have arrived up to T (may include items that
+started before the window):
 
 ```
 Λ(T) = A(T) / T
@@ -227,10 +232,9 @@ that started before the window):
 
 It's units are items/time
 
-If WIP was zero at the beginning of the observation window, then this is the
-same as the arrival rate, otherwise this over-counts the arrival rate at the
-start, but as we observe the process for longer periods, those initial
-end-effects get averaged out.
+If WIP was zero at the beginning of the observation window, then this is the same as the
+arrival rate, otherwise this over-counts the arrival rate at the start, but as we
+observe the process for longer periods, those initial end-effects get averaged out.
 
 ![Cumulative Arrival Rate](images/core/time_average_N_L.png)
 
@@ -238,24 +242,24 @@ end-effects get averaged out.
 
 `average_residence_time_w.png`
 
-Average time items are observed as spending in the observation window up to time
-T (clips the time that is spent outside the window and thus not observed).
+Average time items are observed as spending in the observation window up to time T
+(clips the time that is spent outside the window and thus not observed).
 
 ```
 w(T) =  H(T)/A(T)
 ```
 
-Tracks how “observed time in system” evolves over the sample path. Its units are
-time.
+Tracks how “observed time in system” evolves over the sample path. Its units are time.
 
-Please see our
-posts [What is Residence Time](https://www.polaris-flow-dispatch.com/p/what-is-residence-time)
-and [How long does it take](https://www.polaris-flow-dispatch.com/p/how-long-does-it-take)
+Please see our posts
+[What is Residence Time](https://www.polaris-flow-dispatch.com/p/what-is-residence-time)
+and
+[How long does it take](https://www.polaris-flow-dispatch.com/p/how-long-does-it-take)
 for an explanation of what this metric means.
 
-_Understanding the difference and relationship between residence time and
-familiar metrics like Lead Time, Cycle Time and Work Item Age is crucial for
-understanding why sample path analysis works and these posts explain this._
+_Understanding the difference and relationship between residence time and familiar
+metrics like Lead Time, Cycle Time and Work Item Age is crucial for understanding why
+sample path analysis works and these posts explain this._
 
 ![Average Residence Time](images/core/average_residence_time_w.png)
 
@@ -263,19 +267,19 @@ understanding why sample path analysis works and these posts explain this._
 
 `littles_law_invariant.png`
 
-This plot visualizes
-the [finite version of Little's Law](https://www.polaris-flow-dispatch.com/i/172332418/the-finite-version-of-littles-law)
+This plot visualizes the
+[finite version of Little's Law](https://www.polaris-flow-dispatch.com/i/172332418/the-finite-version-of-littles-law)
 at work.
 
 It states that for all T, `L(T)=Λ(T)·w(T)`.
 
-We verify this by showing that when we plot `L(T)` vs `Λ(T)·w(T)` on a scatter
-plot, all the points will lie on the with `y = x`.
+We verify this by showing that when we plot `L(T)` vs `Λ(T)·w(T)` on a scatter plot, all
+the points will lie on the with `y = x`.
 
 ![Little's Law Invariant](images/core/littles_law_invariant.png)
 
-Notice how points cluster around certain values of L(T). These are significant
-operating modes for the process as it moves towards stable states.
+Notice how points cluster around certain values of L(T). These are significant operating
+modes for the process as it moves towards stable states.
 
 ______________________________________________________________________
 
