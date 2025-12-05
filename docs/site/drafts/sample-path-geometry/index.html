@@ -883,255 +883,183 @@
                               class="math display">\[
                               \Delta\Lambda\,\Delta w.
                               \]</span></p>
-                              <table style="width:8%;">
-                              <colgroup>
-                              <col style="width: 8%" />
-                              </colgroup>
-                              <tbody>
-                              <tr>
-                              <td># Hamiltonian Dynamics</td>
-                              </tr>
-                              <tr>
-                              <td># Hamiltonian Dynamics of the
-                              Finite-Window Identity</td>
-                              </tr>
-                              <tr>
-                              <td>This document derives the Hamiltonian
+                              <hr />
+                              <h1 id="hamiltonian-dynamics">Hamiltonian
+                              Dynamics</h1>
+                              <h1
+                              id="hamiltonian-dynamics-of-the-finite-window-identity">Hamiltonian
+                              Dynamics of the Finite-Window
+                              Identity</h1>
+                              <p>This document derives the Hamiltonian
                               mechanics for a flow system governed by
                               the finite-window Little’s Law. We treat
                               the system as a dynamic particle
                               constrained to the manifold defined by the
-                              identity.</td>
-                              </tr>
-                              <tr>
-                              <td>## 1. The Configuration Space</td>
-                              </tr>
-                              <tr>
-                              <td>We define the generalized coordinates
+                              identity.</p>
+                              <h2 id="the-configuration-space">1. The
+                              Configuration Space</h2>
+                              <p>We define the generalized coordinates
                               <span class="math inline">\(q\)</span> in
                               <strong>Log Space</strong>, where the
                               geometry is globally linear and
-                              additive.</td>
-                              </tr>
-                              <tr>
-                              <td>Let the independent coordinates be:
+                              additive.</p>
+                              <p>Let the independent coordinates be:
                               <span class="math display">\[
                               q_1 = a = \log \Lambda \quad
                               (\text{Arrival Intensity})
                               \]</span> <span class="math display">\[
                               q_2 = r = \log w \quad (\text{Service
                               Intensity})
-                              \]</span></td>
-                              </tr>
-                              <tr>
-                              <td>The dependent coordinate is <span
+                              \]</span></p>
+                              <p>The dependent coordinate is <span
                               class="math inline">\(\ell = \log
                               L\)</span>. The system is subject to the
                               holonomic constraint: <span
                               class="math display">\[
                               \ell(a, r) = a + r
-                              \]</span></td>
-                              </tr>
-                              <tr>
-                              <td>This defines a flat 2D plane in the 3D
+                              \]</span></p>
+                              <p>This defines a flat 2D plane in the 3D
                               configuration space <span
                               class="math inline">\((a, r,
-                              \ell)\)</span>.</td>
-                              </tr>
-                              <tr>
-                              <td>## 2. The Lagrangian</td>
-                              </tr>
-                              <tr>
-                              <td>We assume a “free particle” model
-                              where the system has inertia (resistance
-                              to infinite volatility) but no external
+                              \ell)\)</span>.</p>
+                              <h2 id="the-lagrangian">2. The
+                              Lagrangian</h2>
+                              <p>We assume a “free particle” model where
+                              the system has inertia (resistance to
+                              infinite volatility) but no external
                               potential (<span
                               class="math inline">\(V=0\)</span>) acting
                               on it yet. The Lagrangian is the kinetic
-                              energy of the system.</td>
-                              </tr>
-                              <tr>
-                              <td>Using the differential form <span
+                              energy of the system.</p>
+                              <p>Using the differential form <span
                               class="math inline">\(\dot{\ell} = \dot{a}
                               + \dot{r}\)</span>, the kinetic energy
                               <span class="math inline">\(T\)</span>
-                              is:</td>
-                              </tr>
-                              <tr>
-                              <td><span class="math display">\[
+                              is:</p>
+                              <p><span class="math display">\[
                               T = \frac{1}{2}m \left( \dot{a}^2 +
                               \dot{r}^2 + \dot{\ell}^2 \right)
-                              \]</span></td>
-                              </tr>
-                              <tr>
-                              <td>Substituting the constraint <span
+                              \]</span></p>
+                              <p>Substituting the constraint <span
                               class="math inline">\(\dot{\ell} = \dot{a}
-                              + \dot{r}\)</span>:</td>
-                              </tr>
-                              <tr>
-                              <td><span class="math display">\[
+                              + \dot{r}\)</span>:</p>
+                              <p><span class="math display">\[
                               \mathcal{L}(q, \dot{q}) = \frac{m}{2}
                               \left[ \dot{a}^2 + \dot{r}^2 + (\dot{a} +
                               \dot{r})^2 \right]
-                              \]</span></td>
-                              </tr>
-                              <tr>
-                              <td>Expanding the square term yields the
+                              \]</span></p>
+                              <p>Expanding the square term yields the
                               Lagrangian with an inertial coupling
-                              term:</td>
-                              </tr>
-                              <tr>
-                              <td><span class="math display">\[
+                              term:</p>
+                              <p><span class="math display">\[
                               \mathcal{L} = m \left( \dot{a}^2 +
                               \dot{r}^2 + \dot{a}\dot{r} \right)
-                              \]</span></td>
-                              </tr>
-                              <tr>
-                              <td><strong>Physical
+                              \]</span></p>
+                              <p><strong>Physical
                               Interpretation:</strong> The cross-term
                               <span
                               class="math inline">\(m\dot{a}\dot{r}\)</span>
                               arises because the geometry of the
                               finite-window identity couples the
                               fluctuations of arrival rates and service
-                              times.</td>
-                              </tr>
-                              <tr>
-                              <td>## 3. The Conjugate Momenta</td>
-                              </tr>
-                              <tr>
-                              <td>We derive the generalized momenta
-                              <span class="math inline">\(p_i =
-                              \frac{\partial \mathcal{L}}{\partial
-                              \dot{q}_i}\)</span>:</td>
-                              </tr>
-                              <tr>
-                              <td><span class="math display">\[
+                              times.</p>
+                              <h2 id="the-conjugate-momenta">3. The
+                              Conjugate Momenta</h2>
+                              <p>We derive the generalized momenta <span
+                              class="math inline">\(p_i = \frac{\partial
+                              \mathcal{L}}{\partial
+                              \dot{q}_i}\)</span>:</p>
+                              <p><span class="math display">\[
                               p_a = \frac{\partial \mathcal{L}}{\partial
                               \dot{a}} = m(2\dot{a} + \dot{r})
-                              \]</span></td>
-                              </tr>
-                              <tr>
-                              <td><span class="math display">\[
+                              \]</span></p>
+                              <p><span class="math display">\[
                               p_r = \frac{\partial \mathcal{L}}{\partial
                               \dot{r}} = m(2\dot{r} + \dot{a})
-                              \]</span></td>
-                              </tr>
-                              <tr>
-                              <td>In matrix form <span
+                              \]</span></p>
+                              <p>In matrix form <span
                               class="math inline">\(p = M
-                              v\)</span>:</td>
-                              </tr>
-                              <tr>
-                              <td><span class="math display">\[
+                              v\)</span>:</p>
+                              <p><span class="math display">\[
                               \begin{bmatrix} p_a \\ p_r \end{bmatrix} =
                               m \begin{bmatrix} 2 &amp; 1 \\ 1 &amp; 2
                               \end{bmatrix} \begin{bmatrix} \dot{a} \\
                               \dot{r} \end{bmatrix}
-                              \]</span></td>
-                              </tr>
-                              <tr>
-                              <td>## 4. The Hamiltonian</td>
-                              </tr>
-                              <tr>
-                              <td>The Hamiltonian <span
+                              \]</span></p>
+                              <h2 id="the-hamiltonian">4. The
+                              Hamiltonian</h2>
+                              <p>The Hamiltonian <span
                               class="math inline">\(H\)</span>
                               represents the total energy of the flow.
                               It is obtained via the Legendre
-                              transform:</td>
-                              </tr>
-                              <tr>
-                              <td><span class="math display">\[
+                              transform:</p>
+                              <p><span class="math display">\[
                               H(q, p) = p^\top \dot{q} - \mathcal{L}
-                              \]</span></td>
-                              </tr>
-                              <tr>
-                              <td>First, we invert the mass matrix <span
+                              \]</span></p>
+                              <p>First, we invert the mass matrix <span
                               class="math inline">\(M\)</span> to
                               express velocities in terms of momenta.
                               The inverse of <span
-                              class="math inline">\(M\)</span> is:</td>
-                              </tr>
-                              <tr>
-                              <td><span class="math display">\[
+                              class="math inline">\(M\)</span> is:</p>
+                              <p><span class="math display">\[
                               M^{-1} = \frac{1}{3m} \begin{bmatrix} 2
                               &amp; -1 \\ -1 &amp; 2 \end{bmatrix}
-                              \]</span></td>
-                              </tr>
-                              <tr>
-                              <td>The Hamiltonian for a quadratic
-                              kinetic energy is given by <span
+                              \]</span></p>
+                              <p>The Hamiltonian for a quadratic kinetic
+                              energy is given by <span
                               class="math inline">\(H = \frac{1}{2}
-                              p^\top M^{-1} p\)</span>:</td>
-                              </tr>
-                              <tr>
-                              <td><span class="math display">\[
+                              p^\top M^{-1} p\)</span>:</p>
+                              <p><span class="math display">\[
                               H(p_a, p_r) = \frac{1}{6m} \left[
                               \begin{matrix} p_a &amp; p_r \end{matrix}
                               \right] \begin{bmatrix} 2 &amp; -1 \\ -1
                               &amp; 2 \end{bmatrix} \begin{bmatrix} p_a
                               \\ p_r \end{bmatrix}
-                              \]</span></td>
-                              </tr>
-                              <tr>
-                              <td>Expanding this yields:</td>
-                              </tr>
-                              <tr>
-                              <td><span class="math display">\[
+                              \]</span></p>
+                              <p>Expanding this yields:</p>
+                              <p><span class="math display">\[
                               H = \frac{1}{3m} \left( p_a^2 + p_r^2 -
                               p_a p_r \right)
-                              \]</span></td>
-                              </tr>
-                              <tr>
-                              <td>## 5. Hamilton’s Equations of
-                              Motion</td>
-                              </tr>
-                              <tr>
-                              <td>The evolution of the system in phase
+                              \]</span></p>
+                              <h2 id="hamiltons-equations-of-motion">5.
+                              Hamilton’s Equations of Motion</h2>
+                              <p>The evolution of the system in phase
                               space is governed by the symplectic
-                              gradients.</td>
-                              </tr>
-                              <tr>
-                              <td>### A. Dynamics of the Metrics
-                              (Velocities) <span class="math display">\[
+                              gradients.</p>
+                              <h3
+                              id="a.-dynamics-of-the-metrics-velocities">A.
+                              Dynamics of the Metrics (Velocities)</h3>
+                              <p><span class="math display">\[
                               \dot{a} = \frac{\partial H}{\partial p_a}
                               = \frac{1}{3m}(2p_a - p_r)
                               \]</span> <span class="math display">\[
                               \dot{r} = \frac{\partial H}{\partial p_r}
                               = \frac{1}{3m}(2p_r - p_a)
-                              \]</span></td>
-                              </tr>
-                              <tr>
-                              <td>This highlights the <strong>coupling
+                              \]</span></p>
+                              <p>This highlights the <strong>coupling
                               effect</strong>: The rate of change of the
                               arrival intensity (<span
                               class="math inline">\(\dot{a}\)</span>) is
                               dampened by the momentum of the service
                               duration (<span
-                              class="math inline">\(p_r\)</span>).</td>
-                              </tr>
-                              <tr>
-                              <td>### B. Conservation Laws (Forces)
-                              Since the Hamiltonian is translationally
-                              invariant in log-space (no dependence on
-                              <span class="math inline">\(a\)</span> or
-                              <span class="math inline">\(r\)</span>
-                              explicitly):</td>
-                              </tr>
-                              <tr>
-                              <td><span class="math display">\[
+                              class="math inline">\(p_r\)</span>).</p>
+                              <h3 id="b.-conservation-laws-forces">B.
+                              Conservation Laws (Forces)</h3>
+                              <p>Since the Hamiltonian is
+                              translationally invariant in log-space (no
+                              dependence on <span
+                              class="math inline">\(a\)</span> or <span
+                              class="math inline">\(r\)</span>
+                              explicitly):</p>
+                              <p><span class="math display">\[
                               \dot{p}_a = -\frac{\partial H}{\partial a}
                               = 0 \implies p_a = \text{constant}
                               \]</span> <span class="math display">\[
                               \dot{p}_r = -\frac{\partial H}{\partial r}
                               = 0 \implies p_r = \text{constant}
-                              \]</span></td>
-                              </tr>
-                              <tr>
-                              <td>## 6. Conclusion</td>
-                              </tr>
-                              <tr>
-                              <td>By mapping the finite-window identity
+                              \]</span></p>
+                              <h2 id="conclusion">6. Conclusion</h2>
+                              <p>By mapping the finite-window identity
                               to log-space, we have successfully
                               formulated the system as a free particle
                               on a constrained plane. The Hamiltonian
@@ -1141,10 +1069,8 @@
                               fluid” has a non-diagonal mass tensor,
                               implying that fluctuations in arrival
                               rates and service times are inertially
-                              entangled.</td>
-                              </tr>
-                              </tbody>
-                              </table>
+                              entangled.</p>
+                              <hr />
                               <h1
                               id="presence-mass-as-hamiltonian-mass">Presence
                               Mass as Hamiltonian Mass</h1>

@@ -400,6 +400,7 @@ $$
 
 
 -----
+
 # Hamiltonian Dynamics
 
 # Hamiltonian Dynamics of the Finite-Window Identity
