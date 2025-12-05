@@ -397,3 +397,232 @@ and a symmetric second–order tensor correction
 $$
 \Delta\Lambda\,\Delta w.
 $$
+
+
+-----
+# Hamiltonian Dynamics
+
+# Hamiltonian Dynamics of the Finite-Window Identity
+
+This document derives the Hamiltonian mechanics for a flow system governed by the finite-window Little's Law. We treat the system as a dynamic particle constrained to the manifold defined by the identity.
+
+## 1. The Configuration Space
+
+We define the generalized coordinates $q$ in **Log Space**, where the geometry is globally linear and additive.
+
+Let the independent coordinates be:
+$$
+q_1 = a = \log \Lambda \quad (\text{Arrival Intensity})
+$$
+$$
+q_2 = r = \log w \quad (\text{Service Intensity})
+$$
+
+The dependent coordinate is $\ell = \log L$. The system is subject to the holonomic constraint:
+$$
+\ell(a, r) = a + r
+$$
+
+This defines a flat 2D plane in the 3D configuration space $(a, r, \ell)$.
+
+## 2. The Lagrangian
+
+We assume a "free particle" model where the system has inertia (resistance to infinite volatility) but no external potential ($V=0$) acting on it yet. The Lagrangian is the kinetic energy of the system.
+
+Using the differential form $\dot{\ell} = \dot{a} + \dot{r}$, the kinetic energy $T$ is:
+
+$$
+T = \frac{1}{2}m \left( \dot{a}^2 + \dot{r}^2 + \dot{\ell}^2 \right)
+$$
+
+Substituting the constraint $\dot{\ell} = \dot{a} + \dot{r}$:
+
+$$
+\mathcal{L}(q, \dot{q}) = \frac{m}{2} \left[ \dot{a}^2 + \dot{r}^2 + (\dot{a} + \dot{r})^2 \right]
+$$
+
+Expanding the square term yields the Lagrangian with an inertial coupling term:
+
+$$
+\mathcal{L} = m \left( \dot{a}^2 + \dot{r}^2 + \dot{a}\dot{r} \right)
+$$
+
+**Physical Interpretation:** The cross-term $m\dot{a}\dot{r}$ arises because the geometry of the finite-window identity couples the fluctuations of arrival rates and service times.
+
+## 3. The Conjugate Momenta
+
+We derive the generalized momenta $p_i = \frac{\partial \mathcal{L}}{\partial \dot{q}_i}$:
+
+$$
+p_a = \frac{\partial \mathcal{L}}{\partial \dot{a}} = m(2\dot{a} + \dot{r})
+$$
+
+$$
+p_r = \frac{\partial \mathcal{L}}{\partial \dot{r}} = m(2\dot{r} + \dot{a})
+$$
+
+In matrix form $p = M v$:
+
+$$
+\begin{bmatrix} p_a \\ p_r \end{bmatrix} = m \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix} \begin{bmatrix} \dot{a} \\ \dot{r} \end{bmatrix}
+$$
+
+## 4. The Hamiltonian
+
+The Hamiltonian $H$ represents the total energy of the flow. It is obtained via the Legendre transform:
+
+$$
+H(q, p) = p^\top \dot{q} - \mathcal{L}
+$$
+
+First, we invert the mass matrix $M$ to express velocities in terms of momenta. The inverse of $M$ is:
+
+$$
+M^{-1} = \frac{1}{3m} \begin{bmatrix} 2 & -1 \\ -1 & 2 \end{bmatrix}
+$$
+
+The Hamiltonian for a quadratic kinetic energy is given by $H = \frac{1}{2} p^\top M^{-1} p$:
+
+$$
+H(p_a, p_r) = \frac{1}{6m} \left[ \begin{matrix} p_a & p_r \end{matrix} \right] \begin{bmatrix} 2 & -1 \\ -1 & 2 \end{bmatrix} \begin{bmatrix} p_a \\ p_r \end{bmatrix}
+$$
+
+Expanding this yields:
+
+$$
+H = \frac{1}{3m} \left( p_a^2 + p_r^2 - p_a p_r \right)
+$$
+
+## 5. Hamilton's Equations of Motion
+
+The evolution of the system in phase space is governed by the symplectic gradients.
+
+### A. Dynamics of the Metrics (Velocities)
+$$
+\dot{a} = \frac{\partial H}{\partial p_a} = \frac{1}{3m}(2p_a - p_r)
+$$
+$$
+\dot{r} = \frac{\partial H}{\partial p_r} = \frac{1}{3m}(2p_r - p_a)
+$$
+
+This highlights the **coupling effect**: The rate of change of the arrival intensity ($\dot{a}$) is dampened by the momentum of the service duration ($p_r$).
+
+### B. Conservation Laws (Forces)
+Since the Hamiltonian is translationally invariant in log-space (no dependence on $a$ or $r$ explicitly):
+
+$$
+\dot{p}_a = -\frac{\partial H}{\partial a} = 0 \implies p_a = \text{constant}
+$$
+$$
+\dot{p}_r = -\frac{\partial H}{\partial r} = 0 \implies p_r = \text{constant}
+$$
+
+## 6. Conclusion
+
+By mapping the finite-window identity to log-space, we have successfully formulated the system as a free particle on a constrained plane. The Hamiltonian $H = \frac{1}{3m} (p_a^2 + p_r^2 - p_a p_r)$ reveals that the "queueing fluid" has a non-diagonal mass tensor, implying that fluctuations in arrival rates and service times are inertially entangled.
+
+------------
+
+# Presence Mass as Hamiltonian Mass
+
+This note clarifies the relationship between *presence mass* from Presence Calculus and the *mass* parameter that appears in the Hamiltonian formulation of the finite-window identity. The result is that they coincide naturally: presence mass is the correct choice for Hamiltonian mass because both quantities encode **inertia of change** along the prefix window.
+
+---
+
+## 1. Mass in Hamiltonian Mechanics
+
+In Hamiltonian and Lagrangian mechanics, *mass* represents **inertia**:
+
+- resistance to rapid changes in velocity  
+- smoothing of motion over time  
+- a scaling factor in the kinetic energy metric
+
+For generalized coordinates $q = (q_1, q_2)$, the kinetic energy is
+$$
+T = \frac{1}{2}\,\dot{q}^\top M\,\dot{q},
+$$
+where $M$ is the mass matrix. Larger mass means **slower response** to forces and perturbations.
+
+---
+
+## 2. Presence Mass in Flow Systems
+
+Presence mass in Presence Calculus measures:
+
+- the cumulative time weight carried by the prefix window  
+- the "historical inertia" embedded in the averaged quantities  
+- the resistance of the finite-window metrics to instantaneous fluctuations  
+
+As the window $T$ grows, presence mass increases; consequently:
+
+- $a(T)=\log\Lambda(T)$ changes more slowly  
+- $r(T)=\log w(T)$ changes more slowly  
+- $\ell(T)=\log L(T)$ becomes less sensitive to short-term shifts  
+
+This is *exactly* the property of mass in mechanics.
+
+---
+
+## 3. Why Presence Mass and Hamiltonian Mass Coincide
+
+The finite-window identity in log space,
+$$
+\ell = a + r,
+$$
+defines a holonomic constraint on the system. The Lagrangian for a free particle moving on this constraint manifold is
+$$
+\mathcal{L} = \frac{1}{2}m \left( \dot{a}^2 + \dot{r}^2 + \dot{\ell}^2 \right),
+$$
+with $\dot{\ell} = \dot{a} + \dot{r}$. Substituting gives the reduced Lagrangian
+$$
+\mathcal{L}
+= m\left(\dot{a}^2 + \dot{r}^2 + \dot{a}\dot{r}\right).
+$$
+
+Here the parameter $m$ governs:
+
+- how hard it is for the log-arrival intensity to change  
+- how hard it is for the log-residence-time to change  
+- how strongly the two changes couple through the metric tensor  
+
+These effects correspond exactly to the inertia induced by accumulated presence.
+
+Thus, the mathematical role played by $m$ is identical to the operational meaning of presence mass.
+
+---
+
+## 4. Interpretation
+
+Under this identification:
+
+- **Large presence mass**  
+  - prefix metrics evolve slowly  
+  - the system is “heavy”  
+  - historical data dominates instantaneous changes  
+
+- **Small presence mass**  
+  - prefix metrics are highly reactive  
+  - the system is “light”  
+  - evolution is volatile and sensitive to small perturbations  
+
+This matches the classical mechanical interpretation of mass as resistance to acceleration.
+
+---
+
+## 5. Natural Conclusion
+
+Presence mass **is** Hamiltonian mass.
+
+It determines:
+
+- the geometry of the kinetic term  
+- the metric on the log-space constraint manifold  
+- the inertia of the system’s evolution under the finite-window identity  
+
+This equivalence is not metaphorical. It follows directly from:
+
+1. the definition of presence as accumulated time weight,  
+2. the structure of the kinetic energy in log space, and  
+3. the co-evolution constraint $\dot{\ell} = \dot{a} + \dot{r}$.
+
+Presence mass therefore provides the canonical physical interpretation of the mass parameter in the Hamiltonian formulation of finite-window Little dynamics.

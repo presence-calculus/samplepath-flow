@@ -883,6 +883,445 @@
                               class="math display">\[
                               \Delta\Lambda\,\Delta w.
                               \]</span></p>
+                              <table style="width:8%;">
+                              <colgroup>
+                              <col style="width: 8%" />
+                              </colgroup>
+                              <tbody>
+                              <tr>
+                              <td># Hamiltonian Dynamics</td>
+                              </tr>
+                              <tr>
+                              <td># Hamiltonian Dynamics of the
+                              Finite-Window Identity</td>
+                              </tr>
+                              <tr>
+                              <td>This document derives the Hamiltonian
+                              mechanics for a flow system governed by
+                              the finite-window Little’s Law. We treat
+                              the system as a dynamic particle
+                              constrained to the manifold defined by the
+                              identity.</td>
+                              </tr>
+                              <tr>
+                              <td>## 1. The Configuration Space</td>
+                              </tr>
+                              <tr>
+                              <td>We define the generalized coordinates
+                              <span class="math inline">\(q\)</span> in
+                              <strong>Log Space</strong>, where the
+                              geometry is globally linear and
+                              additive.</td>
+                              </tr>
+                              <tr>
+                              <td>Let the independent coordinates be:
+                              <span class="math display">\[
+                              q_1 = a = \log \Lambda \quad
+                              (\text{Arrival Intensity})
+                              \]</span> <span class="math display">\[
+                              q_2 = r = \log w \quad (\text{Service
+                              Intensity})
+                              \]</span></td>
+                              </tr>
+                              <tr>
+                              <td>The dependent coordinate is <span
+                              class="math inline">\(\ell = \log
+                              L\)</span>. The system is subject to the
+                              holonomic constraint: <span
+                              class="math display">\[
+                              \ell(a, r) = a + r
+                              \]</span></td>
+                              </tr>
+                              <tr>
+                              <td>This defines a flat 2D plane in the 3D
+                              configuration space <span
+                              class="math inline">\((a, r,
+                              \ell)\)</span>.</td>
+                              </tr>
+                              <tr>
+                              <td>## 2. The Lagrangian</td>
+                              </tr>
+                              <tr>
+                              <td>We assume a “free particle” model
+                              where the system has inertia (resistance
+                              to infinite volatility) but no external
+                              potential (<span
+                              class="math inline">\(V=0\)</span>) acting
+                              on it yet. The Lagrangian is the kinetic
+                              energy of the system.</td>
+                              </tr>
+                              <tr>
+                              <td>Using the differential form <span
+                              class="math inline">\(\dot{\ell} = \dot{a}
+                              + \dot{r}\)</span>, the kinetic energy
+                              <span class="math inline">\(T\)</span>
+                              is:</td>
+                              </tr>
+                              <tr>
+                              <td><span class="math display">\[
+                              T = \frac{1}{2}m \left( \dot{a}^2 +
+                              \dot{r}^2 + \dot{\ell}^2 \right)
+                              \]</span></td>
+                              </tr>
+                              <tr>
+                              <td>Substituting the constraint <span
+                              class="math inline">\(\dot{\ell} = \dot{a}
+                              + \dot{r}\)</span>:</td>
+                              </tr>
+                              <tr>
+                              <td><span class="math display">\[
+                              \mathcal{L}(q, \dot{q}) = \frac{m}{2}
+                              \left[ \dot{a}^2 + \dot{r}^2 + (\dot{a} +
+                              \dot{r})^2 \right]
+                              \]</span></td>
+                              </tr>
+                              <tr>
+                              <td>Expanding the square term yields the
+                              Lagrangian with an inertial coupling
+                              term:</td>
+                              </tr>
+                              <tr>
+                              <td><span class="math display">\[
+                              \mathcal{L} = m \left( \dot{a}^2 +
+                              \dot{r}^2 + \dot{a}\dot{r} \right)
+                              \]</span></td>
+                              </tr>
+                              <tr>
+                              <td><strong>Physical
+                              Interpretation:</strong> The cross-term
+                              <span
+                              class="math inline">\(m\dot{a}\dot{r}\)</span>
+                              arises because the geometry of the
+                              finite-window identity couples the
+                              fluctuations of arrival rates and service
+                              times.</td>
+                              </tr>
+                              <tr>
+                              <td>## 3. The Conjugate Momenta</td>
+                              </tr>
+                              <tr>
+                              <td>We derive the generalized momenta
+                              <span class="math inline">\(p_i =
+                              \frac{\partial \mathcal{L}}{\partial
+                              \dot{q}_i}\)</span>:</td>
+                              </tr>
+                              <tr>
+                              <td><span class="math display">\[
+                              p_a = \frac{\partial \mathcal{L}}{\partial
+                              \dot{a}} = m(2\dot{a} + \dot{r})
+                              \]</span></td>
+                              </tr>
+                              <tr>
+                              <td><span class="math display">\[
+                              p_r = \frac{\partial \mathcal{L}}{\partial
+                              \dot{r}} = m(2\dot{r} + \dot{a})
+                              \]</span></td>
+                              </tr>
+                              <tr>
+                              <td>In matrix form <span
+                              class="math inline">\(p = M
+                              v\)</span>:</td>
+                              </tr>
+                              <tr>
+                              <td><span class="math display">\[
+                              \begin{bmatrix} p_a \\ p_r \end{bmatrix} =
+                              m \begin{bmatrix} 2 &amp; 1 \\ 1 &amp; 2
+                              \end{bmatrix} \begin{bmatrix} \dot{a} \\
+                              \dot{r} \end{bmatrix}
+                              \]</span></td>
+                              </tr>
+                              <tr>
+                              <td>## 4. The Hamiltonian</td>
+                              </tr>
+                              <tr>
+                              <td>The Hamiltonian <span
+                              class="math inline">\(H\)</span>
+                              represents the total energy of the flow.
+                              It is obtained via the Legendre
+                              transform:</td>
+                              </tr>
+                              <tr>
+                              <td><span class="math display">\[
+                              H(q, p) = p^\top \dot{q} - \mathcal{L}
+                              \]</span></td>
+                              </tr>
+                              <tr>
+                              <td>First, we invert the mass matrix <span
+                              class="math inline">\(M\)</span> to
+                              express velocities in terms of momenta.
+                              The inverse of <span
+                              class="math inline">\(M\)</span> is:</td>
+                              </tr>
+                              <tr>
+                              <td><span class="math display">\[
+                              M^{-1} = \frac{1}{3m} \begin{bmatrix} 2
+                              &amp; -1 \\ -1 &amp; 2 \end{bmatrix}
+                              \]</span></td>
+                              </tr>
+                              <tr>
+                              <td>The Hamiltonian for a quadratic
+                              kinetic energy is given by <span
+                              class="math inline">\(H = \frac{1}{2}
+                              p^\top M^{-1} p\)</span>:</td>
+                              </tr>
+                              <tr>
+                              <td><span class="math display">\[
+                              H(p_a, p_r) = \frac{1}{6m} \left[
+                              \begin{matrix} p_a &amp; p_r \end{matrix}
+                              \right] \begin{bmatrix} 2 &amp; -1 \\ -1
+                              &amp; 2 \end{bmatrix} \begin{bmatrix} p_a
+                              \\ p_r \end{bmatrix}
+                              \]</span></td>
+                              </tr>
+                              <tr>
+                              <td>Expanding this yields:</td>
+                              </tr>
+                              <tr>
+                              <td><span class="math display">\[
+                              H = \frac{1}{3m} \left( p_a^2 + p_r^2 -
+                              p_a p_r \right)
+                              \]</span></td>
+                              </tr>
+                              <tr>
+                              <td>## 5. Hamilton’s Equations of
+                              Motion</td>
+                              </tr>
+                              <tr>
+                              <td>The evolution of the system in phase
+                              space is governed by the symplectic
+                              gradients.</td>
+                              </tr>
+                              <tr>
+                              <td>### A. Dynamics of the Metrics
+                              (Velocities) <span class="math display">\[
+                              \dot{a} = \frac{\partial H}{\partial p_a}
+                              = \frac{1}{3m}(2p_a - p_r)
+                              \]</span> <span class="math display">\[
+                              \dot{r} = \frac{\partial H}{\partial p_r}
+                              = \frac{1}{3m}(2p_r - p_a)
+                              \]</span></td>
+                              </tr>
+                              <tr>
+                              <td>This highlights the <strong>coupling
+                              effect</strong>: The rate of change of the
+                              arrival intensity (<span
+                              class="math inline">\(\dot{a}\)</span>) is
+                              dampened by the momentum of the service
+                              duration (<span
+                              class="math inline">\(p_r\)</span>).</td>
+                              </tr>
+                              <tr>
+                              <td>### B. Conservation Laws (Forces)
+                              Since the Hamiltonian is translationally
+                              invariant in log-space (no dependence on
+                              <span class="math inline">\(a\)</span> or
+                              <span class="math inline">\(r\)</span>
+                              explicitly):</td>
+                              </tr>
+                              <tr>
+                              <td><span class="math display">\[
+                              \dot{p}_a = -\frac{\partial H}{\partial a}
+                              = 0 \implies p_a = \text{constant}
+                              \]</span> <span class="math display">\[
+                              \dot{p}_r = -\frac{\partial H}{\partial r}
+                              = 0 \implies p_r = \text{constant}
+                              \]</span></td>
+                              </tr>
+                              <tr>
+                              <td>## 6. Conclusion</td>
+                              </tr>
+                              <tr>
+                              <td>By mapping the finite-window identity
+                              to log-space, we have successfully
+                              formulated the system as a free particle
+                              on a constrained plane. The Hamiltonian
+                              <span class="math inline">\(H =
+                              \frac{1}{3m} (p_a^2 + p_r^2 - p_a
+                              p_r)\)</span> reveals that the “queueing
+                              fluid” has a non-diagonal mass tensor,
+                              implying that fluctuations in arrival
+                              rates and service times are inertially
+                              entangled.</td>
+                              </tr>
+                              </tbody>
+                              </table>
+                              <h1
+                              id="presence-mass-as-hamiltonian-mass">Presence
+                              Mass as Hamiltonian Mass</h1>
+                              <p>This note clarifies the relationship
+                              between <em>presence mass</em> from
+                              Presence Calculus and the <em>mass</em>
+                              parameter that appears in the Hamiltonian
+                              formulation of the finite-window identity.
+                              The result is that they coincide
+                              naturally: presence mass is the correct
+                              choice for Hamiltonian mass because both
+                              quantities encode <strong>inertia of
+                              change</strong> along the prefix
+                              window.</p>
+                              <hr />
+                              <h2 id="mass-in-hamiltonian-mechanics">1.
+                              Mass in Hamiltonian Mechanics</h2>
+                              <p>In Hamiltonian and Lagrangian
+                              mechanics, <em>mass</em> represents
+                              <strong>inertia</strong>:</p>
+                              <ul>
+                              <li>resistance to rapid changes in
+                              velocity<br />
+                              </li>
+                              <li>smoothing of motion over time<br />
+                              </li>
+                              <li>a scaling factor in the kinetic energy
+                              metric</li>
+                              </ul>
+                              <p>For generalized coordinates <span
+                              class="math inline">\(q = (q_1,
+                              q_2)\)</span>, the kinetic energy is <span
+                              class="math display">\[
+                              T = \frac{1}{2}\,\dot{q}^\top M\,\dot{q},
+                              \]</span> where <span
+                              class="math inline">\(M\)</span> is the
+                              mass matrix. Larger mass means
+                              <strong>slower response</strong> to forces
+                              and perturbations.</p>
+                              <hr />
+                              <h2 id="presence-mass-in-flow-systems">2.
+                              Presence Mass in Flow Systems</h2>
+                              <p>Presence mass in Presence Calculus
+                              measures:</p>
+                              <ul>
+                              <li>the cumulative time weight carried by
+                              the prefix window<br />
+                              </li>
+                              <li>the “historical inertia” embedded in
+                              the averaged quantities<br />
+                              </li>
+                              <li>the resistance of the finite-window
+                              metrics to instantaneous fluctuations</li>
+                              </ul>
+                              <p>As the window <span
+                              class="math inline">\(T\)</span> grows,
+                              presence mass increases; consequently:</p>
+                              <ul>
+                              <li><span
+                              class="math inline">\(a(T)=\log\Lambda(T)\)</span>
+                              changes more slowly<br />
+                              </li>
+                              <li><span class="math inline">\(r(T)=\log
+                              w(T)\)</span> changes more slowly<br />
+                              </li>
+                              <li><span
+                              class="math inline">\(\ell(T)=\log
+                              L(T)\)</span> becomes less sensitive to
+                              short-term shifts</li>
+                              </ul>
+                              <p>This is <em>exactly</em> the property
+                              of mass in mechanics.</p>
+                              <hr />
+                              <h2
+                              id="why-presence-mass-and-hamiltonian-mass-coincide">3.
+                              Why Presence Mass and Hamiltonian Mass
+                              Coincide</h2>
+                              <p>The finite-window identity in log
+                              space, <span class="math display">\[
+                              \ell = a + r,
+                              \]</span> defines a holonomic constraint
+                              on the system. The Lagrangian for a free
+                              particle moving on this constraint
+                              manifold is <span class="math display">\[
+                              \mathcal{L} = \frac{1}{2}m \left(
+                              \dot{a}^2 + \dot{r}^2 + \dot{\ell}^2
+                              \right),
+                              \]</span> with <span
+                              class="math inline">\(\dot{\ell} = \dot{a}
+                              + \dot{r}\)</span>. Substituting gives the
+                              reduced Lagrangian <span
+                              class="math display">\[
+                              \mathcal{L}
+                              = m\left(\dot{a}^2 + \dot{r}^2 +
+                              \dot{a}\dot{r}\right).
+                              \]</span></p>
+                              <p>Here the parameter <span
+                              class="math inline">\(m\)</span>
+                              governs:</p>
+                              <ul>
+                              <li>how hard it is for the log-arrival
+                              intensity to change<br />
+                              </li>
+                              <li>how hard it is for the
+                              log-residence-time to change<br />
+                              </li>
+                              <li>how strongly the two changes couple
+                              through the metric tensor</li>
+                              </ul>
+                              <p>These effects correspond exactly to the
+                              inertia induced by accumulated
+                              presence.</p>
+                              <p>Thus, the mathematical role played by
+                              <span class="math inline">\(m\)</span> is
+                              identical to the operational meaning of
+                              presence mass.</p>
+                              <hr />
+                              <h2 id="interpretation">4.
+                              Interpretation</h2>
+                              <p>Under this identification:</p>
+                              <ul>
+                              <li><strong>Large presence mass</strong>
+                              <ul>
+                              <li>prefix metrics evolve slowly<br />
+                              </li>
+                              <li>the system is “heavy”<br />
+                              </li>
+                              <li>historical data dominates
+                              instantaneous changes</li>
+                              </ul></li>
+                              <li><strong>Small presence mass</strong>
+                              <ul>
+                              <li>prefix metrics are highly
+                              reactive<br />
+                              </li>
+                              <li>the system is “light”<br />
+                              </li>
+                              <li>evolution is volatile and sensitive to
+                              small perturbations</li>
+                              </ul></li>
+                              </ul>
+                              <p>This matches the classical mechanical
+                              interpretation of mass as resistance to
+                              acceleration.</p>
+                              <hr />
+                              <h2 id="natural-conclusion">5. Natural
+                              Conclusion</h2>
+                              <p>Presence mass <strong>is</strong>
+                              Hamiltonian mass.</p>
+                              <p>It determines:</p>
+                              <ul>
+                              <li>the geometry of the kinetic term<br />
+                              </li>
+                              <li>the metric on the log-space constraint
+                              manifold<br />
+                              </li>
+                              <li>the inertia of the system’s evolution
+                              under the finite-window identity</li>
+                              </ul>
+                              <p>This equivalence is not metaphorical.
+                              It follows directly from:</p>
+                              <ol type="1">
+                              <li>the definition of presence as
+                              accumulated time weight,<br />
+                              </li>
+                              <li>the structure of the kinetic energy in
+                              log space, and<br />
+                              </li>
+                              <li>the co-evolution constraint <span
+                              class="math inline">\(\dot{\ell} = \dot{a}
+                              + \dot{r}\)</span>.</li>
+                              </ol>
+                              <p>Presence mass therefore provides the
+                              canonical physical interpretation of the
+                              mass parameter in the Hamiltonian
+                              formulation of finite-window Little
+                              dynamics.</p>
             <footer id="presence-link" role="contentinfo">
         <a href="https://samplepath.pcalc.org" target="_blank" rel="noreferrer">The Sample Path Analysis Toolkit</a>
         <div style="margin-top: 0.35rem; font-size: 0.85rem; color: #555;">
