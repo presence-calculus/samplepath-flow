@@ -18,8 +18,9 @@ citations: false
 
 # Invocation
 
-This tool generates finite-window Little’s Law charts from an CSV file containing `id`, `start_ts`, `end_ts`, and optionally a `class` column.
-It produces a full set of long run samplepath flow-metrics charts and writes them under an output directory.
+This tool generates finite-window Little’s Law charts from an CSV file containing `id`,
+`start_ts`, `end_ts`, and optionally a `class` column. It produces a full set of long
+run samplepath flow-metrics charts and writes them under an output directory.
 
 Invoke it on the command line with
 
@@ -50,7 +51,8 @@ ______________________________________________________________________
 
 ## Data Filters
 
-Drop rows from the CSV before running the analysis. Useful for isolating subprocesses in the main file. Use with `--scenario` to save subprocess results.
+Drop rows from the CSV before running the analysis. Useful for isolating subprocesses in
+the main file. Use with `--scenario` to save subprocess results.
 
 - **--completed** *(default: `False`)*\
   Include only items with `end_ts`
@@ -74,7 +76,8 @@ Remove outliers to see whether the remaining process converges.
   Drop items above the given percentile of sojourn times
 
 - **--outlier-iqr** *(default: `None`)*\
-  Drop items above Q3 + K·IQR ([Tukey fence](https://en.wikipedia.org/wiki/Outlier#Tukey's_fences))
+  Drop items above Q3 + K·IQR
+  ([Tukey fence](https://en.wikipedia.org/wiki/Outlier#Tukey's_fences))
 
 - **--outlier-iqr-two-sided** *(default: `False`)*\
   Also drop items below Q1 − K·IQR when combined with `--outlier-iqr`
@@ -83,7 +86,8 @@ ______________________________________________________________________
 
 ## Lambda Fine Tuning
 
-Sometimes it helps to drop early points in the λ(T) chart so the remainder displays on a more meaningful scale.
+Sometimes it helps to drop early points in the λ(T) chart so the remainder displays on a
+more meaningful scale.
 
 - **--lambda-pctl** *(default: `None`)*\
   Clip Λ(T) to the upper percentile (e.g., use `99` to clarify charts)
@@ -125,12 +129,12 @@ ______________________________________________________________________
 ## What the command does
 
 1. Parse CLI arguments
-1. Create the output directory structure
-1. Copy input CSV under scenario
-1. Write CLI parameters into the scenario folder
-1. Run the sample-path analysis
-1. Generate the charts and write to the output directory.
-1. Print paths to generated charts
+2. Create the output directory structure
+3. Copy input CSV under scenario
+4. Write CLI parameters into the scenario folder
+5. Run the sample-path analysis
+6. Generate the charts and write to the output directory.
+7. Print paths to generated charts
 
 ______________________________________________________________________
 
@@ -160,11 +164,13 @@ The csv requires three columns
 - _start_ts_: the start time of an event
 - _end_ts_: the end time of an event
 
-Additionally you may pass any other columns. They are all ignored for now, except for a column called _class_ which
-you can use to filter results by event/item type.
+Additionally you may pass any other columns. They are all ignored for now, except for a
+column called _class_ which you can use to filter results by event/item type.
 
-- If your csv has different column names, you can map them with `--start_column` and `--end_column` options.
-- You might need to explicitly pass a date format for the time stamps if you see date parsing errors. The `--date-format` argument does this.
+- If your csv has different column names, you can map them with `--start_column` and
+  `--end_column` options.
+- You might need to explicitly pass a date format for the time stamps if you see date
+  parsing errors. The `--date-format` argument does this.
 
 Results and charts are saved to the output directory as follows:
 
@@ -192,5 +198,5 @@ For input `events.csv`, output is organized as:
 
 \--
 
-A complete reference to the charts produced can be found in [The Chart
-Reference](chart-reference/index).
+A complete reference to the charts produced can be found in
+[The Chart Reference](chart-reference/index).
