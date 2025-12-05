@@ -439,13 +439,18 @@ Samplepath Analysis Toolkit</em></a></p></p>
         <li><a href="#the-charts." id="toc-the-charts.">1.1 The
         charts.</a></li>
         </ul></li>
-        <li><a href="#core-charts" id="toc-core-charts">2 Core
-        charts</a>
+        <li><a href="#a-worked-example" id="toc-a-worked-example">2 A
+        Worked Example</a></li>
+        <li><a href="#sample-path-flow-metrics"
+        id="toc-sample-path-flow-metrics">3 Sample Path Flow Metrics</a>
         <ul>
-        <li><a href="#flow-metrics-summary"
-        id="toc-flow-metrics-summary">2.1 Flow metrics summary</a></li>
-        <li><a href="#the-component-metrics"
-        id="toc-the-component-metrics">2.2 The component metrics</a>
+        <li><a href="#the-core-calculations-for-littles-law"
+        id="toc-the-core-calculations-for-littles-law">3.1 The Core
+        Calculations for Little’s Law</a></li>
+        <li><a href="#summary-chart" id="toc-summary-chart">3.2 Summary
+        chart</a></li>
+        <li><a href="#component-metrics" id="toc-component-metrics">3.3
+        Component metrics</a>
         <ul>
         <li><a href="#the-sample-path-nt"
         id="toc-the-sample-path-nt">The sample path <span
@@ -467,81 +472,24 @@ Samplepath Analysis Toolkit</em></a></p></p>
         time</a></li>
         </ul></li>
         <li><a href="#the-finite-version-of-littles-law"
-        id="toc-the-finite-version-of-littles-law">2.3 The finite
+        id="toc-the-finite-version-of-littles-law">3.4 The finite
         version of Little’s Law</a></li>
-        </ul></li>
-        <li><a href="#convergence---equilibrium-coherence"
-        id="toc-convergence---equilibrium-coherence">3 Convergence -
-        Equilibrium &amp; coherence</a>
-        <ul>
-        <li><a href="#convergence" id="toc-convergence">3.1
-        <code>convergence/</code></a></li>
-        <li><a href="#convergencearrival_departure_equilibrium.png"
-        id="toc-convergencearrival_departure_equilibrium.png">3.2
-        <code>convergence/arrival_departure_equilibrium.png</code></a></li>
-        <li><a href="#convergencepanelsarrival_rate_convergence.png"
-        id="toc-convergencepanelsarrival_rate_convergence.png">3.3
-        <code>convergence/panels/arrival_rate_convergence.png</code></a></li>
-        <li><a href="#convergencepanelsresidence_time_convergence.png"
-        id="toc-convergencepanelsresidence_time_convergence.png">3.4
-        <code>convergence/panels/residence_time_convergence.png</code></a></li>
-        <li><a href="#convergenceresidence_sojourn_coherence.png"
-        id="toc-convergenceresidence_sojourn_coherence.png">3.5
-        <code>convergence/residence_sojourn_coherence.png</code></a></li>
-        <li><a
-        href="#convergencepanelsresidence_time_sojourn_time_scatter.png"
-        id="toc-convergencepanelsresidence_time_sojourn_time_scatter.png">3.6
-        <code>convergence/panels/residence_time_sojourn_time_scatter.png</code></a></li>
-        <li><a href="#sample_path_convergence.png"
-        id="toc-sample_path_convergence.png">3.7
-        <code>sample_path_convergence.png</code></a></li>
-        </ul></li>
-        <li><a href="#stability-charts" id="toc-stability-charts">4
-        Stability Charts</a>
-        <ul>
-        <li><a href="#stability-and-stabilitypanels-rate-stability"
-        id="toc-stability-and-stabilitypanels-rate-stability">4.1
-        <code>stability/</code> and <code>stability/panels/</code> —
-        Rate stability</a></li>
-        <li><a href="#stabilitypanelswip_growth_rate.png"
-        id="toc-stabilitypanelswip_growth_rate.png">4.2
-        <code>stability/panels/wip_growth_rate.png</code></a></li>
-        <li><a href="#stabilitypanelstotal_age_growth_rate.png"
-        id="toc-stabilitypanelstotal_age_growth_rate.png">4.3
-        <code>stability/panels/total_age_growth_rate.png</code></a></li>
-        <li><a href="#stabilityrate_stability.png"
-        id="toc-stabilityrate_stability.png">4.4
-        <code>stability/rate_stability.png</code></a></li>
-        </ul></li>
-        <li><a href="#advanced-charts" id="toc-advanced-charts">5
-        Advanced Charts</a>
-        <ul>
-        <li><a
-        href="#advanced-error-terms-end-effects-and-manifold-view"
-        id="toc-advanced-error-terms-end-effects-and-manifold-view">5.1
-        <code>advanced/</code> — Error terms, end-effects, and manifold
-        view</a></li>
-        <li><a href="#advancedresidence_convergence_errors.png"
-        id="toc-advancedresidence_convergence_errors.png">5.2
-        <code>advanced/residence_convergence_errors.png</code></a></li>
-        <li><a
-        href="#advancedresidence_time_convergence_errors_endeffects.png"
-        id="toc-advancedresidence_time_convergence_errors_endeffects.png">5.3
-        <code>advanced/residence_time_convergence_errors_endeffects.png</code></a></li>
-        <li><a href="#advancedinvariant_manifold3d_log.png"
-        id="toc-advancedinvariant_manifold3d_log.png">5.4
-        <code>advanced/invariant_manifold3D_log.png</code></a></li>
         </ul></li>
         </ul>
       </nav>
-            <p>This reference describes every chart produced by the
-            <code>samplepath</code> CLI, grouped by chart type.</p>
+            <blockquote>
+            <blockquote>
+            <p><strong>Note: <em>This document is a work in progress.
+            This note will be removed when all the charts produced by
+            the analysis are documented</em></strong>.</p>
+            </blockquote>
+            </blockquote>
             <h1 id="what-is-sample-path-analysis">1 What is Sample Path
             Analysis?</h1>
             <p>Sample path analysis is a <em>deterministic</em> analysis
-            that can be run on any observed flow process history.</p>
-            <p>They let us reason about the dynamics and stability of
-            flow processes over the long run, and also in real-time.</p>
+            that can be run on any observed flow process history. It
+            lets us reason about the dynamics and stability of flow
+            processes over the long run, and in real-time.</p>
             <p>We use sample path analysis to determine whether a
             process is stable, and if not what the causes of instability
             are, and what needs to be done to move the process towards
@@ -563,58 +511,152 @@ Samplepath Analysis Toolkit</em></a></p></p>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> convergence/            <span class="co"># convergence vs divergence</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> stability/              <span class="co"># boundedness and existence of limits</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> advanced/               <span class="co"># optional deep-dive charts</span></span></code></pre></div>
+            <p>This reference describes every chart produced by the
+            <code>samplepath</code> CLI, grouped by chart type.</p>
+            <h1 id="a-worked-example">2 A Worked Example</h1>
+            <p>The example charts in this reference and the underlying
+            narrative are discussed in our post <a
+            href="https://www.polaris-flow-dispatch.com/i/172332418/sample-path-analysis-a-worked-example">Little’s
+            Law in a Complex Adaptive System</a></p>
             <p>The example charts in each section below are drawn from
             the Polaris scenario <a
             href="https://github.com/presence-calculus/samplepath/tree/main/examples/polaris/flow-of-work/complete-stories-outliers-removed">completed-stories-outliers-removed</a>.</p>
-            <p>This example is discussed in detail in our post <a
-            href="https://www.polaris-flow-dispatch.com/i/172332418/sample-path-analysis-a-worked-example">Little’s
-            Law in a complex adaptive system</a></p>
             <p>Note: All calculations are done in <em>continuous
             time</em> and all charts report time accumulations in
             hours.</p>
-            <h1 id="core-charts">2 Core charts</h1>
+            <h1 id="sample-path-flow-metrics">3 Sample Path Flow
+            Metrics</h1>
             <p>Time series charts showing the core functions that govern
-            the dynamics of the flow process.</p>
-            <p><strong>Conventions:</strong></p>
+            the long run dynamics of a <a
+            href="https://www.polaris-flow-dispatch.com/i/172332418/flow-processes">flow
+            process</a>.</p>
+            <blockquote>
+            <p>To keep things grounded think of the csv file that you
+            are providing as input to the analysis as the flow process
+            under analysis.</p>
+            <p>The current version of the library only analyzes binary
+            flow processes - where start and end dates represent
+            arrivals/departures events, the effect we are measuring is
+            the presence or absence of items in the process, and the
+            sample path represents the <strong>counting
+            process</strong>: the number of items present in the process
+            at any moment in time (aka the WIP).</p>
+            <p>As we will note along the way, <strong>every
+            concept</strong> in this document generalizes even for the
+            much more general forms of flow processes once you plug in a
+            different sample path. In particular, the set of outputs
+            produced by sample path analysis are
+            <strong>identical</strong> even after generalization!</p>
+            <p>This is why this set of charts is the
+            <strong>foundation</strong> of flow process dynamics.</p>
+            </blockquote>
+            <p><strong>Conventions</strong></p>
             <ul>
-            <li>All functions are charted over a continuous finite
-            interval of time <span
+            <li><p>All charts are defined over a finite observation
+            horizon of length <span
+            class="math inline">\(T_{\max}\)</span>.</p></li>
+            <li><p>Lower-case <span class="math inline">\(t\)</span> is
+            a parameter denoting <em>instantaneous</em> time.</p>
+            <p>Functions of <span class="math inline">\(t\)</span> (such
+            as <span class="math inline">\(N(t)\)</span>) denote sample
+            paths: the values of some measurable property of a process
+            at a specific moment <span class="math inline">\(t \in
+            [0,\,T_{\max}]\)</span>.</p></li>
+            <li><p>Upper-case <span class="math inline">\(T\)</span> is
+            a <em>prefix parameter</em>: a scalar value that determines
+            a <em>time interval</em> <span
+            class="math inline">\([0,\,T]\)</span>.</p>
+            <p>Functions of <span class="math inline">\(T\)</span> (such
+            as <span class="math inline">\(L(T)\)</span>, <span
+            class="math inline">\(\Lambda(T)\)</span>, and <span
+            class="math inline">\(w(T)\)</span> below) are
+            <em>functionals</em>: functions that take a sample path as
+            input and compute a scalar value from the behavior of that
+            function over that interval <span
+            class="math inline">\([0,T]\)</span>. Here <span
+            class="math inline">\(T\)</span> can range over any value in
+            the observation window <span
+            class="math inline">\((0,\,T_{\max}]\)</span>.</p>
+            <p>These functionals are purely deterministic, pathwise
+            calculations (definite integrals in our case) and should not
+            be confused with statistical aggregates.</p></li>
+            </ul>
+            <h2 id="the-core-calculations-for-littles-law">3.1 The Core
+            Calculations for Little’s Law</h2>
+            <p>The input to the analysis is a sample path <span
+            class="math inline">\(N(t)\)</span>.</p>
+            <p>There are four core functionals:</p>
+            <ul>
+            <li><span class="math inline">\(H(T)\)</span>: the area
+            under the sample path over <span
             class="math inline">\([0,T]\)</span>.</li>
-            <li>Functions of lower-case <span
-            class="math inline">\(t\)</span> are instantaneous
-            measurements at a point in time <span
-            class="math inline">\(0 \le t \le T\)</span>.</li>
-            <li>Functions of upper case T represent <em>aggregates</em>
-            computed over the interval <span
-            class="math inline">\([0,t]\)</span> for each <span
-            class="math inline">\(0 \le t \le T\)</span>.</li>
+            <li><span class="math inline">\(L(T)\)</span>: the time
+            average of <span class="math inline">\(N(t)\)</span>,
+            defined as <span
+            class="math inline">\(L(T)=\frac{H(T)}{T}\)</span>.</li>
+            <li><span class="math inline">\(\Lambda(T)\)</span>: the
+            cumulative arrival rate, defined as <span
+            class="math inline">\(\Lambda(T)=\frac{A(T)}{T}\)</span>.</li>
+            <li><span class="math inline">\(w(T)\)</span>: the average
+            residence time, defined as <span
+            class="math inline">\(w(T)=\frac{H(T)}{A(T)}\)</span>.</li>
             </ul>
-            <p>There are four core time-varying functions</p>
-            <ul>
-            <li>The sample path <span
-            class="math inline">\(N(t)\)</span> (aka <em>instantaneous
-            WIP</em>)</li>
-            <li>L(T): The time average of <span
-            class="math inline">\(N(t)\)</span> (aka time average of
-            WIP)</li>
-            <li><span class="math inline">\(\Lambda(T)\)</span>: The
-            cumulative arrival rate.</li>
-            <li><span class="math inline">\(w(T)\)</span>: The average
-            residence time</li>
-            </ul>
-            <p>The finite version of Little’s Law states that</p>
+            <p>From these definitions it follows that</p>
             <p><span class="math display">\[
-            L(T) = \Lambda(T).w(T)
+            L(T) = \frac{H(T)}{T}
+                 = \frac{A(T)}{T}.\frac{H(T)}{A(T)}.
             \]</span></p>
-            <p>for <em>any</em> finite observation window <span
+            <p>Equivalently,</p>
+            <p><span class="math display">\[
+            L(T) = \Lambda(T).w(T).
+            \]</span></p>
+            <p>This is the finite version of Little’s Law.</p>
+            <p>It is a <em>deterministic identity</em> that holds for
+            every finite observation window <span
             class="math inline">\([0,T]\)</span> with <span
-            class="math inline">\(0 \lt T \lt \infty\)</span>.</p>
-            <p>This means that last three functions <em>always</em>
-            change in time in such a way that this identity holds. This
-            constraints governs the global dynamics of the flow process
-            which is what we show in the very first chart you should
-            look at after running the analysis.</p>
-            <h2 id="flow-metrics-summary">2.1 Flow metrics summary</h2>
+            class="math inline">\(0 &lt; T &lt; \infty\)</span> and
+            <span class="math inline">\(A(T) &gt; 0\)</span>. This
+            implies that the three component functions <em>always</em>
+            evolve in a way that preserves the identity.</p>
+            <p>The finite version of Little’s Law is thus a
+            <em>deterministic constraint</em> that governs the global
+            dynamics of <em>any</em> flow process, <em>even ones that
+            operate in complex adaptive systems</em>. It is the
+            foundation for adapting Little’s Law for use in complex
+            systems.</p>
+            <blockquote>
+            <p><strong>Note</strong>: As we discuss in the <a
+            href="https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law">Many
+            Faces of Little’s Law</a>, while the <span
+            class="math inline">\(L=\lambda.W\)</span> form of Little’s
+            Law is incredibly powerful in operations management, much
+            more can be unlocked once we consider the general <span
+            class="math inline">\(H=\lambda.G\)</span> form of Little’s
+            Law.</p>
+            <p>The current version of the library does not provide the
+            representations needed to <em>compute sample paths</em> for
+            this general form of the law. But the key thing to note is
+            that the analysis of this general form and all the charts we
+            see here depend only on the <em>shape of the sample
+            path</em>.</p>
+            <p>Thus what is missing are the sample path construction
+            algorithms that lie upstream of this analysis and the
+            algorithms to compute the necessary functionals for <span
+            class="math inline">\(H(T)\)</span>. Once we provide this.
+            the charts we produce are exactly the same for both forms of
+            the law. This is why this set of charts is a very powerful
+            tool to reason about flow dynamics.</p>
+            <p>So while it is easier to relate to these concepts
+            expressed in terms of familiar ideas like WIP,
+            Arrivals/Departure and Residence Time, all these concepts
+            have natural generalizations when viewed from the lens of
+            the general <span class="math inline">\(H=\lambda.G\)</span>
+            form.</p>
+            <p>This is the generalization we provide in <a
+            href="https://docs.pcalc.org/articles/intro-to-presence-calculus/">The
+            Presence Calculus</a>.</p>
+            </blockquote>
+            <h2 id="summary-chart">3.2 Summary chart</h2>
             <p>This chart can be found at the top level under
             <code>&lt;scenario&gt;/</code></p>
             <table>
@@ -696,8 +738,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             Causal Arrow in Little’s Law</a> for more discussion on what
             this means.</p>
             <hr />
-            <h2 id="the-component-metrics">2.2 The component
-            metrics</h2>
+            <h2 id="component-metrics">3.3 Component metrics</h2>
             <p>Each panel in the main chart is also written under</p>
             <pre><code>&lt;scenario&gt;/core/</code></pre>
             <table>
@@ -760,8 +801,6 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <h3 id="the-sample-path-nt">The sample path <span
             class="math inline">\(N(t)\)</span></h3>
             <p><code>sample_path_N.png</code></p>
-            <p>Instantaneous WIP <code>N(t)</code>. This shows the
-            number of items observed at time t.</p>
             <p>Since we measure in continuous time, this chart is a
             <em>step chart</em>.</p>
             <ul>
@@ -774,6 +813,17 @@ Samplepath Analysis Toolkit</em></a></p></p>
             </ul>
             <p>This is a real time chart that reveals current
             congestion, bursts, and idle periods.</p>
+            <blockquote>
+            <p>If you are familiar with Cumulative Flow Diagrams, <span
+            class="math inline">\(N(t)\)</span> represents the distance
+            between the cumulative arrival line and the cumulative
+            departure line in the diagram.</p>
+            </blockquote>
+            <p>In stochastic process language, <span
+            class="math inline">\(N(t)\)</span> is a <em>process</em>
+            over the flow process</p>
+            <p>the primary <em>object under analysis</em>. Little’s Law
+            describes the</p>
             <figure>
             <img src="images/core/sample_path_N.png"
             alt="Sample Path" />
@@ -784,13 +834,17 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <p>A key quantity in sample path analysis is the <em>area
             under the sample path</em>. This is calculated as the
             definite integral of the sample path curve over [0,T]</p>
-            <pre><code>H(T) = ∫₀ᵀ N(t) dt</code></pre>
+            <p><span class="math display">\[
+            H(T) = \int_0^T N(t) dt
+            \]</span></p>
             <p>Since the area is a product of the number of items
-            present over time, the units of H(T) are in item-time. H(T)
-            is itself not very interesting to chart since this is simply
-            a monotonically increasing function of time.</p>
-            <p>Rather, the parameters that drive flow-process dynamics
-            are the time and item averages of H(T): L(T) and w(T). These
+            present over time, the units of H(T) are in item-time. In
+            the language of the Presence Calculus, <span
+            class="math inline">\(H(T)\)</span> is <em>cumulative
+            presence</em> function over the sample path <span
+            class="math inline">\(N(t)\)</span>.</p>
+            <p>The functions that drive flow-process dynamics are the
+            time and item averages of H(T): L(T) and w(T). These
             continuous functions of time are the key quantities in the
             <em>finite version of Little’s Law</em>.</p>
             <h3 id="lt-time-average-of-nt"><span
@@ -861,7 +915,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <figcaption aria-hidden="true">Average Residence
             Time</figcaption>
             </figure>
-            <h2 id="the-finite-version-of-littles-law">2.3 The finite
+            <h2 id="the-finite-version-of-littles-law">3.4 The finite
             version of Little’s Law</h2>
             <p><code>littles_law_invariant.png</code></p>
             <p>This plot visualizes the <a
@@ -883,288 +937,142 @@ Samplepath Analysis Toolkit</em></a></p></p>
             These are significant operating modes for the process as it
             moves towards stable states.</p>
             <hr />
-            <h1 id="convergence---equilibrium-coherence">3 Convergence -
-            Equilibrium &amp; coherence</h1>
-            <table>
-            <colgroup>
-            <col style="width: 9%" />
-            <col style="width: 41%" />
-            <col style="width: 48%" />
-            </colgroup>
-            <thead>
-            <tr>
-            <th>File</th>
-            <th>What it shows</th>
-            <th>What it means</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-            <td><code>sample_path_convergence.png</code></td>
-            <td>Scatter of <code>L(T)</code> (x-axis) vs
-            <code>λ*(t)·W*(t)</code> (y-axis) with <code>y=x</code> and
-            an ε-band; annotated with a coherence score over a
-            horizon.</td>
-            <td>Direct visual and quantitative test of whether the
-            finite-window sample path obeys Little’s Law asymptotically
-            (sample-path convergence / coherence).</td>
-            </tr>
-            </tbody>
-            </table>
-            <figure>
-            <img src="images/sample_path_convergence.png"
-            alt="Sample Path Convergence" />
-            <figcaption aria-hidden="true">Sample Path
-            Convergence</figcaption>
-            </figure>
-            <table>
-            <colgroup>
-            <col style="width: 16%" />
-            <col style="width: 44%" />
-            <col style="width: 38%" />
-            </colgroup>
-            <thead>
-            <tr>
-            <th>File</th>
-            <th>What it shows</th>
-            <th>What it means</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-            <td><code>convergence/arrival_departure_equilibrium.png</code></td>
-            <td>Two-row stack: (1) cumulative arrivals <code>A(t)</code>
-            vs cumulative departures <code>D(t)</code>; (2)
-            <code>Λ(T)</code> vs throughput rate
-            <code>θ(T)=D(T)/(T−t₀)</code> with masking after last
-            departure.</td>
-            <td>Tests arrival/departure equilibrium: whether
-            <code>A(t)</code> and <code>D(t)</code> grow together and
-            arrival/throughput rates converge.</td>
-            </tr>
-            <tr>
-            <td><code>convergence/panels/arrival_rate_convergence.png</code></td>
-            <td>Single panel: <code>Λ(T)</code> and <code>λ*(t)</code>
-            (empirical arrival rate) over time, with optional warmup and
-            percentile-based y-limits.</td>
-            <td>Compares window-averaged arrival rate to the
-            element-wise empirical rate; checks consistency of the two
-            ways of measuring “arrival rate”.</td>
-            </tr>
-            <tr>
-            <td><code>convergence/panels/residence_time_convergence.png</code></td>
-            <td>Single panel: <code>w(T)</code> vs <code>W*(t)</code>
-            (empirical mean sojourn time of completed items) over
-            time.</td>
-            <td>Coherence between residence-time and sojourn-time views:
-            if the process is coherent, these two series should converge
-            together.</td>
-            </tr>
-            <tr>
-            <td><code>convergence/residence_sojourn_coherence.png</code></td>
-            <td>Two-row stack: (1) <code>w(T)</code> vs
-            <code>W*(t)</code> overlay; (2) scatter of individual
-            sojourn times against time, with <code>w(T)</code> as a
-            reference line.</td>
-            <td>Ties the averaged quantities back to individual element
-            sojourn times; helps see whether outliers or subpopulations
-            are driving divergence.</td>
-            </tr>
-            <tr>
-            <td><code>convergence/panels/residence_time_sojourn_time_scatter.png</code></td>
-            <td>Line of <code>w(T)</code> over time with overlaid
-            scatter of element <em>age</em> (if
-            <code>--incomplete</code>) or sojourn time (if
-            <code>--completed</code> / default).</td>
-            <td>Visualizes how individual element ages/sojourn times
-            relate to the evolving average residence time, and whether a
-            stable band emerges.</td>
-            </tr>
-            </tbody>
-            </table>
-            <h2 id="convergence">3.1 <code>convergence/</code></h2>
-            <pre><code>&lt;scenario&gt;/convergence/
-&lt;scenario&gt;/convergence/panels/</code></pre>
-            <hr />
-            <h2 id="convergencearrival_departure_equilibrium.png">3.2
-            <code>convergence/arrival_departure_equilibrium.png</code></h2>
-            <p>Cumulative arrivals vs departures, plus
-            arrival/throughput rate comparison.<br />
-            Tests for equilibrium.</p>
-            <h2 id="convergencepanelsarrival_rate_convergence.png">3.3
-            <code>convergence/panels/arrival_rate_convergence.png</code></h2>
-            <p><code>Λ(T)</code> (window-average) and <code>λ*(t)</code>
-            (empirical).<br />
-            Checks rate consistency.</p>
-            <h2 id="convergencepanelsresidence_time_convergence.png">3.4
-            <code>convergence/panels/residence_time_convergence.png</code></h2>
-            <p><code>w(T)</code> vs <code>W*(t)</code>.<br />
-            Coherence between window-average residence and empirical
-            sojourn time.</p>
-            <h2 id="convergenceresidence_sojourn_coherence.png">3.5
-            <code>convergence/residence_sojourn_coherence.png</code></h2>
-            <p>Two-row comparison of averages + individual sojourn
-            scatter.</p>
-            <h2
-            id="convergencepanelsresidence_time_sojourn_time_scatter.png">3.6
-            <code>convergence/panels/residence_time_sojourn_time_scatter.png</code></h2>
-            <p><code>w(T)</code> overlaid with individual ages or
-            sojourns.</p>
-            <h2 id="sample_path_convergence.png">3.7
-            <code>sample_path_convergence.png</code></h2>
-            <p>Scatter of <code>L(T)</code> vs <code>λ*(t)·W*(t)</code>
-            with tolerance band.<br />
-            Highest-level convergence and coherence view.</p>
-            <p>Controlled by <strong>Convergence Options</strong>:<br />
-            <code>--convergence</code>, <code>--coherence-eps</code>,
-            <code>--completed</code>, <code>--incomplete</code>,
-            <code>--warmup</code>.</p>
-            <hr />
-            <h1 id="stability-charts">4 Stability Charts</h1>
-            <h2 id="stability-and-stabilitypanels-rate-stability">4.1
-            <code>stability/</code> and <code>stability/panels/</code> —
-            Rate stability</h2>
-            <table>
-            <colgroup>
-            <col style="width: 13%" />
-            <col style="width: 36%" />
-            <col style="width: 49%" />
-            </colgroup>
-            <thead>
-            <tr>
-            <th>File</th>
-            <th>What it shows</th>
-            <th>What it means</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-            <td><code>stability/panels/wip_growth_rate.png</code></td>
-            <td>Two-row stack: (1) <code>N(t)</code> step chart; (2) WIP
-            growth rate <code>N(T)/T</code> with reference lines at 0
-            and 1.</td>
-            <td>Tests whether WIP grows linearly (instability) or
-            sublinearly/flat (bounded or stabilizing), using a rate
-            perspective.</td>
-            </tr>
-            <tr>
-            <td><code>stability/panels/total_age_growth_rate.png</code></td>
-            <td>Two-row stack: (1) total active age <code>R(t)</code> in
-            hours; (2) age growth rate <code>R(T)/T</code> with
-            reference lines at 0 and 1.</td>
-            <td>Looks at growth of total age of WIP: sustained growth
-            points to accumulating, aging work and potential
-            instability.</td>
-            </tr>
-            <tr>
-            <td><code>stability/rate_stability.png</code></td>
-            <td>Four-row stack: (1) <code>N(T)/T</code>; (2)
-            <code>R(T)/T</code>; (3) <code>λ*(T)</code>; (4)
-            <code>w(T)</code> vs <code>W*(t)</code>. Captioned
-            “Equilibrium and Coherence”.</td>
-            <td>Integrated stability view: WIP and age growth rates,
-            empirical arrival rate, and residence/sojourn coherence all
-            on one canvas to assess long-run rate stability.</td>
-            </tr>
-            </tbody>
-            </table>
-            <p>Written under:</p>
-            <pre><code>&lt;scenario&gt;/stability/
-&lt;scenario&gt;/stability/panels/</code></pre>
-            <p>Controlled by <strong>Stability Options</strong>:
-            <code>--stability</code>.</p>
-            <h2 id="stabilitypanelswip_growth_rate.png">4.2
-            <code>stability/panels/wip_growth_rate.png</code></h2>
-            <p><code>N(t)</code> and its growth rate
-            <code>N(T)/T</code>.<br />
-            Detects sublinear vs linear growth.</p>
-            <h2 id="stabilitypanelstotal_age_growth_rate.png">4.3
-            <code>stability/panels/total_age_growth_rate.png</code></h2>
-            <p>Total age <code>R(t)</code> and its growth rate.<br />
-            Identifies aging accumulation.</p>
-            <h2 id="stabilityrate_stability.png">4.4
-            <code>stability/rate_stability.png</code></h2>
-            <p>Four-panel stability synthesis:</p>
-            <ul>
-            <li><code>N(T)/T</code></li>
-            <li><code>R(T)/T</code></li>
-            <li><code>λ*(T)</code></li>
-            <li><code>w(T)</code> vs <code>W*(t)</code></li>
-            </ul>
-            <hr />
-            <hr />
-            <h1 id="advanced-charts">5 Advanced Charts</h1>
-            <h2
-            id="advanced-error-terms-end-effects-and-manifold-view">5.1
-            <code>advanced/</code> — Error terms, end-effects, and
-            manifold view</h2>
-            <table>
-            <colgroup>
-            <col style="width: 15%" />
-            <col style="width: 38%" />
-            <col style="width: 46%" />
-            </colgroup>
-            <thead>
-            <tr>
-            <th>File</th>
-            <th>What it shows</th>
-            <th>What it means</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-            <td><code>advanced/residence_convergence_errors.png</code></td>
-            <td>Three-row stack: (1) <code>w(T)</code> vs
-            <code>W*(t)</code> (dynamic); (2) <code>Λ(T)</code> vs
-            <code>λ*(t)</code> (dynamic); (3) error magnitudes
-            <code>e_W(T)</code> and <code>e_Λ(T)</code> with optional ε
-            threshold.</td>
-            <td>Tracks <em>how</em> coherence is approached or violated,
-            with explicit error terms for residence time and arrival
-            rate over time.</td>
-            </tr>
-            <tr>
-            <td><code>advanced/residence_time_convergence_errors_endeffects.png</code></td>
-            <td>Four-row stack: same as above plus an end-effects panel
-            with <code>r_A(T)</code> (mass share), <code>r_B(T)</code>
-            (boundary share), and <code>ρ(T)=T/W*(t)</code>.</td>
-            <td>Decomposes residual errors into end-effect contributions
-            and time-scaling, making it clear when divergence is driven
-            by boundary conditions vs ongoing dynamics.</td>
-            </tr>
-            <tr>
-            <td><code>advanced/invariant_manifold3D_log.png</code></td>
-            <td>3D log–log–log manifold plot: <code>x = log Λ(T)</code>,
-            <code>y = log w(T)</code>, <code>z = log L(T)</code>,
-            plotting the sample-path trajectory on the plane
-            <code>z = x + y</code>.</td>
-            <td>Geometric view of Little’s Law as an invariant plane;
-            lets you see whether the observed trajectory sticks to the
-            manifold and how it moves across regimes in (rate, time,
-            WIP) space.</td>
-            </tr>
-            </tbody>
-            </table>
-            <p>Written under:</p>
-            <pre><code>&lt;scenario&gt;/advanced/</code></pre>
-            <p>Controlled by <strong>Advanced Options</strong>:
-            <code>--advanced</code>.</p>
-            <h2 id="advancedresidence_convergence_errors.png">5.2
-            <code>advanced/residence_convergence_errors.png</code></h2>
-            <p><code>w(T)</code> vs <code>W*(t)</code>;<br />
-            <code>Λ(T)</code> vs <code>λ*(t)</code>;<br />
-            error magnitudes.</p>
-            <h2
-            id="advancedresidence_time_convergence_errors_endeffects.png">5.3
-            <code>advanced/residence_time_convergence_errors_endeffects.png</code></h2>
-            <p>Adds end-effects: <code>r_A(T)</code>,
-            <code>r_B(T)</code>, <code>ρ(T)</code>.</p>
-            <h2 id="advancedinvariant_manifold3d_log.png">5.4
-            <code>advanced/invariant_manifold3D_log.png</code></h2>
-            <p>3D log–log–log manifold:<br />
-            <code>(log Λ(T), log w(T), log L(T))</code> on the plane
-            <code>z = x + y</code>.</p>
-            <hr />
+            <!--
+            # Convergence - Equilibrium & coherence
+
+            | File                          | What it shows                                                                                                                   | What it means                                                                                                                                         |
+            | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+            | `sample_path_convergence.png` | Scatter of `L(T)` (x-axis) vs `λ*(t)·W*(t)` (y-axis) with `y=x` and an ε-band; annotated with a coherence score over a horizon. | Direct visual and quantitative test of whether the finite-window sample path obeys Little’s Law asymptotically (sample-path convergence / coherence). |
+
+            ![Sample Path Convergence](images/sample_path_convergence.png)
+
+            | File                                                         | What it shows                                                                                                                                                      | What it means                                                                                                                               |
+            | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+            | `convergence/arrival_departure_equilibrium.png`              | Two-row stack: (1) cumulative arrivals `A(t)` vs cumulative departures `D(t)`; (2) `Λ(T)` vs throughput rate `θ(T)=D(T)/(T−t₀)` with masking after last departure. | Tests arrival/departure equilibrium: whether `A(t)` and `D(t)` grow together and arrival/throughput rates converge.                         |
+            | `convergence/panels/arrival_rate_convergence.png`            | Single panel: `Λ(T)` and `λ*(t)` (empirical arrival rate) over time, with optional warmup and percentile-based y-limits.                                           | Compares window-averaged arrival rate to the element-wise empirical rate; checks consistency of the two ways of measuring “arrival rate”.   |
+            | `convergence/panels/residence_time_convergence.png`          | Single panel: `w(T)` vs `W*(t)` (empirical mean sojourn time of completed items) over time.                                                                        | Coherence between residence-time and sojourn-time views: if the process is coherent, these two series should converge together.             |
+            | `convergence/residence_sojourn_coherence.png`                | Two-row stack: (1) `w(T)` vs `W*(t)` overlay; (2) scatter of individual sojourn times against time, with `w(T)` as a reference line.                               | Ties the averaged quantities back to individual element sojourn times; helps see whether outliers or subpopulations are driving divergence. |
+            | `convergence/panels/residence_time_sojourn_time_scatter.png` | Line of `w(T)` over time with overlaid scatter of element *age* (if `--incomplete`) or sojourn time (if `--completed` / default).                                  | Visualizes how individual element ages/sojourn times relate to the evolving average residence time, and whether a stable band emerges.      |
+
+            ## `convergence/`
+
+            ```
+            <scenario>/convergence/
+            <scenario>/convergence/panels/
+            ```
+
+            ______________________________________________________________________
+
+            ## `convergence/arrival_departure_equilibrium.png`
+
+            Cumulative arrivals vs departures, plus arrival/throughput rate comparison.\
+            Tests for equilibrium.
+
+            ## `convergence/panels/arrival_rate_convergence.png`
+
+            `Λ(T)` (window-average) and `λ*(t)` (empirical).\
+            Checks rate consistency.
+
+            ## `convergence/panels/residence_time_convergence.png`
+
+            `w(T)` vs `W*(t)`.\
+            Coherence between window-average residence and empirical sojourn time.
+
+            ## `convergence/residence_sojourn_coherence.png`
+
+            Two-row comparison of averages + individual sojourn scatter.
+
+            ## `convergence/panels/residence_time_sojourn_time_scatter.png`
+
+            `w(T)` overlaid with individual ages or sojourns.
+
+            ## `sample_path_convergence.png`
+
+            Scatter of `L(T)` vs `λ*(t)·W*(t)` with tolerance band.\
+            Highest-level convergence and coherence view.
+
+            Controlled by **Convergence Options**:\
+            `--convergence`, `--coherence-eps`, `--completed`, `--incomplete`, `--warmup`.
+
+            ______________________________________________________________________
+
+            # Stability Charts
+
+            ## `stability/` and `stability/panels/` — Rate stability
+
+            | File                                         | What it shows                                                                                                          | What it means                                                                                                                                                     |
+            | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+            | `stability/panels/wip_growth_rate.png`       | Two-row stack: (1) `N(t)` step chart; (2) WIP growth rate `N(T)/T` with reference lines at 0 and 1.                    | Tests whether WIP grows linearly (instability) or sublinearly/flat (bounded or stabilizing), using a rate perspective.                                            |
+            | `stability/panels/total_age_growth_rate.png` | Two-row stack: (1) total active age `R(t)` in hours; (2) age growth rate `R(T)/T` with reference lines at 0 and 1.     | Looks at growth of total age of WIP: sustained growth points to accumulating, aging work and potential instability.                                               |
+            | `stability/rate_stability.png`               | Four-row stack: (1) `N(T)/T`; (2) `R(T)/T`; (3) `λ*(T)`; (4) `w(T)` vs `W*(t)`. Captioned “Equilibrium and Coherence”. | Integrated stability view: WIP and age growth rates, empirical arrival rate, and residence/sojourn coherence all on one canvas to assess long-run rate stability. |
+
+            Written under:
+
+            ```
+            <scenario>/stability/
+            <scenario>/stability/panels/
+            ```
+
+            Controlled by **Stability Options**: `--stability`.
+
+            ## `stability/panels/wip_growth_rate.png`
+
+            `N(t)` and its growth rate `N(T)/T`.\
+            Detects sublinear vs linear growth.
+
+            ## `stability/panels/total_age_growth_rate.png`
+
+            Total age `R(t)` and its growth rate.\
+            Identifies aging accumulation.
+
+            ## `stability/rate_stability.png`
+
+            Four-panel stability synthesis:
+
+            - `N(T)/T`
+            - `R(T)/T`
+            - `λ*(T)`
+            - `w(T)` vs `W*(t)`
+
+            ______________________________________________________________________
+
+            ______________________________________________________________________
+
+            # Advanced Charts
+
+            ## `advanced/` — Error terms, end-effects, and manifold view
+
+            | File                                                        | What it shows                                                                                                                                            | What it means                                                                                                                                                                         |
+            | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+            | `advanced/residence_convergence_errors.png`                 | Three-row stack: (1) `w(T)` vs `W*(t)` (dynamic); (2) `Λ(T)` vs `λ*(t)` (dynamic); (3) error magnitudes `e_W(T)` and `e_Λ(T)` with optional ε threshold. | Tracks *how* coherence is approached or violated, with explicit error terms for residence time and arrival rate over time.                                                            |
+            | `advanced/residence_time_convergence_errors_endeffects.png` | Four-row stack: same as above plus an end-effects panel with `r_A(T)` (mass share), `r_B(T)` (boundary share), and `ρ(T)=T/W*(t)`.                       | Decomposes residual errors into end-effect contributions and time-scaling, making it clear when divergence is driven by boundary conditions vs ongoing dynamics.                      |
+            | `advanced/invariant_manifold3D_log.png`                     | 3D log–log–log manifold plot: `x = log Λ(T)`, `y = log w(T)`, `z = log L(T)`, plotting the sample-path trajectory on the plane `z = x + y`.              | Geometric view of Little’s Law as an invariant plane; lets you see whether the observed trajectory sticks to the manifold and how it moves across regimes in (rate, time, WIP) space. |
+
+            Written under:
+
+            ```
+            <scenario>/advanced/
+            ```
+
+            Controlled by **Advanced Options**: `--advanced`.
+
+            ## `advanced/residence_convergence_errors.png`
+
+            `w(T)` vs `W*(t)`;\
+            `Λ(T)` vs `λ*(t)`;\
+            error magnitudes.
+
+            ## `advanced/residence_time_convergence_errors_endeffects.png`
+
+            Adds end-effects: `r_A(T)`, `r_B(T)`, `ρ(T)`.
+
+            ## `advanced/invariant_manifold3D_log.png`
+
+            3D log–log–log manifold:\
+            `(log Λ(T), log w(T), log L(T))` on the plane `z = x + y`.
+
+            ______________________________________________________________________
+            -->
             <footer id="presence-link" role="contentinfo">
         <a href="https://samplepath.pcalc.org" target="_blank" rel="noreferrer">The Sample Path Analysis Toolkit</a>
         <div style="margin-top: 0.35rem; font-size: 0.85rem; color: #555;">

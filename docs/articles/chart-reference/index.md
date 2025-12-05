@@ -19,16 +19,13 @@ figPrefix: Figure
 citations: false
 ---
 
-This reference describes every chart produced by the `samplepath` CLI, grouped by chart
-type.
+> > **Note: _This document is a work in progress. This note will be removed when all the charts
+> > produced by the analysis are documented_**.
 
 # What is Sample Path Analysis?
 
 Sample path analysis is a _deterministic_ analysis that can be run on any observed flow
-process history.
-
-They let us reason about the dynamics and stability of flow processes over the long run,
-and also in real-time.
+process history. It lets us reason about the dynamics and stability of flow processes over the long run, and in real-time.
 
 We use sample path analysis to determine whether a process is stable, and if not what
 the causes of instability are, and what needs to be done to move the process towards
@@ -55,48 +52,90 @@ For input `events.csv`, output is organized as follows:
         ├── advanced/               # optional deep-dive charts
 ```
 
+This reference describes every chart produced by the `samplepath` CLI, grouped by chart
+type.
+
+# A Worked Example
+
+The example charts in this reference and the underlying narrative are
+discussed in our post [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-analysis-a-worked-example)
+
 The example charts in each section below are drawn from the Polaris scenario
 [completed-stories-outliers-removed](https://github.com/presence-calculus/samplepath/tree/main/examples/polaris/flow-of-work/complete-stories-outliers-removed).
-
-This example is discussed in detail in our post
-[Little's Law in a complex adaptive system](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-analysis-a-worked-example)
 
 Note: All calculations are done in *continuous time* and all charts report time
 accumulations in hours.
 
-# Core charts
+# Sample Path Flow Metrics
 
-Time series charts showing the core functions that govern the dynamics of the flow
-process.
+Time series charts showing the core functions that govern the long run dynamics of a [flow
+process](https://www.polaris-flow-dispatch.com/i/172332418/flow-processes).
 
-**Conventions:**
+> To keep things grounded
+> think of the csv file that you are providing as input to the analysis as the flow process under analysis.
+>
+> The current version of the library only analyzes binary flow processes - where start and end dates represent arrivals/departures events, the effect we are measuring is the presence or absence of items in the process, and the sample path represents the **counting process**: the number of items present in the process at any moment in time (aka the WIP).
+>
+> As we will note along the way, **every concept** in this document generalizes even for the much more general forms of flow processes once you plug in a different sample path. In particular, the set of outputs produced by sample path analysis are **identical** even after generalization!
+>
+> This is why this set of charts is the **foundation** of flow process dynamics.
 
-- All functions are charted over a continuous finite interval of time $[0,T]$.
-- Functions of lower-case $t$ are instantaneous measurements at a point in time
-  $0 \le t \le T$.
-- Functions of upper case T represent _aggregates_ computed over the interval $[0,t]$
-  for each $0 \le t \le T$.
+**Conventions**
 
-There are four core time-varying functions
+- All charts are defined over a finite observation horizon of length $T_{\max}$.
 
-- The sample path $N(t)$ (aka _instantaneous WIP_)
-- L(T): The time average of $N(t)$ (aka time average of WIP)
-- $\Lambda(T)$: The cumulative arrival rate.
-- $w(T)$: The average residence time
+- Lower-case $t$ is a parameter denoting *instantaneous* time.
 
-The finite version of Little's Law states that
+  Functions of $t$ (such as $N(t)$) denote sample paths: the values of some measurable property of a process at a specific moment $t \in [0,\,T_{\max}]$.
+
+- Upper-case $T$ is a *prefix parameter*: a scalar value that determines a _time interval_ $[0,\,T]$.
+
+  Functions of $T$ (such as $L(T)$, $\Lambda(T)$, and $w(T)$ below) are *functionals*: functions that take a sample path as input and compute a scalar value from the behavior of that function over that interval $[0,T]$. Here $T$ can range over any value in the observation window $(0,\,T_{\max}]$.
+
+  These functionals are purely deterministic, pathwise calculations (definite integrals in our case) and should not be confused with statistical aggregates.
+
+## The Core Calculations for Little's Law
+
+The input to the analysis is a sample path $N(t)$.
+
+There are four core functionals:
+
+- $H(T)$: the area under the sample path over $[0,T]$.
+- $L(T)$: the time average of $N(t)$, defined as $L(T)=\frac{H(T)}{T}$.
+- $\Lambda(T)$: the cumulative arrival rate, defined as $\Lambda(T)=\frac{A(T)}{T}$.
+- $w(T)$: the average residence time, defined as $w(T)=\frac{H(T)}{A(T)}$.
+
+From these definitions it follows that
 
 $$
-L(T) = \Lambda(T).w(T)
+L(T) = \frac{H(T)}{T}
+     = \frac{A(T)}{T}.\frac{H(T)}{A(T)}.
 $$
 
-for _any_ finite observation window $[0,T]$ with $0 \lt T \lt \infty$.
+Equivalently,
 
-This means that last three functions _always_ change in time in such a way that this
-identity holds. This constraints governs the global dynamics of the flow process which
-is what we show in the very first chart you should look at after running the analysis.
+$$
+L(T) = \Lambda(T).w(T).
+$$
 
-## Flow metrics summary
+This is the finite version of Little’s Law.
+
+It is a _deterministic identity_ that holds for every finite observation window $[0,T]$ with $0 < T < \infty$ and $A(T) > 0$.
+This implies that the three component functions _always_ evolve in a way that preserves the identity.
+
+The finite version of Little's Law is thus a _deterministic constraint_ that governs the global dynamics of _any_ flow process, _even ones that operate in complex adaptive systems_. It is the foundation for adapting Little's Law for use in complex systems.
+
+> **Note**: As we discuss in the [Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law), while the $L=\lambda.W$ form of Little's Law is incredibly powerful in operations management, much more can be unlocked once we consider the general $H=\lambda.G$ form of Little's Law.
+>
+> The current version of the library does not provide the representations needed to _compute sample paths_ for this general form of the law. But the key thing to note is that the analysis of this general form and all the charts we see here depend only on the _shape of the sample path_.
+>
+> Thus what is missing are the sample path construction algorithms that lie upstream of this analysis and the algorithms to compute the necessary functionals for $H(T)$. Once we provide this. the charts we produce are exactly the same for both forms of the law. This is why this set of charts is a very powerful tool to reason about flow dynamics.
+>
+> So while it is easier to relate to these concepts expressed in terms of familiar ideas like WIP, Arrivals/Departure and Residence Time, all these concepts have natural generalizations when viewed from the lens of the general $H=\lambda.G$ form.
+>
+> This is the generalization we provide in [The Presence Calculus](https://docs.pcalc.org/articles/intro-to-presence-calculus/).
+
+## Summary chart
 
 This chart can be found at the top level under `<scenario>/`
 
@@ -145,7 +184,7 @@ for more discussion on what this means.
 
 ______________________________________________________________________
 
-## The component metrics
+## Component metrics
 
 Each panel in the main chart is also written under
 
@@ -167,8 +206,6 @@ Their detail descriptions follow.
 
 `sample_path_N.png`
 
-Instantaneous WIP `N(t)`. This shows the number of items observed at time t.
-
 Since we measure in continuous time, this chart is a *step chart*.
 
 - The line will go up with each arrival and go down with each departure.
@@ -178,6 +215,12 @@ Since we measure in continuous time, this chart is a *step chart*.
 
 This is a real time chart that reveals current congestion, bursts, and idle periods.
 
+> If you are familiar with Cumulative Flow Diagrams, $N(t)$ represents the distance between the cumulative arrival line and the cumulative departure line in the diagram.
+
+In stochastic process language, $N(t)$ is a _process_ over the flow process
+
+the primary _object under analysis_. Little's Law describes the
+
 ![Sample Path](images/core/sample_path_N.png)
 
 ### The area under the sample path
@@ -185,15 +228,15 @@ This is a real time chart that reveals current congestion, bursts, and idle peri
 A key quantity in sample path analysis is the *area under the sample path*. This is
 calculated as the definite integral of the sample path curve over [0,T]
 
-```
-H(T) = ∫₀ᵀ N(t) dt
-```
+$$
+H(T) = \int_0^T N(t) dt
+$$
 
 Since the area is a product of the number of items present over time, the units of H(T)
-are in item-time. H(T) is itself not very interesting to chart since this is simply a
-monotonically increasing function of time.
+are in item-time. In the language of the Presence Calculus, $H(T)$ is _cumulative presence_ function
+over the sample path $N(t)$.
 
-Rather, the parameters that drive flow-process dynamics are the time and item averages
+The functions that drive flow-process dynamics are the time and item averages
 of H(T): L(T) and w(T). These continuous functions of time are the key quantities in the
 _finite version of Little’s Law_.
 
@@ -283,6 +326,7 @@ modes for the process as it moves towards stable states.
 
 ______________________________________________________________________
 
+<!--
 # Convergence - Equilibrium & coherence
 
 | File                          | What it shows                                                                                                                   | What it means                                                                                                                                         |
@@ -417,3 +461,4 @@ Adds end-effects: `r_A(T)`, `r_B(T)`, `ρ(T)`.
 `(log Λ(T), log w(T), log L(T))` on the plane `z = x + y`.
 
 ______________________________________________________________________
+-->
