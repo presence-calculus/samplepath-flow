@@ -303,7 +303,7 @@ Install uv following the [Quick Start](#quick-start-with-uv-recommended) section
 
 ```bash
 git clone https://github.com/krishnaku/samplepath-flow.git
-cd samplepath
+cd samplepath-flow
 ```
 
 ### 2. Sync development dependencies
