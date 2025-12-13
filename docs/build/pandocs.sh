@@ -91,11 +91,11 @@ pandoc_for_file() {
   bib="$(first_existing \
         "$dir/references.bib" \
         "$src_root/references.bib" \
-        ${repo_root:+$repo_root/references.bib} 2>/dev/null || true)"
+        ${repo_root:+$repo_root/docs/build/references.bib} 2>/dev/null || true)"
   csl="$(first_existing \
         "$dir/ieee.csl" \
         "$src_root/ieee.csl" \
-        ${repo_root:+$repo_root/ieee.csl} 2>/dev/null || true)"
+        ${repo_root:+$repo_root/docs/build/ieee.csl} 2>/dev/null || true)"
   tpl="$(first_existing \
         "$dir/pandoc_template.html" \
         "$src_root/pandoc_template.html" \
