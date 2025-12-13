@@ -302,7 +302,7 @@ Install uv following the [Quick Start](#quick-start-with-uv-recommended) section
 ### 1. Clone and enter the repository
 
 ```bash
-git clone https://github.com/krishnaku/samplepath.git
+git clone https://github.com/krishnaku/samplepath-flow.git
 cd samplepath
 ```
 
