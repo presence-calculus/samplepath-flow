@@ -1,7 +1,7 @@
 # The Sample Path Analysis Library and Toolkit
 
 A reference implementation of sample-path flow metrics, convergence analysis, and
-stability diagnostics for flow processes in complex adaptive systems using the finite
+stability diagnostics for flow processes using the finite
 window formulation of **[Little's Law](https://docs.pcalc.org/articles/littles-law)**.
 
 See documentation [here](https://samplepath.pcalc.org).
