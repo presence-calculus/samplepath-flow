@@ -50,17 +50,20 @@ real world operational processes are in this class.
 - Length of observation and the behaviour over short and long time-scales carry information of significant operational relevance. 
 
 All these conditions make traditional statistical and probabilistic approaches difficult to use rigorously. These are precisely 
-the conditions under which sample path analysis thrives. In this repository we are mainly focused on showing how samplepath techniques compare to statistical and probabilistics
-models and show they relate to each other. 
-
-
-A key mathematical theorem we will use in this context is Little's Law.
+the conditions under which sample path analysis thrives. A key mathematical theorem we will use in this context is Little's Law.
 It makes it possible to construct powerful, context specific measurement models that
 of a process that establishes deterministic cause and effect relationships between how key parameters of a large class of non-determinsitic processes behave. 
 
 If you are new to Little's Law or are only familiar with the traditional idea of
 Little's Law from manufacuring applications, please see our overview article on
 [**Little’s Law**](https://docs.pcalc.org/articles/littles-law).
+
+In this repository we are mainly focused on providing lightweight tools to apply these powerful concepts to your own operational data and 
+showing how samplepath techniques relate to current statistical and probabilistics
+models. 
+
+The best way to learn and understand these powerful concepts is to apply them to your own operational data and see what they tell you. 
+We aim to make that as easy as possible, providing theory, tools and examples to help you learn about this technique on your own. 
 
 [More background and history is here ...](https://samplepath.pcalc.org/articles/package-overview)
 
