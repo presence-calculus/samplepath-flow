@@ -210,7 +210,7 @@ Using pipx (for end users/global CLI usage)
 
 ```bash
 pipx install samplepath
-samplepath --help
+flow --help
 ```
 
 To upgrade later
@@ -223,23 +223,30 @@ ______________________________________________________________________
 
 # 5. Usage
 
+The command line invocation is
+```bash
+flow <command> <input-csv> [options]
+```
+
+Currently the only command supported is `analyze` and it is assumed by default if not provided.
 The complete CLI documentation is [here](https://samplepath.pcalc.org/articles/cli).
-Here are a few examples.
+
+Here are a few examples:
 
 ```bash
 # Analyze completed items, save analysis to the output-dir under the scenario name shipped. Clean existing output directories
-flow events.csv --output-dir spath-analysis --scenario shipped --completed --clean
+flow analyze events.csv --output-dir spath-analysis --scenario shipped --completed --clean
 
 # Pass an explicit date format (example below shows the typical case for non-US date formats).
 # We use standard Python date formats: https://docs.python.org/3/library/datetime.html#format-codes
 
-flow events.csv --date-format "%d/%m/%Y" --output-dir spath-analysis --scenario shipped --completed --clean
+flow analyze events.csv --date-format "%d/%m/%Y" --output-dir spath-analysis --scenario shipped --completed --clean
 
 # Limit analysis to elements with class story
-flow events.csv --class story
+flow analyze events.csv --class story
 
 # Apply Tukey filter to remove items with outlier sojourn times before analysis of completed items
-flow events.csv  --outlier-iqr 1.5 --completed
+flow analyze events.csv  --outlier-iqr 1.5 --completed
 ```
 
 ## 📂 Input Format
@@ -336,7 +343,7 @@ uv run mdformat .             # Format markdown files
 During development, run samplepath directly from the source code:
 
 ```bash
-uv run samplepath examples/polaris/csv/work_tracking.csv --help
+uv run flow analyze examples/polaris/csv/work_tracking.csv --help
 ```
 
 ### 6. Build and publish (maintainers)

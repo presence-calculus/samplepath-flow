@@ -431,7 +431,12 @@ Samplepath Analysis Toolkit</em></a></p></p>
         <ul>
         <li><a href="#invocation" id="toc-invocation">1
         Invocation</a></li>
-        <li><a href="#options" id="toc-options">2 Options</a>
+        <li><a href="#commands" id="toc-commands">2 Commands</a></li>
+        <li><a href="#analyze-command" id="toc-analyze-command">3
+        Analyze Command</a>
+        <ul>
+        <li><a href="#example" id="toc-example">Example</a></li>
+        <li><a href="#options" id="toc-options">Options</a>
         <ul>
         <li><a href="#csv-parsing" id="toc-csv-parsing">CSV
         Parsing</a></li>
@@ -445,32 +450,59 @@ Samplepath Analysis Toolkit</em></a></p></p>
         id="toc-convergence-thresholds">Convergence Thresholds</a></li>
         <li><a href="#output-configuration"
         id="toc-output-configuration">Output Configuration</a></li>
-        <li><a href="#what-the-command-does"
-        id="toc-what-the-command-does">What the command does</a></li>
-        <li><a href="#example" id="toc-example">Example</a></li>
         </ul></li>
-        <li><a href="#inputs-and-outputs" id="toc-inputs-and-outputs">3
-        Inputs and Outputs</a>
+        <li><a href="#inputs-and-outputs"
+        id="toc-inputs-and-outputs">Inputs and Outputs</a>
         <ul>
         <li><a href="#input-format" id="toc-input-format">Input
         Format</a></li>
         <li><a href="#output-layout" id="toc-output-layout">Output
         Layout</a></li>
         </ul></li>
+        </ul></li>
         </ul>
       </nav>
             <h1 id="invocation">1 Invocation</h1>
-            <p>This tool generates finite-window Little’s Law charts
-            from an CSV file containing <code>id</code>,
+            <p>This tool contains command line utilities that perform
+            sample path analysis on data sets representing flow
+            processes provided in csv files and writes its output as
+            <code>png</code> files to the local filesystem.</p>
+            <p>Invoke it on the command line with</p>
+            <div class="sourceCode" id="cb1"><pre
+            class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">flow</span> <span class="op">&lt;</span>command<span class="op">&gt;</span> <span class="op">&lt;</span>csv-file<span class="op">&gt;</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span></span></code></pre></div>
+            <h1 id="commands">2 Commands</h1>
+            <ul>
+            <li><code>Analyze</code>: Generates finite-window Little’s
+            Law charts from an CSV file containing <code>id</code>,
             <code>start_ts</code>, <code>end_ts</code>, and optionally a
             <code>class</code> column. It produces a full set of long
             run samplepath flow-metrics charts and writes them under an
-            output directory.</p>
-            <p>Invoke it on the command line with</p>
-            <div class="sourceCode" id="cb1"><pre
-            class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samplepath</span> <span class="op">&lt;</span>csv-file<span class="op">&gt;</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span></span></code></pre></div>
-            <h1 id="options">2 Options</h1>
-            <h2 id="csv-parsing">CSV Parsing</h2>
+            output directory.</li>
+            </ul>
+            <h1 id="analyze-command">3 Analyze Command</h1>
+            <p>What it does:</p>
+            <ol type="1">
+            <li>Parse CLI arguments</li>
+            <li>Create the output directory structure</li>
+            <li>Copy input CSV under scenario</li>
+            <li>Write CLI parameters into the scenario folder</li>
+            <li>Run the sample-path analysis</li>
+            <li>Generate the charts and write to the output
+            directory.</li>
+            <li>Print paths to generated charts</li>
+            </ol>
+            <h3 id="example">Example</h3>
+            <div class="sourceCode" id="cb2"><pre
+            class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">flow</span> analyze events.csv <span class="dt">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--completed</span> <span class="dt">\</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--outlier-iqr</span> 1.5 <span class="dt">\</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--lambda-pctl</span> 99 <span class="dt">\</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output-dir</span> charts <span class="dt">\</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--scenario</span> weekly_report <span class="dt">\</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--clean</span></span></code></pre></div>
+            <hr />
+            <h2 id="options">Options</h2>
+            <h3 id="csv-parsing">CSV Parsing</h3>
             <ul>
             <li><p><strong>csv</strong> <em>(positional)</em><br />
             Path to the CSV. Should contain at least the columns
@@ -489,7 +521,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             Explicit datetime format string for parsing</p></li>
             </ul>
             <hr />
-            <h2 id="data-filters">Data Filters</h2>
+            <h3 id="data-filters">Data Filters</h3>
             <p>Drop rows from the CSV before running the analysis.
             Useful for isolating subprocesses in the main file. Use with
             <code>--scenario</code> to save subprocess results.</p>
@@ -505,7 +537,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             Comma-separated list of class tags to include</p></li>
             </ul>
             <hr />
-            <h2 id="outlier-trimming">Outlier Trimming</h2>
+            <h3 id="outlier-trimming">Outlier Trimming</h3>
             <p>Remove outliers to see whether the remaining process
             converges.</p>
             <ul>
@@ -528,7 +560,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <code>--outlier-iqr</code></p></li>
             </ul>
             <hr />
-            <h2 id="lambda-fine-tuning">Lambda Fine Tuning</h2>
+            <h3 id="lambda-fine-tuning">Lambda Fine Tuning</h3>
             <p>Sometimes it helps to drop early points in the λ(T) chart
             so the remainder displays on a more meaningful scale.</p>
             <ul>
@@ -545,7 +577,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             percentiles</p></li>
             </ul>
             <hr />
-            <h2 id="convergence-thresholds">Convergence Thresholds</h2>
+            <h3 id="convergence-thresholds">Convergence Thresholds</h3>
             <ul>
             <li><p><strong>–epsilon</strong> <em>(default:
             <code>0.05</code>)</em><br />
@@ -556,7 +588,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             convergence</p></li>
             </ul>
             <hr />
-            <h2 id="output-configuration">Output Configuration</h2>
+            <h3 id="output-configuration">Output Configuration</h3>
             <ul>
             <li><p><strong>–output-dir</strong> <em>(default:
             <code>charts</code>)</em><br />
@@ -572,30 +604,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
             Remove existing charts before writing new results</p></li>
             </ul>
             <hr />
-            <h2 id="what-the-command-does">What the command does</h2>
-            <ol type="1">
-            <li>Parse CLI arguments</li>
-            <li>Create the output directory structure</li>
-            <li>Copy input CSV under scenario</li>
-            <li>Write CLI parameters into the scenario folder</li>
-            <li>Run the sample-path analysis</li>
-            <li>Generate the charts and write to the output
-            directory.</li>
-            <li>Print paths to generated charts</li>
-            </ol>
-            <hr />
-            <h2 id="example">Example</h2>
-            <div class="sourceCode" id="cb2"><pre
-            class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samplepath</span> events.csv <span class="dt">\</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--completed</span> <span class="dt">\</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--outlier-iqr</span> 1.5 <span class="dt">\</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--lambda-pctl</span> 99 <span class="dt">\</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output-dir</span> charts <span class="dt">\</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--scenario</span> weekly_report <span class="dt">\</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--clean</span></span></code></pre></div>
-            <hr />
-            <h1 id="inputs-and-outputs">3 Inputs and Outputs</h1>
-            <h2 id="input-format">Input Format</h2>
+            <h2 id="inputs-and-outputs">Inputs and Outputs</h2>
+            <h3 id="input-format">Input Format</h3>
             <p>The input format is simple.</p>
             <p>The csv requires three columns</p>
             <ul>
@@ -625,7 +635,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             </ul>
             <p>See the <a href="docs/src/cli.html">CLI Documentation</a>
             for the full list of command line options.</p>
-            <h2 id="output-layout">Output Layout</h2>
+            <h3 id="output-layout">Output Layout</h3>
             <p>For input <code>events.csv</code>, output is organized
             as:</p>
             <div class="sourceCode" id="cb3"><pre
@@ -641,7 +651,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="ex">└──</span> misc/                   <span class="co"># ancillary artifacts</span></span></code></pre></div>
             <p>--</p>
             <p>A complete reference to the charts produced can be found
-            in <a href="chart-reference/index">The Chart
+            in <a href="../../articles/chart-reference">The Chart
             Reference</a>.</p>
             <footer id="presence-link" role="contentinfo">
         <a href="https://samplepath.pcalc.org" target="_blank" rel="noreferrer">The Sample Path Analysis Toolkit</a>

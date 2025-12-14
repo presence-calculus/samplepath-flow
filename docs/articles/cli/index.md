@@ -14,23 +14,58 @@ sectionsDepth: 1
 figPrefix: Figure
 # Configure citations
 citations: false
+
+document-root: ../..
+
 ---
 
 # Invocation
 
-This tool generates finite-window Little’s Law charts from an CSV file containing `id`,
-`start_ts`, `end_ts`, and optionally a `class` column. It produces a full set of long
-run samplepath flow-metrics charts and writes them under an output directory.
+This tool contains command line utilities that perform sample path analysis on data sets representing
+flow processes provided in csv files and writes its output as `png` files to the local filesystem.
 
 Invoke it on the command line with
 
 ```bash
-samplepath <csv-file> [options]
+flow <command> <csv-file> [options]
 ```
 
-# Options
+# Commands
 
-## CSV Parsing
+- `Analyze`: Generates finite-window Little’s Law charts from an CSV file containing `id`,
+`start_ts`, `end_ts`, and optionally a `class` column. It produces a full set of long
+run samplepath flow-metrics charts and writes them under an output directory.
+
+
+# Analyze Command
+
+What it does:
+
+1. Parse CLI arguments
+2. Create the output directory structure
+3. Copy input CSV under scenario
+4. Write CLI parameters into the scenario folder
+5. Run the sample-path analysis
+6. Generate the charts and write to the output directory.
+7. Print paths to generated charts
+
+### Example
+
+```bash
+flow analyze events.csv \
+  --completed \
+  --outlier-iqr 1.5 \
+  --lambda-pctl 99 \
+  --output-dir charts \
+  --scenario weekly_report \
+  --clean
+```
+
+______________________________________________________________________
+
+## Options
+
+### CSV Parsing
 
 - **csv** *(positional)*\
   Path to the CSV. Should contain at least the columns (`id,start_ts,end_ts[, class]`)
@@ -49,7 +84,7 @@ samplepath <csv-file> [options]
 
 ______________________________________________________________________
 
-## Data Filters
+### Data Filters
 
 Drop rows from the CSV before running the analysis. Useful for isolating subprocesses in
 the main file. Use with `--scenario` to save subprocess results.
@@ -65,7 +100,7 @@ the main file. Use with `--scenario` to save subprocess results.
 
 ______________________________________________________________________
 
-## Outlier Trimming
+### Outlier Trimming
 
 Remove outliers to see whether the remaining process converges.
 
@@ -84,7 +119,7 @@ Remove outliers to see whether the remaining process converges.
 
 ______________________________________________________________________
 
-## Lambda Fine Tuning
+### Lambda Fine Tuning
 
 Sometimes it helps to drop early points in the λ(T) chart so the remainder displays on a
 more meaningful scale.
@@ -100,7 +135,7 @@ more meaningful scale.
 
 ______________________________________________________________________
 
-## Convergence Thresholds
+### Convergence Thresholds
 
 - **--epsilon** *(default: `0.05`)*\
   Relative error threshold for convergence
@@ -110,7 +145,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## Output Configuration
+### Output Configuration
 
 - **--output-dir** *(default: `charts`)*\
   Root directory where charts will be written
@@ -126,35 +161,9 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## What the command does
+## Inputs and Outputs
 
-1. Parse CLI arguments
-2. Create the output directory structure
-3. Copy input CSV under scenario
-4. Write CLI parameters into the scenario folder
-5. Run the sample-path analysis
-6. Generate the charts and write to the output directory.
-7. Print paths to generated charts
-
-______________________________________________________________________
-
-## Example
-
-```bash
-samplepath events.csv \
-  --completed \
-  --outlier-iqr 1.5 \
-  --lambda-pctl 99 \
-  --output-dir charts \
-  --scenario weekly_report \
-  --clean
-```
-
-______________________________________________________________________
-
-# Inputs and Outputs
-
-## Input Format
+### Input Format
 
 The input format is simple.
 
@@ -179,7 +188,7 @@ Results and charts are saved to the output directory as follows:
 
 See the [CLI Documentation](docs/src/cli.md) for the full list of command line options.
 
-## Output Layout
+### Output Layout
 
 For input `events.csv`, output is organized as:
 
@@ -199,4 +208,4 @@ For input `events.csv`, output is organized as:
 \--
 
 A complete reference to the charts produced can be found in
-[The Chart Reference](chart-reference/index).
+[The Chart Reference]($document-root/articles/chart-reference).
