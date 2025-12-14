@@ -169,28 +169,30 @@ ______________________________________________________________________
 uv tool install samplepath
 ```
 
-This will install Python automatically if needed and make `samplepath` available
-globally.
+This will install Python automatically if needed and make a command line tool `flow` available globally. This is the the first set of sample path analysis tools that are available under this package. More will be added as we expand this suite of tools.
+
 
 ### 3. Verify installation
 
 ```bash
-samplepath --help
+flow --help
 ```
 
 If this prints the help message, you're ready to go.
 
-**Note:** On some machines the very first time you run this command it might take 8 to
+**Note** On some machines the very first time you run this command it might take 8 to
 10 seconds to complete due to the plotting library downloading fonts. Subsequent calls
 should be fine.
 
+
 ### Alternative: Run without installation
 
-You can also run samplepath directly without installing it globally using `uvx`:
+You can also run samplepath directly without installing it globally using `uvx`. This installs the package and its directly from pypi into an isolated local environment and runs the command in that environment. It is useful for use in automated workflows.
 
 ```bash
 uvx samplepath events.csv --help
 ```
+**Note**: `uvx` dispatches commands by package name so you have to invoke the command as `samplepath`. Internally this calls `flow` by default, so the command surface is currently identical. This behavior will evolve as additional tools are introduced under this package.
 
 ### Alternative: Use pip and pipx
 
@@ -226,18 +228,18 @@ Here are a few examples.
 
 ```bash
 # Analyze completed items, save analysis to the output-dir under the scenario name shipped. Clean existing output directories
-samplepath events.csv --output-dir spath-analysis --scenario shipped --completed --clean
+flow events.csv --output-dir spath-analysis --scenario shipped --completed --clean
 
 # Pass an explicit date format (example below shows the typical case for non-US date formats).
 # We use standard Python date formats: https://docs.python.org/3/library/datetime.html#format-codes
 
-samplepath events.csv --date-format "%d/%m/%Y" --output-dir spath-analysis --scenario shipped --completed --clean
+flow events.csv --date-format "%d/%m/%Y" --output-dir spath-analysis --scenario shipped --completed --clean
 
 # Limit analysis to elements with class story
-samplepath events.csv --class story
+flow events.csv --class story
 
 # Apply Tukey filter to remove items with outlier sojourn times before analysis of completed items
-samplepath events.csv  --outlier-iqr 1.5 --completed
+flow events.csv  --outlier-iqr 1.5 --completed
 ```
 
 ## 📂 Input Format
@@ -253,10 +255,9 @@ The csv requires three columns
 Additionally you may pass any other columns. They are all ignored for now, except for a
 column called _class_ which you can use to filter results by event/item type.
 
-- If your csv has different column names, you can map them with `--start_column` and
-  `--end_column` options.
+- If your csv has different column names than the standard names expected, you can map them with `--start_column` and`--end_column` options.
 - You might need to explicitly pass a date format for the time stamps if you see date
-  parsing errors. The `--date-format` argument does this.
+  parsing errors. The `--date-format` argument does this. See the CLI documentation for how to specify this.
 
 Results and charts are saved to the output directory as follows:
 
@@ -285,7 +286,7 @@ For input `events.csv`, output is organized as:
 
 \--
 
-A complete reference to the charts produced can be found
+A complete reference for the computations involved and charts produced can be found
 [here](https://samplepath.pcalc.org/articles/chart-reference).
 
 ______________________________________________________________________

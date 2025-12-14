@@ -62,6 +62,7 @@ Repository = "https://github.com/presence-calculus/samplepath-flow.git"
 
 [project.scripts]
 samplepath = "samplepath.cli:main"
+flow = "samplepath.cli:main"
 
 [build-system]
 requires = ["hatchling"]
