@@ -47,10 +47,13 @@ Agent must:
   - “Do not mention file lists in the commit message; reviewers can see this in git.”
   - “When instructed to ‘commit changed source files only’, stage only source/test files; leave docs, task notes, caches unstaged unless explicitly requested.”
   - “If a commit fails formatting or hooks, fix the issues and re-run hooks before committing.”
-  - When merging to `main`, prefer a squash merge. Merge commit message format:
-  ```
-  [Task ID]: (Task Name): Merge <branch name> to main
-  ```
+  - before commiting code provide a summary of the commit message and the files that will be committed.
+  - once approved you can stage and commit the files without asking separately for permission after each step.
+
+    - When merging to `main`, prefer a squash merge. Merge commit message format:
+    ```
+    [Task ID]: (Task Name): Merge <branch name> to main
+    ```
 
 ------------
 ## Code Review
@@ -128,5 +131,12 @@ review. Use one assertion per test. Use parametrized tests for scenario coverage
 Fixtures should be deterministic. Agent may modify existing tests only when required by
 the task’s acceptance criteria. Always present modifications of existing tests for
 review before making any changes.
+
+Policy for automated test/formatter execution (no per-command prompts):
+
+  - You have blanket approval to run tests and formatters without asking each time, as long as they write only inside the repo workspace.
+  - Use local caches to avoid sandbox/network prompts: UV_CACHE_DIR=.uv-cache uv run pytest and PRE_COMMIT_HOME=.pre-commit-cache pre-commit run --all-files.
+  - Do not request escalation unless a executing tests must write outside the workspace or needs network; pause and ask only in those cases.
+  - Summarize command results in responses; no need to ask permission for standard test/formatter runs.
 
 # End of file

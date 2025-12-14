@@ -8,7 +8,7 @@ __pycache__/
 # uv
 dist/
 *.egg-info/
-
+.pre-commit-cache
 .mypy_cache/
 
 # Virtualenvs
@@ -60,3 +60,4 @@ charts
 # --- OS junk ---
 .DS_Store
 Thumbs.db
+/.pre-commit-cache/
