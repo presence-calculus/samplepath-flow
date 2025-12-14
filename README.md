@@ -16,10 +16,10 @@ ______________________________________________________________________
 
 # 1. Overview
 
-**samplepath** is a Python library for analyzing _macro dynamics_ of flow processes. 
-It provides deterministic tools to precisely describe the
-_long-run_ behavior of non-deterministic flow processes including stochastic processes and
-processes that naturally arise in complex real world business processes:
+**samplepath** is a Python library for analyzing _macro dynamics_ of flow processes.
+It provides deterministic tools to precisely describe the _long-run_ behavior of
+non-deterministic flow processes including stochastic processes and processes that
+naturally arise in complex, real-world business processes:
 
 - Arrival/departure equilibrium
 - Process time coherence, and
@@ -38,32 +38,38 @@ process dynamics. Please see
 [sample path analysis is not a statistical method](https://samplepath.pcalc.org/articles/not-statistics)
 for more details.
 
-As a result, this technique allows us to extend key deterministic theorems from stochastic process
-theory to a much more general class of non-deterministic processes. 
+As a result, this technique allows us to extend key deterministic theorems from
+stochastic process theory to a much more general class of non-deterministic processes.
 
-This has huge practical significance since most
-real world operational processes are in this class. 
+This has huge practical significance since most real-world operational processes are in
+this class.
 
-- Statistical distributions of key operational parameters vary continously over time (non-stationarity)
-- The future of the process is dependendent on its past history.
+- Statistical distributions of key operational parameters vary continuously over time (non-stationarity)
+- The future of the process is dependent on its past history.
 - Initial conditions have significant impact on the observed behavior.
-- Length of observation and the behaviour over short and long time-scales carry information of significant operational relevance. 
+- Length of observation and the behavior over short and long time-scales carry information of significant operational relevance.
 
-All these conditions make traditional statistical and probabilistic approaches difficult to use rigorously. These are precisely 
-the conditions under which sample path analysis thrives. A key mathematical theorem we will use in this context is Little's Law.
-It makes it possible to construct powerful, context specific measurement models that
-of a process that establishes deterministic cause and effect relationships between how key parameters of a large class of non-determinsitic processes behave. 
+All these conditions make traditional statistical and probabilistic methods difficult to
+apply rigorously in these environments. These are precisely the conditions under which
+sample path analysis thrives.
+
+A key mathematical theorem we use in this context is Little's Law. It makes it possible
+to construct powerful, context-specific measurement models of a process that establish
+deterministic cause and effect relationships between how key parameters of the process
+behave. Contrary to popular belief, the class of processes for which we can do this is
+surprisingly general.
 
 If you are new to Little's Law or are only familiar with the traditional idea of
-Little's Law from manufacuring applications, please see our overview article on
+Little's Law from manufacturing applications, please see our overview article on
 [**Little’s Law**](https://docs.pcalc.org/articles/littles-law).
 
-In this repository we are mainly focused on providing lightweight tools to apply these powerful concepts to your own operational data and 
-showing how samplepath techniques relate to current statistical and probabilistics
-models. 
+In this repository we focus on providing lightweight tools to apply these concepts to
+your own operational data and showing how samplepath techniques relate to current
+statistical and probabilistic measurement techniques.
 
-The best way to learn and understand these powerful concepts is to apply them to your own operational data and see what they tell you. 
-We aim to make that as easy as possible, providing theory, tools and examples to help you learn about this technique on your own. 
+The best way to learn and understand these concepts is to apply them to your own
+operational data and see what they reveal. We aim to make that as easy as possible,
+providing theory, tools, and examples to help you explore this technique on your own.
 
 [More background and history is here ...](https://samplepath.pcalc.org/articles/package-overview)
 
@@ -95,7 +101,7 @@ analysis:
 - Estimating empirical **limits** with uncertainty and **tail** checks to verify
   stability (alpha)
 
-B. Command line tools provide utilities that wrap these calculations
+B. Command line tools that wrap these calculations:
 
 - Simple workflows that take CSV files as input to run sample path analysis with a rich
   set of parameters and options.
@@ -140,20 +146,20 @@ ______________________________________________________________________
 
 # 3. Package Scope
 
-This package is a part of [The Presence Calculus Project](https://docs.pcalc.org): an
-open source computational toolkit that is intended to make sample path methods and
+This package is part of [The Presence Calculus Project](https://docs.pcalc.org): an
+open-source computational toolkit that is intended to make sample path methods and
 concepts more accessible to practitioners working on operations management problems in
 the software industry including engineering/product/sales/marketing operations and
 related disciplines: value stream management, developer experience and platforms, and
 lean continuous process improvement.
 
-This library and toolkit is intended to be used by practitioners to understand the
-theory and _develop their intuition about the dynamics of flow processes_, using their
-own environments. Understanding the context behind the data greatly helps makes the
-abstract ideas here concrete and there in no substitute for getting your hands dirty and
+This library and toolkit are intended to be used by practitioners to understand the
+theory and _develop their intuition about the dynamics of flow processes_ using data from their
+own environments. Understanding the context behind the data greatly helps make the
+abstract ideas concrete, and there is no substitute for getting your hands dirty and
 trying things out directly. This toolkit is designed for that.
 
-It is not ready nor intended to support production quality operations management
+It is neither ready nor intended to support production-quality operations management
 tooling.
 
 [See more..](https://samplepath.pcalc.org/package-overview/goals.html)
@@ -186,7 +192,9 @@ ______________________________________________________________________
 uv tool install samplepath
 ```
 
-This will install Python automatically if needed and make a command line tool `flow` available globally. This is the the first set of sample path analysis tools that are available under this package. More will be added as we expand this suite of tools.
+This will install Python automatically if needed and make a command line tool `flow`
+available globally. This is the first set of sample path analysis tools available under
+this package. More will be added as we expand this suite of tools.
 
 
 ### 3. Verify installation
@@ -204,7 +212,9 @@ should be fine.
 
 ### Alternative: Run without installation
 
-You can also run samplepath directly without installing it globally using `uvx`. This installs the package and its directly from pypi into an isolated local environment and runs the command in that environment. It is useful for use in automated workflows.
+You can also run samplepath directly without installing it globally using `uvx`. This
+installs the package and its dependencies directly from PyPI into an isolated local
+environment and runs the command there. It is useful for automated workflows.
 
 ```bash
 uvx samplepath events.csv --help
@@ -245,7 +255,7 @@ The command line invocation is
 flow <command> <input-csv> [options]
 ```
 
-Currently the only command supported is `analyze` and it is assumed by default if not provided.
+Currently the only command supported is `analyze`; if omitted, it is assumed by default.
 The complete CLI documentation is [here](https://samplepath.pcalc.org/articles/cli).
 
 Here are a few examples:
@@ -263,23 +273,23 @@ flow analyze events.csv --date-format "%d/%m/%Y" --output-dir spath-analysis --s
 flow analyze events.csv --class story
 
 # Apply Tukey filter to remove items with outlier sojourn times before analysis of completed items
-flow analyze events.csv  --outlier-iqr 1.5 --completed
+flow analyze events.csv --outlier-iqr 1.5 --completed
 ```
 
 ## 📂 Input Format
 
 The input format is simple.
 
-The csv requires three columns
+The CSV requires three columns:
 
 - _id_: any string identifier to denote an element/item
 - _start_ts_: the start time of an event
 - _end_ts_: the end time of an event
 
-Additionally you may pass any other columns. They are all ignored for now, except for a
-column called _class_ which you can use to filter results by event/item type.
+Additionally you may pass any other columns. They are all ignored for now except for a
+column called _class_, which you can use to filter results by event/item type.
 
-- If your csv has different column names than the standard names expected, you can map them with `--start_column` and`--end_column` options.
+- If your CSV has different column names than the standard names expected, you can map them with `--start_column` and`--end_column` options.
 - You might need to explicitly pass a date format for the time stamps if you see date
   parsing errors. The `--date-format` argument does this. See the CLI documentation for how to specify this.
 
@@ -393,7 +403,7 @@ ______________________________________________________________________
 
 # 7. Documentation
 
-Please see our [documentation site](https://samplepath.pcalc.org)
+Please see our [documentation site](https://samplepath.pcalc.org).
 
 ______________________________________________________________________
 
