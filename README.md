@@ -39,14 +39,28 @@ process dynamics. Please see
 for more details.
 
 As a result, this technique allows us to extend key deterministic theorems from stochastic process
-theory to processes operating a much more general class of non-deterministic systems.
+theory to a much more general class of non-deterministic processes. 
+
+This has huge practical significance since most
+real world operational processes are in this class. 
+
+- Statistical distributions of key operational parameters vary continously over time (non-stationarity)
+- The future of the process is dependendent on its past history.
+- Initial conditions have significant impact on the observed behavior.
+- Length of observation and the behaviour over short and long time-scales carry information of significant operational relevance. 
+
+All these conditions make traditional statistical and probabilistic approaches difficult to use rigorously. These are precisely 
+the conditions under which sample path analysis thrives. In this repository we are mainly focused on showing how samplepath techniques compare to statistical and probabilistics
+models and show they relate to each other. 
+
+
+A key mathematical theorem we will use in this context is Little's Law.
+It makes it possible to construct powerful, context specific measurement models that
+of a process that establishes deterministic cause and effect relationships between how key parameters of a large class of non-determinsitic processes behave. 
 
 If you are new to Little's Law or are only familiar with the traditional idea of
 Little's Law from manufacuring applications, please see our overview article on
 [**Little’s Law**](https://docs.pcalc.org/articles/littles-law).
-
-Our focus is operations management in software development, but the techniques here are
-much more general.
 
 [More background and history is here ...](https://samplepath.pcalc.org/articles/package-overview)
 
