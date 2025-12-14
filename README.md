@@ -16,9 +16,10 @@ ______________________________________________________________________
 
 # 1. Overview
 
-**samplepath** is a Python library for analyzing _macro dynamics_ of flow processes in
-complex adaptive systems. It provides deterministic tools to precisely describe the
-_long-run_ behavior of stochastic flow processes:
+**samplepath** is a Python library for analyzing _macro dynamics_ of flow processes. 
+It provides deterministic tools to precisely describe the
+_long-run_ behavior of non-deterministic flow processes including stochastic processes and
+processes that naturally arise in complex real world business processes:
 
 - Arrival/departure equilibrium
 - Process time coherence, and
@@ -27,19 +28,18 @@ _long-run_ behavior of stochastic flow processes:
 using the finite-window formulation of
 [**Little’s Law**](https://docs.pcalc.org/articles/littles-law).
 
-The focus of the analysis is a single _sample path_ of a flow process: a _continuous_
+The focus of the analysis is a single _sample path_ of a process: a _continuous_
 real-valued function that describes a particular process behavior when observed over a
 long, but finite period of time.
 
 A key aspect of this technique is that it is _distribution-free_. It does not require
-well-defined statistical or probability distributions to reason rigorously about a flow
-process. Please see
+well-defined statistical or probability distributions to reason rigorously about
+process dynamics. Please see
 [sample path analysis is not a statistical method](https://samplepath.pcalc.org/articles/not-statistics)
 for more details.
 
-As a result, this technique allows us to extend many results from stochastic process
-theory to processes operating in complex adaptive systems, where stable statistical
-distributions often don't exist.
+As a result, this technique allows us to extend key deterministic theorems from stochastic process
+theory to processes operating a much more general class of non-deterministic systems.
 
 If you are new to Little's Law or are only familiar with the traditional idea of
 Little's Law from manufacuring applications, please see our overview article on
