@@ -41,12 +41,31 @@ Agent must:
 
 ### Commit Requirements
 
-Use the task **ID** in commit messages. Use the task **Name** when reporting work being
-done. When merging to `main`, prefer a squash merge. Merge commit message format:
+- “Every commit must target the current task. Allowed files: only those required by the task specification.”
+  - “Commit message format for all branch commits (not merges): [Task ID]: (Task Name): <short summary> followed by a body listing the changes and rationale.”
+  - “Example: [2]: (cli subcommand refactoring): CLI subcommand refactor with body bullets describing what changed and why.”
+  - “Do not mention file lists in the commit message; reviewers can see this in git.”
+  - “When instructed to ‘commit changed source files only’, stage only source/test files; leave docs, task notes, caches unstaged unless explicitly requested.”
+  - “If a commit fails formatting or hooks, fix the issues and re-run hooks before committing.”
+  - When merging to `main`, prefer a squash merge. Merge commit message format:
+  ```
+  [Task ID]: (Task Name): Merge <branch name> to main
+  ```
 
-```
-[Task ID]: (Task Name): Merge <branch name> to main
-```
+------------
+## Code Review
+When instructed to 'see code feedback':
+- check the latest content of .task/code-review.md
+- summarize the changes you plan to make including test changes and get them approved.
+- make the changes and wait for approval
+- commit the changes on approval
+
+When instructed to 'see testing feedback'
+- check the latest content of .task/test-suite-review.md
+- summarize the changes you plan to make and get them approved.
+- make the changes and report test stats
+- commit the changes on approval
+
 
 ______________________________________________________________________
 

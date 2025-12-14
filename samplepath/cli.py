@@ -13,26 +13,59 @@ from .file_utils import (
 from .sample_path_analysis import run_analysis
 
 
+def _looks_like_path(token: str) -> bool:
+    path = Path(token)
+    return path.suffix != "" or path.exists() or ("/" in token or "\\" in token)
+
+
+def normalize_argv(
+    argv: list[str], subcommands: set[str], parser: argparse.ArgumentParser
+) -> list[str]:
+    # argv[0] is program name
+    if len(argv) <= 1:
+        return argv
+    first = argv[1]
+    if first.startswith("-"):
+        return argv
+    if first in subcommands:
+        return argv
+    if _looks_like_path(first):
+        return [argv[0], "analyze", *argv[1:]]
+
+    parser.print_help()
+    print(f"Error: command '{first}' not recognized", file=sys.stderr)
+    sys.exit(1)
+
+
 def validate_args(args):
     error = False
 
-    if args.completed and args.incomplete:
+    if getattr(args, "completed", False) and getattr(args, "incomplete", False):
         print(
             "Error: --completed and --incomplete cannot be used together",
             file=sys.stderr,
         )
+        error = True
 
     if error:
         sys.exit(1)
 
 
-def parse_args():
+def build_parser() -> tuple[argparse.ArgumentParser, set[str]]:
     parser = argparse.ArgumentParser(
         description="Finite-window Little’s Law charts from intervals CSV",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+    subparsers = parser.add_subparsers(dest="cmd", required=True)
+
+    analyze = subparsers.add_parser(
+        "analyze",
+        help="Generate finite-window flow-metrics charts from an intervals CSV",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
     # -- CSV Parsing --- #
-    csv_group = parser.add_argument_group("CSV Parsing")
+    csv_group = analyze.add_argument_group("CSV Parsing")
     csv_group.add_argument(
         "csv", type=str, help="Path to CSV (id,start_ts,end_ts[,class])"
     )
@@ -69,7 +102,7 @@ def parse_args():
     )
 
     # Input Data Filters ---#
-    data_filters = parser.add_argument_group("Data filters")
+    data_filters = analyze.add_argument_group("Data filters")
     data_filters.add_argument(
         "--completed",
         action="store_true",
@@ -89,7 +122,7 @@ def parse_args():
     )
 
     # - Outlier trimming --#
-    outliers_group = parser.add_argument_group("Outlier Trimming")
+    outliers_group = analyze.add_argument_group("Outlier Trimming")
     outliers_group.add_argument(
         "--outlier-hours",
         type=float,
@@ -115,7 +148,7 @@ def parse_args():
     )
 
     # - Fine tuning lambda display --#
-    lambda_fine_tuning = parser.add_argument_group("Lambda Fine Tuning")
+    lambda_fine_tuning = analyze.add_argument_group("Lambda Fine Tuning")
     lambda_fine_tuning.add_argument(
         "--lambda-pctl",
         type=float,
@@ -136,7 +169,7 @@ def parse_args():
     )
 
     # -- Parameters for tuning sample path convergence charts ---#
-    convergence_thresholds = parser.add_argument_group("Convergence Thresholds")
+    convergence_thresholds = analyze.add_argument_group("Convergence Thresholds")
     convergence_thresholds.add_argument(
         "--epsilon",
         type=float,
@@ -151,7 +184,7 @@ def parse_args():
     )
 
     # output directory handling
-    output_dirs = parser.add_argument_group("Output Configuration")
+    output_dirs = analyze.add_argument_group("Output Configuration")
     output_dirs.add_argument(
         "--output-dir",
         type=lambda p: Path(p).expanduser().resolve(),
@@ -179,7 +212,21 @@ def parse_args():
         help="removing existing charts in output directory",
     )
 
-    args = parser.parse_args()
+    subcommand_names = set(subparsers.choices.keys())
+    return parser, subcommand_names
+
+
+def parse_args(argv: list[str] | None = None):
+    parser, subcommand_names = build_parser()
+    if argv is None:
+        argv = sys.argv
+    argv = normalize_argv(argv, subcommand_names, parser)
+
+    if len(argv) <= 1:
+        parser.print_help()
+        sys.exit(0)
+
+    args = parser.parse_args(argv[1:])
     validate_args(args)
     return parser, args
 
@@ -193,19 +240,22 @@ def get_class_filters(classes):
 
 def main():
     parser, args = parse_args()
-    out_dir = ensure_output_dirs(
-        args.csv,
-        output_dir=args.output_dir,
-        scenario_dir=args.scenario,
-        clean=args.clean,
-    )
-    if args.save_input:
-        copy_input_csv_to_output(args.csv, out_dir)
 
-    write_cli_args_to_file(parser, args, out_dir)
     try:
+        out_dir = ensure_output_dirs(
+            args.csv,
+            output_dir=args.output_dir,
+            scenario_dir=args.scenario,
+            clean=args.clean,
+        )
+        if args.save_input:
+            copy_input_csv_to_output(args.csv, out_dir)
+
+        write_cli_args_to_file(parser, args, out_dir)
         paths = run_analysis(args.csv, args, out_dir)
         print("Wrote charts:\n" + "\n".join(paths))
+    except SystemExit:
+        raise
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
