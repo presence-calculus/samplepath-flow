@@ -32,7 +32,7 @@ def normalize_argv(
     if _looks_like_path(first):
         return [argv[0], "analyze", *argv[1:]]
 
-    parser.print_help()
+    print_help(parser)
     print(f"Error: command '{first}' not recognized", file=sys.stderr)
     sys.exit(1)
 
@@ -53,7 +53,7 @@ def validate_args(args):
 
 def build_parser() -> tuple[argparse.ArgumentParser, set[str]]:
     parser = argparse.ArgumentParser(
-        description="Finite-window Little’s Law charts from intervals CSV",
+        description="Sample-path flow metrics, convergence analysis, and stability diagnostics for flow processes using the finite window formulation of Little's Law.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     subparsers = parser.add_subparsers(dest="cmd", required=True)
@@ -222,8 +222,8 @@ def parse_args(argv: list[str] | None = None):
         argv = sys.argv
     argv = normalize_argv(argv, subcommand_names, parser)
 
-    if len(argv) <= 1:
-        parser.print_help()
+    if len(argv) <= 1 or argv[1] in ("-h", "--help"):
+        print_help(parser)
         sys.exit(0)
 
     args = parser.parse_args(argv[1:])
@@ -236,6 +236,13 @@ def get_class_filters(classes):
     if classes:
         class_filters = [c for c in classes.split(",") if c.strip() != ""]
     return class_filters
+
+
+def print_help(parser):
+    print("===================================================")
+    print("SamplePath Flow - a Presence Calculus product")
+    print("===================================================")
+    parser.print_help()
 
 
 def main():

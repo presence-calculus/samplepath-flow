@@ -1,4 +1,6 @@
 # The Sample Path Analysis Library and Toolkit
+> A Presence Calculus Product
+
 
 A reference implementation of sample-path flow metrics, convergence analysis, and
 stability diagnostics for flow processes using the finite
