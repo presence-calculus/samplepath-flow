@@ -240,7 +240,7 @@ def get_class_filters(classes):
 
 def print_help(parser):
     print("===================================================")
-    print("SamplePath Flow - a Presence Calculus product")
+    print("SamplePath Flow - a Presence Calculus Product")
     print("===================================================")
     parser.print_help()
 
