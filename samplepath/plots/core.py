@@ -387,7 +387,7 @@ def plot_core_flow_metrics_charts(
         "N(t)",
         path_N,
         caption=note,
-        events=metrics.events,
+        events=metrics.events if getattr(args, "with_event_marks", False) else None,
     )
 
     path_L = os.path.join(core_panels_dir, "time_average_N_L.png")
