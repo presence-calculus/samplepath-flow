@@ -120,10 +120,60 @@ def draw_step_chart(
     out_path: str,
     unit: str = "timestamp",
     caption: Optional[str] = None,
+    events: Optional[List[Tuple[pd.Timestamp, int, int]]] = None,
 ) -> None:
-    draw_series_chart(
-        times, values, title, ylabel, out_path, unit=unit, caption=caption, style="step"
-    )
+    """Draw a step chart with optional arrival/departure event markers.
+
+    Parameters
+    ----------
+    events : optional list of (timestamp, delta_n, arrivals)
+        If provided, overlays colored markers:
+        - Purple dots for arrivals
+        - Green dots for departures
+    """
+    fig, ax = init_fig_ax()
+    ax.step(times, values, where="post", label=ylabel)
+
+    # Overlay event markers if provided
+    if events:
+        # Build a lookup from timestamp to index for y-positioning
+        time_to_idx = {t: i for i, t in enumerate(times)}
+        arrival_times, arrival_vals = [], []
+        departure_times, departure_vals = [], []
+
+        for t, delta_n, arrivals in events:
+            departures = arrivals - delta_n
+            idx = time_to_idx.get(t)
+            if idx is not None:
+                y_val = values[idx]
+                if arrivals > 0:
+                    arrival_times.append(t)
+                    arrival_vals.append(y_val)
+                if departures > 0:
+                    departure_times.append(t)
+                    departure_vals.append(y_val)
+
+        # Plot small markers as subtle event indicators
+        if departure_times:
+            ax.scatter(
+                departure_times,
+                departure_vals,
+                color="green",
+                s=2,
+                zorder=5,
+                label="Departure",
+            )
+        if arrival_times:
+            ax.scatter(
+                arrival_times,
+                arrival_vals,
+                color="purple",
+                s=2,
+                zorder=6,
+                label="Arrival",
+            )
+
+    format_and_save(fig, ax, title, ylabel, unit, caption, out_path)
 
 
 def _clip_axis_to_percentile(

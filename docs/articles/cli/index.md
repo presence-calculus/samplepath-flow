@@ -159,6 +159,10 @@ ______________________________________________________________________
 - **--clean** *(default: `False`)*\
   Remove existing charts before writing new results
 
+- **--with-event-marks** *(default: `False`)*\
+  Show arrival/departure event markers on sample path charts. When enabled, arrivals
+  are shown as purple dots and departures as green dots on the N(t) chart.
+
 ______________________________________________________________________
 
 ## Inputs and Outputs

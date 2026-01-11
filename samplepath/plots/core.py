@@ -381,7 +381,13 @@ def plot_core_flow_metrics_charts(
 
     path_N = os.path.join(core_panels_dir, "sample_path_N.png")
     draw_step_chart(
-        metrics.times, metrics.N, "N(t) — Sample Path", "N(t)", path_N, caption=note
+        metrics.times,
+        metrics.N,
+        "N(t) — Sample Path",
+        "N(t)",
+        path_N,
+        caption=note,
+        events=metrics.events if getattr(args, "with_event_marks", False) else None,
     )
 
     path_L = os.path.join(core_panels_dir, "time_average_N_L.png")
