@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Why do we need a new way to measure flow?</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+
+    html {
+      box-sizing: border-box;
+      font-size: 100%;
+    }
+
+    *, *:before, *:after {
+      box-sizing: inherit;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Nunito, Arial, sans-serif;
+      font-size: 1.1rem;
+      line-height: 1.75;
+      background: #fff;
+      color: #111;
+
+      /* Remove Pandoc's injected width restrictions */
+      max-width: none !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+
+    .wrapper {
+      display: flex;
+      justify-content: center;
+    }
+
+    #page {
+      max-width: 880px;
+      width: 100%;
+      padding: 2rem 1rem;
+    }
+
+    h1, h2, h3, h4 {
+      font-weight: bold;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+
+    p {
+      margin: 1.25rem 0;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 2rem auto;
+    }
+
+    pre {
+      background: #f8f8f8;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 6px;
+    }
+
+    code {
+      font-family: SFMono-Regular, Consolas, monospace;
+      background: #f5f5f5;
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+    }
+
+    blockquote {
+      margin: 2rem 0;
+      padding-left: 1rem;
+      border-left: 4px solid #ddd;
+      color: #666;
+      font-style: italic;
+    }
+
+    .subtitle, .author, .date {
+      color: #666;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+
+    nav#TOC {
+      margin: 2rem 0;
+      padding: 1rem;
+      border: 1px solid #eee;
+      background: #fafafa;
+      overflow-x: auto;
+    }
+
+    figure {
+      margin: 2rem auto;
+      text-align: center;
+    }
+
+    figure img {
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 2rem auto;
+    }
+
+    figcaption {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 0.75rem;
+    }
+
+    header#title-block-header {
+      text-align: center;
+    }
+
+    #presence-link {
+      margin: 3rem auto 0;
+      padding: 1.25rem 1rem 1.5rem;
+      text-align: center;
+      font-size: 0.95rem;
+      color: #444;
+      border-top: 1px solid #e5e7ea;
+      background: #f9f9f9;
+      border-radius: 8px 8px 0 0;
+    }
+
+    #presence-link a {
+      text-decoration: none;
+      color: #222;
+      font-weight: 600;
+    }
+
+    #presence-link a:hover {
+      text-decoration: underline;
+    }
+
+    .site-nav {
+      margin: 0 auto 2rem;
+      padding: 0.75rem 1rem;
+      background: #f6f7f8;
+      border: 1px solid #e5e7ea;
+      border-radius: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      justify-content: center;
+      font-size: 0.98rem;
+    }
+
+    .site-nav a {
+      color: #222;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.2rem 0.35rem;
+    }
+
+    .site-nav a:hover {
+      text-decoration: underline;
+    }
+
+
+    @media screen and (min-width: 1024px) {
+      body {
+        font-size: 1.15rem;
+      }
+
+      #page {
+        padding: 3rem 2rem;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div id="page">
+      <nav class="site-nav" aria-label="Primary">
+        <a href="https://samplepath.pcalc.org/index.html">Home</a>
+        <a href="https://samplepath.pcalc.org/articles/package-overview/index.html">Package Overview</a>
+        <a href="https://samplepath.pcalc.org/articles/cli/index.html">Command Line</a>
+        <a href="https://samplepath.pcalc.org/articles/chart-reference/index.html">Chart Reference</a>
+        <a href="https://samplepath.pcalc.org/examples/README.html">Examples</a>
+      </nav>
+                  <header id="title-block-header">
+        <h1 class="title"><strong>Why do we need a new way to measure
+flow?</strong></h1>
+
+        <p class="author"><p><a href=""><em>Dr. Krishna
+Kumar</em></a></p></p>
+
+              </header>
+                  <div class="header-image">
+        <img src="-root/assets/" alt="Header image"/>
+      </div>
+                  <p>Flow metrics today are largely used for visibility
+                  and reporting of process metrics like Throughput and
+                  Process Time (Lead/Cycle/Flow Time etc). The more
+                  sophisticated flow metrics tools also report on Work
+                  In Process levels and Work Item Age, but as we have
+                  seen in our series, the way you measure these has a
+                  lot to do with how useful they are in providing
+                  actionable diagnostics for improving flow.</p>
+                  <p>Today these metrics are reported as independent
+                  statistics measured across some arbitrarily chosen
+                  business reporting period: we pick a window and report
+                  the number of items that have finished in the window
+                  and how long those items took to complete, the average
+                  age of the items that are in progress in that window.
+                  If they do report WIP it is the instantaneous WIP</p>
+                  <p>By and large, thes measurement approaches look at
+                  flow metrics through the lens of sample statistics and
+                  statistical distributions. So the average process time
+                  is assumed to be the statistical average of some
+                  underlying distribution of sampled cycle time over the
+                  reporting window.</p>
+                  <p>What Little’s Law shows us is that flow metrics
+                  provide true diagnostic value only when all the key
+                  metrics - Arrivals/Departure Rate, time-average of
+                  WIP, and process time averages are measured over the
+                  same observation window.</p>
+            <footer id="presence-link" role="contentinfo">
+        <a href="https://samplepath.pcalc.org" target="_blank" rel="noreferrer">The Sample Path Analysis Toolkit</a>
+        <div style="margin-top: 0.35rem; font-size: 0.85rem; color: #555;">
+          © 2025 Krishna Kumar. All rights reserved.
+        </div>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
