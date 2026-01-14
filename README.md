@@ -266,7 +266,11 @@ Here are a few examples:
 # Analyze completed items, save analysis to the output-dir under the scenario name shipped. Clean existing output directories
 flow analyze events.csv --output-dir spath-analysis --scenario shipped --completed --clean
 
-# Pass an explicit date format (example below shows the typical case for non-US date formats).
+# If date formats in your locale have days before month  (EU, LATAM, Africa, Commonwealth etc.)  pass the --dayFirst option so dates can be parsed without too much hassle.
+
+flow analyze events.csv --dayFirst
+
+# If that fails pass an explicit date format (example below shows the typical case for non-US date formats).
 # We use standard Python date formats: https://docs.python.org/3/library/datetime.html#format-codes
 
 flow analyze events.csv --date-format "%d/%m/%Y" --output-dir spath-analysis --scenario shipped --completed --clean
@@ -292,7 +296,8 @@ Additionally you may pass any other columns. They are all ignored for now except
 column called _class_, which you can use to filter results by event/item type.
 
 - If your CSV has different column names than the standard names expected, you can map them with `--start_column` and`--end_column` options.
-- You might need to explicitly pass a date format for the time stamps if you see date
+- If your dates start with day before month pass the `--dayFirst` option
+- If that fails you might need to explicitly pass a date format for the time stamps if you see date
   parsing errors. The `--date-format` argument does this. See the CLI documentation for how to specify this.
 
 Results and charts are saved to the output directory as follows:
