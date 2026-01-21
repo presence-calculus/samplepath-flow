@@ -124,6 +124,7 @@ def draw_step_chart(
     color: str = "tab:blue",
     color_with_marks: str = "tab:grey",
     fill: bool = True,
+    drop_lines: bool = True,
 ) -> None:
     """Draw a step chart with optional arrival/departure event markers.
 
@@ -165,6 +166,16 @@ def draw_step_chart(
 
         # Plot small markers as subtle event indicators
         if departure_times:
+            if drop_lines:
+                ax.vlines(
+                    departure_times,
+                    0,
+                    departure_vals,
+                    colors="green",
+                    linewidths=0.5,
+                    alpha=0.5,
+                    zorder=4,
+                )
             ax.scatter(
                 departure_times,
                 departure_vals,
@@ -174,6 +185,16 @@ def draw_step_chart(
                 label="Departure",
             )
         if arrival_times:
+            if drop_lines:
+                ax.vlines(
+                    arrival_times,
+                    0,
+                    arrival_vals,
+                    colors="purple",
+                    linewidths=0.5,
+                    alpha=0.5,
+                    zorder=5,
+                )
             ax.scatter(
                 arrival_times,
                 arrival_vals,
