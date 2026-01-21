@@ -160,3 +160,66 @@ def test_empty_events_returns_empty_arrays():
     T, L, Lam, w, N, A, Arr, Dep = compute_sample_path_metrics(events, times)
     for arr in (L, Lam, w, N, A, Arr, Dep):
         assert arr.size == 0
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  FLOW METRICS RESULT MARKER TIMES
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+from samplepath.metrics import compute_finite_window_flow_metrics
+
+
+def test_flow_metrics_result_arrival_times_single_arrival():
+    """Single arrival event has correct arrival_times."""
+    t0 = _t("2024-01-01 00:00")
+    t1 = _t("2024-01-01 02:00")
+    events = [(t0, +1, 1), (t1, -1, 0)]
+    result = compute_finite_window_flow_metrics(events)
+    assert result.arrival_times == [t0]
+
+
+def test_flow_metrics_result_departure_times_single_departure():
+    """Single departure event has correct departure_times."""
+    t0 = _t("2024-01-01 00:00")
+    t1 = _t("2024-01-01 02:00")
+    events = [(t0, +1, 1), (t1, -1, 0)]
+    result = compute_finite_window_flow_metrics(events)
+    assert result.departure_times == [t1]
+
+
+def test_flow_metrics_result_marker_times_overlapping_items():
+    """Overlapping items have correct arrival and departure times."""
+    t0 = _t("2024-01-01 00:00")
+    t1 = _t("2024-01-01 01:00")
+    t2 = _t("2024-01-01 03:30")
+    t3 = _t("2024-01-01 05:00")
+    events = [(t0, +1, 1), (t1, +1, 1), (t2, -1, 0), (t3, -1, 0)]
+    result = compute_finite_window_flow_metrics(events)
+    assert result.arrival_times == [t0, t1]
+    assert result.departure_times == [t2, t3]
+
+
+def test_flow_metrics_result_marker_times_same_timestamp_tie():
+    """Same-timestamp arrival and departure both recorded."""
+    t0 = _t("2024-01-01 00:00")
+    events = [(t0, +1, 1), (t0, -1, 0)]
+    result = compute_finite_window_flow_metrics(events)
+    assert result.arrival_times == [t0]
+    assert result.departure_times == [t0]
+
+
+def test_flow_metrics_result_marker_times_empty_events():
+    """Empty events yield empty marker times."""
+    result = compute_finite_window_flow_metrics([])
+    assert result.arrival_times == []
+    assert result.departure_times == []
+
+
+def test_flow_metrics_result_marker_times_pre_window_arrivals_excluded():
+    """Arrivals before t0 are excluded from arrival_times due to zeroing."""
+    t_pre = _t("2024-01-01 00:00")
+    t0 = _t("2024-01-01 01:00")
+    t1 = _t("2024-01-01 02:00")
+    events = [(t_pre, +1, 1), (t0, +1, 1), (t1, -1, 0)]
+    result = compute_finite_window_flow_metrics(events, start=t0)
+    # t_pre arrival is zeroed, so only t0 should be in arrival_times
+    assert result.arrival_times == [t0]

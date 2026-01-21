@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from samplepath.plots.helpers import draw_step_chart
+from samplepath.plots.helpers import ScatterOverlay, draw_step_chart
 
 
 def _t(s: str) -> pd.Timestamp:
@@ -16,45 +16,45 @@ def _t(s: str) -> pd.Timestamp:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Event marker extraction logic tests
+# ScatterOverlay tests
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
-def test_event_markers_extracts_arrivals():
-    """Arrivals are correctly identified: arrivals > 0."""
-    # event = (timestamp, delta_n, arrivals)
-    # For arrival: delta_n = +1, arrivals = 1
-    # departures = arrivals - delta_n = 1 - 1 = 0
-    event = (_t("2024-01-01 00:00"), +1, 1)
-    delta_n, arrivals = event[1], event[2]
-    departures = arrivals - delta_n
-
-    assert arrivals == 1
-    assert departures == 0
-
-
-def test_event_markers_extracts_departures():
-    """Departures are correctly identified: departures = arrivals - delta_n."""
-    # For departure: delta_n = -1, arrivals = 0
-    # departures = arrivals - delta_n = 0 - (-1) = 1
-    event = (_t("2024-01-01 02:00"), -1, 0)
-    delta_n, arrivals = event[1], event[2]
-    departures = arrivals - delta_n
-
-    assert arrivals == 0
-    assert departures == 1
+def test_scatter_overlay_creation():
+    """ScatterOverlay dataclass instantiates correctly."""
+    overlay = ScatterOverlay(
+        x=[_t("2024-01-01 00:00")],
+        y=[1.0],
+        color="purple",
+        label="Test",
+    )
+    assert overlay.x == [_t("2024-01-01 00:00")]
+    assert overlay.y == [1.0]
+    assert overlay.color == "purple"
+    assert overlay.label == "Test"
 
 
-def test_event_markers_handles_simultaneous_arrival_departure():
-    """Both arrival and departure at same timestamp (net zero change)."""
-    # For simultaneous: delta_n = 0, arrivals = 1
-    # departures = arrivals - delta_n = 1 - 0 = 1
-    event = (_t("2024-01-01 01:00"), 0, 1)
-    delta_n, arrivals = event[1], event[2]
-    departures = arrivals - delta_n
+def test_scatter_overlay_drop_lines_default_false():
+    """drop_lines defaults to False."""
+    overlay = ScatterOverlay(
+        x=[_t("2024-01-01 00:00")],
+        y=[1.0],
+        color="green",
+        label="Test",
+    )
+    assert overlay.drop_lines is False
 
-    assert arrivals == 1
-    assert departures == 1
+
+def test_scatter_overlay_drop_lines_can_be_true():
+    """drop_lines can be set to True."""
+    overlay = ScatterOverlay(
+        x=[_t("2024-01-01 00:00")],
+        y=[1.0],
+        color="green",
+        label="Test",
+        drop_lines=True,
+    )
+    assert overlay.drop_lines is True
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -71,10 +71,8 @@ def simple_chart_data():
 
 
 @patch("samplepath.plots.helpers.plt")
-def test_draw_step_chart_without_events_no_scatter(
-    mock_plt, simple_chart_data, tmp_path
-):
-    """When events=None, no scatter calls are made."""
+def test_draw_step_chart_no_overlays_no_scatter(mock_plt, simple_chart_data, tmp_path):
+    """When overlays=None, no scatter calls are made."""
     times, values = simple_chart_data
     out_path = str(tmp_path / "chart.png")
 
@@ -82,65 +80,172 @@ def test_draw_step_chart_without_events_no_scatter(
     mock_fig = MagicMock()
     mock_plt.subplots.return_value = (mock_fig, mock_ax)
 
-    draw_step_chart(times, values, "Title", "Y", out_path, events=None)
+    draw_step_chart(times, values, "Title", "Y", out_path, overlays=None)
 
     mock_ax.scatter.assert_not_called()
 
 
 @patch("samplepath.plots.helpers.plt")
-def test_draw_step_chart_with_events_calls_scatter(
+def test_draw_step_chart_with_overlays_calls_scatter(
     mock_plt, simple_chart_data, tmp_path
 ):
-    """When events provided, scatter is called for markers."""
+    """When overlays provided, scatter is called for each overlay."""
     times, values = simple_chart_data
     out_path = str(tmp_path / "chart.png")
-    events = [
-        (_t("2024-01-01 00:00"), +1, 1),  # arrival
-        (_t("2024-01-01 02:00"), -1, 0),  # departure
+    overlays = [
+        ScatterOverlay(
+            x=[_t("2024-01-01 00:00")],
+            y=[1.0],
+            color="purple",
+            label="Arrival",
+        ),
+        ScatterOverlay(
+            x=[_t("2024-01-01 02:00")],
+            y=[0.0],
+            color="green",
+            label="Departure",
+        ),
     ]
 
     mock_ax = MagicMock()
     mock_fig = MagicMock()
     mock_plt.subplots.return_value = (mock_fig, mock_ax)
 
-    draw_step_chart(times, values, "Title", "Y", out_path, events=events)
+    draw_step_chart(times, values, "Title", "Y", out_path, overlays=overlays)
 
     assert mock_ax.scatter.call_count == 2
 
 
 @patch("samplepath.plots.helpers.plt")
-def test_draw_step_chart_arrival_marker_is_purple(mock_plt, tmp_path):
-    """Arrival markers use purple color."""
+def test_draw_step_chart_overlay_uses_specified_color(mock_plt, tmp_path):
+    """Overlay color is passed to scatter."""
     times = [_t("2024-01-01 00:00")]
     values = np.array([1.0])
     out_path = str(tmp_path / "chart.png")
-    events = [(_t("2024-01-01 00:00"), +1, 1)]  # arrival only
+    overlays = [
+        ScatterOverlay(
+            x=[_t("2024-01-01 00:00")],
+            y=[1.0],
+            color="purple",
+            label="Test",
+        ),
+    ]
 
     mock_ax = MagicMock()
     mock_fig = MagicMock()
     mock_plt.subplots.return_value = (mock_fig, mock_ax)
 
-    draw_step_chart(times, values, "Title", "Y", out_path, events=events)
+    draw_step_chart(times, values, "Title", "Y", out_path, overlays=overlays)
 
-    # Check scatter was called with purple
     call_kwargs = mock_ax.scatter.call_args_list[0][1]
     assert call_kwargs["color"] == "purple"
 
 
 @patch("samplepath.plots.helpers.plt")
-def test_draw_step_chart_departure_marker_is_green(mock_plt, tmp_path):
-    """Departure markers use green color."""
+def test_draw_step_chart_overlay_drop_lines_calls_vlines(mock_plt, tmp_path):
+    """drop_lines=True renders vertical lines."""
     times = [_t("2024-01-01 00:00")]
-    values = np.array([0.0])
+    values = np.array([1.0])
     out_path = str(tmp_path / "chart.png")
-    events = [(_t("2024-01-01 00:00"), -1, 0)]  # departure only
+    overlays = [
+        ScatterOverlay(
+            x=[_t("2024-01-01 00:00")],
+            y=[1.0],
+            color="green",
+            label="Test",
+            drop_lines=True,
+        ),
+    ]
 
     mock_ax = MagicMock()
     mock_fig = MagicMock()
     mock_plt.subplots.return_value = (mock_fig, mock_ax)
 
-    draw_step_chart(times, values, "Title", "Y", out_path, events=events)
+    draw_step_chart(times, values, "Title", "Y", out_path, overlays=overlays)
 
-    # Check scatter was called with green
-    call_kwargs = mock_ax.scatter.call_args_list[0][1]
-    assert call_kwargs["color"] == "green"
+    mock_ax.vlines.assert_called_once()
+
+
+@patch("samplepath.plots.helpers.plt")
+def test_draw_step_chart_overlay_no_drop_lines_no_vlines(mock_plt, tmp_path):
+    """drop_lines=False does not render vertical lines."""
+    times = [_t("2024-01-01 00:00")]
+    values = np.array([1.0])
+    out_path = str(tmp_path / "chart.png")
+    overlays = [
+        ScatterOverlay(
+            x=[_t("2024-01-01 00:00")],
+            y=[1.0],
+            color="green",
+            label="Test",
+            drop_lines=False,
+        ),
+    ]
+
+    mock_ax = MagicMock()
+    mock_fig = MagicMock()
+    mock_plt.subplots.return_value = (mock_fig, mock_ax)
+
+    draw_step_chart(times, values, "Title", "Y", out_path, overlays=overlays)
+
+    mock_ax.vlines.assert_not_called()
+
+
+@patch("samplepath.plots.helpers.plt")
+def test_draw_step_chart_empty_overlay_skipped(mock_plt, tmp_path):
+    """Overlay with empty x list is skipped."""
+    times = [_t("2024-01-01 00:00")]
+    values = np.array([1.0])
+    out_path = str(tmp_path / "chart.png")
+    overlays = [
+        ScatterOverlay(
+            x=[],
+            y=[],
+            color="green",
+            label="Empty",
+        ),
+    ]
+
+    mock_ax = MagicMock()
+    mock_fig = MagicMock()
+    mock_plt.subplots.return_value = (mock_fig, mock_ax)
+
+    draw_step_chart(times, values, "Title", "Y", out_path, overlays=overlays)
+
+    mock_ax.scatter.assert_not_called()
+
+
+@patch("samplepath.plots.helpers.plt")
+def test_draw_step_chart_multiple_overlays(mock_plt, tmp_path):
+    """Multiple overlays each get rendered."""
+    times = [_t("2024-01-01 00:00"), _t("2024-01-01 01:00"), _t("2024-01-01 02:00")]
+    values = np.array([1.0, 2.0, 0.0])
+    out_path = str(tmp_path / "chart.png")
+    overlays = [
+        ScatterOverlay(
+            x=[_t("2024-01-01 00:00")],
+            y=[1.0],
+            color="purple",
+            label="First",
+        ),
+        ScatterOverlay(
+            x=[_t("2024-01-01 01:00")],
+            y=[2.0],
+            color="green",
+            label="Second",
+        ),
+        ScatterOverlay(
+            x=[_t("2024-01-01 02:00")],
+            y=[0.0],
+            color="red",
+            label="Third",
+        ),
+    ]
+
+    mock_ax = MagicMock()
+    mock_fig = MagicMock()
+    mock_plt.subplots.return_value = (mock_fig, mock_ax)
+
+    draw_step_chart(times, values, "Title", "Y", out_path, overlays=overlays)
+
+    assert mock_ax.scatter.call_count == 3

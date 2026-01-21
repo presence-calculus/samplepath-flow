@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
+from dataclasses import dataclass
 from typing import List, Optional, Sequence, Tuple
 
 from matplotlib import pyplot as plt
@@ -8,6 +9,31 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 import numpy as np
 import pandas as pd
+
+
+@dataclass
+class ScatterOverlay:
+    """A scatter series to overlay on a chart.
+
+    Attributes
+    ----------
+    x : List[pd.Timestamp]
+        X-coordinates (timestamps) for scatter points.
+    y : List[float]
+        Y-coordinates for scatter points.
+    color : str
+        Color for the scatter points and drop lines.
+    label : str
+        Legend label for this series.
+    drop_lines : bool
+        If True, draw vertical lines from each point to the x-axis.
+    """
+
+    x: List[pd.Timestamp]
+    y: List[float]
+    color: str
+    label: str
+    drop_lines: bool = False
 
 
 def add_caption(fig: Figure, text: str) -> None:
@@ -120,88 +146,46 @@ def draw_step_chart(
     out_path: str,
     unit: str = "timestamp",
     caption: Optional[str] = None,
-    events: Optional[List[Tuple[pd.Timestamp, int, int]]] = None,
     color: str = "tab:blue",
-    color_with_marks: str = "tab:grey",
-    fill: bool = True,
-    drop_lines: bool = True,
+    fill: bool = False,
+    overlays: Optional[List[ScatterOverlay]] = None,
 ) -> None:
-    """Draw a step chart with optional arrival/departure event markers.
+    """Draw a step chart with optional scatter overlays.
 
     Parameters
     ----------
-    events : optional list of (timestamp, delta_n, arrivals)
-        If provided, overlays colored markers:
-        - Purple dots for arrivals
-        - Green dots for departures
+    overlays : optional List[ScatterOverlay]
+        Scatter series to overlay on the chart. Each overlay specifies
+        x/y coordinates, color, label, and whether to draw drop lines.
     """
     fig, ax = init_fig_ax()
-    if events is None:
-        line_color = color
-    else:
-        line_color = color_with_marks
 
-    ax.step(times, values, where="post", label=ylabel, color=line_color)
+    ax.step(times, values, where="post", label=ylabel, color=color)
     if fill:
-        ax.fill_between(times, values, step="post", alpha=0.3, color=line_color)
+        ax.fill_between(times, values, step="post", alpha=0.3, color=color)
 
-    # Overlay event markers if provided
-    if events:
-        # Build a lookup from timestamp to index for y-positioning
-        time_to_idx = {t: i for i, t in enumerate(times)}
-        arrival_times, arrival_vals = [], []
-        departure_times, departure_vals = [], []
-
-        for t, delta_n, arrivals in events:
-            departures = arrivals - delta_n
-            idx = time_to_idx.get(t)
-            if idx is not None:
-                y_val = values[idx]
-                if arrivals > 0:
-                    arrival_times.append(t)
-                    arrival_vals.append(y_val)
-                if departures > 0:
-                    departure_times.append(t)
-                    departure_vals.append(y_val)
-
-        # Plot small markers as subtle event indicators
-        if departure_times:
-            if drop_lines:
+    # Render scatter overlays
+    if overlays:
+        for i, overlay in enumerate(overlays):
+            if not overlay.x:
+                continue
+            if overlay.drop_lines:
                 ax.vlines(
-                    departure_times,
+                    overlay.x,
                     0,
-                    departure_vals,
-                    colors="green",
+                    overlay.y,
+                    colors=overlay.color,
                     linewidths=0.5,
                     alpha=0.5,
-                    zorder=4,
+                    zorder=4 + i,
                 )
             ax.scatter(
-                departure_times,
-                departure_vals,
-                color="green",
+                overlay.x,
+                overlay.y,
+                color=overlay.color,
                 s=2,
-                zorder=5,
-                label="Departure",
-            )
-        if arrival_times:
-            if drop_lines:
-                ax.vlines(
-                    arrival_times,
-                    0,
-                    arrival_vals,
-                    colors="purple",
-                    linewidths=0.5,
-                    alpha=0.5,
-                    zorder=5,
-                )
-            ax.scatter(
-                arrival_times,
-                arrival_vals,
-                color="purple",
-                s=2,
-                zorder=6,
-                label="Arrival",
+                zorder=5 + i,
+                label=overlay.label,
             )
 
     format_and_save(fig, ax, title, ylabel, unit, caption, out_path)

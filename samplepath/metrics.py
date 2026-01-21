@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Literal, Optional, Tuple
 
 import numpy as np
@@ -37,6 +37,10 @@ class FlowMetricsResult:
         Start of the finite reporting window (first observation time).
     tn : pd.Timestamp
         End of the finite reporting window (last observation time).
+    arrival_times : List[pd.Timestamp]
+        Timestamps of arrival events (for overlay plotting).
+    departure_times : List[pd.Timestamp]
+        Timestamps of departure events (for overlay plotting).
 
     Methods
     -------
@@ -57,6 +61,8 @@ class FlowMetricsResult:
     freq: Optional[str]
     t0: pd.Timestamp | NaTType = pd.NaT
     tn: pd.Timestamp | NaTType = pd.NaT
+    arrival_times: List[pd.Timestamp] = field(default_factory=list)
+    departure_times: List[pd.Timestamp] = field(default_factory=list)
 
     def to_dataframe(self) -> pd.DataFrame:
         return pd.DataFrame(
@@ -318,6 +324,16 @@ def compute_finite_window_flow_metrics(
     # Compute metrics
     T, L, Lam, w, N, A, Arr, Dep = compute_sample_path_metrics(events_prepped, obs)
 
+    # Extract arrival and departure timestamps for overlay plotting
+    arrival_times: List[pd.Timestamp] = []
+    departure_times: List[pd.Timestamp] = []
+    for t, delta_n, arrivals in events_prepped:
+        departures = arrivals - delta_n
+        if arrivals > 0:
+            arrival_times.append(t)
+        if departures > 0:
+            departure_times.append(t)
+
     return FlowMetricsResult(
         events=events_prepped,
         times=T,
@@ -332,6 +348,8 @@ def compute_finite_window_flow_metrics(
         freq=resolved_freq,
         t0=t0,
         tn=tn,
+        arrival_times=arrival_times,
+        departure_times=departure_times,
     )
 
 

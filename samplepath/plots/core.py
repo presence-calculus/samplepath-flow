@@ -13,6 +13,7 @@ import pandas as pd
 from samplepath.filter import FilterResult
 from samplepath.metrics import FlowMetricsResult
 from samplepath.plots.helpers import (
+    ScatterOverlay,
     _clip_axis_to_percentile,
     add_caption,
     draw_line_chart,
@@ -380,6 +381,38 @@ def plot_core_flow_metrics_charts(
     note = f"Filters: {filter_label}"
 
     path_N = os.path.join(core_panels_dir, "sample_path_N.png")
+
+    # Build overlays for arrival/departure markers if requested
+    overlays = None
+    if getattr(args, "with_event_marks", False):
+        time_to_idx = {t: i for i, t in enumerate(metrics.times)}
+        arrival_y = [
+            float(metrics.N[time_to_idx[t]])
+            for t in metrics.arrival_times
+            if t in time_to_idx
+        ]
+        departure_y = [
+            float(metrics.N[time_to_idx[t]])
+            for t in metrics.departure_times
+            if t in time_to_idx
+        ]
+        overlays = [
+            ScatterOverlay(
+                x=[t for t in metrics.arrival_times if t in time_to_idx],
+                y=arrival_y,
+                color="purple",
+                label="Arrival",
+                drop_lines=True,
+            ),
+            ScatterOverlay(
+                x=[t for t in metrics.departure_times if t in time_to_idx],
+                y=departure_y,
+                color="green",
+                label="Departure",
+                drop_lines=True,
+            ),
+        ]
+
     draw_step_chart(
         metrics.times,
         metrics.N,
@@ -387,7 +420,9 @@ def plot_core_flow_metrics_charts(
         "N(t)",
         path_N,
         caption=note,
-        events=metrics.events if getattr(args, "with_event_marks", False) else None,
+        overlays=overlays,
+        color="grey" if overlays is not None else "tab:blue",
+        fill=True,
     )
 
     path_L = os.path.join(core_panels_dir, "time_average_N_L.png")
