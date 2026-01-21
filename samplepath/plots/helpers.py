@@ -121,6 +121,9 @@ def draw_step_chart(
     unit: str = "timestamp",
     caption: Optional[str] = None,
     events: Optional[List[Tuple[pd.Timestamp, int, int]]] = None,
+    color: str = "tab:blue",
+    color_with_marks: str = "tab:grey",
+    fill: bool = True,
 ) -> None:
     """Draw a step chart with optional arrival/departure event markers.
 
@@ -132,7 +135,14 @@ def draw_step_chart(
         - Green dots for departures
     """
     fig, ax = init_fig_ax()
-    ax.step(times, values, where="post", label=ylabel)
+    if events is None:
+        line_color = color
+    else:
+        line_color = color_with_marks
+
+    ax.step(times, values, where="post", label=ylabel, color=line_color)
+    if fill:
+        ax.fill_between(times, values, step="post", alpha=0.3, color=line_color)
 
     # Overlay event markers if provided
     if events:
