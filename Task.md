@@ -1,13 +1,11 @@
 ---
-ID: 4
-Task: Add arrival/departures marks to N(t) chart
-Branch: arrival-departure-marks-nt
+ID: 5
+Task: Centralize core chart plotting logic
+Branch: core-chart-plotting-refactor
 ---
 
-Spec: A key property of sample path analysis is that all the charts are driven by arrival and departure events. So the discontinuities in the charts correspond to events. This is in contrast to most current flow metrics charts where the time axis is organized by calendar date.
+Spec: In the plotting logic in core.py, the logic to darw individual charts for  N(t), L(T) etc in plot_core_flow_metrics_charts.py and the plots where we show the composite stacks like draw_four_panel_column, we need a way to centralize the logic for display of each chart so that we can reuse it in different layouts.
 
-To highlight this fact, I want to show an event indicator on every point in the key sample path flow metrics charts. We will start with N(t) the instantaenous WIP sample path chart.
+So the exact same capabilities should be available to be dropped into a single chart or a composite stack.
 
-For this chart, I want to show an arrival as purple colored dot and a departure as a green colored dot.
-
-Add a command line option -with-event-marks to turn this feature on an off globally for all charts that support it.
+Make a plan on how we can refactor the code to acheive this.

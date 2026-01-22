@@ -14,13 +14,19 @@ from samplepath.filter import FilterResult
 from samplepath.metrics import FlowMetricsResult
 from samplepath.plots.helpers import (
     ScatterOverlay,
-    _clip_axis_to_percentile,
     add_caption,
     draw_line_chart,
+    draw_LT_chart,
+    draw_N_chart,
     draw_step_chart,
     format_and_save,
     format_date_axis,
     init_fig_ax,
+    render_lambda_chart,
+    render_line_chart,
+    render_LT_chart,
+    render_N_chart,
+    render_step_chart,
 )
 
 
@@ -36,33 +42,17 @@ def draw_lambda_chart(
     unit: str = "timestamp",
     caption: Optional[str] = None,
 ) -> None:
-    """Line chart with optional percentile-based y-limits and warmup exclusion."""
+    """Draw a standalone Λ(T) chart with optional percentile clipping and save to file."""
     fig, ax = init_fig_ax(figsize=(10.0, 3.6))
-    ax.plot(times, values, label=ylabel)
-
-    # Inline percentile clipping
-    vals = np.asarray(values, dtype=float)
-    if vals.size > 0:
-        mask = np.isfinite(vals)
-        if lambda_warmup_hours and times:
-            t0 = times[0]
-            ages_hr = np.array([(t - t0).total_seconds() / 3600.0 for t in times])
-            mask &= ages_hr >= float(lambda_warmup_hours)
-        data = vals[mask]
-        if data.size > 0 and np.isfinite(data).any():
-            top = (
-                np.nanpercentile(data, lambda_pctl_upper)
-                if lambda_pctl_upper is not None
-                else np.nanmax(data)
-            )
-            bottom = (
-                np.nanpercentile(data, lambda_pctl_lower)
-                if lambda_pctl_lower is not None
-                else 0.0
-            )
-            if np.isfinite(top) and np.isfinite(bottom) and top > bottom:
-                ax.set_ylim(float(bottom), float(top))
-
+    render_lambda_chart(
+        ax,
+        times,
+        values,
+        label=ylabel,
+        pctl_upper=lambda_pctl_upper,
+        pctl_lower=lambda_pctl_lower,
+        warmup_hours=lambda_warmup_hours if lambda_warmup_hours else 0.0,
+    )
     format_and_save(fig, ax, title, ylabel, unit, caption, out_path)
 
 
@@ -137,6 +127,9 @@ def plot_core_sample_path_analysis_stack(args, filter_result, metrics, out_dir):
         args.lambda_lower_pctl,
         args.lambda_warmup,
         caption=f"{filter_result.display}",
+        arrival_times=metrics.arrival_times,
+        departure_times=metrics.departure_times,
+        with_event_marks=getattr(args, "with_event_marks", False),
     )
     return four_col_stack
 
@@ -153,33 +146,45 @@ def draw_four_panel_column(
     lambda_pctl_lower: Optional[float] = None,
     lambda_warmup_hours: Optional[float] = None,
     caption: Optional[str] = None,
+    arrival_times: Optional[List[pd.Timestamp]] = None,
+    departure_times: Optional[List[pd.Timestamp]] = None,
+    with_event_marks: bool = False,
 ) -> None:
+    """Draw a 4-panel vertical stack: N(t), L(T), Λ(T), w(T)."""
     fig, axes = plt.subplots(4, 1, figsize=(12, 11), sharex=True)
 
-    axes[0].step(times, N_vals, where="post", label="N(t)")
-    axes[0].set_title("N(t) — Sample Path")
-    axes[0].set_ylabel("N(t)")
-    axes[0].legend()
+    render_N_chart(
+        axes[0],
+        times,
+        N_vals,
+        arrival_times=arrival_times,
+        departure_times=departure_times,
+        with_event_marks=with_event_marks,
+    )
 
-    axes[1].plot(times, L_vals, label="L(T)")
-    axes[1].set_title("L(T) — Time-Average of N(t)")
-    axes[1].set_ylabel("L(T)")
-    axes[1].legend()
+    render_LT_chart(
+        axes[1],
+        times,
+        L_vals,
+        arrival_times=arrival_times,
+        departure_times=departure_times,
+        with_event_marks=with_event_marks,
+    )
 
-    axes[2].plot(times, Lam_vals, label="Λ(T) [1/hr]")
-    axes[2].set_title("Λ(T) — Cumulative Arrival Rate")
-    axes[2].set_ylabel("Λ(T) [1/hr]")
-    axes[2].legend()
-    _clip_axis_to_percentile(
+    render_lambda_chart(
         axes[2],
         times,
         Lam_vals,
-        upper_p=lambda_pctl_upper,
-        lower_p=lambda_pctl_lower,
-        warmup_hours=lambda_warmup_hours,
+        label="Λ(T) [1/hr]",
+        pctl_upper=lambda_pctl_upper,
+        pctl_lower=lambda_pctl_lower,
+        warmup_hours=lambda_warmup_hours if lambda_warmup_hours else 0.0,
     )
+    axes[2].set_title("Λ(T) — Cumulative Arrival Rate")
+    axes[2].set_ylabel("Λ(T) [1/hr]")
+    axes[2].legend()
 
-    axes[3].plot(times, w_vals, label="w(T) [hrs]")
+    render_line_chart(axes[3], times, w_vals, label="w(T) [hrs]")
     axes[3].set_title("w(T) — Average Residence Time")
     axes[3].set_ylabel("w(T) [hrs]")
     axes[3].set_xlabel("Date")
@@ -189,12 +194,12 @@ def draw_four_panel_column(
         format_date_axis(ax)
 
     plt.tight_layout(rect=(0, 0, 1, 0.90))
-    fig.suptitle(title, fontsize=14, y=0.97)  # larger main title
+    fig.suptitle(title, fontsize=14, y=0.97)
     if caption:
         fig.text(
             0.5,
             0.945,
-            caption,  # small gray subtitle just below title
+            caption,
             ha="center",
             va="top",
         )
@@ -218,33 +223,45 @@ def draw_five_panel_column(
     lambda_pctl_upper: Optional[float] = None,
     lambda_pctl_lower: Optional[float] = None,
     lambda_warmup_hours: Optional[float] = None,
+    arrival_times: Optional[List[pd.Timestamp]] = None,
+    departure_times: Optional[List[pd.Timestamp]] = None,
+    with_event_marks: bool = False,
 ) -> None:
+    """Draw a 5-panel vertical stack: N(t), L(T), Λ(T), w(T), A(T)."""
     fig, axes = plt.subplots(5, 1, figsize=(12, 14), sharex=True)
 
-    axes[0].step(times, N_vals, where="post", label="N(t)")
-    axes[0].set_title("N(t) — Sample Path")
-    axes[0].set_ylabel("N(t)")
-    axes[0].legend()
+    render_N_chart(
+        axes[0],
+        times,
+        N_vals,
+        arrival_times=arrival_times,
+        departure_times=departure_times,
+        with_event_marks=with_event_marks,
+    )
 
-    axes[1].plot(times, L_vals, label="L(T)")
-    axes[1].set_title("L(T) — Time-Average of N(t)")
-    axes[1].set_ylabel("L(T)")
-    axes[1].legend()
+    render_LT_chart(
+        axes[1],
+        times,
+        L_vals,
+        arrival_times=arrival_times,
+        departure_times=departure_times,
+        with_event_marks=with_event_marks,
+    )
 
-    axes[2].plot(times, Lam_vals, label="Λ(T) [1/hr]")
-    axes[2].set_title("Λ(T) — Cumulative Arrival Rate")
-    axes[2].set_ylabel("Λ(T) [1/hr]")
-    axes[2].legend()
-    _clip_axis_to_percentile(
+    render_lambda_chart(
         axes[2],
         times,
         Lam_vals,
-        upper_p=lambda_pctl_upper,
-        lower_p=lambda_pctl_lower,
-        warmup_hours=lambda_warmup_hours,
+        label="Λ(T) [1/hr]",
+        pctl_upper=lambda_pctl_upper,
+        pctl_lower=lambda_pctl_lower,
+        warmup_hours=lambda_warmup_hours if lambda_warmup_hours else 0.0,
     )
+    axes[2].set_title("Λ(T) — Cumulative Arrival Rate")
+    axes[2].set_ylabel("Λ(T) [1/hr]")
+    axes[2].legend()
 
-    axes[3].plot(times, w_vals, label="w(T) [hrs]")
+    render_line_chart(axes[3], times, w_vals, label="w(T) [hrs]")
     if (
         scatter_times is not None
         and scatter_values is not None
@@ -262,7 +279,7 @@ def draw_five_panel_column(
     axes[3].set_ylabel("w(T) [hrs]")
     axes[3].legend()
 
-    axes[4].plot(times, A_vals, label="A(T) [hrs·items]")
+    render_line_chart(axes[4], times, A_vals, label="A(T) [hrs·items]")
     axes[4].set_title("A(T) — cumulative area ∫N(t)dt")
     axes[4].set_ylabel("A(T) [hrs·items]")
     axes[4].set_xlabel("Date")
@@ -291,38 +308,50 @@ def draw_five_panel_column_with_scatter(
     lambda_pctl_upper: Optional[float] = None,
     lambda_pctl_lower: Optional[float] = None,
     lambda_warmup_hours: Optional[float] = None,
+    arrival_times: Optional[List[pd.Timestamp]] = None,
+    departure_times: Optional[List[pd.Timestamp]] = None,
+    with_event_marks: bool = False,
 ) -> None:
+    """Draw a 5-panel stack: N(t), L(T), Λ(T), w(T) plain, w(T)+scatter."""
     fig, axes = plt.subplots(5, 1, figsize=(12, 14), sharex=True)
 
-    axes[0].step(times, N_vals, where="post", label="N(t)")
-    axes[0].set_title("N(t) — Sample Path")
-    axes[0].set_ylabel("N(t)")
-    axes[0].legend()
+    render_N_chart(
+        axes[0],
+        times,
+        N_vals,
+        arrival_times=arrival_times,
+        departure_times=departure_times,
+        with_event_marks=with_event_marks,
+    )
 
-    axes[1].plot(times, L_vals, label="L(T)")
-    axes[1].set_title("L(T) — Time-Average of N(t)")
-    axes[1].set_ylabel("L(T)")
-    axes[1].legend()
+    render_LT_chart(
+        axes[1],
+        times,
+        L_vals,
+        arrival_times=arrival_times,
+        departure_times=departure_times,
+        with_event_marks=with_event_marks,
+    )
 
-    axes[2].plot(times, Lam_vals, label="Λ(T) [1/hr]")
-    axes[2].set_title("Λ(T) — Cumulative Arrival Rate")
-    axes[2].set_ylabel("Λ(T) [1/hr]")
-    axes[2].legend()
-    _clip_axis_to_percentile(
+    render_lambda_chart(
         axes[2],
         times,
         Lam_vals,
-        upper_p=lambda_pctl_upper,
-        lower_p=lambda_pctl_lower,
-        warmup_hours=lambda_warmup_hours,
+        label="Λ(T) [1/hr]",
+        pctl_upper=lambda_pctl_upper,
+        pctl_lower=lambda_pctl_lower,
+        warmup_hours=lambda_warmup_hours if lambda_warmup_hours else 0.0,
     )
+    axes[2].set_title("Λ(T) — Cumulative Arrival Rate")
+    axes[2].set_ylabel("Λ(T) [1/hr]")
+    axes[2].legend()
 
-    axes[3].plot(times, w_vals, label="w(T) [hrs]")
+    render_line_chart(axes[3], times, w_vals, label="w(T) [hrs]")
     axes[3].set_title("w(T) — Average Residence Time (plain, own scale)")
     axes[3].set_ylabel("w(T) [hrs]")
     axes[3].legend()
 
-    axes[4].plot(times, w_vals, label="w(T) [hrs]")
+    render_line_chart(axes[4], times, w_vals, label="w(T) [hrs]")
     if (
         scatter_times is not None
         and scatter_values is not None
@@ -381,57 +410,24 @@ def plot_core_flow_metrics_charts(
     note = f"Filters: {filter_label}"
 
     path_N = os.path.join(core_panels_dir, "sample_path_N.png")
-
-    # Build overlays for arrival/departure markers if requested
-    overlays = None
-    if getattr(args, "with_event_marks", False):
-        time_to_idx = {t: i for i, t in enumerate(metrics.times)}
-        arrival_y = [
-            float(metrics.N[time_to_idx[t]])
-            for t in metrics.arrival_times
-            if t in time_to_idx
-        ]
-        departure_y = [
-            float(metrics.N[time_to_idx[t]])
-            for t in metrics.departure_times
-            if t in time_to_idx
-        ]
-        overlays = [
-            ScatterOverlay(
-                x=[t for t in metrics.arrival_times if t in time_to_idx],
-                y=arrival_y,
-                color="purple",
-                label="Arrival",
-                drop_lines=True,
-            ),
-            ScatterOverlay(
-                x=[t for t in metrics.departure_times if t in time_to_idx],
-                y=departure_y,
-                color="green",
-                label="Departure",
-                drop_lines=True,
-            ),
-        ]
-
-    draw_step_chart(
+    draw_N_chart(
         metrics.times,
         metrics.N,
-        "N(t) — Sample Path",
-        "N(t)",
         path_N,
+        arrival_times=metrics.arrival_times,
+        departure_times=metrics.departure_times,
+        with_event_marks=getattr(args, "with_event_marks", False),
         caption=note,
-        overlays=overlays,
-        color="grey" if overlays is not None else "tab:blue",
-        fill=True,
     )
 
     path_L = os.path.join(core_panels_dir, "time_average_N_L.png")
-    draw_line_chart(
+    draw_LT_chart(
         metrics.times,
         metrics.L,
-        "L(T) — Time-average N(t)",
-        "L(T)",
         path_L,
+        arrival_times=metrics.arrival_times,
+        departure_times=metrics.departure_times,
+        with_event_marks=getattr(args, "with_event_marks", False),
         caption=note,
     )
 
