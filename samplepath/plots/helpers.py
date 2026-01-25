@@ -401,6 +401,7 @@ def build_event_overlays(
     arrival_times: Optional[List[pd.Timestamp]],
     departure_times: Optional[List[pd.Timestamp]],
     drop_lines: bool = True,
+    drop_lines_for_departures: bool = True,
 ) -> Optional[List[ScatterOverlay]]:
     """Build arrival/departure overlays by mapping event x-values to series y-values.
 
@@ -420,6 +421,8 @@ def build_event_overlays(
         Timestamps of departure events.
     drop_lines : bool
         If True, draw vertical lines from each point to the x-axis.
+    drop_lines_for_departures : bool
+        If True, draw vertical lines for departures (arrivals always use drop_lines).
 
     Returns
     -------
@@ -450,7 +453,7 @@ def build_event_overlays(
             y=departure_y,
             color="green",
             label="Departure",
-            drop_lines=drop_lines,
+            drop_lines=drop_lines and drop_lines_for_departures,
         ),
     ]
 

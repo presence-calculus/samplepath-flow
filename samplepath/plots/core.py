@@ -113,10 +113,24 @@ def render_Lambda(
     times: Sequence[pd.Timestamp],
     Lam_vals: Sequence[float],
     *,
+    arrival_times: Optional[List[pd.Timestamp]] = None,
+    with_event_marks: bool = False,
     clip_opts: Optional[ClipOptions] = None,
     show_title: bool = True,
 ) -> None:
-    render_line_chart(ax, times, Lam_vals, label="Λ(T) [1/hr]", color="tab:blue")
+    overlays = (
+        build_event_overlays(times, Lam_vals, arrival_times, [], drop_lines=True)
+        if with_event_marks
+        else None
+    )
+    render_line_chart(
+        ax,
+        times,
+        Lam_vals,
+        label="Λ(T) [1/hr]",
+        color="tab:blue",
+        overlays=overlays,
+    )
     opts = clip_opts or ClipOptions()
     if opts.pctl_upper is not None or opts.pctl_lower is not None:
         _clip_axis_to_percentile(
@@ -138,10 +152,27 @@ def render_w(
     times: Sequence[pd.Timestamp],
     w_vals: Sequence[float],
     *,
+    arrival_times: Optional[List[pd.Timestamp]] = None,
+    departure_times: Optional[List[pd.Timestamp]] = None,
+    with_event_marks: bool = False,
     show_title: bool = True,
 ) -> None:
     label = "w(T) [hrs]"
-    render_line_chart(ax, times, w_vals, label=label, color="tab:blue")
+    overlays = (
+        build_event_overlays(
+            times,
+            w_vals,
+            arrival_times,
+            departure_times,
+            drop_lines=True,
+            drop_lines_for_departures=False,
+        )
+        if with_event_marks
+        else None
+    )
+    render_line_chart(
+        ax, times, w_vals, label=label, color="tab:blue", overlays=overlays
+    )
     if show_title:
         ax.set_title("w(T) — Average Residence Time")
     ax.set_ylabel(label)
@@ -303,6 +334,8 @@ def plot_Lambda(
     times: List[pd.Timestamp],
     Lam_vals: Sequence[float],
     *,
+    arrival_times: Optional[List[pd.Timestamp]] = None,
+    with_event_marks: bool = False,
     clip_opts: Optional[ClipOptions] = None,
     unit: str = "timestamp",
     caption: Optional[str] = None,
@@ -312,7 +345,14 @@ def plot_Lambda(
         axes,
     ):
         ax = _first_axis(axes)
-        render_Lambda(ax, times, Lam_vals, clip_opts=clip_opts)
+        render_Lambda(
+            ax,
+            times,
+            Lam_vals,
+            arrival_times=arrival_times,
+            with_event_marks=with_event_marks,
+            clip_opts=clip_opts,
+        )
 
 
 def plot_w(
@@ -320,6 +360,9 @@ def plot_w(
     times: List[pd.Timestamp],
     w_vals: Sequence[float],
     *,
+    arrival_times: Optional[List[pd.Timestamp]] = None,
+    departure_times: Optional[List[pd.Timestamp]] = None,
+    with_event_marks: bool = False,
     unit: str = "timestamp",
     caption: Optional[str] = None,
 ) -> None:
@@ -328,7 +371,14 @@ def plot_w(
         axes,
     ):
         ax = _first_axis(axes)
-        render_w(ax, times, w_vals)
+        render_w(
+            ax,
+            times,
+            w_vals,
+            arrival_times=arrival_times,
+            departure_times=departure_times,
+            with_event_marks=with_event_marks,
+        )
 
 
 def plot_A(
@@ -437,13 +487,22 @@ def plot_core_stack(
             flat_axes[2],
             times,
             Lam_vals,
+            arrival_times=arrival_times,
+            with_event_marks=with_event_marks,
             clip_opts=ClipOptions(
                 pctl_upper=lambda_pctl_upper,
                 pctl_lower=lambda_pctl_lower,
                 warmup_hours=lambda_warmup_hours,
             ),
         )
-        render_w(flat_axes[3], times, w_vals)
+        render_w(
+            flat_axes[3],
+            times,
+            w_vals,
+            arrival_times=arrival_times,
+            departure_times=departure_times,
+            with_event_marks=with_event_marks,
+        )
 
 
 def plot_L_vs_Lambda_w(
@@ -609,6 +668,8 @@ def plot_core_flow_metrics_charts(
         path_Lam,
         metrics.times,
         metrics.Lambda,
+        arrival_times=metrics.arrival_times,
+        with_event_marks=getattr(args, "with_event_marks", False),
         clip_opts=ClipOptions(
             pctl_upper=args.lambda_pctl,
             pctl_lower=args.lambda_lower_pctl,
@@ -619,7 +680,16 @@ def plot_core_flow_metrics_charts(
     )
 
     path_w = os.path.join(core_panels_dir, "average_residence_time_w.png")
-    plot_w(path_w, metrics.times, metrics.w, unit=unit, caption=caption)
+    plot_w(
+        path_w,
+        metrics.times,
+        metrics.w,
+        arrival_times=metrics.arrival_times,
+        departure_times=metrics.departure_times,
+        with_event_marks=getattr(args, "with_event_marks", False),
+        unit=unit,
+        caption=caption,
+    )
 
     path_A = os.path.join(core_panels_dir, "cumulative_area_A.png")
     plot_A(path_A, metrics.times, metrics.A, unit=unit, caption=caption)

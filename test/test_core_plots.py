@@ -105,6 +105,80 @@ def test_render_w_sets_defaults():
     ax.set_ylabel.assert_called_once_with("w(T) [hrs]")
 
 
+def test_render_Lambda_arrival_overlays_when_enabled():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    arrivals = [times[0]]
+    with patch("samplepath.plots.core.render_line_chart") as mock_line:
+        core.render_Lambda(
+            ax,
+            times,
+            values,
+            arrival_times=arrivals,
+            with_event_marks=True,
+        )
+    overlays = mock_line.call_args.kwargs["overlays"]
+    assert overlays[0].color == "purple"
+
+
+def test_render_w_overlays_when_enabled():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    arrivals = [times[0]]
+    departures = [times[0]]
+    with patch("samplepath.plots.core.render_line_chart") as mock_line:
+        core.render_w(
+            ax,
+            times,
+            values,
+            arrival_times=arrivals,
+            departure_times=departures,
+            with_event_marks=True,
+        )
+    overlays = mock_line.call_args.kwargs["overlays"]
+    assert overlays[0].color == "purple"
+
+
+def test_render_w_overlays_include_departures():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    arrivals = [times[0]]
+    departures = [times[0]]
+    with patch("samplepath.plots.core.render_line_chart") as mock_line:
+        core.render_w(
+            ax,
+            times,
+            values,
+            arrival_times=arrivals,
+            departure_times=departures,
+            with_event_marks=True,
+        )
+    overlays = mock_line.call_args.kwargs["overlays"]
+    assert overlays[1].color == "green"
+
+
+def test_render_w_overlays_departures_no_drop_lines():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    arrivals = [times[0]]
+    departures = [times[0]]
+    with patch("samplepath.plots.core.render_line_chart") as mock_line:
+        core.render_w(
+            ax,
+            times,
+            values,
+            arrival_times=arrivals,
+            departure_times=departures,
+            with_event_marks=True,
+        )
+    overlays = mock_line.call_args.kwargs["overlays"]
+    assert overlays[1].drop_lines is False
+
+
 def test_render_A_sets_defaults():
     ax = MagicMock()
     times = [_t("2024-01-01")]
@@ -609,6 +683,31 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
         with_event_marks=True,
         unit="D",
     )
+
+
+def test_core_driver_passes_event_marks_to_Lambda_and_w():
+    metrics = _metrics_fixture()
+    out_dir = "/tmp/out"
+    args = SimpleNamespace(
+        lambda_pctl=99.0,
+        lambda_lower_pctl=1.0,
+        lambda_warmup=0.5,
+        with_event_marks=True,
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with (
+        patch("samplepath.plots.core.plot_core_stack"),
+        patch("samplepath.plots.core.plot_N"),
+        patch("samplepath.plots.core.plot_L"),
+        patch("samplepath.plots.core.plot_A"),
+        patch("samplepath.plots.core.plot_CFD"),
+        patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
+        patch("samplepath.plots.core.plot_Lambda") as mock_lam,
+        patch("samplepath.plots.core.plot_w") as mock_w,
+    ):
+        core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
+    assert mock_lam.call_args.kwargs["with_event_marks"] is True
+    assert mock_w.call_args.kwargs["with_event_marks"] is True
 
 
 def test_core_driver_uses_metrics_freq_for_unit():
