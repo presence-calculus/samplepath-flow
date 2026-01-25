@@ -114,6 +114,66 @@ def test_render_A_sets_defaults():
     ax.set_ylabel.assert_called_once_with("A(T) [hrs·items]")
 
 
+def _render_cfd_with_mocks():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    arrivals = np.array([1.0])
+    departures = np.array([0.0])
+    with patch("samplepath.plots.core.render_step_chart") as mock_step:
+        core.render_CFD(ax, times, arrivals, departures)
+    return ax, mock_step
+
+
+def test_render_CFD_calls_step_twice():
+    _, mock_step = _render_cfd_with_mocks()
+    assert mock_step.call_count == 2
+
+
+def test_render_CFD_arrivals_label():
+    _, mock_step = _render_cfd_with_mocks()
+    assert mock_step.call_args_list[0].kwargs["label"] == "A(t): cumulative arrivals"
+
+
+def test_render_CFD_arrivals_color():
+    _, mock_step = _render_cfd_with_mocks()
+    assert mock_step.call_args_list[0].kwargs["color"] == "tab:blue"
+
+
+def test_render_CFD_arrivals_fill_false():
+    _, mock_step = _render_cfd_with_mocks()
+    assert mock_step.call_args_list[0].kwargs["fill"] is False
+
+
+def test_render_CFD_departures_label():
+    _, mock_step = _render_cfd_with_mocks()
+    assert mock_step.call_args_list[1].kwargs["label"] == "D(t): cumulative departures"
+
+
+def test_render_CFD_departures_color():
+    _, mock_step = _render_cfd_with_mocks()
+    assert mock_step.call_args_list[1].kwargs["color"] == "tab:orange"
+
+
+def test_render_CFD_departures_fill_false():
+    _, mock_step = _render_cfd_with_mocks()
+    assert mock_step.call_args_list[1].kwargs["fill"] is False
+
+
+def test_render_CFD_sets_title():
+    ax, _ = _render_cfd_with_mocks()
+    ax.set_title.assert_called_once_with("Cumulative Arrivals vs Cumulative Departures")
+
+
+def test_render_CFD_sets_ylabel():
+    ax, _ = _render_cfd_with_mocks()
+    ax.set_ylabel.assert_called_once_with("count")
+
+
+def test_render_CFD_sets_legend():
+    ax, _ = _render_cfd_with_mocks()
+    ax.legend.assert_called_once()
+
+
 def test_plot_single_panel_calls_renderer():
     fig = MagicMock()
     ax = MagicMock()
@@ -194,6 +254,83 @@ def test_plot_single_panel_A_calls_renderer():
     ):
         core.plot_A("out.png", [_t("2024-01-01")], np.array([5.0]))
     mock_render.assert_called_once()
+
+
+def test_plot_single_panel_CFD_calls_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.render_CFD") as mock_render,
+    ):
+        core.plot_CFD(
+            "out.png",
+            [_t("2024-01-01")],
+            np.array([1.0]),
+            np.array([0.0]),
+        )
+    mock_render.assert_called_once()
+
+
+def test_plot_CFD_passes_unit():
+    fig = MagicMock()
+    ax = MagicMock()
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax
+
+    with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
+        core.plot_CFD(
+            "out.png",
+            [_t("2024-01-01")],
+            np.array([1.0]),
+            np.array([0.0]),
+            unit="W",
+        )
+    assert ctx.call_args.kwargs["unit"] == "W"
+
+
+def test_plot_CFD_passes_caption():
+    fig = MagicMock()
+    ax = MagicMock()
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax
+
+    with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
+        core.plot_CFD(
+            "out.png",
+            [_t("2024-01-01")],
+            np.array([1.0]),
+            np.array([0.0]),
+            caption="Filters: test",
+        )
+    assert ctx.call_args.kwargs["caption"] == "Filters: test"
+
+
+def test_plot_CFD_uses_single_panel_layout():
+    fig = MagicMock()
+    ax = MagicMock()
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax
+
+    with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
+        core.plot_CFD(
+            "out.png",
+            [_t("2024-01-01")],
+            np.array([1.0]),
+            np.array([0.0]),
+        )
+    assert ctx.call_args.kwargs["nrows"] == 1
 
 
 def test_plot_core_stack_calls_all_renderers():
@@ -304,6 +441,8 @@ def _metrics_fixture(freq: str | None = "D"):
         Lambda=np.array([3.0]),
         w=np.array([4.0]),
         A=np.array([5.0]),
+        Arrivals=np.array([1.0]),
+        Departures=np.array([0.0]),
         arrival_times=[_t("2024-01-01")],
         departure_times=[_t("2024-01-02")],
         freq=freq,
@@ -321,6 +460,7 @@ def test_core_driver_returns_expected_paths():
         os.path.join(out_dir, "core/cumulative_arrival_rate_Lambda.png"),
         os.path.join(out_dir, "core/average_residence_time_w.png"),
         os.path.join(out_dir, "core/cumulative_area_A.png"),
+        os.path.join(out_dir, "core/cumulative_flow_diagram.png"),
         os.path.join(out_dir, "core/littles_law_invariant.png"),
         os.path.join(out_dir, "sample_path_flow_metrics.png"),
     ]
@@ -331,6 +471,7 @@ def test_core_driver_returns_expected_paths():
         patch("samplepath.plots.core.plot_Lambda"),
         patch("samplepath.plots.core.plot_w"),
         patch("samplepath.plots.core.plot_A"),
+        patch("samplepath.plots.core.plot_CFD"),
         patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
     ):
         written = core.plot_core_flow_metrics_charts(
@@ -356,6 +497,7 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
         patch("samplepath.plots.core.plot_Lambda"),
         patch("samplepath.plots.core.plot_w"),
         patch("samplepath.plots.core.plot_A"),
+        patch("samplepath.plots.core.plot_CFD"),
         patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
     ):
         core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
@@ -391,6 +533,7 @@ def test_core_driver_uses_metrics_freq_for_unit():
             patch("samplepath.plots.core.plot_Lambda"),
             patch("samplepath.plots.core.plot_w"),
             patch("samplepath.plots.core.plot_A"),
+            patch("samplepath.plots.core.plot_CFD"),
             patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
         ):
             core.plot_core_flow_metrics_charts(
@@ -413,6 +556,7 @@ def test_core_driver_falls_back_to_timestamp_unit():
             patch("samplepath.plots.core.plot_L"),
             patch("samplepath.plots.core.plot_w"),
             patch("samplepath.plots.core.plot_A"),
+            patch("samplepath.plots.core.plot_CFD"),
             patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
         ):
             core.plot_core_flow_metrics_charts(
@@ -435,6 +579,7 @@ def test_core_driver_uses_filter_display_caption():
             patch("samplepath.plots.core.plot_L"),
             patch("samplepath.plots.core.plot_Lambda"),
             patch("samplepath.plots.core.plot_A"),
+            patch("samplepath.plots.core.plot_CFD"),
             patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
         ):
             core.plot_core_flow_metrics_charts(
@@ -457,6 +602,7 @@ def test_core_driver_calls_plot_A_under_core_dir():
             patch("samplepath.plots.core.plot_L"),
             patch("samplepath.plots.core.plot_Lambda"),
             patch("samplepath.plots.core.plot_w"),
+            patch("samplepath.plots.core.plot_CFD"),
             patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
         ):
             core.plot_core_flow_metrics_charts(
@@ -464,6 +610,39 @@ def test_core_driver_calls_plot_A_under_core_dir():
             )
     assert mock_plot.call_args.args[0] == os.path.join(
         out_dir, "core/cumulative_area_A.png"
+    )
+
+
+def test_core_driver_calls_plot_CFD_under_core_dir():
+    out_dir = "/tmp/out"
+    args = SimpleNamespace(lambda_pctl=None, lambda_lower_pctl=None, lambda_warmup=0.0)
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    metrics = SimpleNamespace(
+        times=[_t("2024-01-01")],
+        Arrivals=np.array([1.0]),
+        Departures=np.array([0.0]),
+        N=np.array([1.0]),
+        L=np.array([1.0]),
+        Lambda=np.array([1.0]),
+        w=np.array([1.0]),
+        A=np.array([1.0]),
+        arrival_times=[],
+        departure_times=[],
+        freq=None,
+    )
+    with (
+        patch("samplepath.plots.core.plot_core_stack"),
+        patch("samplepath.plots.core.plot_N"),
+        patch("samplepath.plots.core.plot_L"),
+        patch("samplepath.plots.core.plot_Lambda"),
+        patch("samplepath.plots.core.plot_w"),
+        patch("samplepath.plots.core.plot_A"),
+        patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
+        patch("samplepath.plots.core.plot_CFD") as mock_plot,
+    ):
+        core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
+    assert mock_plot.call_args.args[0] == os.path.join(
+        out_dir, "core/cumulative_flow_diagram.png"
     )
 
 
@@ -538,6 +717,7 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
             patch("samplepath.plots.core.plot_Lambda"),
             patch("samplepath.plots.core.plot_w"),
             patch("samplepath.plots.core.plot_A"),
+            patch("samplepath.plots.core.plot_CFD"),
         ):
             core.plot_core_flow_metrics_charts(
                 None, args, filter_result, metrics, out_dir
@@ -565,6 +745,7 @@ def test_core_driver_omits_caption_when_label_empty():
         patch("samplepath.plots.core.plot_Lambda"),
         patch("samplepath.plots.core.plot_w"),
         patch("samplepath.plots.core.plot_A"),
+        patch("samplepath.plots.core.plot_CFD"),
         patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
     ):
         core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)

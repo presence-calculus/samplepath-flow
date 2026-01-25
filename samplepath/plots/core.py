@@ -160,6 +160,36 @@ def render_A(
     ax.legend()
 
 
+def render_CFD(
+    ax,
+    times: Sequence[pd.Timestamp],
+    arrivals_cum: Sequence[float],
+    departures_cum: Sequence[float],
+    *,
+    show_title: bool = True,
+) -> None:
+    render_step_chart(
+        ax,
+        times,
+        arrivals_cum,
+        label="A(t): cumulative arrivals",
+        color="tab:blue",
+        fill=False,
+    )
+    render_step_chart(
+        ax,
+        times,
+        departures_cum,
+        label="D(t): cumulative departures",
+        color="tab:orange",
+        fill=False,
+    )
+    if show_title:
+        ax.set_title("Cumulative Arrivals vs Cumulative Departures")
+    ax.set_ylabel("count")
+    ax.legend()
+
+
 # ---------------------------------------------------------------------------
 # Standalone panel plots
 # ---------------------------------------------------------------------------
@@ -264,6 +294,23 @@ def plot_A(
     ):
         ax = _first_axis(axes)
         render_A(ax, times, A_vals)
+
+
+def plot_CFD(
+    out_path: str,
+    times: List[pd.Timestamp],
+    arrivals_cum: Sequence[float],
+    departures_cum: Sequence[float],
+    *,
+    unit: str = "timestamp",
+    caption: Optional[str] = None,
+) -> None:
+    with figure_context(out_path, nrows=1, ncols=1, unit=unit, caption=caption) as (
+        _,
+        axes,
+    ):
+        ax = _first_axis(axes)
+        render_CFD(ax, times, arrivals_cum, departures_cum)
 
 
 # ---------------------------------------------------------------------------
@@ -463,6 +510,16 @@ def plot_core_flow_metrics_charts(
     path_A = os.path.join(core_panels_dir, "cumulative_area_A.png")
     plot_A(path_A, metrics.times, metrics.A, unit=unit, caption=caption)
 
+    path_CFD = os.path.join(core_panels_dir, "cumulative_flow_diagram.png")
+    plot_CFD(
+        path_CFD,
+        metrics.times,
+        metrics.Arrivals,
+        metrics.Departures,
+        unit=unit,
+        caption=caption,
+    )
+
     path_invariant = os.path.join(core_panels_dir, "littles_law_invariant.png")
     plot_L_vs_Lambda_w(
         metrics.times,
@@ -474,4 +531,13 @@ def plot_core_flow_metrics_charts(
         caption=caption,
     )
 
-    return [path_N, path_L, path_Lam, path_w, path_A, path_invariant, path_stack]
+    return [
+        path_N,
+        path_L,
+        path_Lam,
+        path_w,
+        path_A,
+        path_CFD,
+        path_invariant,
+        path_stack,
+    ]
