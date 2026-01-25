@@ -1,22 +1,13 @@
 ---
-ID: 6
-Task: Extract cumulative flow diagram as core panel
-Branch: cfd-component
+ID: 7
+Task: Add point overlays to Little's Law Invariant Chart
+Branch: llw-point-overlay
 ---
 
-Spec: Currently the cumulative flow diagram is implemented as an inline panel in the arrival/departure equilibrium convergence stack convergence.py:360:369. We need to extract it as a standard reusable component in core and write it as a core panel that can be reused in the convergence module. So, following our patterns we need.
-1. A render_CFD method that renders the arrivals and eeparture events as a step chart.
-2. A plot_CFD method that saves it as standalone chart using figure_context.
-3. Wiring to pull it into the charts produced as part of the core flow metrics charts.
-4. Update to reuse this component in the divergence module.
-5. Drive it with tests.
-6. Add support for overlays in the CFD: The arrival step chart should use arrival times and the departure step chart should use departue times. This might need updates to logic of overlays in the core step chart drawing code.
-7. Add a fill in between the two lines of the CFD.
+Spec: Currently the l_lambda_w chart does not support event overlays even though it suports vertical and horizontal drop lines. However, every point on the chart represents either an arrival or departure event, even though by the time we draw the chart we no longer are looking at a time stamp. We can capture the point information on the chart as follows:
+1. For each point color the point purple if it is an arrival and color it green if it represents a departure.
+2. (experiment) Use a color gradient or opacity to represent time, with lighter color representing earlier points and deeper color or opacity to represent later time. So we can look at the chart and understand the temporal trends of where values are clustering *now* vs *earlier*.
 
 Progress:
-- Added render_CFD and plot_CFD in core and wired into core flow metrics outputs.
-- Added CFD tests covering baseline visual properties and output wiring.
-- Convergence stack now reuses render_CFD with focused test coverage.
-- Added CFD overlays using explicit arrival/departure times and purple/green markers.
-- Added grey fill between arrivals and departures in CFD.
+- Added LLW event-colored points with drop lines, legend, and time-based opacity.
 Status: done

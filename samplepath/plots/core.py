@@ -14,7 +14,8 @@ from dataclasses import dataclass
 import os
 from typing import List, Optional, Sequence
 
-from matplotlib import pyplot as plt
+from matplotlib import colors as mcolors, pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 import pandas as pd
 
@@ -451,28 +452,80 @@ def plot_L_vs_Lambda_w(
     Lam_vals: np.ndarray,
     w_vals: np.ndarray,
     *,
+    arrival_times: Optional[List[pd.Timestamp]] = None,
+    departure_times: Optional[List[pd.Timestamp]] = None,
+    with_event_marks: bool = False,
     title: str,
     out_path: str,
     caption: Optional[str] = None,
 ) -> None:
-    del times
     x = np.asarray(L_vals, dtype=float)
     y = np.asarray(Lam_vals, dtype=float) * np.asarray(w_vals, dtype=float)
+    t = np.asarray(times, dtype=object)
     mask = np.isfinite(x) & np.isfinite(y)
-    x, y = x[mask], y[mask]
+    x, y, t = x[mask], y[mask], t[mask]
 
     fig, ax = plt.subplots(figsize=(6.0, 6.0))
-    render_scatter_chart(
-        ax,
-        x,
-        y,
-        label=None,
-        color="tab:blue",
-        alpha=0.7,
-        size=18,
-        drop_lines="both",
-        drop_line_alpha=0.25,
-    )
+    if x.size:
+        arrival_set = set(arrival_times or [])
+        departure_set = set(departure_times or [])
+        alphas = np.linspace(0.2, 1.0, num=len(t))
+        colors = []
+        drop_colors = []
+        for idx, time_val in enumerate(t):
+            base = "tab:blue"
+            if with_event_marks:
+                if time_val in departure_set:
+                    base = "green"
+                elif time_val in arrival_set:
+                    base = "purple"
+            colors.append(mcolors.to_rgba(base, alpha=float(alphas[idx])))
+            drop_colors.append(mcolors.to_rgba(base, alpha=0.25))
+        ax.scatter(
+            x,
+            y,
+            s=18,
+            color=colors,
+            label=None,
+        )
+        ax.vlines(
+            x,
+            0,
+            y,
+            colors=drop_colors,
+            linewidths=0.5,
+            alpha=0.25,
+        )
+        ax.hlines(
+            y,
+            0,
+            x,
+            colors=drop_colors,
+            linewidths=0.5,
+            alpha=0.25,
+        )
+        if with_event_marks:
+            ax.legend(
+                handles=[
+                    Line2D(
+                        [0],
+                        [0],
+                        marker="o",
+                        color="purple",
+                        linestyle="None",
+                        label="Arrival",
+                    ),
+                    Line2D(
+                        [0],
+                        [0],
+                        marker="o",
+                        color="green",
+                        linestyle="None",
+                        label="Departure",
+                    ),
+                ],
+                loc="best",
+            )
 
     if x.size and y.size:
         mn = float(np.nanmin([x.min(), y.min()]))
@@ -590,6 +643,9 @@ def plot_core_flow_metrics_charts(
         metrics.L,
         metrics.Lambda,
         metrics.w,
+        arrival_times=metrics.arrival_times,
+        departure_times=metrics.departure_times,
+        with_event_marks=getattr(args, "with_event_marks", False),
         title="L(T) vs Λ(T).w(T)",
         out_path=path_invariant,
         caption=caption,

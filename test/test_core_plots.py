@@ -6,6 +6,7 @@ import os
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+from matplotlib import colors as mcolors
 import numpy as np
 import pandas as pd
 
@@ -766,11 +767,10 @@ def test_plot_L_vs_Lambda_w_renders_invariant_chart():
     ax = MagicMock()
     with (
         patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)),
-        patch("samplepath.plots.core.render_scatter_chart") as mock_scatter,
         patch("samplepath.plots.core.add_caption") as mock_caption,
     ):
         core.plot_L_vs_Lambda_w(
-            [_t("2024-01-01")],
+            [_t("2024-01-01"), _t("2024-01-02")],
             np.array([1.0, 2.0]),
             np.array([1.0, 1.5]),
             np.array([2.0, 1.0]),
@@ -778,15 +778,6 @@ def test_plot_L_vs_Lambda_w_renders_invariant_chart():
             out_path="out.png",
             caption="Filters: test",
         )
-    mock_scatter.assert_called_once()
-    args, kwargs = mock_scatter.call_args
-    assert args[0] is ax
-    assert kwargs["label"] is None
-    assert kwargs["color"] == "tab:blue"
-    assert kwargs["alpha"] == 0.7
-    assert kwargs["size"] == 18
-    assert kwargs["drop_lines"] == "both"
-    assert kwargs["drop_line_alpha"] == 0.25
     ax.plot.assert_called_once()
     ax.set_aspect.assert_called_once_with("equal", adjustable="box")
     ax.grid.assert_not_called()
@@ -801,10 +792,7 @@ def test_plot_L_vs_Lambda_w_renders_invariant_chart():
 def test_plot_L_vs_Lambda_w_skips_reference_line_on_nonfinite():
     fig = MagicMock()
     ax = MagicMock()
-    with (
-        patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)),
-        patch("samplepath.plots.core.render_scatter_chart") as mock_scatter,
-    ):
+    with (patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)),):
         core.plot_L_vs_Lambda_w(
             [_t("2024-01-01")],
             np.array([np.nan]),
@@ -814,7 +802,221 @@ def test_plot_L_vs_Lambda_w_skips_reference_line_on_nonfinite():
             out_path="out.png",
         )
     ax.plot.assert_not_called()
-    mock_scatter.assert_called_once()
+    ax.scatter.assert_not_called()
+
+
+def test_plot_L_vs_Lambda_w_event_marks_colors_arrivals_purple():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+        core.plot_L_vs_Lambda_w(
+            times,
+            np.array([1.0, 2.0]),
+            np.array([1.0, 1.0]),
+            np.array([1.0, 1.0]),
+            arrival_times=[times[0]],
+            departure_times=[times[1]],
+            with_event_marks=True,
+            title="L(T) vs Λ(T).w(T)",
+            out_path="out.png",
+        )
+    colors = ax.scatter.call_args.kwargs["color"]
+    assert colors[0][:3] == mcolors.to_rgba("purple")[:3]
+
+
+def test_plot_L_vs_Lambda_w_event_marks_colors_departures_green():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+        core.plot_L_vs_Lambda_w(
+            times,
+            np.array([1.0, 2.0]),
+            np.array([1.0, 1.0]),
+            np.array([1.0, 1.0]),
+            arrival_times=[times[0]],
+            departure_times=[times[1]],
+            with_event_marks=True,
+            title="L(T) vs Λ(T).w(T)",
+            out_path="out.png",
+        )
+    colors = ax.scatter.call_args.kwargs["color"]
+    assert colors[1][:3] == mcolors.to_rgba("green")[:3]
+
+
+def test_plot_L_vs_Lambda_w_event_marks_alpha_increases():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+        core.plot_L_vs_Lambda_w(
+            times,
+            np.array([1.0, 2.0]),
+            np.array([1.0, 1.0]),
+            np.array([1.0, 1.0]),
+            arrival_times=[times[0]],
+            departure_times=[times[1]],
+            with_event_marks=True,
+            title="L(T) vs Λ(T).w(T)",
+            out_path="out.png",
+        )
+    colors = ax.scatter.call_args.kwargs["color"]
+    assert colors[0][3] < colors[1][3]
+
+
+def test_plot_L_vs_Lambda_w_event_marks_drop_lines_arrival_color():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+        core.plot_L_vs_Lambda_w(
+            times,
+            np.array([1.0, 2.0]),
+            np.array([1.0, 1.0]),
+            np.array([1.0, 1.0]),
+            arrival_times=[times[0]],
+            departure_times=[times[1]],
+            with_event_marks=True,
+            title="L(T) vs Λ(T).w(T)",
+            out_path="out.png",
+        )
+    colors = ax.vlines.call_args.kwargs["colors"]
+    assert colors[0] == mcolors.to_rgba("purple", alpha=0.25)
+
+
+def test_plot_L_vs_Lambda_w_event_marks_drop_lines_departure_color():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+        core.plot_L_vs_Lambda_w(
+            times,
+            np.array([1.0, 2.0]),
+            np.array([1.0, 1.0]),
+            np.array([1.0, 1.0]),
+            arrival_times=[times[0]],
+            departure_times=[times[1]],
+            with_event_marks=True,
+            title="L(T) vs Λ(T).w(T)",
+            out_path="out.png",
+        )
+    colors = ax.vlines.call_args.kwargs["colors"]
+    assert colors[1] == mcolors.to_rgba("green", alpha=0.25)
+
+
+def test_plot_L_vs_Lambda_w_event_marks_hlines_arrival_color():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+        core.plot_L_vs_Lambda_w(
+            times,
+            np.array([1.0, 2.0]),
+            np.array([1.0, 1.0]),
+            np.array([1.0, 1.0]),
+            arrival_times=[times[0]],
+            departure_times=[times[1]],
+            with_event_marks=True,
+            title="L(T) vs Λ(T).w(T)",
+            out_path="out.png",
+        )
+    colors = ax.hlines.call_args.kwargs["colors"]
+    assert colors[0] == mcolors.to_rgba("purple", alpha=0.25)
+
+
+def test_plot_L_vs_Lambda_w_event_marks_hlines_departure_color():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+        core.plot_L_vs_Lambda_w(
+            times,
+            np.array([1.0, 2.0]),
+            np.array([1.0, 1.0]),
+            np.array([1.0, 1.0]),
+            arrival_times=[times[0]],
+            departure_times=[times[1]],
+            with_event_marks=True,
+            title="L(T) vs Λ(T).w(T)",
+            out_path="out.png",
+        )
+    colors = ax.hlines.call_args.kwargs["colors"]
+    assert colors[1] == mcolors.to_rgba("green", alpha=0.25)
+
+
+def test_plot_L_vs_Lambda_w_event_marks_adds_legend():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+        core.plot_L_vs_Lambda_w(
+            times,
+            np.array([1.0, 2.0]),
+            np.array([1.0, 1.0]),
+            np.array([1.0, 1.0]),
+            arrival_times=[times[0]],
+            departure_times=[times[1]],
+            with_event_marks=True,
+            title="L(T) vs Λ(T).w(T)",
+            out_path="out.png",
+        )
+    ax.legend.assert_called_once()
+
+
+def test_plot_L_vs_Lambda_w_no_event_marks_alpha_increases():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+        core.plot_L_vs_Lambda_w(
+            times,
+            np.array([1.0, 2.0]),
+            np.array([1.0, 1.0]),
+            np.array([1.0, 1.0]),
+            with_event_marks=False,
+            title="L(T) vs Λ(T).w(T)",
+            out_path="out.png",
+        )
+    colors = ax.scatter.call_args.kwargs["color"]
+    assert colors[0][3] < colors[1][3]
+
+
+def test_plot_L_vs_Lambda_w_no_event_marks_has_no_legend():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+        core.plot_L_vs_Lambda_w(
+            times,
+            np.array([1.0, 2.0]),
+            np.array([1.0, 1.0]),
+            np.array([1.0, 1.0]),
+            with_event_marks=False,
+            title="L(T) vs Λ(T).w(T)",
+            out_path="out.png",
+        )
+    ax.legend.assert_not_called()
+
+
+def test_plot_L_vs_Lambda_w_departure_overrides_arrival_color():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+        core.plot_L_vs_Lambda_w(
+            times,
+            np.array([1.0]),
+            np.array([1.0]),
+            np.array([1.0]),
+            arrival_times=times,
+            departure_times=times,
+            with_event_marks=True,
+            title="L(T) vs Λ(T).w(T)",
+            out_path="out.png",
+        )
+    colors = ax.scatter.call_args.kwargs["color"]
+    assert colors[0][:3] == mcolors.to_rgba("green")[:3]
 
 
 def test_core_driver_calls_invariant_plot_under_core_dir():
@@ -842,6 +1044,9 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
         metrics.L,
         metrics.Lambda,
         metrics.w,
+        arrival_times=metrics.arrival_times,
+        departure_times=metrics.departure_times,
+        with_event_marks=False,
         title="L(T) vs Λ(T).w(T)",
         out_path=os.path.join(out_dir, "core/littles_law_invariant.png"),
         caption="Filters: test",
