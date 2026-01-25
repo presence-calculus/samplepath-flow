@@ -17,6 +17,7 @@ from samplepath.metrics import (
     compute_end_effect_series,
     compute_tracking_errors,
 )
+from samplepath.plots.core import render_CFD
 from samplepath.plots.helpers import (
     _clip_axis_to_percentile,
     add_caption,
@@ -357,12 +358,7 @@ def draw_arrival_departure_convergence_stack(
     fig, axes = plt.subplots(2, 1, figsize=(12, 6.5), sharex=True)
 
     # Panel 1: cumulative counts (step plots)
-    axes[0].step(times, arrivals_cum, where="post", label="A(t): cumulative arrivals")
-    axes[0].step(
-        times, departures_cum, where="post", label="D(t): cumulative departures"
-    )
-    axes[0].set_title("Cumulative Arrivals vs Cumulative Departures")
-    axes[0].set_ylabel("count")
+    render_CFD(axes[0], times, arrivals_cum, departures_cum)
     axes[0].legend(loc="best")
     format_date_axis(axes[0])
 

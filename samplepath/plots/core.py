@@ -28,6 +28,7 @@ from samplepath.plots.figure_context import (
     layout_context,
 )
 from samplepath.plots.helpers import (
+    ScatterOverlay,
     _clip_axis_to_percentile,
     add_caption,
     build_event_overlays,
@@ -166,24 +167,73 @@ def render_CFD(
     arrivals_cum: Sequence[float],
     departures_cum: Sequence[float],
     *,
+    arrival_times: Optional[List[pd.Timestamp]] = None,
+    departure_times: Optional[List[pd.Timestamp]] = None,
+    with_event_marks: bool = False,
     show_title: bool = True,
 ) -> None:
+    arrivals_overlay = None
+    departures_overlay = None
+    if with_event_marks:
+        if arrival_times is not None:
+            time_to_idx = {t: i for i, t in enumerate(times)}
+            arrival_x = [t for t in arrival_times if t in time_to_idx]
+            arrival_y = [float(arrivals_cum[time_to_idx[t]]) for t in arrival_x]
+            arrivals_overlay = [
+                ScatterOverlay(
+                    x=arrival_x,
+                    y=arrival_y,
+                    color="purple",
+                    label="Arrival",
+                    drop_lines=True,
+                )
+            ]
+        if departure_times is not None:
+            time_to_idx = {t: i for i, t in enumerate(times)}
+            departure_x = [t for t in departure_times if t in time_to_idx]
+            departure_y = [float(departures_cum[time_to_idx[t]]) for t in departure_x]
+            departures_overlay = [
+                ScatterOverlay(
+                    x=departure_x,
+                    y=departure_y,
+                    color="green",
+                    label="Departure",
+                    drop_lines=True,
+                )
+            ]
     render_step_chart(
         ax,
         times,
         arrivals_cum,
         label="A(t): cumulative arrivals",
-        color="tab:blue",
+        color="purple",
         fill=False,
+        overlays=arrivals_overlay,
     )
     render_step_chart(
         ax,
         times,
         departures_cum,
         label="D(t): cumulative departures",
-        color="tab:orange",
+        color="green",
         fill=False,
+        overlays=departures_overlay,
     )
+    arr = np.asarray(arrivals_cum, dtype=float)
+    dep = np.asarray(departures_cum, dtype=float)
+    mask = arr >= dep
+    if mask.any():
+        ax.fill_between(
+            times,
+            arr,
+            dep,
+            where=mask,
+            color="grey",
+            alpha=0.3,
+            step="post",
+            interpolate=True,
+            zorder=1,
+        )
     if show_title:
         ax.set_title("Cumulative Arrivals vs Cumulative Departures")
     ax.set_ylabel("count")
@@ -302,6 +352,9 @@ def plot_CFD(
     arrivals_cum: Sequence[float],
     departures_cum: Sequence[float],
     *,
+    arrival_times: Optional[List[pd.Timestamp]] = None,
+    departure_times: Optional[List[pd.Timestamp]] = None,
+    with_event_marks: bool = False,
     unit: str = "timestamp",
     caption: Optional[str] = None,
 ) -> None:
@@ -310,7 +363,15 @@ def plot_CFD(
         axes,
     ):
         ax = _first_axis(axes)
-        render_CFD(ax, times, arrivals_cum, departures_cum)
+        render_CFD(
+            ax,
+            times,
+            arrivals_cum,
+            departures_cum,
+            arrival_times=arrival_times,
+            departure_times=departure_times,
+            with_event_marks=with_event_marks,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -516,6 +577,9 @@ def plot_core_flow_metrics_charts(
         metrics.times,
         metrics.Arrivals,
         metrics.Departures,
+        arrival_times=metrics.arrival_times,
+        departure_times=metrics.departure_times,
+        with_event_marks=getattr(args, "with_event_marks", False),
         unit=unit,
         caption=caption,
     )

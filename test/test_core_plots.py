@@ -114,13 +114,21 @@ def test_render_A_sets_defaults():
     ax.set_ylabel.assert_called_once_with("A(T) [hrs·items]")
 
 
-def _render_cfd_with_mocks():
+def _render_cfd_with_mocks(with_event_marks: bool = False):
     ax = MagicMock()
     times = [_t("2024-01-01")]
     arrivals = np.array([1.0])
     departures = np.array([0.0])
     with patch("samplepath.plots.core.render_step_chart") as mock_step:
-        core.render_CFD(ax, times, arrivals, departures)
+        core.render_CFD(
+            ax,
+            times,
+            arrivals,
+            departures,
+            arrival_times=times,
+            departure_times=times,
+            with_event_marks=with_event_marks,
+        )
     return ax, mock_step
 
 
@@ -136,7 +144,7 @@ def test_render_CFD_arrivals_label():
 
 def test_render_CFD_arrivals_color():
     _, mock_step = _render_cfd_with_mocks()
-    assert mock_step.call_args_list[0].kwargs["color"] == "tab:blue"
+    assert mock_step.call_args_list[0].kwargs["color"] == "purple"
 
 
 def test_render_CFD_arrivals_fill_false():
@@ -151,12 +159,76 @@ def test_render_CFD_departures_label():
 
 def test_render_CFD_departures_color():
     _, mock_step = _render_cfd_with_mocks()
-    assert mock_step.call_args_list[1].kwargs["color"] == "tab:orange"
+    assert mock_step.call_args_list[1].kwargs["color"] == "green"
 
 
 def test_render_CFD_departures_fill_false():
     _, mock_step = _render_cfd_with_mocks()
     assert mock_step.call_args_list[1].kwargs["fill"] is False
+
+
+def test_render_CFD_arrivals_overlay_none_by_default():
+    _, mock_step = _render_cfd_with_mocks()
+    assert mock_step.call_args_list[0].kwargs["overlays"] is None
+
+
+def test_render_CFD_departures_overlay_none_by_default():
+    _, mock_step = _render_cfd_with_mocks()
+    assert mock_step.call_args_list[1].kwargs["overlays"] is None
+
+
+def test_render_CFD_arrivals_overlay_drop_lines_true():
+    _, mock_step = _render_cfd_with_mocks(with_event_marks=True)
+    overlay = mock_step.call_args_list[0].kwargs["overlays"][0]
+    assert overlay.drop_lines is True
+
+
+def test_render_CFD_departures_overlay_drop_lines_true():
+    _, mock_step = _render_cfd_with_mocks(with_event_marks=True)
+    overlay = mock_step.call_args_list[1].kwargs["overlays"][0]
+    assert overlay.drop_lines is True
+
+
+def test_render_CFD_arrivals_overlay_uses_arrival_times():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    arrivals = np.array([1.0, 2.0])
+    departures = np.array([0.0, 1.0])
+    arrival_times = [times[0]]
+    departure_times = [times[1]]
+    with patch("samplepath.plots.core.render_step_chart") as mock_step:
+        core.render_CFD(
+            ax,
+            times,
+            arrivals,
+            departures,
+            arrival_times=arrival_times,
+            departure_times=departure_times,
+            with_event_marks=True,
+        )
+    overlay = mock_step.call_args_list[0].kwargs["overlays"][0]
+    assert overlay.x == arrival_times
+
+
+def test_render_CFD_departures_overlay_uses_departure_times():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    arrivals = np.array([1.0, 2.0])
+    departures = np.array([0.0, 1.0])
+    arrival_times = [times[0]]
+    departure_times = [times[1]]
+    with patch("samplepath.plots.core.render_step_chart") as mock_step:
+        core.render_CFD(
+            ax,
+            times,
+            arrivals,
+            departures,
+            arrival_times=arrival_times,
+            departure_times=departure_times,
+            with_event_marks=True,
+        )
+    overlay = mock_step.call_args_list[1].kwargs["overlays"][0]
+    assert overlay.x == departure_times
 
 
 def test_render_CFD_sets_title():
@@ -172,6 +244,23 @@ def test_render_CFD_sets_ylabel():
 def test_render_CFD_sets_legend():
     ax, _ = _render_cfd_with_mocks()
     ax.legend.assert_called_once()
+
+
+def test_render_CFD_fills_between_when_arrivals_above_departures():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    arrivals = np.array([1.0, 2.0])
+    departures = np.array([0.0, 3.0])
+    with patch("samplepath.plots.core.render_step_chart"):
+        core.render_CFD(ax, times, arrivals, departures)
+    ax.fill_between.assert_called_once()
+    _, kwargs = ax.fill_between.call_args
+    assert kwargs["color"] == "grey"
+    assert kwargs["alpha"] == 0.3
+    assert kwargs["step"] == "post"
+    assert kwargs["interpolate"] is True
+    assert kwargs["zorder"] == 1
+    assert kwargs["where"].tolist() == [True, False]
 
 
 def test_plot_single_panel_calls_renderer():
@@ -273,6 +362,8 @@ def test_plot_single_panel_CFD_calls_renderer():
             [_t("2024-01-01")],
             np.array([1.0]),
             np.array([0.0]),
+            arrival_times=[_t("2024-01-01")],
+            departure_times=[_t("2024-01-01")],
         )
     mock_render.assert_called_once()
 
@@ -644,6 +735,30 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
     assert mock_plot.call_args.args[0] == os.path.join(
         out_dir, "core/cumulative_flow_diagram.png"
     )
+
+
+def test_core_driver_passes_event_marks_to_CFD():
+    metrics = _metrics_fixture()
+    out_dir = "/tmp/out"
+    args = SimpleNamespace(
+        lambda_pctl=None,
+        lambda_lower_pctl=None,
+        lambda_warmup=0.0,
+        with_event_marks=True,
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with (
+        patch("samplepath.plots.core.plot_core_stack"),
+        patch("samplepath.plots.core.plot_N"),
+        patch("samplepath.plots.core.plot_L"),
+        patch("samplepath.plots.core.plot_Lambda"),
+        patch("samplepath.plots.core.plot_w"),
+        patch("samplepath.plots.core.plot_A"),
+        patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
+        patch("samplepath.plots.core.plot_CFD") as mock_plot,
+    ):
+        core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
+    assert mock_plot.call_args.kwargs["with_event_marks"] is True
 
 
 def test_plot_L_vs_Lambda_w_renders_invariant_chart():

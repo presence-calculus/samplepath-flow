@@ -10,8 +10,13 @@ Spec: Currently the cumulative flow diagram is implemented as an inline panel in
 3. Wiring to pull it into the charts produced as part of the core flow metrics charts.
 4. Update to reuse this component in the divergence module.
 5. Drive it with tests.
+6. Add support for overlays in the CFD: The arrival step chart should use arrival times and the departure step chart should use departue times. This might need updates to logic of overlays in the core step chart drawing code.
+7. Add a fill in between the two lines of the CFD.
 
 Progress:
 - Added render_CFD and plot_CFD in core and wired into core flow metrics outputs.
 - Added CFD tests covering baseline visual properties and output wiring.
-Status: in progress
+- Convergence stack now reuses render_CFD with focused test coverage.
+- Added CFD overlays using explicit arrival/departure times and purple/green markers.
+- Added grey fill between arrivals and departures in CFD.
+Status: done
