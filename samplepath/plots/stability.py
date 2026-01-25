@@ -12,11 +12,11 @@ import pandas as pd
 
 from samplepath.filter import FilterResult
 from samplepath.metrics import FlowMetricsResult, compute_elementwise_empirical_metrics
+from samplepath.plots.core import render_N
 from samplepath.plots.helpers import (
     _clip_axis_to_percentile,
     add_caption,
     format_date_axis,
-    render_N_chart,
 )
 
 
@@ -153,7 +153,7 @@ def plot_rate_stability_charts(
 
     # Top: N(t) sample path (step plot)
     ax_top = axes[0]
-    render_N_chart(ax_top, times, N_raw)
+    render_N(ax_top, times, N_raw)
     format_date_axis(ax_top)
 
     # Bottom: WIP Growth Rate N(T)/T

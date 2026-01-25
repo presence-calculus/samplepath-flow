@@ -257,6 +257,97 @@ def render_line_chart(
             )
 
 
+def render_scatter_chart(
+    ax: Axes,
+    x_vals: Sequence[float],
+    y_vals: Sequence[float],
+    *,
+    label: Optional[str] = None,
+    color: str = "tab:blue",
+    alpha: float = 0.7,
+    size: float = 18,
+    overlays: Optional[List[ScatterOverlay]] = None,
+    drop_lines: str = "none",
+    drop_line_alpha: float = 0.25,
+    drop_line_color: Optional[str] = None,
+) -> None:
+    """Render a scatter chart to an existing axes.
+
+    Parameters
+    ----------
+    ax : Axes
+        Matplotlib axes to render to.
+    x_vals : Sequence[float]
+        X-coordinates.
+    y_vals : Sequence[float]
+        Y-coordinates.
+    label : optional str
+        Legend label for the scatter series.
+    color : str
+        Color for points.
+    alpha : float
+        Alpha for points.
+    size : float
+        Marker size.
+    overlays : optional List[ScatterOverlay]
+        Scatter series to overlay on the chart.
+    drop_lines : str
+        One of "none", "vertical", "both" to control base drop lines.
+    drop_line_alpha : float
+        Alpha for drop lines.
+    drop_line_color : optional str
+        Color for drop lines (defaults to point color).
+    """
+    ax.scatter(
+        x_vals,
+        y_vals,
+        s=size,
+        alpha=alpha,
+        color=color,
+        label=label,
+    )
+    if drop_lines in ("vertical", "both"):
+        ax.vlines(
+            x_vals,
+            0,
+            y_vals,
+            colors=drop_line_color or color,
+            linewidths=0.5,
+            alpha=drop_line_alpha,
+        )
+    if drop_lines == "both":
+        ax.hlines(
+            y_vals,
+            0,
+            x_vals,
+            colors=drop_line_color or color,
+            linewidths=0.5,
+            alpha=drop_line_alpha,
+        )
+    if overlays:
+        for i, overlay in enumerate(overlays):
+            if not overlay.x:
+                continue
+            if overlay.drop_lines:
+                ax.vlines(
+                    overlay.x,
+                    0,
+                    overlay.y,
+                    colors=overlay.color,
+                    linewidths=0.5,
+                    alpha=0.5,
+                    zorder=4 + i,
+                )
+            ax.scatter(
+                overlay.x,
+                overlay.y,
+                color=overlay.color,
+                s=2,
+                zorder=5 + i,
+                label=overlay.label,
+            )
+
+
 def render_lambda_chart(
     ax: Axes,
     times: Sequence[pd.Timestamp],

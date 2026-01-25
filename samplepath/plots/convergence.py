@@ -20,9 +20,82 @@ from samplepath.metrics import (
 from samplepath.plots.helpers import (
     _clip_axis_to_percentile,
     add_caption,
+    format_and_save,
     format_date_axis,
     init_fig_ax,
 )
+
+
+def plot_sojourn_time_scatter(args, df, filter_result, metrics, out_dir) -> str:
+    t_scatter_times: List[pd.Timestamp] = []
+    t_scatter_vals = np.array([])
+    if args.incomplete:
+        if len(metrics.times) > 0:
+            t_end = metrics.times[-1]
+            t_scatter_times = df["start_ts"].tolist()
+            t_scatter_vals = (
+                (t_end - df["start_ts"]).dt.total_seconds() / 3600.0
+            ).to_numpy()
+
+    else:
+        df_c = df[df["end_ts"].notna()].copy()
+        if not df_c.empty:
+            t_scatter_times = df_c["end_ts"].tolist()
+            t_scatter_vals = df_c["duration_hr"].to_numpy()
+
+    if len(t_scatter_times) == 0:
+        return []
+
+    if len(t_scatter_times) > 0:
+        ts_w_scatter = os.path.join(
+            out_dir, "convergence/panels/residence_time_sojourn_time_scatter.png"
+        )
+        label = "age" if args.incomplete else "sojourn time"
+        draw_line_chart_with_scatter(
+            metrics.times,
+            metrics.w,
+            f"Element {label} vs Average residence time",
+            f"Time [hrs]",
+            ts_w_scatter,
+            t_scatter_times,
+            t_scatter_vals,
+            scatter_label=f"element {label}",
+            caption=filter_result.label if filter_result else None,
+        )
+
+    return [ts_w_scatter]
+
+
+def draw_line_chart_with_scatter(
+    times: List[pd.Timestamp],
+    values: np.ndarray,
+    title: str,
+    ylabel: str,
+    out_path: str,
+    scatter_times: List[pd.Timestamp],
+    scatter_values: np.ndarray,
+    line_label: str = "Average Residence Time",
+    scatter_label: str = "element sojourn time",
+    unit: str = "timestamp",
+    caption: Optional[str] = None,
+) -> None:
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.plot(times, values, label=line_label)
+    if (
+        scatter_times is not None
+        and scatter_values is not None
+        and len(scatter_times) > 0
+    ):
+        ax.scatter(
+            scatter_times,
+            scatter_values,
+            s=16,
+            alpha=0.6,
+            marker="o",
+            label=scatter_label,
+        )
+
+    format_and_save(fig, ax, title, ylabel, unit, caption, out_path)
 
 
 def draw_residence_time_convergence_panel(
@@ -767,6 +840,9 @@ def plot_convergence_charts(
     written += plot_arrival_rate_convergence(
         args, filter_result, metrics, empirical_metrics, out_dir
     )
+
+    # soujourn time scatter plot
+    written += plot_sojourn_time_scatter(args, df, filter_result, metrics, out_dir)
 
     written += plot_residence_time_sojourn_time_coherence_charts(
         df, args, filter_result, metrics, out_dir
