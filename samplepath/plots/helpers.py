@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
 from dataclasses import dataclass
-from typing import List, Optional, Sequence, Tuple
+from typing import Any, List, Optional, Sequence, Tuple
 
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
@@ -47,6 +47,13 @@ def add_caption(fig: Figure, text: str) -> None:
         va="bottom",
         fontsize=9,
     )
+
+
+def resolve_caption(filter_result: Optional[Any]) -> Optional[str]:
+    """Build a caption string from a filter result-like object."""
+    if filter_result and getattr(filter_result, "label", None):
+        return getattr(filter_result, "display", None)
+    return "Filters: None"
 
 
 def format_date_axis(ax: Axes, unit: str = "timestamp") -> None:

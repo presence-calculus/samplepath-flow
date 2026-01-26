@@ -1,22 +1,23 @@
 ---
-ID: 11
-Task: Panel Classes
-Branch: panel-classes
+ID: 12
+Task: Plot API rewiring
+Branch: plot-api-rewiring
 ---
 
-Spec:
-We want to explore a new API pattern for core plotting:
-- Panels become classes with shared state (defaults + options).
-- Stacks remain functions (stateless layout orchestration).
+Spec: 00012-plot-api-rewiring
 
-We will defer an ADR until after a prototype and decision.
+Proposal
+- Add global ChartConfig derived from CLI "Chart Configuration" section.
+- Panel plot signature becomes: plot(df, chart_config, filter_result, metrics, out_dir).
+- Panel constructors retain per-panel overrides (titles, toggles).
+- render(...) remains explicit and data-focused.
 
-Phase 0 (prototype): refactor N(t) to a panel class and update call sites.
-Phase 1: migrate all call sites of render_N and remove render_N.
-Phase 2.x: migrate remaining core panels in order of appearance in core.py,
-one per commit (L, Lambda, w, H, CFD). Remove each wrapper after migration.
+Phase 0 (this task)
+- Add ChartConfig type and CLI->ChartConfig mapping at the plot entry.
+- Migrate NPanel.plot to the new signature.
+- Update NPanel call sites and tests.
 
-Status:
-- N, L, Lambda, w, H panel migrations committed.
-- CFD panel migration committed.
-- LLW panel migration in progress (core + tests).
+Clarifications
+- Provide ChartConfig.init_from_args(...) to allow future non-CLI sources.
+- ChartConfig should not carry unit; panels derive unit from metrics.freq.
+- Caption formatting should use a shared helper (panel-independent).

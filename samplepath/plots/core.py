@@ -21,6 +21,7 @@ import pandas as pd
 
 from samplepath.filter import FilterResult
 from samplepath.metrics import FlowMetricsResult, MetricDerivations
+from samplepath.plots.chart_config import ChartConfig
 from samplepath.plots.figure_context import (
     FigureDecorSpec,
     LayoutSpec,
@@ -37,6 +38,7 @@ from samplepath.plots.helpers import (
     render_line_chart,
     render_scatter_chart,
     render_step_chart,
+    resolve_caption,
 )
 
 
@@ -100,15 +102,16 @@ class NPanel:
 
     def plot(
         self,
-        out_path: str,
-        times: List[pd.Timestamp],
-        N_vals: Sequence[float],
-        *,
-        arrival_times: Optional[List[pd.Timestamp]] = None,
-        departure_times: Optional[List[pd.Timestamp]] = None,
-        unit: str = "timestamp",
-        caption: Optional[str] = None,
+        df: pd.DataFrame,
+        chart_config: ChartConfig,
+        filter_result: Optional[FilterResult],
+        metrics: FlowMetricsResult,
+        out_dir: str,
     ) -> None:
+        del df
+        out_path = os.path.join(out_dir, "core/sample_path_N.png")
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
         with figure_context(out_path, nrows=1, ncols=1, unit=unit, caption=caption) as (
             _,
             axes,
@@ -116,10 +119,10 @@ class NPanel:
             ax = _first_axis(axes)
             self.render(
                 ax,
-                times,
-                N_vals,
-                arrival_times=arrival_times,
-                departure_times=departure_times,
+                metrics.times,
+                metrics.N,
+                arrival_times=metrics.arrival_times,
+                departure_times=metrics.departure_times,
             )
 
 
@@ -710,18 +713,15 @@ def plot_core_stack(
 
 def plot_core_flow_metrics_charts(
     df: pd.DataFrame,
-    args,
+    chart_config: ChartConfig,
     filter_result: Optional[FilterResult],
     metrics: FlowMetricsResult,
     out_dir: str,
 ) -> List[str]:
-    del df
     core_panels_dir = os.path.join(out_dir, "core")
     unit = metrics.freq if metrics.freq else "timestamp"
-    caption = (
-        filter_result.display if filter_result and filter_result.label else "Filters: "
-    )
-    show_derivations = getattr(args, "show_derivations", False)
+    caption = resolve_caption(filter_result)
+    show_derivations = chart_config.show_derivations
 
     path_stack = os.path.join(out_dir, "sample_path_flow_metrics.png")
     plot_core_stack(
@@ -731,34 +731,26 @@ def plot_core_flow_metrics_charts(
         metrics.L,
         metrics.Lambda,
         metrics.w,
-        lambda_pctl_upper=args.lambda_pctl,
-        lambda_pctl_lower=args.lambda_lower_pctl,
-        lambda_warmup_hours=args.lambda_warmup,
+        lambda_pctl_upper=chart_config.lambda_pctl_upper,
+        lambda_pctl_lower=chart_config.lambda_pctl_lower,
+        lambda_warmup_hours=chart_config.lambda_warmup_hours,
         caption=caption,
         arrival_times=metrics.arrival_times,
         departure_times=metrics.departure_times,
-        with_event_marks=getattr(args, "with_event_marks", False),
+        with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
         unit=unit,
     )
 
     path_N = os.path.join(core_panels_dir, "sample_path_N.png")
     NPanel(
-        with_event_marks=getattr(args, "with_event_marks", False),
+        with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
-    ).plot(
-        path_N,
-        metrics.times,
-        metrics.N,
-        arrival_times=metrics.arrival_times,
-        departure_times=metrics.departure_times,
-        unit=unit,
-        caption=caption,
-    )
+    ).plot(df, chart_config, filter_result, metrics, out_dir)
 
     path_L = os.path.join(core_panels_dir, "time_average_N_L.png")
     LPanel(
-        with_event_marks=getattr(args, "with_event_marks", False),
+        with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
     ).plot(
         path_L,
@@ -772,12 +764,12 @@ def plot_core_flow_metrics_charts(
 
     path_Lam = os.path.join(core_panels_dir, "cumulative_arrival_rate_Lambda.png")
     LambdaPanel(
-        with_event_marks=getattr(args, "with_event_marks", False),
+        with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
         clip_opts=ClipOptions(
-            pctl_upper=args.lambda_pctl,
-            pctl_lower=args.lambda_lower_pctl,
-            warmup_hours=args.lambda_warmup,
+            pctl_upper=chart_config.lambda_pctl_upper,
+            pctl_lower=chart_config.lambda_pctl_lower,
+            warmup_hours=chart_config.lambda_warmup_hours,
         ),
     ).plot(
         path_Lam,
@@ -790,7 +782,7 @@ def plot_core_flow_metrics_charts(
 
     path_w = os.path.join(core_panels_dir, "average_residence_time_w.png")
     WPanel(
-        with_event_marks=getattr(args, "with_event_marks", False),
+        with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
     ).plot(
         path_w,
@@ -813,7 +805,7 @@ def plot_core_flow_metrics_charts(
 
     path_CFD = os.path.join(core_panels_dir, "cumulative_flow_diagram.png")
     CFDPanel(
-        with_event_marks=getattr(args, "with_event_marks", False),
+        with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
     ).plot(
         path_CFD,
@@ -828,7 +820,7 @@ def plot_core_flow_metrics_charts(
 
     path_invariant = os.path.join(core_panels_dir, "littles_law_invariant.png")
     LLWPanel(
-        with_event_marks=getattr(args, "with_event_marks", False),
+        with_event_marks=chart_config.with_event_marks,
         title="L(T) vs Λ(T).w(T)",
     ).plot(
         path_invariant,

@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 
 from samplepath.plots import core
+from samplepath.plots.chart_config import ChartConfig
 from samplepath.plots.core import ClipOptions
 
 
@@ -467,12 +468,16 @@ def test_plot_single_panel_calls_renderer():
 
     with (
         patch("samplepath.plots.core.figure_context", side_effect=fake_context),
-        patch("samplepath.plots.core.NPanel.plot") as mock_plot,
+        patch("samplepath.plots.core.NPanel.render") as mock_render,
     ):
         core.NPanel(with_event_marks=True).plot(
-            "out.png", [_t("2024-01-01")], np.array([1.0])
+            None,
+            ChartConfig(with_event_marks=True),
+            SimpleNamespace(display="Filters: test", label="test"),
+            _metrics_fixture(),
+            "/tmp/out",
         )
-    mock_plot.assert_called_once()
+    mock_render.assert_called_once()
 
 
 def test_plot_single_panel_L_calls_renderer():
@@ -738,6 +743,7 @@ def test_core_driver_returns_expected_paths():
     metrics = _metrics_fixture()
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
+    chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     expected = [
         os.path.join(out_dir, "core/sample_path_N.png"),
@@ -760,7 +766,7 @@ def test_core_driver_returns_expected_paths():
         patch("samplepath.plots.core.LLWPanel.plot") as mock_plot_llw,
     ):
         written = core.plot_core_flow_metrics_charts(
-            None, args, filter_result, metrics, out_dir
+            None, chart_config, filter_result, metrics, out_dir
         )
     assert written == expected
     mock_plot_N.assert_called_once()
@@ -781,6 +787,7 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
         lambda_warmup=1.5,
         with_event_marks=True,
     )
+    chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack") as mock_stack,
@@ -792,7 +799,9 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot_CFD,
         patch("samplepath.plots.core.LLWPanel.plot"),
     ):
-        core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
+        core.plot_core_flow_metrics_charts(
+            None, chart_config, filter_result, metrics, out_dir
+        )
     mock_stack.assert_called_once_with(
         os.path.join(out_dir, "sample_path_flow_metrics.png"),
         metrics.times,
@@ -827,6 +836,7 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w():
         lambda_warmup=0.5,
         with_event_marks=True,
     )
+    chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
@@ -838,7 +848,9 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w():
         patch("samplepath.plots.core.LambdaPanel") as mock_lam_cls,
         patch("samplepath.plots.core.WPanel") as mock_w_cls,
     ):
-        core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
+        core.plot_core_flow_metrics_charts(
+            None, chart_config, filter_result, metrics, out_dir
+        )
     assert mock_lam_cls.call_args.kwargs["with_event_marks"] is True
     assert mock_w_cls.call_args.kwargs["with_event_marks"] is True
     assert mock_cfd_cls.call_args.kwargs["with_event_marks"] is True
@@ -857,6 +869,7 @@ def test_core_driver_passes_show_derivations_to_CFD():
         lambda_warmup=0.5,
         show_derivations=True,
     )
+    chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
@@ -868,7 +881,9 @@ def test_core_driver_passes_show_derivations_to_CFD():
         patch("samplepath.plots.core.LLWPanel.plot"),
         patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
     ):
-        core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
+        core.plot_core_flow_metrics_charts(
+            None, chart_config, filter_result, metrics, out_dir
+        )
     assert mock_cfd_cls.call_args.kwargs["show_derivations"] is True
     mock_plot_N.assert_called_once()
     mock_plot_L.assert_called_once()
@@ -881,6 +896,7 @@ def test_core_driver_uses_metrics_freq_for_unit():
     metrics = _metrics_fixture(freq="W")
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
+    chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
@@ -895,15 +911,16 @@ def test_core_driver_uses_metrics_freq_for_unit():
             patch("samplepath.plots.core.LLWPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
-                None, args, filter_result, metrics, out_dir
+                None, chart_config, filter_result, metrics, out_dir
             )
-    assert mock_plot.call_args.kwargs["unit"] == "W"
+    assert mock_plot.call_args.args[1] == chart_config
 
 
 def test_core_driver_falls_back_to_timestamp_unit():
     metrics = _metrics_fixture(freq=None)
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
+    chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
@@ -918,15 +935,56 @@ def test_core_driver_falls_back_to_timestamp_unit():
             patch("samplepath.plots.core.LLWPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
-                None, args, filter_result, metrics, out_dir
+                None, chart_config, filter_result, metrics, out_dir
             )
     assert mock_plot.call_args.kwargs["unit"] == "timestamp"
+
+
+def test_NPanel_plot_uses_metrics_freq_for_unit():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture(freq="W")
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax
+
+    with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
+        core.NPanel().plot(
+            None,
+            ChartConfig(),
+            SimpleNamespace(display="Filters: test", label="test"),
+            metrics,
+            "/tmp/out",
+        )
+    assert ctx.call_args.kwargs["unit"] == "W"
+
+
+def test_NPanel_plot_falls_back_to_timestamp_unit():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture(freq=None)
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax
+
+    with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
+        core.NPanel().plot(
+            None,
+            ChartConfig(),
+            SimpleNamespace(display="Filters: test", label="test"),
+            metrics,
+            "/tmp/out",
+        )
+    assert ctx.call_args.kwargs["unit"] == "timestamp"
 
 
 def test_core_driver_uses_filter_display_caption():
     metrics = _metrics_fixture()
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
+    chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
@@ -941,7 +999,7 @@ def test_core_driver_uses_filter_display_caption():
             patch("samplepath.plots.core.LLWPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
-                None, args, filter_result, metrics, out_dir
+                None, chart_config, filter_result, metrics, out_dir
             )
     assert mock_plot.call_args.kwargs["caption"] == "Filters: test"
 
@@ -950,6 +1008,7 @@ def test_core_driver_calls_plot_H_under_core_dir():
     metrics = _metrics_fixture()
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
+    chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
@@ -964,7 +1023,7 @@ def test_core_driver_calls_plot_H_under_core_dir():
             patch("samplepath.plots.core.LLWPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
-                None, args, filter_result, metrics, out_dir
+                None, chart_config, filter_result, metrics, out_dir
             )
     assert mock_plot.call_args.args[0] == os.path.join(
         out_dir, "core/cumulative_presence_mass_H.png"
@@ -974,6 +1033,7 @@ def test_core_driver_calls_plot_H_under_core_dir():
 def test_core_driver_calls_plot_CFD_under_core_dir():
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=None, lambda_lower_pctl=None, lambda_warmup=0.0)
+    chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     metrics = SimpleNamespace(
         times=[_t("2024-01-01")],
@@ -998,7 +1058,9 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
         patch("samplepath.plots.core.LLWPanel.plot"),
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot,
     ):
-        core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
+        core.plot_core_flow_metrics_charts(
+            None, chart_config, filter_result, metrics, out_dir
+        )
     assert mock_plot.call_args.args[0] == os.path.join(
         out_dir, "core/cumulative_flow_diagram.png"
     )
@@ -1013,6 +1075,7 @@ def test_core_driver_passes_event_marks_to_CFD():
         lambda_warmup=0.0,
         with_event_marks=True,
     )
+    chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
@@ -1024,7 +1087,9 @@ def test_core_driver_passes_event_marks_to_CFD():
         patch("samplepath.plots.core.LLWPanel"),
         patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
     ):
-        core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
+        core.plot_core_flow_metrics_charts(
+            None, chart_config, filter_result, metrics, out_dir
+        )
     assert mock_cfd_cls.call_args.kwargs["with_event_marks"] is True
 
 
@@ -1265,6 +1330,7 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
     metrics = _metrics_fixture()
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
+    chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
@@ -1279,7 +1345,7 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
             patch("samplepath.plots.core.CFDPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
-                None, args, filter_result, metrics, out_dir
+                None, chart_config, filter_result, metrics, out_dir
             )
     mock_panel.assert_called_once_with(
         with_event_marks=False,
@@ -1301,6 +1367,7 @@ def test_core_driver_omits_caption_when_label_empty():
     metrics = _metrics_fixture()
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
+    chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: ", label="")
     with (
         patch("samplepath.plots.core.plot_core_stack") as mock_stack,
@@ -1312,5 +1379,7 @@ def test_core_driver_omits_caption_when_label_empty():
         patch("samplepath.plots.core.CFDPanel.plot"),
         patch("samplepath.plots.core.LLWPanel.plot"),
     ):
-        core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
-    assert mock_stack.call_args.kwargs["caption"] == "Filters: "
+        core.plot_core_flow_metrics_charts(
+            None, chart_config, filter_result, metrics, out_dir
+        )
+    assert mock_stack.call_args.kwargs["caption"] == "Filters: None"

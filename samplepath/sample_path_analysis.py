@@ -29,13 +29,17 @@ from .plots import (
     plot_misc_charts,
     plot_stability_charts,
 )
+from .plots.chart_config import ChartConfig
 from .point_process import to_arrival_departure_process
 
 
 def produce_all_charts(df, args, filter_result, metrics, empirical_metrics, out_dir):
     written: List[str] = []
     # create plots
-    written += plot_core_flow_metrics_charts(df, args, filter_result, metrics, out_dir)
+    chart_config = ChartConfig.init_from_args(args)
+    written += plot_core_flow_metrics_charts(
+        df, chart_config, filter_result, metrics, out_dir
+    )
     written += plot_convergence_charts(
         df, args, filter_result, metrics, empirical_metrics, out_dir
     )
