@@ -37,7 +37,7 @@ Introduce a three-layer structure with consistent naming (with review updates):
 - `render_L(ax, times, L_vals, *, arrival_times=None, departure_times=None, with_event_marks=False, show_title=True)`
 - `render_Lambda(ax, times, Lam_vals, *, clip_opts: ClipOptions | None = None, show_title=True)`
 - `render_w(ax, times, w_vals, *, show_title=True)`
-- `render_A(ax, times, A_vals, *, show_title=True)`
+- `render_H(ax, times, H_vals, *, show_title=True)`
 
 Views:
 - Build overlays from explicit arrival/departure times when requested; map event x-values to series y-values.
@@ -46,13 +46,13 @@ Views:
 - Avoid figure creation or saving; minimal x-axis formatting (left to layouts).
 
 **Layer 3: Layouts/Entrypoints (`layouts.py`)**
-- Standalone: `plot_N`, `plot_L`, `plot_Lambda`, `plot_w`, `plot_A` (create fig/ax, call view, format/save).
+- Standalone: `plot_N`, `plot_L`, `plot_Lambda`, `plot_w`, `plot_H` (create fig/ax, call view, format/save).
 - Composite: `plot_core_stack` (orchestrates N, L, Λ, w panels; shared x-axis formatting, captions).
 - Only call Layer 2 views; no direct primitive calls.
 
 ### Naming rules
 - Primitives: `render_*` (step/line/lambda/overlays), `build_event_overlays`.
-- Views: `render_N`, `render_L`, `render_Lambda`, `render_w`, `render_A`.
+- Views: `render_N`, `render_L`, `render_Lambda`, `render_w`, `render_H`.
 - Layout/entrypoints: `plot_*` for standalones and `plot_core_stack` for composites.
 - No other `draw_*`/`render_*` variants; composites do not call primitives directly.
 
@@ -80,8 +80,8 @@ See `decisions/diagrams/003.1-plot-call-chain-proposed.md` for a visual call cha
 
 1. Create module structure: `primitives.py`, `charts.py`, `layouts.py`, shared `helpers.py` (types/utilities).
 2. Move/refactor primitives to `primitives.py`: `render_step`, `render_line`, `render_lambda`, `render_overlays`; keep `build_event_overlays`.
-3. Implement chart views in `charts.py`: `render_N`, `render_L`, `render_Lambda` (using `ClipOptions`), `render_w`, `render_A`.
-4. Implement layouts in `layouts.py`: `plot_N`, `plot_L`, `plot_Lambda`, `plot_w`, `plot_A`, `plot_core_stack` (and any variants), delegating only to views.
+3. Implement chart views in `charts.py`: `render_N`, `render_L`, `render_Lambda` (using `ClipOptions`), `render_w`, `render_H`.
+4. Implement layouts in `layouts.py`: `plot_N`, `plot_L`, `plot_Lambda`, `plot_w`, `plot_H`, `plot_core_stack` (and any variants), delegating only to views.
 5. Update callers (`core.py`, `stability.py`, `convergence.py`, etc.) to use the new entrypoints; remove or deprecate old `draw_*`/`render_*` variants.
 6. Update/add tests to target each layer: primitives (call args), views (overlay/color/title/clipping decisions), layouts (delegation and shared formatting).
 7. Keep Matplotlib implementation; backend-agnostic `ChartSpec`/`RenderBackend` remains future work (post-refactor).
@@ -103,7 +103,7 @@ ADR-002’s current state introduced centralized recipes but still mixed names a
 | `render_LT_chart` | `render_L` | charts.py |
 | (new) | `render_Lambda` | charts.py |
 | (new) | `render_w` | charts.py |
-| (new) | `render_A` | charts.py |
+| (new) | `render_H` | charts.py |
 | `draw_N_chart` | `plot_N` | layouts.py |
 | `draw_LT_chart` | `plot_L` | layouts.py |
 | `draw_four_panel_column` | `plot_core_stack` | layouts.py |
@@ -114,6 +114,6 @@ ADR-002’s current state introduced centralized recipes but still mixed names a
 | Layer | Module | Functions | Responsibility |
 |-------|--------|-----------|----------------|
 | 1. Primitives | `primitives.py` | `render_step`, `render_line`, `render_lambda`, `render_overlays`, `build_event_overlays` | Draw series + overlays on axes |
-| 2. Charts | `charts.py` | `render_N`, `render_L`, `render_Lambda`, `render_w`, `render_A` | Complete chart definition (title, ylabel, colors, overlay logic) |
-| 3. Layouts | `layouts.py` | `plot_N`, `plot_L`, `plot_Lambda`, `plot_w`, `plot_A`, `plot_core_stack` | Create figure, call charts, format axes, save |
+| 2. Charts | `charts.py` | `render_N`, `render_L`, `render_Lambda`, `render_w`, `render_H` | Complete chart definition (title, ylabel, colors, overlay logic) |
+| 3. Layouts | `layouts.py` | `plot_N`, `plot_L`, `plot_Lambda`, `plot_w`, `plot_H`, `plot_core_stack` | Create figure, call charts, format axes, save |
 | Shared | `helpers.py` (or `common.py`) | `ClipOptions`, `ScatterOverlay`, `format_date_axis` | Data types and utilities |

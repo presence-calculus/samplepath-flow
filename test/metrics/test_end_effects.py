@@ -18,7 +18,7 @@ def _t(s: str) -> pd.Timestamp:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Fixtures: one simple 2h item; and shared arrays for A_vals, W_star
+# Fixtures: one simple 2h item; and shared arrays for H_vals, W_star
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
@@ -50,10 +50,10 @@ def events_one_item(df_one_item):
 
 
 @pytest.fixture
-def A_vals(events_one_item, times_three):
-    # Use the module’s sampler to produce A aligned to times
-    _, _, _, _, _, A, _, _ = compute_sample_path_metrics(events_one_item, times_three)
-    return A
+def H_vals(events_one_item, times_three):
+    # Use the module’s sampler to produce H aligned to times
+    _, _, _, _, _, H, _, _ = compute_sample_path_metrics(events_one_item, times_three)
+    return H
 
 
 @pytest.fixture
@@ -67,45 +67,45 @@ def W_star_series(df_one_item, times_three):
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
-def test_shapes_match_times(df_one_item, times_three, A_vals, W_star_series):
-    rA, rB, rho = compute_end_effect_series(
-        df_one_item, times_three, A_vals, W_star_series
+def test_shapes_match_times(df_one_item, times_three, H_vals, W_star_series):
+    rH, rB, rho = compute_end_effect_series(
+        df_one_item, times_three, H_vals, W_star_series
     )
-    assert rA.shape == rB.shape == rho.shape == (len(times_three),)
+    assert rH.shape == rB.shape == rho.shape == (len(times_three),)
 
 
 def test_start_index_has_nans_when_elapsed_zero(
-    df_one_item, times_three, A_vals, W_star_series
+    df_one_item, times_three, H_vals, W_star_series
 ):
-    rA, rB, rho = compute_end_effect_series(
-        df_one_item, times_three, A_vals, W_star_series
+    rH, rB, rho = compute_end_effect_series(
+        df_one_item, times_three, H_vals, W_star_series
     )
-    assert np.isnan(rA[0]) and np.isnan(rB[0]) and np.isnan(rho[0])
+    assert np.isnan(rH[0]) and np.isnan(rB[0]) and np.isnan(rho[0])
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# rA(T): end-effect share of area
+# rH(T): end-effect share of presence mass
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
-def test_rA_is_one_before_first_completion(
-    df_one_item, times_three, A_vals, W_star_series
+def test_rH_is_one_before_first_completion(
+    df_one_item, times_three, H_vals, W_star_series
 ):
-    # At t_mid: A_full=0 (no fully contained items), A_T>0 → rA = 1
-    rA, _, _ = compute_end_effect_series(
-        df_one_item, times_three, A_vals, W_star_series
+    # At t_mid: H_full=0 (no fully contained items), H_T>0 → rH = 1
+    rH, _, _ = compute_end_effect_series(
+        df_one_item, times_three, H_vals, W_star_series
     )
-    assert np.isclose(rA[1], 1.0)
+    assert np.isclose(rH[1], 1.0)
 
 
-def test_rA_is_zero_when_window_contains_only_full_items(
-    df_one_item, times_three, A_vals, W_star_series
+def test_rH_is_zero_when_window_contains_only_full_items(
+    df_one_item, times_three, H_vals, W_star_series
 ):
-    # At t1: the only item is fully contained → E=0 → rA=0
-    rA, _, _ = compute_end_effect_series(
-        df_one_item, times_three, A_vals, W_star_series
+    # At t1: the only item is fully contained → E=0 → rH=0
+    rH, _, _ = compute_end_effect_series(
+        df_one_item, times_three, H_vals, W_star_series
     )
-    assert np.isclose(rA[2], 0.0)
+    assert np.isclose(rH[2], 0.0)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -114,19 +114,19 @@ def test_rA_is_zero_when_window_contains_only_full_items(
 
 
 def test_rB_is_one_while_item_is_incomplete(
-    df_one_item, times_three, A_vals, W_star_series
+    df_one_item, times_three, H_vals, W_star_series
 ):
     # At t_mid: total_started=1, incomplete_by_t=1 → rB=1
     _, rB, _ = compute_end_effect_series(
-        df_one_item, times_three, A_vals, W_star_series
+        df_one_item, times_three, H_vals, W_star_series
     )
     assert np.isclose(rB[1], 1.0)
 
 
-def test_rB_is_zero_after_completion(df_one_item, times_three, A_vals, W_star_series):
+def test_rB_is_zero_after_completion(df_one_item, times_three, H_vals, W_star_series):
     # At t1: total_started=1, incomplete_by_t=0 → rB=0
     _, rB, _ = compute_end_effect_series(
-        df_one_item, times_three, A_vals, W_star_series
+        df_one_item, times_three, H_vals, W_star_series
     )
     assert np.isclose(rB[2], 0.0)
 
@@ -136,20 +136,20 @@ def test_rB_is_zero_after_completion(df_one_item, times_three, A_vals, W_star_se
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
-def test_rho_nan_before_any_completion(df_one_item, times_three, A_vals, W_star_series):
+def test_rho_nan_before_any_completion(df_one_item, times_three, H_vals, W_star_series):
     # W*(t_mid) is NaN (no completions yet) → rho is NaN
     _, _, rho = compute_end_effect_series(
-        df_one_item, times_three, A_vals, W_star_series
+        df_one_item, times_three, H_vals, W_star_series
     )
     assert np.isnan(rho[1])
 
 
 def test_rho_equals_elapsed_over_mean_duration_at_completion(
-    df_one_item, times_three, A_vals, W_star_series
+    df_one_item, times_three, H_vals, W_star_series
 ):
     # At t1: elapsed=2h, W*(t1)=2h → rho=1
     _, _, rho = compute_end_effect_series(
-        df_one_item, times_three, A_vals, W_star_series
+        df_one_item, times_three, H_vals, W_star_series
     )
     assert np.isclose(rho[2], 1.0)
 
@@ -160,5 +160,5 @@ def test_rho_equals_elapsed_over_mean_duration_at_completion(
 
 
 def test_empty_times_return_empty_arrays(df_one_item):
-    rA, rB, rho = compute_end_effect_series(df_one_item, [], np.array([]), np.array([]))
-    assert rA.size == 0 and rB.size == 0 and rho.size == 0
+    rH, rB, rho = compute_end_effect_series(df_one_item, [], np.array([]), np.array([]))
+    assert rH.size == 0 and rB.size == 0 and rho.size == 0

@@ -18,7 +18,7 @@ flowchart TD
         render_L
         render_Lambda
         render_w
-        render_A
+        render_H
     end
 
     %% Standalone layouts
@@ -26,7 +26,7 @@ flowchart TD
     plot_L --> render_L
     plot_Lambda --> render_Lambda
     plot_w --> render_w
-    plot_A --> render_A
+    plot_H --> render_H
 
     %% Overlay builder
     render_N -->|optional overlays| build_event_overlays

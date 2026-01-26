@@ -28,7 +28,7 @@ def draw_five_panel_column(
     L_vals: np.ndarray,
     Lam_vals: np.ndarray,
     w_vals: np.ndarray,
-    A_vals: np.ndarray,
+    H_vals: np.ndarray,
     title: str,
     out_path: str,
     scatter_times: Optional[List[pd.Timestamp]] = None,
@@ -41,7 +41,7 @@ def draw_five_panel_column(
     departure_times: Optional[List[pd.Timestamp]] = None,
     with_event_marks: bool = False,
 ) -> None:
-    """Draw a 5-panel vertical stack: N(t), L(T), Λ(T), w(T), A(T)."""
+    """Draw a 5-panel vertical stack: N(t), L(T), Λ(T), w(T), H(T)."""
     fig, axes = plt.subplots(5, 1, figsize=(12, 14), sharex=True)
 
     render_N_chart(
@@ -93,9 +93,9 @@ def draw_five_panel_column(
     axes[3].set_ylabel("w(T) [hrs]")
     axes[3].legend()
 
-    render_line_chart(axes[4], times, A_vals, label="A(T) [hrs·items]")
-    axes[4].set_title("A(T) — cumulative area ∫N(t)dt")
-    axes[4].set_ylabel("A(T) [hrs·items]")
+    render_line_chart(axes[4], times, H_vals, label="H(T) [hrs·items]")
+    axes[4].set_title("H(T) — Cumulative Presence Mass ∫N(t)dt")
+    axes[4].set_ylabel("H(T) [hrs·items]")
     axes[4].set_xlabel("Date")
     axes[4].legend()
 
@@ -217,15 +217,15 @@ def plot_five_column_stacks(df, args, filter_result, metrics, out_dir):
     t_scatter_vals = df["duration_hr"].to_numpy()
     written = []
 
-    col_ts5 = os.path.join(out_dir, "misc/timestamp_stack_with_A.png")
+    col_ts5 = os.path.join(out_dir, "misc/timestamp_stack_with_H.png")
     draw_five_panel_column(
         metrics.times,
         metrics.N,
         metrics.Lambda,
         metrics.Lambda,
         metrics.w,
-        metrics.A,
-        f"Finite-window metrics incl. A(T) (timestamp, {filter_result.label})",
+        metrics.H,
+        f"Finite-window metrics incl. H(T) (timestamp, {filter_result.label})",
         col_ts5,
         scatter_times=t_scatter_times,
         scatter_values=t_scatter_vals,

@@ -100,7 +100,7 @@ The input to the analysis is a sample path $N(t)$.
 
 There are four core functionals:
 
-- $H(T)$: the area under the sample path over $[0,T]$.
+- $H(T)$: the cumulative presence mass under the sample path over $[0,T]$.
 - $L(T)$: the time average of $N(t)$, defined as $L(T)=\frac{H(T)}{T}$.
 - $\Lambda(T)$: the cumulative arrival rate, defined as $\Lambda(T)=\frac{A(T)}{T}$.
 - $w(T)$: the average residence time, defined as $w(T)=\frac{H(T)}{A(T)}$.
@@ -198,6 +198,7 @@ Each panel in the main chart is also written under
 | `core/time_average_N_L.png`               | Line chart of `L(T)` = time-average of `N(t)` over `[0, T]`.                                                          | Tracks how average WIP over the observation window converges (or doesn’t). This is the “L” in Little’s Law, measured pathwise. |
 | `core/cumulative_arrival_rate_Lambda.png` | Line chart of `Λ(T)` (cumulative arrival rate `A(T)/(T−t₀)`), with optional percentile clipping and warmup exclusion. | Empirical arrival rate over time, with tools to ignore early transients and outliers.                                          |
 | `core/average_residence_time_w.png`       | Line chart of `w(T)` (average residence time over the window, in hours).                                              | Shows how the time items spend in the boundary evolves; long/fat tails and slow drainage show up as increasing `w(T)`.         |
+| `core/cumulative_presence_mass_H.png`     | Line chart of `H(T)` (cumulative presence mass over the window, in item-hours).                                       | Total presence mass accumulated by items in the system, used in `L(T)` and `w(T)` definitions.                                |
 | `core/littles_law_invariant.png`          | Scatter of `L(T)` (x-axis) vs `Λ(T)·w(T)` (y-axis) with `y=x` reference line, equal aspect ratio.                     | Pure Little’s Law invariant check: all finite points should lie near `y=x` if the metric calculations are consistent.          |
 
 Their detail descriptions follow.
@@ -219,16 +220,16 @@ This is a real time chart that reveals current congestion, bursts, and idle peri
 
 ![Sample Path](images/core/sample_path_N.png)
 
-### The area under the sample path
+### The cumulative presence mass
 
-A key quantity in sample path analysis is the *area under the sample path*. This is
+A key quantity in sample path analysis is the *cumulative presence mass*. This is
 calculated as the definite integral of the sample path curve over [0,T]
 
 $$
 H(T) = \int_0^T N(t) dt
 $$
 
-Since the area is a product of the number of items present over time, the units of H(T)
+Since the mass is a product of the number of items present over time, the units of H(T)
 are in item-time. In the language of the Presence Calculus, $H(T)$ is _cumulative presence_ function
 over the sample path $N(t)$.
 
@@ -242,7 +243,7 @@ _finite version of Little’s Law_.
 
 Time-average WIP:
 
-`L(T)` is the time average of the area under the sample path. May also be viewed as the
+`L(T)` is the time average of the cumulative presence mass. May also be viewed as the
 rate at which the area H(T) grows.
 
 Its units are in items.
@@ -430,7 +431,7 @@ ______________________________________________________________________
 | File                                                        | What it shows                                                                                                                                            | What it means                                                                                                                                                                         |
 | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `advanced/residence_convergence_errors.png`                 | Three-row stack: (1) `w(T)` vs `W*(t)` (dynamic); (2) `Λ(T)` vs `λ*(t)` (dynamic); (3) error magnitudes `e_W(T)` and `e_Λ(T)` with optional ε threshold. | Tracks *how* coherence is approached or violated, with explicit error terms for residence time and arrival rate over time.                                                            |
-| `advanced/residence_time_convergence_errors_endeffects.png` | Four-row stack: same as above plus an end-effects panel with `r_A(T)` (mass share), `r_B(T)` (boundary share), and `ρ(T)=T/W*(t)`.                       | Decomposes residual errors into end-effect contributions and time-scaling, making it clear when divergence is driven by boundary conditions vs ongoing dynamics.                      |
+| `advanced/residence_time_convergence_errors_endeffects.png` | Four-row stack: same as above plus an end-effects panel with `r_H(T)` (mass share), `r_B(T)` (boundary share), and `ρ(T)=T/W*(t)`.                       | Decomposes residual errors into end-effect contributions and time-scaling, making it clear when divergence is driven by boundary conditions vs ongoing dynamics.                      |
 | `advanced/invariant_manifold3D_log.png`                     | 3D log–log–log manifold plot: `x = log Λ(T)`, `y = log w(T)`, `z = log L(T)`, plotting the sample-path trajectory on the plane `z = x + y`.              | Geometric view of Little’s Law as an invariant plane; lets you see whether the observed trajectory sticks to the manifold and how it moves across regimes in (rate, time, WIP) space. |
 
 Written under:
@@ -449,7 +450,7 @@ error magnitudes.
 
 ## `advanced/residence_time_convergence_errors_endeffects.png`
 
-Adds end-effects: `r_A(T)`, `r_B(T)`, `ρ(T)`.
+Adds end-effects: `r_H(T)`, `r_B(T)`, `ρ(T)`.
 
 ## `advanced/invariant_manifold3D_log.png`
 

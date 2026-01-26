@@ -4,7 +4,7 @@
 """
 Experimental core plotting module using figure_context.
 
-This module defines panel-level renderers (N, L, Λ, w, A) and a 4-panel stack
+This module defines panel-level renderers (N, L, Λ, w, H) and a 4-panel stack
 layout built on the new figure_context helper. It leaves existing plotting
 entrypoints untouched; wiring to sample_path_analysis can happen once this
 path is validated.
@@ -80,7 +80,7 @@ def render_N(
         overlays=overlays,
     )
     if show_title:
-        ax.set_title("N(t) — Sample Path")
+        ax.set_title("N(t) — Sample Path: A(T) - D(T)")
     ax.set_ylabel("N(t)")
     ax.legend()
 
@@ -103,7 +103,7 @@ def render_L(
     color = "grey" if overlays else "tab:blue"
     render_line_chart(ax, times, L_vals, label="L(T)", color=color, overlays=overlays)
     if show_title:
-        ax.set_title("L(T) — Time-Average of N(t)")
+        ax.set_title("L(T) — Time-Average of N(t): 1/T.∫N(t)dt")
     ax.set_ylabel("L(T)")
     ax.legend()
 
@@ -142,7 +142,7 @@ def render_Lambda(
             opts.warmup_hours,
         )
     if show_title:
-        ax.set_title("Λ(T) — Cumulative Arrival Rate")
+        ax.set_title("Λ(T) — Cumulative Arrival Rate: 1/T.A(T)")
     ax.set_ylabel("Λ(T) [1/hr]")
     ax.legend()
 
@@ -174,22 +174,22 @@ def render_w(
         ax, times, w_vals, label=label, color="tab:blue", overlays=overlays
     )
     if show_title:
-        ax.set_title("w(T) — Average Residence Time")
+        ax.set_title("w(T) — Average Residence Time: 1/A(T).∫N(t)dt")
     ax.set_ylabel(label)
     ax.legend()
 
 
-def render_A(
+def render_H(
     ax,
     times: Sequence[pd.Timestamp],
-    A_vals: Sequence[float],
+    H_vals: Sequence[float],
     *,
     show_title: bool = True,
 ) -> None:
-    render_line_chart(ax, times, A_vals, label="A(T) [hrs·items]", color="tab:blue")
+    render_line_chart(ax, times, H_vals, label="H(T) [hrs·items]", color="tab:blue")
     if show_title:
-        ax.set_title("A(T) — cumulative area ∫N(t)dt")
-    ax.set_ylabel("A(T) [hrs·items]")
+        ax.set_title("H(T) — Cumulative Presence Mass ∫N(t)dt")
+    ax.set_ylabel("H(T) [hrs·items]")
     ax.legend()
 
 
@@ -381,10 +381,10 @@ def plot_w(
         )
 
 
-def plot_A(
+def plot_H(
     out_path: str,
     times: List[pd.Timestamp],
-    A_vals: Sequence[float],
+    H_vals: Sequence[float],
     *,
     unit: str = "timestamp",
     caption: Optional[str] = None,
@@ -394,7 +394,7 @@ def plot_A(
         axes,
     ):
         ax = _first_axis(axes)
-        render_A(ax, times, A_vals)
+        render_H(ax, times, H_vals)
 
 
 def plot_CFD(
@@ -691,8 +691,8 @@ def plot_core_flow_metrics_charts(
         caption=caption,
     )
 
-    path_A = os.path.join(core_panels_dir, "cumulative_area_A.png")
-    plot_A(path_A, metrics.times, metrics.A, unit=unit, caption=caption)
+    path_H = os.path.join(core_panels_dir, "cumulative_presence_mass_H.png")
+    plot_H(path_H, metrics.times, metrics.H, unit=unit, caption=caption)
 
     path_CFD = os.path.join(core_panels_dir, "cumulative_flow_diagram.png")
     plot_CFD(
@@ -726,7 +726,7 @@ def plot_core_flow_metrics_charts(
         path_L,
         path_Lam,
         path_w,
-        path_A,
+        path_H,
         path_CFD,
         path_invariant,
         path_stack,

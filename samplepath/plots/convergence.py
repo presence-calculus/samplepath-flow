@@ -238,7 +238,7 @@ def draw_dynamic_convergence_panel_with_errors_and_endeffects(
     lam_star: np.ndarray,
     eW: np.ndarray,
     eLam: np.ndarray,
-    rA: np.ndarray,
+    rH: np.ndarray,
     rB: np.ndarray,
     rho: np.ndarray,
     epsilon: Optional[float],
@@ -286,7 +286,7 @@ def draw_dynamic_convergence_panel_with_errors_and_endeffects(
             0.0, max(ub, (epsilon if epsilon is not None else 0.0) * 1.5 + 1e-6)
         )
 
-    axes[3].plot(times, rA, label="r_A(T) = E/A", alpha=0.9)
+    axes[3].plot(times, rH, label="r_H(T) = E/H", alpha=0.9)
     axes[3].plot(times, rB, label="r_B(T) = B/starts", alpha=0.9)
     axes[3].set_title("End-effects: mass share and boundary share")
     axes[3].set_ylabel("share [0–1]")
@@ -581,8 +581,8 @@ def plot_residence_time_sojourn_time_coherence_charts(
         )
         written.append(ts_conv_dyn3)
     # --- End-effect diagnostics ---
-    rA_ts, rB_ts, rho_ts = (
-        compute_end_effect_series(df, metrics.times, metrics.A, W_star_ts)
+    rH_ts, rB_ts, rho_ts = (
+        compute_end_effect_series(df, metrics.times, metrics.H, W_star_ts)
         if len(metrics.times) > 0
         else (np.array([]), np.array([]), np.array([]))
     )
@@ -598,7 +598,7 @@ def plot_residence_time_sojourn_time_coherence_charts(
             lam_star_ts,
             eW_ts,
             eLam_ts,
-            rA_ts,
+            rH_ts,
             rB_ts,
             rho_ts,
             epsilon,

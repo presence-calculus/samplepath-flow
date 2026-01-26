@@ -165,6 +165,6 @@ Charts not yet consolidated (still using direct `render_line_chart` calls):
 
 - Λ(T) — has special percentile clipping, needs `render_Lambda_chart` recipe
 - w(T) — needs `render_w_chart` recipe
-- A(T) — needs `render_A_chart` recipe
+- H(T) — needs `render_H_chart` recipe
 
 These will follow the same pattern established by `render_N_chart` and `render_LT_chart`.

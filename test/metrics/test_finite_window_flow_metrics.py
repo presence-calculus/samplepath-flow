@@ -61,12 +61,12 @@ def test_event_mode_final_identity_L_equals_A_over_elapsed(simple_events):
     res = compute_finite_window_flow_metrics(simple_events, freq=None)
     t0, tn = res.times[0], res.times[-1]
     elapsed = (tn - t0).total_seconds() / 3600.0
-    assert np.isclose(res.L[-1], res.A[-1] / elapsed)
+    assert np.isclose(res.L[-1], res.H[-1] / elapsed)
 
 
 def test_event_mode_final_identity_w_equals_A_over_arrivals(simple_events):
     res = compute_finite_window_flow_metrics(simple_events, freq=None)
-    assert np.isclose(res.w[-1], res.A[-1] / res.Arrivals[-1])
+    assert np.isclose(res.w[-1], res.H[-1] / res.Arrivals[-1])
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -146,5 +146,5 @@ def test_empty_events_returns_empty_arrays():
     res = compute_finite_window_flow_metrics([], freq="day")
     assert all(
         getattr(res, name).size == 0
-        for name in ["L", "Lambda", "w", "N", "A", "Arrivals", "Departures"]
+        for name in ["L", "Lambda", "w", "N", "H", "Arrivals", "Departures"]
     )

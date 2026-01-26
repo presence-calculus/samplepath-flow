@@ -179,14 +179,14 @@ def test_render_w_overlays_departures_no_drop_lines():
     assert overlays[1].drop_lines is False
 
 
-def test_render_A_sets_defaults():
+def test_render_H_sets_defaults():
     ax = MagicMock()
     times = [_t("2024-01-01")]
     values = np.array([1.0])
     with patch("samplepath.plots.core.render_line_chart") as mock_line:
-        core.render_A(ax, times, values)
+        core.render_H(ax, times, values)
     mock_line.assert_called_once()
-    ax.set_ylabel.assert_called_once_with("A(T) [hrs·items]")
+    ax.set_ylabel.assert_called_once_with("H(T) [hrs·items]")
 
 
 def _render_cfd_with_mocks(with_event_marks: bool = False):
@@ -404,7 +404,7 @@ def test_plot_single_panel_w_calls_renderer():
     mock_render.assert_called_once()
 
 
-def test_plot_single_panel_A_calls_renderer():
+def test_plot_single_panel_H_calls_renderer():
     fig = MagicMock()
     ax = MagicMock()
 
@@ -414,9 +414,9 @@ def test_plot_single_panel_A_calls_renderer():
 
     with (
         patch("samplepath.plots.core.figure_context", side_effect=fake_context),
-        patch("samplepath.plots.core.render_A") as mock_render,
+        patch("samplepath.plots.core.render_H") as mock_render,
     ):
-        core.plot_A("out.png", [_t("2024-01-01")], np.array([5.0]))
+        core.plot_H("out.png", [_t("2024-01-01")], np.array([5.0]))
     mock_render.assert_called_once()
 
 
@@ -606,7 +606,7 @@ def _metrics_fixture(freq: str | None = "D"):
         L=np.array([2.0]),
         Lambda=np.array([3.0]),
         w=np.array([4.0]),
-        A=np.array([5.0]),
+        H=np.array([5.0]),
         Arrivals=np.array([1.0]),
         Departures=np.array([0.0]),
         arrival_times=[_t("2024-01-01")],
@@ -625,7 +625,7 @@ def test_core_driver_returns_expected_paths():
         os.path.join(out_dir, "core/time_average_N_L.png"),
         os.path.join(out_dir, "core/cumulative_arrival_rate_Lambda.png"),
         os.path.join(out_dir, "core/average_residence_time_w.png"),
-        os.path.join(out_dir, "core/cumulative_area_A.png"),
+        os.path.join(out_dir, "core/cumulative_presence_mass_H.png"),
         os.path.join(out_dir, "core/cumulative_flow_diagram.png"),
         os.path.join(out_dir, "core/littles_law_invariant.png"),
         os.path.join(out_dir, "sample_path_flow_metrics.png"),
@@ -636,7 +636,7 @@ def test_core_driver_returns_expected_paths():
         patch("samplepath.plots.core.plot_L"),
         patch("samplepath.plots.core.plot_Lambda"),
         patch("samplepath.plots.core.plot_w"),
-        patch("samplepath.plots.core.plot_A"),
+        patch("samplepath.plots.core.plot_H"),
         patch("samplepath.plots.core.plot_CFD"),
         patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
     ):
@@ -662,7 +662,7 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
         patch("samplepath.plots.core.plot_L"),
         patch("samplepath.plots.core.plot_Lambda"),
         patch("samplepath.plots.core.plot_w"),
-        patch("samplepath.plots.core.plot_A"),
+        patch("samplepath.plots.core.plot_H"),
         patch("samplepath.plots.core.plot_CFD"),
         patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
     ):
@@ -699,7 +699,7 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w():
         patch("samplepath.plots.core.plot_core_stack"),
         patch("samplepath.plots.core.plot_N"),
         patch("samplepath.plots.core.plot_L"),
-        patch("samplepath.plots.core.plot_A"),
+        patch("samplepath.plots.core.plot_H"),
         patch("samplepath.plots.core.plot_CFD"),
         patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
         patch("samplepath.plots.core.plot_Lambda") as mock_lam,
@@ -723,7 +723,7 @@ def test_core_driver_uses_metrics_freq_for_unit():
             patch("samplepath.plots.core.plot_L"),
             patch("samplepath.plots.core.plot_Lambda"),
             patch("samplepath.plots.core.plot_w"),
-            patch("samplepath.plots.core.plot_A"),
+            patch("samplepath.plots.core.plot_H"),
             patch("samplepath.plots.core.plot_CFD"),
             patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
         ):
@@ -746,7 +746,7 @@ def test_core_driver_falls_back_to_timestamp_unit():
             patch("samplepath.plots.core.plot_N"),
             patch("samplepath.plots.core.plot_L"),
             patch("samplepath.plots.core.plot_w"),
-            patch("samplepath.plots.core.plot_A"),
+            patch("samplepath.plots.core.plot_H"),
             patch("samplepath.plots.core.plot_CFD"),
             patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
         ):
@@ -769,7 +769,7 @@ def test_core_driver_uses_filter_display_caption():
             patch("samplepath.plots.core.plot_N"),
             patch("samplepath.plots.core.plot_L"),
             patch("samplepath.plots.core.plot_Lambda"),
-            patch("samplepath.plots.core.plot_A"),
+            patch("samplepath.plots.core.plot_H"),
             patch("samplepath.plots.core.plot_CFD"),
             patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
         ):
@@ -779,14 +779,14 @@ def test_core_driver_uses_filter_display_caption():
     assert mock_plot.call_args.kwargs["caption"] == "Filters: test"
 
 
-def test_core_driver_calls_plot_A_under_core_dir():
+def test_core_driver_calls_plot_H_under_core_dir():
     metrics = _metrics_fixture()
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_A") as mock_plot,
+        patch("samplepath.plots.core.plot_H") as mock_plot,
     ):
         with (
             patch("samplepath.plots.core.plot_N"),
@@ -800,7 +800,7 @@ def test_core_driver_calls_plot_A_under_core_dir():
                 None, args, filter_result, metrics, out_dir
             )
     assert mock_plot.call_args.args[0] == os.path.join(
-        out_dir, "core/cumulative_area_A.png"
+        out_dir, "core/cumulative_presence_mass_H.png"
     )
 
 
@@ -816,7 +816,7 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
         L=np.array([1.0]),
         Lambda=np.array([1.0]),
         w=np.array([1.0]),
-        A=np.array([1.0]),
+        H=np.array([1.0]),
         arrival_times=[],
         departure_times=[],
         freq=None,
@@ -827,7 +827,7 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
         patch("samplepath.plots.core.plot_L"),
         patch("samplepath.plots.core.plot_Lambda"),
         patch("samplepath.plots.core.plot_w"),
-        patch("samplepath.plots.core.plot_A"),
+        patch("samplepath.plots.core.plot_H"),
         patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
         patch("samplepath.plots.core.plot_CFD") as mock_plot,
     ):
@@ -853,7 +853,7 @@ def test_core_driver_passes_event_marks_to_CFD():
         patch("samplepath.plots.core.plot_L"),
         patch("samplepath.plots.core.plot_Lambda"),
         patch("samplepath.plots.core.plot_w"),
-        patch("samplepath.plots.core.plot_A"),
+        patch("samplepath.plots.core.plot_H"),
         patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
         patch("samplepath.plots.core.plot_CFD") as mock_plot,
     ):
@@ -1132,7 +1132,7 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
             patch("samplepath.plots.core.plot_L"),
             patch("samplepath.plots.core.plot_Lambda"),
             patch("samplepath.plots.core.plot_w"),
-            patch("samplepath.plots.core.plot_A"),
+            patch("samplepath.plots.core.plot_H"),
             patch("samplepath.plots.core.plot_CFD"),
         ):
             core.plot_core_flow_metrics_charts(
@@ -1163,7 +1163,7 @@ def test_core_driver_omits_caption_when_label_empty():
         patch("samplepath.plots.core.plot_L"),
         patch("samplepath.plots.core.plot_Lambda"),
         patch("samplepath.plots.core.plot_w"),
-        patch("samplepath.plots.core.plot_A"),
+        patch("samplepath.plots.core.plot_H"),
         patch("samplepath.plots.core.plot_CFD"),
         patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
     ):

@@ -26,7 +26,7 @@ class FlowMetricsResult:
     Lambda : np.ndarray           # processes/hour
     w : np.ndarray                # hours (finite-window average residence contribution per arrival)
     N : np.ndarray                # processes
-    A : np.ndarray                # process·hours
+    H : np.ndarray                # process·hours
     Arrivals : np.ndarray         # cumulative arrivals Arr(T) in (t0, T]
     Departures : np.ndarray       # cumulative departures Dep(T) in (t0, T]
     mode : Literal["event","calendar"]
@@ -45,7 +45,7 @@ class FlowMetricsResult:
     Methods
     -------
     to_dataframe() -> pd.DataFrame
-        Tabular view with columns: time, L, Lambda, w, N, A, Arrivals, Departures.
+        Tabular view with columns: time, L, Lambda, w, N, H, Arrivals, Departures.
     """
 
     events: List[Tuple[pd.Timestamp, int, int]]
@@ -54,7 +54,7 @@ class FlowMetricsResult:
     Lambda: np.ndarray
     w: np.ndarray
     N: np.ndarray
-    A: np.ndarray
+    H: np.ndarray
     Arrivals: np.ndarray
     Departures: np.ndarray
     mode: Literal["event", "calendar"]
@@ -72,7 +72,7 @@ class FlowMetricsResult:
                 "Lambda": self.Lambda,
                 "w": self.w,
                 "N": self.N,
-                "A": self.A,
+                "H": self.H,
                 "Arrivals": self.Arrivals,
                 "Departures": self.Departures,
             }
@@ -115,7 +115,7 @@ def compute_sample_path_metrics(
     Lambda(T): np.ndarray  (processes/hour)       average arrival rate since t0
     w(T)     : np.ndarray  (hours)                finite-window average residence contribution per arrival
     N(T)     : np.ndarray  (processes)            number in system right after events ≤ T
-    A(T)     : np.ndarray  (process·hours)        area under N(t) from t0 to T
+    H(T)     : np.ndarray  (process·hours)        cumulative presence mass from t0 to T
     Arr(T)   : np.ndarray  (count)                cumulative arrivals in (t0, T]
     Dep(T)   : np.ndarray  (count)                cumulative departures in (t0, T]
 
@@ -145,12 +145,12 @@ def compute_sample_path_metrics(
 
     # Running state
     N = 0
-    A = 0.0
+    H = 0.0
     cum_arr = 0
     cum_dep = 0
     prev = t0
 
-    out_L, out_Lam, out_w, out_N, out_A, out_Arr, out_Dep = ([] for _ in range(7))
+    out_L, out_Lam, out_w, out_N, out_H, out_Arr, out_Dep = ([] for _ in range(7))
     i = 0  # event index
 
     for t in T:
@@ -160,7 +160,7 @@ def compute_sample_path_metrics(
             # Area up to event
             dt_h = (t_ev - prev).total_seconds() / 3600.0
             if dt_h > 0:
-                A += N * dt_h
+                H += N * dt_h
                 prev = t_ev
             # Jump and counts at event
             N += dN
@@ -175,20 +175,20 @@ def compute_sample_path_metrics(
         # Tail from last event to t
         dt_h = (t - prev).total_seconds() / 3600.0
         if dt_h > 0:
-            A += N * dt_h
+            H += N * dt_h
             prev = t
 
         # Report metrics at t
         elapsed_h = (t - t0).total_seconds() / 3600.0
-        L = (A / elapsed_h) if elapsed_h > 0 else np.nan
+        L = (H / elapsed_h) if elapsed_h > 0 else np.nan
         Lam = (cum_arr / elapsed_h) if elapsed_h > 0 else np.nan
-        w = (A / cum_arr) if cum_arr > 0 else np.nan
+        w = (H / cum_arr) if cum_arr > 0 else np.nan
 
         out_L.append(L)
         out_Lam.append(Lam)
         out_w.append(w)
         out_N.append(N)
-        out_A.append(A)
+        out_H.append(H)
         out_Arr.append(cum_arr)
         out_Dep.append(cum_dep)
 
@@ -198,7 +198,7 @@ def compute_sample_path_metrics(
         np.array(out_Lam, dtype=float),
         np.array(out_w, dtype=float),
         np.array(out_N, dtype=float),
-        np.array(out_A, dtype=float),
+        np.array(out_H, dtype=float),
         np.array(out_Arr, dtype=float),
         np.array(out_Dep, dtype=float),
     )
@@ -234,7 +234,7 @@ def compute_finite_window_flow_metrics(
     FlowMetricsResult with:
       • reference to prepped `events`
       • observation `times`
-      • L, Lambda, w, N, A
+      • L, Lambda, w, N, H
       • cumulative Arrivals(T) and Departures(T)
       • mode, freq, t0, tn
     """
@@ -247,7 +247,7 @@ def compute_finite_window_flow_metrics(
             Lambda=np.array([]),
             w=np.array([]),
             N=np.array([]),
-            A=np.array([]),
+            H=np.array([]),
             Arrivals=np.array([]),
             Departures=np.array([]),
             mode="event" if freq is None else "calendar",
@@ -304,7 +304,7 @@ def compute_finite_window_flow_metrics(
             Lambda=np.array([]),
             w=np.array([]),
             N=np.array([]),
-            A=np.array([]),
+            H=np.array([]),
             Arrivals=np.array([]),
             Departures=np.array([]),
             mode=mode,
@@ -322,7 +322,7 @@ def compute_finite_window_flow_metrics(
         events_prepped.append((t, dN, 0 if t < t0 else a))
 
     # Compute metrics
-    T, L, Lam, w, N, A, Arr, Dep = compute_sample_path_metrics(events_prepped, obs)
+    T, L, Lam, w, N, H, Arr, Dep = compute_sample_path_metrics(events_prepped, obs)
 
     # Extract arrival and departure timestamps for overlay plotting
     arrival_times: List[pd.Timestamp] = []
@@ -341,7 +341,7 @@ def compute_finite_window_flow_metrics(
         Lambda=Lam,
         w=w,
         N=N,
-        A=A,
+        H=H,
         Arrivals=Arr,
         Departures=Dep,
         mode=mode,
@@ -491,21 +491,21 @@ def compute_elementwise_empirical_metrics(
 
 
 def compute_end_effect_series(
-    df: pd.DataFrame, times: List[pd.Timestamp], A_vals: np.ndarray, W_star: np.ndarray
+    df: pd.DataFrame, times: List[pd.Timestamp], H_vals: np.ndarray, W_star: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Compute end-effect diagnostics over [t0, t]:
 
     Returns arrays aligned to `times`:
-      - rA(T) = E(T) / A(T), where E(T) = A(T) - sum(full durations of items fully contained)
+      - rH(T) = E(T) / H(T), where E(T) = H(T) - sum(full durations of items fully contained)
       - rB(T) = B(T) / total_items_started_by_t, boundary share
       - rho(T) = T / W*(t), window/typical-duration ratio
     """
     n = len(times)
-    rA = np.full(n, np.nan, dtype=float)
+    rH = np.full(n, np.nan, dtype=float)
     rB = np.full(n, np.nan, dtype=float)
     rho = np.full(n, np.nan, dtype=float)
     if n == 0:
-        return rA, rB, rho
+        return rH, rB, rho
 
     df = df.copy()
     df["duration_h"] = (df["end_ts"] - df["start_ts"]).dt.total_seconds() / 3600.0
@@ -519,21 +519,21 @@ def compute_end_effect_series(
         if elapsed_h <= 0:
             continue
 
-        A_T = float(A_vals[i]) if i < len(A_vals) and np.isfinite(A_vals[i]) else np.nan
-        if not np.isfinite(A_T) or A_T <= 0:
+        H_T = float(H_vals[i]) if i < len(H_vals) and np.isfinite(H_vals[i]) else np.nan
+        if not np.isfinite(H_T) or H_T <= 0:
             continue
 
         mask_full = df_sorted_by_end["end_ts"].notna() & (
             df_sorted_by_end["end_ts"] <= t
         )
-        A_full = (
+        H_full = (
             float(df_sorted_by_end.loc[mask_full, "duration_h"].sum())
             if mask_full.any()
             else 0.0
         )
 
-        E_T = max(A_T - A_full, 0.0)
-        rA[i] = E_T / A_T if A_T > 0 else np.nan
+        E_T = max(H_T - H_full, 0.0)
+        rH[i] = E_T / H_T if H_T > 0 else np.nan
 
         mask_started = df_sorted_by_start["start_ts"] <= t
         total_started = int(mask_started.sum())
@@ -548,7 +548,7 @@ def compute_end_effect_series(
             (elapsed_h / Wstar_t) if np.isfinite(Wstar_t) and Wstar_t > 0 else np.nan
         )
 
-    return rA, rB, rho
+    return rH, rB, rho
 
 
 def compute_tracking_errors(

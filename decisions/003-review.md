@@ -13,7 +13,7 @@ This document summarizes the review of ADR-003 and records agreed changes before
 
 **Original:** `render_N_view`, `render_L_view`, `render_Lambda_view`, `render_w_view`
 
-**Agreed:** `render_N`, `render_L`, `render_Lambda`, `render_w`, `render_A`
+**Agreed:** `render_N`, `render_L`, `render_Lambda`, `render_w`, `render_H`
 
 Rationale: `_view` is UI terminology that doesn't fit. Shorter names are clearer.
 
@@ -45,17 +45,17 @@ class ClipOptions:
 
 Rationale: `clip_opts` as an untyped parameter is underspecified. A dataclass documents the structure.
 
-### 4. Include A(T) chart
+### 4. Include H(T) chart
 
-**Original:** ADR-003 listed N, L, Λ, w but omitted A(T).
+**Original:** ADR-003 listed N, L, Λ, w but omitted H(T).
 
-**Agreed:** Add `render_A` for cumulative area ∫N(t)dt.
+**Agreed:** Add `render_H` for Cumulative Presence Mass ∫N(t)dt.
 
-Full chart list: `render_N`, `render_L`, `render_Lambda`, `render_w`, `render_A`
+Full chart list: `render_N`, `render_L`, `render_Lambda`, `render_w`, `render_H`
 
 ### 5. Keep `plot_*` naming for layouts
 
-Standalone layouts use `plot_N`, `plot_L`, `plot_Lambda`, `plot_w`, `plot_A`.
+Standalone layouts use `plot_N`, `plot_L`, `plot_Lambda`, `plot_w`, `plot_H`.
 
 Composite layout: `plot_core_stack`.
 
@@ -83,7 +83,7 @@ This eliminates duplication between `render_step` and `render_line`. Lives in `p
 ```
 samplepath/plots/
   primitives.py    # render_step, render_line, render_lambda
-  charts.py        # render_N, render_L, render_Lambda, render_w, render_A
+  charts.py        # render_N, render_L, render_Lambda, render_w, render_H
   layouts.py       # plot_N, plot_L, plot_core_stack, etc.
   helpers.py       # build_event_overlays, format_date_axis, ClipOptions, ScatterOverlay
 ```
@@ -95,7 +95,7 @@ samplepath/plots/
 | Layer | Module | Functions | Responsibility |
 |-------|--------|-----------|----------------|
 | 1. Primitives | `primitives.py` | `render_step`, `render_line`, `render_lambda`, `render_overlays` | Draw series + overlays on axes |
-| 2. Charts | `charts.py` | `render_N`, `render_L`, `render_Lambda`, `render_w`, `render_A` | Complete chart definition (title, ylabel, colors, overlay logic) |
+| 2. Charts | `charts.py` | `render_N`, `render_L`, `render_Lambda`, `render_w`, `render_H` | Complete chart definition (title, ylabel, colors, overlay logic) |
 | 3. Layouts | `layouts.py` | `plot_N`, `plot_L`, `plot_core_stack` | Create figure, call charts, format axes, save |
 | Shared | `helpers.py` | `build_event_overlays`, `ClipOptions`, `ScatterOverlay`, `format_date_axis` | Data types and utilities |
 
@@ -113,7 +113,7 @@ samplepath/plots/
 | `render_LT_chart` | `render_L` | charts.py |
 | (new) | `render_Lambda` | charts.py |
 | (new) | `render_w` | charts.py |
-| (new) | `render_A` | charts.py |
+| (new) | `render_H` | charts.py |
 | `draw_N_chart` | `plot_N` | layouts.py |
 | `draw_LT_chart` | `plot_L` | layouts.py |
 | `draw_four_panel_column` | `plot_core_stack` | layouts.py |
@@ -125,7 +125,7 @@ samplepath/plots/
 
 1. Create module structure (`primitives.py`, `charts.py`, `layouts.py`)
 2. Move primitives: `render_step`, `render_line`, `render_lambda` to `primitives.py`
-3. Move/create chart recipes in `charts.py`: `render_N`, `render_L`, then add `render_Lambda`, `render_w`, `render_A`
+3. Move/create chart recipes in `charts.py`: `render_N`, `render_L`, then add `render_Lambda`, `render_w`, `render_H`
 4. Move layouts to `layouts.py` and rename to `plot_*`
 5. Update imports in `core.py`, `stability.py`, `convergence.py`
 6. Update/add tests for each layer
