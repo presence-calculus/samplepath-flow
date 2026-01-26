@@ -645,8 +645,6 @@ def plot_core_stack(
         flat_axes = axes if not isinstance(axes, np.ndarray) else axes.ravel()
 
         NPanel(
-            show_title=True,
-            title="N(t) — Sample Path",
             show_derivations=chart_config.show_derivations,
             with_event_marks=chart_config.with_event_marks,
         ).render(
@@ -657,8 +655,6 @@ def plot_core_stack(
             departure_times=metrics.departure_times,
         )
         LPanel(
-            show_title=True,
-            title="L(T) — Time-Average of N(t)",
             show_derivations=chart_config.show_derivations,
             with_event_marks=chart_config.with_event_marks,
         ).render(
@@ -669,8 +665,6 @@ def plot_core_stack(
             departure_times=metrics.departure_times,
         )
         LambdaPanel(
-            show_title=True,
-            title="Λ(T) — Cumulative Arrival Rate",
             show_derivations=chart_config.show_derivations,
             with_event_marks=chart_config.with_event_marks,
             clip_opts=ClipOptions(
@@ -685,8 +679,6 @@ def plot_core_stack(
             arrival_times=metrics.arrival_times,
         )
         WPanel(
-            show_title=True,
-            title="w(T) — Average Residence Time",
             show_derivations=chart_config.show_derivations,
             with_event_marks=chart_config.with_event_marks,
         ).render(
