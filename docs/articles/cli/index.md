@@ -145,6 +145,17 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Chart Configuration
+
+- **--with-event-marks** *(default: `False`)*\
+  Show point process event markers on sample path charts. When enabled, for example, arrivals
+  are shown as purple dots and departures as green dots with drop lines to the event timestamps.
+
+- **--show-derivations** *(default: `False`)*\
+  Show formulas for key metrics in titles/legends of charts. eg. N(t) = A(T) - D(T) see chart reference for more details
+
+______________________________________________________________________
+
 ### Output Configuration
 
 - **--output-dir** *(default: `charts`)*\
@@ -158,10 +169,6 @@ ______________________________________________________________________
 
 - **--clean** *(default: `False`)*\
   Remove existing charts before writing new results
-
-- **--with-event-marks** *(default: `False`)*\
-  Show arrival/departure event markers on sample path charts. When enabled, arrivals
-  are shown as purple dots and departures as green dots on the N(t) chart.
 
 ______________________________________________________________________
 

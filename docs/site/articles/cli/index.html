@@ -448,6 +448,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
         id="toc-lambda-fine-tuning">Lambda Fine Tuning</a></li>
         <li><a href="#convergence-thresholds"
         id="toc-convergence-thresholds">Convergence Thresholds</a></li>
+        <li><a href="#chart-configuration"
+        id="toc-chart-configuration">Chart Configuration</a></li>
         <li><a href="#output-configuration"
         id="toc-output-configuration">Output Configuration</a></li>
         </ul></li>
@@ -588,6 +590,21 @@ Samplepath Analysis Toolkit</em></a></p></p>
             convergence</p></li>
             </ul>
             <hr />
+            <h3 id="chart-configuration">Chart Configuration</h3>
+            <ul>
+            <li><p><strong>–with-event-marks</strong> <em>(default:
+            <code>False</code>)</em><br />
+            Show point process event markers on sample path charts. When
+            enabled, for example, arrivals are shown as purple dots and
+            departures as green dots with drop lines to the event
+            timestamps.</p></li>
+            <li><p><strong>–show-derivations</strong> <em>(default:
+            <code>False</code>)</em><br />
+            Show formulas for key metrics in titles/legends of charts.
+            eg. N(t) = A(T) - D(T) see chart reference for more
+            details</p></li>
+            </ul>
+            <hr />
             <h3 id="output-configuration">Output Configuration</h3>
             <ul>
             <li><p><strong>–output-dir</strong> <em>(default:
@@ -602,11 +619,6 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <li><p><strong>–clean</strong> <em>(default:
             <code>False</code>)</em><br />
             Remove existing charts before writing new results</p></li>
-            <li><p><strong>–with-event-marks</strong> <em>(default:
-            <code>False</code>)</em><br />
-            Show arrival/departure event markers on sample path charts.
-            When enabled, arrivals are shown as purple dots and
-            departures as green dots on the N(t) chart.</p></li>
             </ul>
             <hr />
             <h2 id="inputs-and-outputs">Inputs and Outputs</h2>

@@ -52,8 +52,131 @@ def test_render_N_no_title_when_suppressed():
         patch("samplepath.plots.core.build_event_overlays", return_value=None),
         patch("samplepath.plots.core.render_step_chart"),
     ):
-        core.render_N(ax, times, values, with_event_marks=False, show_title=False)
+        core.render_N(
+            ax,
+            times,
+            values,
+            with_event_marks=False,
+            show_title=False,
+        )
     ax.set_title.assert_not_called()
+
+
+def test_render_N_title_appends_derivation_when_enabled():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    with (
+        patch("samplepath.plots.core.render_step_chart"),
+        patch("samplepath.plots.core.MetricDerivations.get", return_value="DERIVATION"),
+    ):
+        core.render_N(
+            ax,
+            times,
+            values,
+            title="Base Title",
+            show_derivations=True,
+        )
+    assert ax.set_title.call_args[0][0] == "Base Title: DERIVATION"
+
+
+def test_render_N_title_uses_metric_derivations_lookup():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    with (
+        patch("samplepath.plots.core.render_step_chart"),
+        patch("samplepath.plots.core.MetricDerivations.get") as mock_get,
+    ):
+        core.render_N(
+            ax,
+            times,
+            values,
+            title="Base Title",
+            show_derivations=True,
+        )
+    assert mock_get.call_args[0][0] == "N"
+
+
+def test_construct_title_returns_base_without_derivation():
+    assert core.construct_title("Base", False, derivation_key="N") == "Base"
+
+
+def test_construct_title_appends_derivation_when_available():
+    with patch(
+        "samplepath.plots.core.MetricDerivations.get", return_value="DERIVATION"
+    ):
+        title = core.construct_title("Base", True, derivation_key="N")
+    assert title == "Base: DERIVATION"
+
+
+def test_render_L_title_unchanged_when_derivations_disabled():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([2.0])
+    with patch("samplepath.plots.core.render_line_chart"):
+        core.render_L(
+            ax,
+            times,
+            values,
+            title="Base Title",
+            show_derivations=False,
+        )
+    assert ax.set_title.call_args[0][0] == "Base Title"
+
+
+def test_render_Lambda_title_appends_derivation_when_enabled():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    with (
+        patch("samplepath.plots.core.render_line_chart"),
+        patch("samplepath.plots.core.MetricDerivations.get", return_value="DERIVATION"),
+    ):
+        core.render_Lambda(
+            ax,
+            times,
+            values,
+            title="Base Title",
+            show_derivations=True,
+        )
+    assert ax.set_title.call_args[0][0] == "Base Title: DERIVATION"
+
+
+def test_render_w_title_appends_derivation_when_enabled():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    with (
+        patch("samplepath.plots.core.render_line_chart"),
+        patch("samplepath.plots.core.MetricDerivations.get", return_value="DERIVATION"),
+    ):
+        core.render_w(
+            ax,
+            times,
+            values,
+            title="Base Title",
+            show_derivations=True,
+        )
+    assert ax.set_title.call_args[0][0] == "Base Title: DERIVATION"
+
+
+def test_render_H_title_appends_derivation_when_enabled():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    with (
+        patch("samplepath.plots.core.render_line_chart"),
+        patch("samplepath.plots.core.MetricDerivations.get", return_value="DERIVATION"),
+    ):
+        core.render_H(
+            ax,
+            times,
+            values,
+            title="Base Title",
+            show_derivations=True,
+        )
+    assert ax.set_title.call_args[0][0] == "Base Title: DERIVATION"
 
 
 def test_render_L_colors_grey_when_overlays():
@@ -214,7 +337,7 @@ def test_render_CFD_calls_step_twice():
 
 def test_render_CFD_arrivals_label():
     _, mock_step = _render_cfd_with_mocks()
-    assert mock_step.call_args_list[0].kwargs["label"] == "A(t): cumulative arrivals"
+    assert mock_step.call_args_list[0].kwargs["label"] == "A(T) - Cumulative arrivals"
 
 
 def test_render_CFD_arrivals_color():
@@ -229,7 +352,43 @@ def test_render_CFD_arrivals_fill_false():
 
 def test_render_CFD_departures_label():
     _, mock_step = _render_cfd_with_mocks()
-    assert mock_step.call_args_list[1].kwargs["label"] == "D(t): cumulative departures"
+    assert mock_step.call_args_list[1].kwargs["label"] == "D(T) - Cumulative departures"
+
+
+def test_render_CFD_appends_derivations_to_labels_when_enabled():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    arrivals = np.array([1.0])
+    departures = np.array([0.0])
+
+    def _derivation_for_key(key: str):
+        return {
+            "A": "A(T) = ∑ arrivals in [0, T]",
+            "D": "D(T) = ∑ departures in [0, T]",
+        }[key]
+
+    with (
+        patch("samplepath.plots.core.render_step_chart") as mock_step,
+        patch(
+            "samplepath.plots.core.MetricDerivations.get",
+            side_effect=_derivation_for_key,
+        ),
+    ):
+        core.render_CFD(
+            ax,
+            times,
+            arrivals,
+            departures,
+            show_derivations=True,
+        )
+    assert (
+        mock_step.call_args_list[0].kwargs["label"]
+        == "A(T) - Cumulative arrivals — A(T) = ∑ arrivals in [0, T]"
+    )
+    assert (
+        mock_step.call_args_list[1].kwargs["label"]
+        == "D(T) - Cumulative departures — D(T) = ∑ departures in [0, T]"
+    )
 
 
 def test_render_CFD_departures_color():
@@ -308,7 +467,7 @@ def test_render_CFD_departures_overlay_uses_departure_times():
 
 def test_render_CFD_sets_title():
     ax, _ = _render_cfd_with_mocks()
-    ax.set_title.assert_called_once_with("Cumulative Arrivals vs Cumulative Departures")
+    ax.set_title.assert_called_once_with("Cumulative Flow Diagram")
 
 
 def test_render_CFD_sets_ylabel():
@@ -681,6 +840,7 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
         arrival_times=metrics.arrival_times,
         departure_times=metrics.departure_times,
         with_event_marks=True,
+        show_derivations=False,
         unit="D",
     )
 
@@ -708,6 +868,30 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w():
         core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
     assert mock_lam.call_args.kwargs["with_event_marks"] is True
     assert mock_w.call_args.kwargs["with_event_marks"] is True
+
+
+def test_core_driver_passes_show_derivations_to_CFD():
+    metrics = _metrics_fixture()
+    out_dir = "/tmp/out"
+    args = SimpleNamespace(
+        lambda_pctl=99.0,
+        lambda_lower_pctl=1.0,
+        lambda_warmup=0.5,
+        show_derivations=True,
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with (
+        patch("samplepath.plots.core.plot_core_stack"),
+        patch("samplepath.plots.core.plot_N"),
+        patch("samplepath.plots.core.plot_L"),
+        patch("samplepath.plots.core.plot_Lambda"),
+        patch("samplepath.plots.core.plot_w"),
+        patch("samplepath.plots.core.plot_H"),
+        patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
+        patch("samplepath.plots.core.plot_CFD") as mock_plot,
+    ):
+        core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
+    assert mock_plot.call_args.kwargs["show_derivations"] is True
 
 
 def test_core_driver_uses_metrics_freq_for_unit():

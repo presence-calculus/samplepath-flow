@@ -79,6 +79,24 @@ class FlowMetricsResult:
         )
 
 
+class MetricDerivations:
+    """Centralized derivation strings for core flow metrics."""
+
+    DERIVATIONS: dict[str, str] = {
+        "A": "A(T) = ∑ arrivals in [0, T]",
+        "D": "D(T) = ∑ departures in [0, T]",
+        "N": "N(t) = A(t) − D(t)",
+        "H": "H(T) = ∫₀ᵀ N(t) dt",
+        "L": "L(T) = H(T) / T",
+        "Lambda": "Λ(T) = A(T) / T",
+        "w": "w(T) = H(T) / A(T)",
+    }
+
+    @classmethod
+    def get(cls, key: str) -> Optional[str]:
+        return cls.DERIVATIONS.get(key)
+
+
 # --- Core Metrics Calculations
 def compute_sample_path_metrics(
     events: List[Tuple[pd.Timestamp, int, int]],

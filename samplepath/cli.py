@@ -211,11 +211,19 @@ def build_parser() -> tuple[argparse.ArgumentParser, set[str]]:
         default=False,
         help="removing existing charts in output directory",
     )
-    output_dirs.add_argument(
+
+    chart_config = analyze.add_argument_group("Chart Configuration")
+    chart_config.add_argument(
         "--with-event-marks",
         action="store_true",
         default=False,
         help="Show arrival/departure event markers on sample path charts",
+    )
+    chart_config.add_argument(
+        "--show-derivations",
+        action="store_true",
+        default=False,
+        help="Append metric derivations to core chart titles",
     )
 
     subcommand_names = set(subparsers.choices.keys())

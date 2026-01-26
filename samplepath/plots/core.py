@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 
 from samplepath.filter import FilterResult
-from samplepath.metrics import FlowMetricsResult
+from samplepath.metrics import FlowMetricsResult, MetricDerivations
 from samplepath.plots.figure_context import (
     FigureDecorSpec,
     LayoutSpec,
@@ -49,6 +49,17 @@ class ClipOptions:
     warmup_hours: float = 0.0
 
 
+def construct_title(
+    base_title: str, show_derivations: bool, derivation_key: Optional[str] = None
+) -> str:
+    if not show_derivations:
+        return base_title
+    if not derivation_key:
+        return base_title
+    derivation = MetricDerivations.get(derivation_key)
+    return f"{base_title}: {derivation}" if derivation else base_title
+
+
 # ---------------------------------------------------------------------------
 # Panel renderers
 # ---------------------------------------------------------------------------
@@ -63,6 +74,8 @@ def render_N(
     departure_times: Optional[List[pd.Timestamp]] = None,
     with_event_marks: bool = False,
     show_title: bool = True,
+    title: str = "N(t) — Sample Path",
+    show_derivations: bool = False,
 ) -> None:
     overlays = (
         build_event_overlays(times, N_vals, arrival_times, departure_times)
@@ -80,7 +93,7 @@ def render_N(
         overlays=overlays,
     )
     if show_title:
-        ax.set_title("N(t) — Sample Path: A(T) - D(T)")
+        ax.set_title(construct_title(title, show_derivations, derivation_key="N"))
     ax.set_ylabel("N(t)")
     ax.legend()
 
@@ -94,6 +107,8 @@ def render_L(
     departure_times: Optional[List[pd.Timestamp]] = None,
     with_event_marks: bool = False,
     show_title: bool = True,
+    title: str = "L(T) — Time-Average of N(t)",
+    show_derivations: bool = False,
 ) -> None:
     overlays = (
         build_event_overlays(times, L_vals, arrival_times, departure_times)
@@ -103,7 +118,7 @@ def render_L(
     color = "grey" if overlays else "tab:blue"
     render_line_chart(ax, times, L_vals, label="L(T)", color=color, overlays=overlays)
     if show_title:
-        ax.set_title("L(T) — Time-Average of N(t): 1/T.∫N(t)dt")
+        ax.set_title(construct_title(title, show_derivations, derivation_key="L"))
     ax.set_ylabel("L(T)")
     ax.legend()
 
@@ -117,6 +132,8 @@ def render_Lambda(
     with_event_marks: bool = False,
     clip_opts: Optional[ClipOptions] = None,
     show_title: bool = True,
+    title: str = "Λ(T) — Cumulative Arrival Rate",
+    show_derivations: bool = False,
 ) -> None:
     overlays = (
         build_event_overlays(times, Lam_vals, arrival_times, [], drop_lines=True)
@@ -142,7 +159,7 @@ def render_Lambda(
             opts.warmup_hours,
         )
     if show_title:
-        ax.set_title("Λ(T) — Cumulative Arrival Rate: 1/T.A(T)")
+        ax.set_title(construct_title(title, show_derivations, derivation_key="Lambda"))
     ax.set_ylabel("Λ(T) [1/hr]")
     ax.legend()
 
@@ -156,6 +173,8 @@ def render_w(
     departure_times: Optional[List[pd.Timestamp]] = None,
     with_event_marks: bool = False,
     show_title: bool = True,
+    title: str = "w(T) — Average Residence Time",
+    show_derivations: bool = False,
 ) -> None:
     label = "w(T) [hrs]"
     overlays = (
@@ -174,7 +193,7 @@ def render_w(
         ax, times, w_vals, label=label, color="tab:blue", overlays=overlays
     )
     if show_title:
-        ax.set_title("w(T) — Average Residence Time: 1/A(T).∫N(t)dt")
+        ax.set_title(construct_title(title, show_derivations, derivation_key="w"))
     ax.set_ylabel(label)
     ax.legend()
 
@@ -185,10 +204,12 @@ def render_H(
     H_vals: Sequence[float],
     *,
     show_title: bool = True,
+    title: str = "H(T) — Cumulative Presence Mass",
+    show_derivations: bool = False,
 ) -> None:
     render_line_chart(ax, times, H_vals, label="H(T) [hrs·items]", color="tab:blue")
     if show_title:
-        ax.set_title("H(T) — Cumulative Presence Mass ∫N(t)dt")
+        ax.set_title(construct_title(title, show_derivations, derivation_key="H"))
     ax.set_ylabel("H(T) [hrs·items]")
     ax.legend()
 
@@ -203,6 +224,8 @@ def render_CFD(
     departure_times: Optional[List[pd.Timestamp]] = None,
     with_event_marks: bool = False,
     show_title: bool = True,
+    title: str = "Cumulative Flow Diagram",
+    show_derivations: bool = False,
 ) -> None:
     arrivals_overlay = None
     departures_overlay = None
@@ -233,11 +256,20 @@ def render_CFD(
                     drop_lines=True,
                 )
             ]
+    arrivals_label = "A(T) - Cumulative arrivals"
+    departures_label = "D(T) - Cumulative departures"
+    if show_derivations:
+        deriv_arrivals = MetricDerivations.get("A")
+        deriv_departures = MetricDerivations.get("D")
+        if deriv_arrivals:
+            arrivals_label = f"{arrivals_label} — {deriv_arrivals}"
+        if deriv_departures:
+            departures_label = f"{departures_label} — {deriv_departures}"
     render_step_chart(
         ax,
         times,
         arrivals_cum,
-        label="A(t): cumulative arrivals",
+        label=arrivals_label,
         color="purple",
         fill=False,
         overlays=arrivals_overlay,
@@ -246,7 +278,7 @@ def render_CFD(
         ax,
         times,
         departures_cum,
-        label="D(t): cumulative departures",
+        label=departures_label,
         color="green",
         fill=False,
         overlays=departures_overlay,
@@ -267,7 +299,7 @@ def render_CFD(
             zorder=1,
         )
     if show_title:
-        ax.set_title("Cumulative Arrivals vs Cumulative Departures")
+        ax.set_title(title)
     ax.set_ylabel("count")
     ax.legend()
 
@@ -287,6 +319,9 @@ def plot_N(
     with_event_marks: bool = False,
     unit: str = "timestamp",
     caption: Optional[str] = None,
+    show_title: bool = True,
+    title: str = "N(t) — Sample Path",
+    show_derivations: bool = False,
 ) -> None:
     with figure_context(out_path, nrows=1, ncols=1, unit=unit, caption=caption) as (
         _,
@@ -300,6 +335,9 @@ def plot_N(
             arrival_times=arrival_times,
             departure_times=departure_times,
             with_event_marks=with_event_marks,
+            show_title=show_title,
+            title=title,
+            show_derivations=show_derivations,
         )
 
 
@@ -313,6 +351,9 @@ def plot_L(
     with_event_marks: bool = False,
     unit: str = "timestamp",
     caption: Optional[str] = None,
+    show_title: bool = True,
+    title: str = "L(T) — Time-Average of N(t)",
+    show_derivations: bool = False,
 ) -> None:
     with figure_context(out_path, nrows=1, ncols=1, unit=unit, caption=caption) as (
         _,
@@ -326,6 +367,9 @@ def plot_L(
             arrival_times=arrival_times,
             departure_times=departure_times,
             with_event_marks=with_event_marks,
+            show_title=show_title,
+            title=title,
+            show_derivations=show_derivations,
         )
 
 
@@ -339,6 +383,9 @@ def plot_Lambda(
     clip_opts: Optional[ClipOptions] = None,
     unit: str = "timestamp",
     caption: Optional[str] = None,
+    show_title: bool = True,
+    title: str = "Λ(T) — Cumulative Arrival Rate",
+    show_derivations: bool = False,
 ) -> None:
     with figure_context(out_path, nrows=1, ncols=1, unit=unit, caption=caption) as (
         _,
@@ -352,6 +399,9 @@ def plot_Lambda(
             arrival_times=arrival_times,
             with_event_marks=with_event_marks,
             clip_opts=clip_opts,
+            show_title=show_title,
+            title=title,
+            show_derivations=show_derivations,
         )
 
 
@@ -365,6 +415,9 @@ def plot_w(
     with_event_marks: bool = False,
     unit: str = "timestamp",
     caption: Optional[str] = None,
+    show_title: bool = True,
+    title: str = "w(T) — Average Residence Time",
+    show_derivations: bool = False,
 ) -> None:
     with figure_context(out_path, nrows=1, ncols=1, unit=unit, caption=caption) as (
         _,
@@ -378,6 +431,9 @@ def plot_w(
             arrival_times=arrival_times,
             departure_times=departure_times,
             with_event_marks=with_event_marks,
+            show_title=show_title,
+            title=title,
+            show_derivations=show_derivations,
         )
 
 
@@ -388,13 +444,23 @@ def plot_H(
     *,
     unit: str = "timestamp",
     caption: Optional[str] = None,
+    show_title: bool = True,
+    title: str = "H(T) — Cumulative Presence Mass",
+    show_derivations: bool = False,
 ) -> None:
     with figure_context(out_path, nrows=1, ncols=1, unit=unit, caption=caption) as (
         _,
         axes,
     ):
         ax = _first_axis(axes)
-        render_H(ax, times, H_vals)
+        render_H(
+            ax,
+            times,
+            H_vals,
+            show_title=show_title,
+            title=title,
+            show_derivations=show_derivations,
+        )
 
 
 def plot_CFD(
@@ -408,6 +474,9 @@ def plot_CFD(
     with_event_marks: bool = False,
     unit: str = "timestamp",
     caption: Optional[str] = None,
+    show_title: Optional[bool] = True,
+    title: Optional[str] = "Cumulative Flow Diagram",
+    show_derivations: Optional[bool] = False,
 ) -> None:
     with figure_context(out_path, nrows=1, ncols=1, unit=unit, caption=caption) as (
         _,
@@ -422,6 +491,9 @@ def plot_CFD(
             arrival_times=arrival_times,
             departure_times=departure_times,
             with_event_marks=with_event_marks,
+            show_title=show_title,
+            title=title,
+            show_derivations=show_derivations,
         )
 
 
@@ -446,6 +518,12 @@ def plot_core_stack(
     departure_times: Optional[List[pd.Timestamp]] = None,
     with_event_marks: bool = False,
     unit: str = "timestamp",
+    show_title: bool = True,
+    title_N: str = "N(t) — Sample Path",
+    title_L: str = "L(T) — Time-Average of N(t)",
+    title_Lambda: str = "Λ(T) — Cumulative Arrival Rate",
+    title_w: str = "w(T) — Average Residence Time",
+    show_derivations: bool = False,
 ) -> None:
     layout = LayoutSpec(nrows=4, ncols=1, figsize=(12.0, 11.0), sharex=True)
     decor = FigureDecorSpec(
@@ -474,6 +552,9 @@ def plot_core_stack(
             arrival_times=arrival_times,
             departure_times=departure_times,
             with_event_marks=with_event_marks,
+            show_title=show_title,
+            title=title_N,
+            show_derivations=show_derivations,
         )
         render_L(
             flat_axes[1],
@@ -482,6 +563,9 @@ def plot_core_stack(
             arrival_times=arrival_times,
             departure_times=departure_times,
             with_event_marks=with_event_marks,
+            show_title=show_title,
+            title=title_L,
+            show_derivations=show_derivations,
         )
         render_Lambda(
             flat_axes[2],
@@ -494,6 +578,9 @@ def plot_core_stack(
                 pctl_lower=lambda_pctl_lower,
                 warmup_hours=lambda_warmup_hours,
             ),
+            show_title=show_title,
+            title=title_Lambda,
+            show_derivations=show_derivations,
         )
         render_w(
             flat_axes[3],
@@ -502,6 +589,9 @@ def plot_core_stack(
             arrival_times=arrival_times,
             departure_times=departure_times,
             with_event_marks=with_event_marks,
+            show_title=show_title,
+            title=title_w,
+            show_derivations=show_derivations,
         )
 
 
@@ -620,6 +710,7 @@ def plot_core_flow_metrics_charts(
     caption = (
         filter_result.display if filter_result and filter_result.label else "Filters: "
     )
+    show_derivations = getattr(args, "show_derivations", False)
 
     path_stack = os.path.join(out_dir, "sample_path_flow_metrics.png")
     plot_core_stack(
@@ -636,6 +727,7 @@ def plot_core_flow_metrics_charts(
         arrival_times=metrics.arrival_times,
         departure_times=metrics.departure_times,
         with_event_marks=getattr(args, "with_event_marks", False),
+        show_derivations=show_derivations,
         unit=unit,
     )
 
@@ -647,6 +739,7 @@ def plot_core_flow_metrics_charts(
         arrival_times=metrics.arrival_times,
         departure_times=metrics.departure_times,
         with_event_marks=getattr(args, "with_event_marks", False),
+        show_derivations=show_derivations,
         unit=unit,
         caption=caption,
     )
@@ -659,6 +752,7 @@ def plot_core_flow_metrics_charts(
         arrival_times=metrics.arrival_times,
         departure_times=metrics.departure_times,
         with_event_marks=getattr(args, "with_event_marks", False),
+        show_derivations=show_derivations,
         unit=unit,
         caption=caption,
     )
@@ -675,6 +769,7 @@ def plot_core_flow_metrics_charts(
             pctl_lower=args.lambda_lower_pctl,
             warmup_hours=args.lambda_warmup,
         ),
+        show_derivations=show_derivations,
         unit=unit,
         caption=caption,
     )
@@ -687,12 +782,20 @@ def plot_core_flow_metrics_charts(
         arrival_times=metrics.arrival_times,
         departure_times=metrics.departure_times,
         with_event_marks=getattr(args, "with_event_marks", False),
+        show_derivations=show_derivations,
         unit=unit,
         caption=caption,
     )
 
     path_H = os.path.join(core_panels_dir, "cumulative_presence_mass_H.png")
-    plot_H(path_H, metrics.times, metrics.H, unit=unit, caption=caption)
+    plot_H(
+        path_H,
+        metrics.times,
+        metrics.H,
+        show_derivations=show_derivations,
+        unit=unit,
+        caption=caption,
+    )
 
     path_CFD = os.path.join(core_panels_dir, "cumulative_flow_diagram.png")
     plot_CFD(
@@ -703,6 +806,7 @@ def plot_core_flow_metrics_charts(
         arrival_times=metrics.arrival_times,
         departure_times=metrics.departure_times,
         with_event_marks=getattr(args, "with_event_marks", False),
+        show_derivations=show_derivations,
         unit=unit,
         caption=caption,
     )

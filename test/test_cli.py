@@ -61,12 +61,19 @@ def test_parse_args_defaults_and_types():
     assert args.lambda_warmup == 0.0
     assert args.save_input is True
     assert args.with_event_marks is False
+    assert args.show_derivations is False
 
 
 def test_with_event_marks_flag_can_be_enabled():
     _, args = cli.parse_args(["flow", "events.csv", "--with-event-marks"])
 
     assert args.with_event_marks is True
+
+
+def test_show_derivations_flag_can_be_enabled():
+    _, args = cli.parse_args(["flow", "events.csv", "--show-derivations"])
+
+    assert args.show_derivations is True
 
 
 def test_output_dir_expands_user():
