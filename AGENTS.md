@@ -54,6 +54,8 @@ Agent must:
     ```
     [Task ID]: (Task Name): Merge <branch name> to main
     ```
+    Craft a concise yet complete summary of the changes that were made in the squash merge and get the message reviewed before performing the merge.
+
 
 ------------
 ## Code Review
