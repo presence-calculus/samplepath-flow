@@ -13,14 +13,14 @@ def _t(s: str) -> pd.Timestamp:
     return pd.Timestamp(s)
 
 
-def test_draw_arrival_departure_convergence_stack_uses_render_CFD():
+def test_draw_arrival_departure_convergence_stack_uses_CFDPanel_render():
     times = [_t("2024-01-01"), _t("2024-01-02")]
     arrivals = np.array([1.0, 2.0])
     departures = np.array([0.0, 1.0])
     lambda_rate = np.array([0.5, 0.75])
 
     with (
-        patch("samplepath.plots.convergence.render_CFD") as mock_render,
+        patch("samplepath.plots.convergence.CFDPanel.render") as mock_render,
         patch("samplepath.plots.convergence.plt.subplots") as mock_subplots,
         patch("samplepath.plots.convergence.format_date_axis"),
         patch("samplepath.plots.convergence._clip_axis_to_percentile"),

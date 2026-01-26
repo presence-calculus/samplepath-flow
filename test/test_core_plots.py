@@ -27,13 +27,12 @@ def test_render_N_colors_grey_when_overlays():
         patch("samplepath.plots.core.build_event_overlays", return_value=overlays),
         patch("samplepath.plots.core.render_step_chart") as mock_render,
     ):
-        core.render_N(
+        core.NPanel(with_event_marks=True).render(
             ax,
             times,
             values,
             arrival_times=[times[0]],
             departure_times=[times[0]],
-            with_event_marks=True,
         )
     mock_render.assert_called_once()
     _, kwargs = mock_render.call_args
@@ -52,13 +51,7 @@ def test_render_N_no_title_when_suppressed():
         patch("samplepath.plots.core.build_event_overlays", return_value=None),
         patch("samplepath.plots.core.render_step_chart"),
     ):
-        core.render_N(
-            ax,
-            times,
-            values,
-            with_event_marks=False,
-            show_title=False,
-        )
+        core.NPanel(show_title=False).render(ax, times, values)
     ax.set_title.assert_not_called()
 
 
@@ -70,13 +63,7 @@ def test_render_N_title_appends_derivation_when_enabled():
         patch("samplepath.plots.core.render_step_chart"),
         patch("samplepath.plots.core.MetricDerivations.get", return_value="DERIVATION"),
     ):
-        core.render_N(
-            ax,
-            times,
-            values,
-            title="Base Title",
-            show_derivations=True,
-        )
+        core.NPanel(title="Base Title", show_derivations=True).render(ax, times, values)
     assert ax.set_title.call_args[0][0] == "Base Title: DERIVATION"
 
 
@@ -88,14 +75,21 @@ def test_render_N_title_uses_metric_derivations_lookup():
         patch("samplepath.plots.core.render_step_chart"),
         patch("samplepath.plots.core.MetricDerivations.get") as mock_get,
     ):
-        core.render_N(
-            ax,
-            times,
-            values,
-            title="Base Title",
-            show_derivations=True,
-        )
+        core.NPanel(title="Base Title", show_derivations=True).render(ax, times, values)
     assert mock_get.call_args[0][0] == "N"
+
+
+def test_n_panel_render_uses_panel_state_for_title():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    panel = core.NPanel(title="Base Title", show_derivations=True)
+    with (
+        patch("samplepath.plots.core.render_step_chart"),
+        patch("samplepath.plots.core.MetricDerivations.get", return_value="DERIVATION"),
+    ):
+        panel.render(ax, times, values)
+    assert ax.set_title.call_args[0][0] == "Base Title: DERIVATION"
 
 
 def test_construct_title_returns_base_without_derivation():
@@ -115,12 +109,8 @@ def test_render_L_title_unchanged_when_derivations_disabled():
     times = [_t("2024-01-01")]
     values = np.array([2.0])
     with patch("samplepath.plots.core.render_line_chart"):
-        core.render_L(
-            ax,
-            times,
-            values,
-            title="Base Title",
-            show_derivations=False,
+        core.LPanel(title="Base Title", show_derivations=False).render(
+            ax, times, values
         )
     assert ax.set_title.call_args[0][0] == "Base Title"
 
@@ -133,12 +123,8 @@ def test_render_Lambda_title_appends_derivation_when_enabled():
         patch("samplepath.plots.core.render_line_chart"),
         patch("samplepath.plots.core.MetricDerivations.get", return_value="DERIVATION"),
     ):
-        core.render_Lambda(
-            ax,
-            times,
-            values,
-            title="Base Title",
-            show_derivations=True,
+        core.LambdaPanel(title="Base Title", show_derivations=True).render(
+            ax, times, values
         )
     assert ax.set_title.call_args[0][0] == "Base Title: DERIVATION"
 
@@ -151,13 +137,7 @@ def test_render_w_title_appends_derivation_when_enabled():
         patch("samplepath.plots.core.render_line_chart"),
         patch("samplepath.plots.core.MetricDerivations.get", return_value="DERIVATION"),
     ):
-        core.render_w(
-            ax,
-            times,
-            values,
-            title="Base Title",
-            show_derivations=True,
-        )
+        core.WPanel(title="Base Title", show_derivations=True).render(ax, times, values)
     assert ax.set_title.call_args[0][0] == "Base Title: DERIVATION"
 
 
@@ -169,13 +149,7 @@ def test_render_H_title_appends_derivation_when_enabled():
         patch("samplepath.plots.core.render_line_chart"),
         patch("samplepath.plots.core.MetricDerivations.get", return_value="DERIVATION"),
     ):
-        core.render_H(
-            ax,
-            times,
-            values,
-            title="Base Title",
-            show_derivations=True,
-        )
+        core.HPanel(title="Base Title", show_derivations=True).render(ax, times, values)
     assert ax.set_title.call_args[0][0] == "Base Title: DERIVATION"
 
 
@@ -188,13 +162,12 @@ def test_render_L_colors_grey_when_overlays():
         patch("samplepath.plots.core.build_event_overlays", return_value=overlays),
         patch("samplepath.plots.core.render_line_chart") as mock_render,
     ):
-        core.render_L(
+        core.LPanel(with_event_marks=True).render(
             ax,
             times,
             values,
             arrival_times=[times[0]],
             departure_times=[times[0]],
-            with_event_marks=True,
         )
     _, kwargs = mock_render.call_args
     assert kwargs["color"] == "grey"
@@ -212,7 +185,7 @@ def test_render_Lambda_passes_clip_options():
         patch("samplepath.plots.core.render_line_chart") as mock_line,
         patch("samplepath.plots.core._clip_axis_to_percentile") as mock_clip,
     ):
-        core.render_Lambda(ax, times, values, clip_opts=clip)
+        core.LambdaPanel(clip_opts=clip).render(ax, times, values)
     mock_line.assert_called_once()
     mock_clip.assert_called_once_with(ax, list(times), values, 99.0, 1.0, 0.5)
     ax.set_ylabel.assert_called_once_with("Λ(T) [1/hr]")
@@ -223,7 +196,7 @@ def test_render_w_sets_defaults():
     times = [_t("2024-01-01")]
     values = np.array([0.5])
     with patch("samplepath.plots.core.render_line_chart") as mock_line:
-        core.render_w(ax, times, values)
+        core.WPanel().render(ax, times, values)
     mock_line.assert_called_once()
     ax.set_ylabel.assert_called_once_with("w(T) [hrs]")
 
@@ -234,12 +207,11 @@ def test_render_Lambda_arrival_overlays_when_enabled():
     values = np.array([1.0])
     arrivals = [times[0]]
     with patch("samplepath.plots.core.render_line_chart") as mock_line:
-        core.render_Lambda(
+        core.LambdaPanel(with_event_marks=True).render(
             ax,
             times,
             values,
             arrival_times=arrivals,
-            with_event_marks=True,
         )
     overlays = mock_line.call_args.kwargs["overlays"]
     assert overlays[0].color == "purple"
@@ -252,13 +224,12 @@ def test_render_w_overlays_when_enabled():
     arrivals = [times[0]]
     departures = [times[0]]
     with patch("samplepath.plots.core.render_line_chart") as mock_line:
-        core.render_w(
+        core.WPanel(with_event_marks=True).render(
             ax,
             times,
             values,
             arrival_times=arrivals,
             departure_times=departures,
-            with_event_marks=True,
         )
     overlays = mock_line.call_args.kwargs["overlays"]
     assert overlays[0].color == "purple"
@@ -271,13 +242,12 @@ def test_render_w_overlays_include_departures():
     arrivals = [times[0]]
     departures = [times[0]]
     with patch("samplepath.plots.core.render_line_chart") as mock_line:
-        core.render_w(
+        core.WPanel(with_event_marks=True).render(
             ax,
             times,
             values,
             arrival_times=arrivals,
             departure_times=departures,
-            with_event_marks=True,
         )
     overlays = mock_line.call_args.kwargs["overlays"]
     assert overlays[1].color == "green"
@@ -290,13 +260,12 @@ def test_render_w_overlays_departures_no_drop_lines():
     arrivals = [times[0]]
     departures = [times[0]]
     with patch("samplepath.plots.core.render_line_chart") as mock_line:
-        core.render_w(
+        core.WPanel(with_event_marks=True).render(
             ax,
             times,
             values,
             arrival_times=arrivals,
             departure_times=departures,
-            with_event_marks=True,
         )
     overlays = mock_line.call_args.kwargs["overlays"]
     assert overlays[1].drop_lines is False
@@ -307,7 +276,7 @@ def test_render_H_sets_defaults():
     times = [_t("2024-01-01")]
     values = np.array([1.0])
     with patch("samplepath.plots.core.render_line_chart") as mock_line:
-        core.render_H(ax, times, values)
+        core.HPanel().render(ax, times, values)
     mock_line.assert_called_once()
     ax.set_ylabel.assert_called_once_with("H(T) [hrs·items]")
 
@@ -318,14 +287,13 @@ def _render_cfd_with_mocks(with_event_marks: bool = False):
     arrivals = np.array([1.0])
     departures = np.array([0.0])
     with patch("samplepath.plots.core.render_step_chart") as mock_step:
-        core.render_CFD(
+        core.CFDPanel(with_event_marks=with_event_marks).render(
             ax,
             times,
             arrivals,
             departures,
             arrival_times=times,
             departure_times=times,
-            with_event_marks=with_event_marks,
         )
     return ax, mock_step
 
@@ -374,13 +342,7 @@ def test_render_CFD_appends_derivations_to_labels_when_enabled():
             side_effect=_derivation_for_key,
         ),
     ):
-        core.render_CFD(
-            ax,
-            times,
-            arrivals,
-            departures,
-            show_derivations=True,
-        )
+        core.CFDPanel(show_derivations=True).render(ax, times, arrivals, departures)
     assert (
         mock_step.call_args_list[0].kwargs["label"]
         == "A(T) - Cumulative arrivals — A(T) = ∑ arrivals in [0, T]"
@@ -431,14 +393,13 @@ def test_render_CFD_arrivals_overlay_uses_arrival_times():
     arrival_times = [times[0]]
     departure_times = [times[1]]
     with patch("samplepath.plots.core.render_step_chart") as mock_step:
-        core.render_CFD(
+        core.CFDPanel(with_event_marks=True).render(
             ax,
             times,
             arrivals,
             departures,
             arrival_times=arrival_times,
             departure_times=departure_times,
-            with_event_marks=True,
         )
     overlay = mock_step.call_args_list[0].kwargs["overlays"][0]
     assert overlay.x == arrival_times
@@ -452,14 +413,13 @@ def test_render_CFD_departures_overlay_uses_departure_times():
     arrival_times = [times[0]]
     departure_times = [times[1]]
     with patch("samplepath.plots.core.render_step_chart") as mock_step:
-        core.render_CFD(
+        core.CFDPanel(with_event_marks=True).render(
             ax,
             times,
             arrivals,
             departures,
             arrival_times=arrival_times,
             departure_times=departure_times,
-            with_event_marks=True,
         )
     overlay = mock_step.call_args_list[1].kwargs["overlays"][0]
     assert overlay.x == departure_times
@@ -486,7 +446,7 @@ def test_render_CFD_fills_between_when_arrivals_above_departures():
     arrivals = np.array([1.0, 2.0])
     departures = np.array([0.0, 3.0])
     with patch("samplepath.plots.core.render_step_chart"):
-        core.render_CFD(ax, times, arrivals, departures)
+        core.CFDPanel().render(ax, times, arrivals, departures)
     ax.fill_between.assert_called_once()
     _, kwargs = ax.fill_between.call_args
     assert kwargs["color"] == "grey"
@@ -507,12 +467,12 @@ def test_plot_single_panel_calls_renderer():
 
     with (
         patch("samplepath.plots.core.figure_context", side_effect=fake_context),
-        patch("samplepath.plots.core.render_N") as mock_render,
+        patch("samplepath.plots.core.NPanel.plot") as mock_plot,
     ):
-        core.plot_N(
-            "out.png", [_t("2024-01-01")], np.array([1.0]), with_event_marks=True
+        core.NPanel(with_event_marks=True).plot(
+            "out.png", [_t("2024-01-01")], np.array([1.0])
         )
-    mock_render.assert_called_once()
+    mock_plot.assert_called_once()
 
 
 def test_plot_single_panel_L_calls_renderer():
@@ -525,9 +485,9 @@ def test_plot_single_panel_L_calls_renderer():
 
     with (
         patch("samplepath.plots.core.figure_context", side_effect=fake_context),
-        patch("samplepath.plots.core.render_L") as mock_render,
+        patch("samplepath.plots.core.LPanel.plot") as mock_render,
     ):
-        core.plot_L("out.png", [_t("2024-01-01")], np.array([2.0]))
+        core.LPanel().plot("out.png", [_t("2024-01-01")], np.array([2.0]))
     mock_render.assert_called_once()
 
 
@@ -541,9 +501,9 @@ def test_plot_single_panel_Lambda_calls_renderer():
 
     with (
         patch("samplepath.plots.core.figure_context", side_effect=fake_context),
-        patch("samplepath.plots.core.render_Lambda") as mock_render,
+        patch("samplepath.plots.core.LambdaPanel.plot") as mock_render,
     ):
-        core.plot_Lambda("out.png", [_t("2024-01-01")], np.array([3.0]))
+        core.LambdaPanel().plot("out.png", [_t("2024-01-01")], np.array([3.0]))
     mock_render.assert_called_once()
 
 
@@ -557,9 +517,9 @@ def test_plot_single_panel_w_calls_renderer():
 
     with (
         patch("samplepath.plots.core.figure_context", side_effect=fake_context),
-        patch("samplepath.plots.core.render_w") as mock_render,
+        patch("samplepath.plots.core.WPanel.plot") as mock_render,
     ):
-        core.plot_w("out.png", [_t("2024-01-01")], np.array([4.0]))
+        core.WPanel().plot("out.png", [_t("2024-01-01")], np.array([4.0]))
     mock_render.assert_called_once()
 
 
@@ -573,9 +533,9 @@ def test_plot_single_panel_H_calls_renderer():
 
     with (
         patch("samplepath.plots.core.figure_context", side_effect=fake_context),
-        patch("samplepath.plots.core.render_H") as mock_render,
+        patch("samplepath.plots.core.HPanel.plot") as mock_render,
     ):
-        core.plot_H("out.png", [_t("2024-01-01")], np.array([5.0]))
+        core.HPanel().plot("out.png", [_t("2024-01-01")], np.array([5.0]))
     mock_render.assert_called_once()
 
 
@@ -589,9 +549,9 @@ def test_plot_single_panel_CFD_calls_renderer():
 
     with (
         patch("samplepath.plots.core.figure_context", side_effect=fake_context),
-        patch("samplepath.plots.core.render_CFD") as mock_render,
+        patch("samplepath.plots.core.CFDPanel.render") as mock_render,
     ):
-        core.plot_CFD(
+        core.CFDPanel().plot(
             "out.png",
             [_t("2024-01-01")],
             np.array([1.0]),
@@ -611,7 +571,7 @@ def test_plot_CFD_passes_unit():
         yield fig, ax
 
     with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
-        core.plot_CFD(
+        core.CFDPanel().plot(
             "out.png",
             [_t("2024-01-01")],
             np.array([1.0]),
@@ -630,7 +590,7 @@ def test_plot_CFD_passes_caption():
         yield fig, ax
 
     with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
-        core.plot_CFD(
+        core.CFDPanel().plot(
             "out.png",
             [_t("2024-01-01")],
             np.array([1.0]),
@@ -649,7 +609,7 @@ def test_plot_CFD_uses_single_panel_layout():
         yield fig, ax
 
     with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
-        core.plot_CFD(
+        core.CFDPanel().plot(
             "out.png",
             [_t("2024-01-01")],
             np.array([1.0]),
@@ -668,10 +628,10 @@ def test_plot_core_stack_calls_all_renderers():
 
     with (
         patch("samplepath.plots.core.layout_context", side_effect=fake_context),
-        patch("samplepath.plots.core.render_N") as mock_N,
-        patch("samplepath.plots.core.render_L") as mock_L,
-        patch("samplepath.plots.core.render_Lambda") as mock_Lam,
-        patch("samplepath.plots.core.render_w") as mock_w,
+        patch("samplepath.plots.core.NPanel.render") as mock_N,
+        patch("samplepath.plots.core.LPanel.render") as mock_L,
+        patch("samplepath.plots.core.LambdaPanel.render") as mock_Lam,
+        patch("samplepath.plots.core.WPanel.render") as mock_w,
     ):
         core.plot_core_stack(
             "out.png",
@@ -714,10 +674,10 @@ def test_plot_core_stack_applies_layout_and_caption():
 
     with (
         patch("samplepath.plots.core.layout_context", side_effect=fake_context),
-        patch("samplepath.plots.core.render_N"),
-        patch("samplepath.plots.core.render_L"),
-        patch("samplepath.plots.core.render_Lambda"),
-        patch("samplepath.plots.core.render_w"),
+        patch("samplepath.plots.core.NPanel.render"),
+        patch("samplepath.plots.core.LPanel.render"),
+        patch("samplepath.plots.core.LambdaPanel.render"),
+        patch("samplepath.plots.core.WPanel.render"),
     ):
         core.plot_core_stack(
             "out.png",
@@ -742,10 +702,10 @@ def test_plot_core_stack_uses_tighter_layout_without_caption():
 
     with (
         patch("samplepath.plots.core.layout_context", side_effect=fake_context),
-        patch("samplepath.plots.core.render_N"),
-        patch("samplepath.plots.core.render_L"),
-        patch("samplepath.plots.core.render_Lambda"),
-        patch("samplepath.plots.core.render_w"),
+        patch("samplepath.plots.core.NPanel.render"),
+        patch("samplepath.plots.core.LPanel.render"),
+        patch("samplepath.plots.core.LambdaPanel.render"),
+        patch("samplepath.plots.core.WPanel.render"),
     ):
         core.plot_core_stack(
             "out.png",
@@ -791,18 +751,25 @@ def test_core_driver_returns_expected_paths():
     ]
     with (
         patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_N"),
-        patch("samplepath.plots.core.plot_L"),
-        patch("samplepath.plots.core.plot_Lambda"),
-        patch("samplepath.plots.core.plot_w"),
-        patch("samplepath.plots.core.plot_H"),
-        patch("samplepath.plots.core.plot_CFD"),
-        patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
+        patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
+        patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
+        patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
+        patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
+        patch("samplepath.plots.core.HPanel.plot") as mock_plot_H,
+        patch("samplepath.plots.core.CFDPanel.plot") as mock_plot_CFD,
+        patch("samplepath.plots.core.LLWPanel.plot") as mock_plot_llw,
     ):
         written = core.plot_core_flow_metrics_charts(
             None, args, filter_result, metrics, out_dir
         )
     assert written == expected
+    mock_plot_N.assert_called_once()
+    mock_plot_L.assert_called_once()
+    mock_plot_Lam.assert_called_once()
+    mock_plot_w.assert_called_once()
+    mock_plot_H.assert_called_once()
+    mock_plot_CFD.assert_called_once()
+    mock_plot_llw.assert_called_once()
 
 
 def test_core_driver_calls_plot_core_stack_with_expected_args():
@@ -817,13 +784,13 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack") as mock_stack,
-        patch("samplepath.plots.core.plot_N"),
-        patch("samplepath.plots.core.plot_L"),
-        patch("samplepath.plots.core.plot_Lambda"),
-        patch("samplepath.plots.core.plot_w"),
-        patch("samplepath.plots.core.plot_H"),
-        patch("samplepath.plots.core.plot_CFD"),
-        patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
+        patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
+        patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
+        patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
+        patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
+        patch("samplepath.plots.core.HPanel.plot") as mock_plot_H,
+        patch("samplepath.plots.core.CFDPanel.plot") as mock_plot_CFD,
+        patch("samplepath.plots.core.LLWPanel.plot"),
     ):
         core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
     mock_stack.assert_called_once_with(
@@ -843,6 +810,12 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
         show_derivations=False,
         unit="D",
     )
+    mock_plot_N.assert_called_once()
+    mock_plot_L.assert_called_once()
+    mock_plot_Lam.assert_called_once()
+    mock_plot_w.assert_called_once()
+    mock_plot_H.assert_called_once()
+    mock_plot_CFD.assert_called_once()
 
 
 def test_core_driver_passes_event_marks_to_Lambda_and_w():
@@ -857,17 +830,22 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_N"),
-        patch("samplepath.plots.core.plot_L"),
-        patch("samplepath.plots.core.plot_H"),
-        patch("samplepath.plots.core.plot_CFD"),
-        patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
-        patch("samplepath.plots.core.plot_Lambda") as mock_lam,
-        patch("samplepath.plots.core.plot_w") as mock_w,
+        patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
+        patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
+        patch("samplepath.plots.core.HPanel.plot"),
+        patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
+        patch("samplepath.plots.core.LLWPanel"),
+        patch("samplepath.plots.core.LambdaPanel") as mock_lam_cls,
+        patch("samplepath.plots.core.WPanel") as mock_w_cls,
     ):
         core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
-    assert mock_lam.call_args.kwargs["with_event_marks"] is True
-    assert mock_w.call_args.kwargs["with_event_marks"] is True
+    assert mock_lam_cls.call_args.kwargs["with_event_marks"] is True
+    assert mock_w_cls.call_args.kwargs["with_event_marks"] is True
+    assert mock_cfd_cls.call_args.kwargs["with_event_marks"] is True
+    mock_plot_N.assert_called_once()
+    mock_plot_L.assert_called_once()
+    mock_lam_cls.assert_called_once()
+    mock_w_cls.assert_called_once()
 
 
 def test_core_driver_passes_show_derivations_to_CFD():
@@ -882,16 +860,21 @@ def test_core_driver_passes_show_derivations_to_CFD():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_N"),
-        patch("samplepath.plots.core.plot_L"),
-        patch("samplepath.plots.core.plot_Lambda"),
-        patch("samplepath.plots.core.plot_w"),
-        patch("samplepath.plots.core.plot_H"),
-        patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
-        patch("samplepath.plots.core.plot_CFD") as mock_plot,
+        patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
+        patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
+        patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
+        patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
+        patch("samplepath.plots.core.HPanel.plot") as mock_plot_H,
+        patch("samplepath.plots.core.LLWPanel.plot"),
+        patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
     ):
         core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
-    assert mock_plot.call_args.kwargs["show_derivations"] is True
+    assert mock_cfd_cls.call_args.kwargs["show_derivations"] is True
+    mock_plot_N.assert_called_once()
+    mock_plot_L.assert_called_once()
+    mock_plot_Lam.assert_called_once()
+    mock_plot_w.assert_called_once()
+    mock_plot_H.assert_called_once()
 
 
 def test_core_driver_uses_metrics_freq_for_unit():
@@ -901,15 +884,15 @@ def test_core_driver_uses_metrics_freq_for_unit():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_N") as mock_plot,
+        patch("samplepath.plots.core.NPanel.plot") as mock_plot,
     ):
         with (
-            patch("samplepath.plots.core.plot_L"),
-            patch("samplepath.plots.core.plot_Lambda"),
-            patch("samplepath.plots.core.plot_w"),
-            patch("samplepath.plots.core.plot_H"),
-            patch("samplepath.plots.core.plot_CFD"),
-            patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
+            patch("samplepath.plots.core.LPanel.plot"),
+            patch("samplepath.plots.core.LambdaPanel.plot"),
+            patch("samplepath.plots.core.WPanel.plot"),
+            patch("samplepath.plots.core.HPanel.plot"),
+            patch("samplepath.plots.core.CFDPanel.plot"),
+            patch("samplepath.plots.core.LLWPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
                 None, args, filter_result, metrics, out_dir
@@ -924,15 +907,15 @@ def test_core_driver_falls_back_to_timestamp_unit():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_Lambda") as mock_plot,
+        patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot,
     ):
         with (
-            patch("samplepath.plots.core.plot_N"),
-            patch("samplepath.plots.core.plot_L"),
-            patch("samplepath.plots.core.plot_w"),
-            patch("samplepath.plots.core.plot_H"),
-            patch("samplepath.plots.core.plot_CFD"),
-            patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
+            patch("samplepath.plots.core.NPanel.plot"),
+            patch("samplepath.plots.core.LPanel.plot"),
+            patch("samplepath.plots.core.WPanel.plot"),
+            patch("samplepath.plots.core.HPanel.plot"),
+            patch("samplepath.plots.core.CFDPanel.plot"),
+            patch("samplepath.plots.core.LLWPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
                 None, args, filter_result, metrics, out_dir
@@ -947,15 +930,15 @@ def test_core_driver_uses_filter_display_caption():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_w") as mock_plot,
+        patch("samplepath.plots.core.WPanel.plot") as mock_plot,
     ):
         with (
-            patch("samplepath.plots.core.plot_N"),
-            patch("samplepath.plots.core.plot_L"),
-            patch("samplepath.plots.core.plot_Lambda"),
-            patch("samplepath.plots.core.plot_H"),
-            patch("samplepath.plots.core.plot_CFD"),
-            patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
+            patch("samplepath.plots.core.NPanel.plot"),
+            patch("samplepath.plots.core.LPanel.plot"),
+            patch("samplepath.plots.core.LambdaPanel.plot"),
+            patch("samplepath.plots.core.HPanel.plot"),
+            patch("samplepath.plots.core.CFDPanel.plot"),
+            patch("samplepath.plots.core.LLWPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
                 None, args, filter_result, metrics, out_dir
@@ -970,15 +953,15 @@ def test_core_driver_calls_plot_H_under_core_dir():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_H") as mock_plot,
+        patch("samplepath.plots.core.HPanel.plot") as mock_plot,
     ):
         with (
-            patch("samplepath.plots.core.plot_N"),
-            patch("samplepath.plots.core.plot_L"),
-            patch("samplepath.plots.core.plot_Lambda"),
-            patch("samplepath.plots.core.plot_w"),
-            patch("samplepath.plots.core.plot_CFD"),
-            patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
+            patch("samplepath.plots.core.NPanel.plot"),
+            patch("samplepath.plots.core.LPanel.plot"),
+            patch("samplepath.plots.core.LambdaPanel.plot"),
+            patch("samplepath.plots.core.WPanel.plot"),
+            patch("samplepath.plots.core.CFDPanel.plot"),
+            patch("samplepath.plots.core.LLWPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
                 None, args, filter_result, metrics, out_dir
@@ -1007,13 +990,13 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
     )
     with (
         patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_N"),
-        patch("samplepath.plots.core.plot_L"),
-        patch("samplepath.plots.core.plot_Lambda"),
-        patch("samplepath.plots.core.plot_w"),
-        patch("samplepath.plots.core.plot_H"),
-        patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
-        patch("samplepath.plots.core.plot_CFD") as mock_plot,
+        patch("samplepath.plots.core.NPanel.plot"),
+        patch("samplepath.plots.core.LPanel.plot"),
+        patch("samplepath.plots.core.LambdaPanel.plot"),
+        patch("samplepath.plots.core.WPanel.plot"),
+        patch("samplepath.plots.core.HPanel.plot"),
+        patch("samplepath.plots.core.LLWPanel.plot"),
+        patch("samplepath.plots.core.CFDPanel.plot") as mock_plot,
     ):
         core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
     assert mock_plot.call_args.args[0] == os.path.join(
@@ -1033,32 +1016,31 @@ def test_core_driver_passes_event_marks_to_CFD():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_N"),
-        patch("samplepath.plots.core.plot_L"),
-        patch("samplepath.plots.core.plot_Lambda"),
-        patch("samplepath.plots.core.plot_w"),
-        patch("samplepath.plots.core.plot_H"),
-        patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
-        patch("samplepath.plots.core.plot_CFD") as mock_plot,
+        patch("samplepath.plots.core.NPanel.plot"),
+        patch("samplepath.plots.core.LPanel.plot"),
+        patch("samplepath.plots.core.LambdaPanel.plot"),
+        patch("samplepath.plots.core.WPanel.plot"),
+        patch("samplepath.plots.core.HPanel.plot"),
+        patch("samplepath.plots.core.LLWPanel"),
+        patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
     ):
         core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
-    assert mock_plot.call_args.kwargs["with_event_marks"] is True
+    assert mock_cfd_cls.call_args.kwargs["with_event_marks"] is True
 
 
-def test_plot_L_vs_Lambda_w_renders_invariant_chart():
+def test_LLWPanel_renders_invariant_chart():
     fig = MagicMock()
     ax = MagicMock()
     with (
         patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)),
         patch("samplepath.plots.core.add_caption") as mock_caption,
     ):
-        core.plot_L_vs_Lambda_w(
+        core.LLWPanel(title="L(T) vs Λ(T).w(T)").plot(
+            "out.png",
             [_t("2024-01-01"), _t("2024-01-02")],
             np.array([1.0, 2.0]),
             np.array([1.0, 1.5]),
             np.array([2.0, 1.0]),
-            title="L(T) vs Λ(T).w(T)",
-            out_path="out.png",
             caption="Filters: test",
         )
     ax.plot.assert_called_once()
@@ -1072,231 +1054,208 @@ def test_plot_L_vs_Lambda_w_renders_invariant_chart():
     fig.savefig.assert_called_once_with("out.png")
 
 
-def test_plot_L_vs_Lambda_w_skips_reference_line_on_nonfinite():
+def test_LLWPanel_skips_reference_line_on_nonfinite():
     fig = MagicMock()
     ax = MagicMock()
     with (patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)),):
-        core.plot_L_vs_Lambda_w(
+        core.LLWPanel().plot(
+            "out.png",
             [_t("2024-01-01")],
             np.array([np.nan]),
             np.array([np.nan]),
             np.array([np.nan]),
-            title="L(T) vs Λ(T).w(T)",
-            out_path="out.png",
         )
     ax.plot.assert_not_called()
     ax.scatter.assert_not_called()
 
 
-def test_plot_L_vs_Lambda_w_event_marks_colors_arrivals_purple():
+def test_LLWPanel_event_marks_colors_arrivals_purple():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
     with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
-        core.plot_L_vs_Lambda_w(
+        core.LLWPanel(with_event_marks=True).plot(
+            "out.png",
             times,
             np.array([1.0, 2.0]),
             np.array([1.0, 1.0]),
             np.array([1.0, 1.0]),
             arrival_times=[times[0]],
             departure_times=[times[1]],
-            with_event_marks=True,
-            title="L(T) vs Λ(T).w(T)",
-            out_path="out.png",
         )
     colors = ax.scatter.call_args.kwargs["color"]
     assert colors[0][:3] == mcolors.to_rgba("purple")[:3]
 
 
-def test_plot_L_vs_Lambda_w_event_marks_colors_departures_green():
+def test_LLWPanel_event_marks_colors_departures_green():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
     with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
-        core.plot_L_vs_Lambda_w(
+        core.LLWPanel(with_event_marks=True).plot(
+            "out.png",
             times,
             np.array([1.0, 2.0]),
             np.array([1.0, 1.0]),
             np.array([1.0, 1.0]),
             arrival_times=[times[0]],
             departure_times=[times[1]],
-            with_event_marks=True,
-            title="L(T) vs Λ(T).w(T)",
-            out_path="out.png",
         )
     colors = ax.scatter.call_args.kwargs["color"]
     assert colors[1][:3] == mcolors.to_rgba("green")[:3]
 
 
-def test_plot_L_vs_Lambda_w_event_marks_alpha_increases():
+def test_LLWPanel_event_marks_alpha_increases():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
     with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
-        core.plot_L_vs_Lambda_w(
+        core.LLWPanel(with_event_marks=True).plot(
+            "out.png",
             times,
             np.array([1.0, 2.0]),
             np.array([1.0, 1.0]),
             np.array([1.0, 1.0]),
             arrival_times=[times[0]],
             departure_times=[times[1]],
-            with_event_marks=True,
-            title="L(T) vs Λ(T).w(T)",
-            out_path="out.png",
         )
     colors = ax.scatter.call_args.kwargs["color"]
     assert colors[0][3] < colors[1][3]
 
 
-def test_plot_L_vs_Lambda_w_event_marks_drop_lines_arrival_color():
+def test_LLWPanel_event_marks_drop_lines_arrival_color():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
     with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
-        core.plot_L_vs_Lambda_w(
+        core.LLWPanel(with_event_marks=True).plot(
+            "out.png",
             times,
             np.array([1.0, 2.0]),
             np.array([1.0, 1.0]),
             np.array([1.0, 1.0]),
             arrival_times=[times[0]],
             departure_times=[times[1]],
-            with_event_marks=True,
-            title="L(T) vs Λ(T).w(T)",
-            out_path="out.png",
         )
     colors = ax.vlines.call_args.kwargs["colors"]
     assert colors[0] == mcolors.to_rgba("purple", alpha=0.25)
 
 
-def test_plot_L_vs_Lambda_w_event_marks_drop_lines_departure_color():
+def test_LLWPanel_event_marks_drop_lines_departure_color():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
     with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
-        core.plot_L_vs_Lambda_w(
+        core.LLWPanel(with_event_marks=True).plot(
+            "out.png",
             times,
             np.array([1.0, 2.0]),
             np.array([1.0, 1.0]),
             np.array([1.0, 1.0]),
             arrival_times=[times[0]],
             departure_times=[times[1]],
-            with_event_marks=True,
-            title="L(T) vs Λ(T).w(T)",
-            out_path="out.png",
         )
     colors = ax.vlines.call_args.kwargs["colors"]
     assert colors[1] == mcolors.to_rgba("green", alpha=0.25)
 
 
-def test_plot_L_vs_Lambda_w_event_marks_hlines_arrival_color():
+def test_LLWPanel_event_marks_hlines_arrival_color():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
     with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
-        core.plot_L_vs_Lambda_w(
+        core.LLWPanel(with_event_marks=True).plot(
+            "out.png",
             times,
             np.array([1.0, 2.0]),
             np.array([1.0, 1.0]),
             np.array([1.0, 1.0]),
             arrival_times=[times[0]],
             departure_times=[times[1]],
-            with_event_marks=True,
-            title="L(T) vs Λ(T).w(T)",
-            out_path="out.png",
         )
     colors = ax.hlines.call_args.kwargs["colors"]
     assert colors[0] == mcolors.to_rgba("purple", alpha=0.25)
 
 
-def test_plot_L_vs_Lambda_w_event_marks_hlines_departure_color():
+def test_LLWPanel_event_marks_hlines_departure_color():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
     with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
-        core.plot_L_vs_Lambda_w(
+        core.LLWPanel(with_event_marks=True).plot(
+            "out.png",
             times,
             np.array([1.0, 2.0]),
             np.array([1.0, 1.0]),
             np.array([1.0, 1.0]),
             arrival_times=[times[0]],
             departure_times=[times[1]],
-            with_event_marks=True,
-            title="L(T) vs Λ(T).w(T)",
-            out_path="out.png",
         )
     colors = ax.hlines.call_args.kwargs["colors"]
     assert colors[1] == mcolors.to_rgba("green", alpha=0.25)
 
 
-def test_plot_L_vs_Lambda_w_event_marks_adds_legend():
+def test_LLWPanel_event_marks_adds_legend():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
     with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
-        core.plot_L_vs_Lambda_w(
+        core.LLWPanel(with_event_marks=True).plot(
+            "out.png",
             times,
             np.array([1.0, 2.0]),
             np.array([1.0, 1.0]),
             np.array([1.0, 1.0]),
             arrival_times=[times[0]],
             departure_times=[times[1]],
-            with_event_marks=True,
-            title="L(T) vs Λ(T).w(T)",
-            out_path="out.png",
         )
     ax.legend.assert_called_once()
 
 
-def test_plot_L_vs_Lambda_w_no_event_marks_alpha_increases():
+def test_LLWPanel_no_event_marks_alpha_increases():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
     with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
-        core.plot_L_vs_Lambda_w(
+        core.LLWPanel(with_event_marks=False).plot(
+            "out.png",
             times,
             np.array([1.0, 2.0]),
             np.array([1.0, 1.0]),
             np.array([1.0, 1.0]),
-            with_event_marks=False,
-            title="L(T) vs Λ(T).w(T)",
-            out_path="out.png",
         )
     colors = ax.scatter.call_args.kwargs["color"]
     assert colors[0][3] < colors[1][3]
 
 
-def test_plot_L_vs_Lambda_w_no_event_marks_has_no_legend():
+def test_LLWPanel_no_event_marks_has_no_legend():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
     with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
-        core.plot_L_vs_Lambda_w(
+        core.LLWPanel(with_event_marks=False).plot(
+            "out.png",
             times,
             np.array([1.0, 2.0]),
             np.array([1.0, 1.0]),
             np.array([1.0, 1.0]),
-            with_event_marks=False,
-            title="L(T) vs Λ(T).w(T)",
-            out_path="out.png",
         )
     ax.legend.assert_not_called()
 
 
-def test_plot_L_vs_Lambda_w_departure_overrides_arrival_color():
+def test_LLWPanel_departure_overrides_arrival_color():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01")]
     with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
-        core.plot_L_vs_Lambda_w(
+        core.LLWPanel(with_event_marks=True).plot(
+            "out.png",
             times,
             np.array([1.0]),
             np.array([1.0]),
             np.array([1.0]),
             arrival_times=times,
             departure_times=times,
-            with_event_marks=True,
-            title="L(T) vs Λ(T).w(T)",
-            out_path="out.png",
         )
     colors = ax.scatter.call_args.kwargs["color"]
     assert colors[0][:3] == mcolors.to_rgba("green")[:3]
@@ -1309,29 +1268,31 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_L_vs_Lambda_w") as mock_plot,
+        patch("samplepath.plots.core.LLWPanel") as mock_panel,
     ):
         with (
-            patch("samplepath.plots.core.plot_N"),
-            patch("samplepath.plots.core.plot_L"),
-            patch("samplepath.plots.core.plot_Lambda"),
-            patch("samplepath.plots.core.plot_w"),
-            patch("samplepath.plots.core.plot_H"),
-            patch("samplepath.plots.core.plot_CFD"),
+            patch("samplepath.plots.core.NPanel.plot"),
+            patch("samplepath.plots.core.LPanel.plot"),
+            patch("samplepath.plots.core.LambdaPanel.plot"),
+            patch("samplepath.plots.core.WPanel.plot"),
+            patch("samplepath.plots.core.HPanel.plot"),
+            patch("samplepath.plots.core.CFDPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
                 None, args, filter_result, metrics, out_dir
             )
-    mock_plot.assert_called_once_with(
+    mock_panel.assert_called_once_with(
+        with_event_marks=False,
+        title="L(T) vs Λ(T).w(T)",
+    )
+    mock_panel.return_value.plot.assert_called_once_with(
+        os.path.join(out_dir, "core/littles_law_invariant.png"),
         metrics.times,
         metrics.L,
         metrics.Lambda,
         metrics.w,
         arrival_times=metrics.arrival_times,
         departure_times=metrics.departure_times,
-        with_event_marks=False,
-        title="L(T) vs Λ(T).w(T)",
-        out_path=os.path.join(out_dir, "core/littles_law_invariant.png"),
         caption="Filters: test",
     )
 
@@ -1343,13 +1304,13 @@ def test_core_driver_omits_caption_when_label_empty():
     filter_result = SimpleNamespace(display="Filters: ", label="")
     with (
         patch("samplepath.plots.core.plot_core_stack") as mock_stack,
-        patch("samplepath.plots.core.plot_N"),
-        patch("samplepath.plots.core.plot_L"),
-        patch("samplepath.plots.core.plot_Lambda"),
-        patch("samplepath.plots.core.plot_w"),
-        patch("samplepath.plots.core.plot_H"),
-        patch("samplepath.plots.core.plot_CFD"),
-        patch("samplepath.plots.core.plot_L_vs_Lambda_w"),
+        patch("samplepath.plots.core.NPanel.plot"),
+        patch("samplepath.plots.core.LPanel.plot"),
+        patch("samplepath.plots.core.LambdaPanel.plot"),
+        patch("samplepath.plots.core.WPanel.plot"),
+        patch("samplepath.plots.core.HPanel.plot"),
+        patch("samplepath.plots.core.CFDPanel.plot"),
+        patch("samplepath.plots.core.LLWPanel.plot"),
     ):
         core.plot_core_flow_metrics_charts(None, args, filter_result, metrics, out_dir)
     assert mock_stack.call_args.kwargs["caption"] == "Filters: "

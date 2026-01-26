@@ -10,7 +10,7 @@ import pandas as pd
 from samplepath.plots import stability
 
 
-def test_plot_rate_stability_charts_calls_render_N():
+def test_plot_rate_stability_charts_calls_render_N_panel():
     times = [pd.Timestamp("2024-01-01"), pd.Timestamp("2024-01-02")]
     metrics = SimpleNamespace(
         times=times,
@@ -49,7 +49,7 @@ def test_plot_rate_stability_charts_calls_render_N():
             ],
         ),
         patch("samplepath.plots.stability.plt.close"),
-        patch("samplepath.plots.stability.render_N") as mock_render,
+        patch("samplepath.plots.stability.NPanel.render") as mock_render,
     ):
         stability.plot_rate_stability_charts(
             df, args, filter_result, metrics, out_dir="/tmp/out"
