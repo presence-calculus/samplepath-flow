@@ -615,29 +615,14 @@ class LLWPanel:
 
 
 def plot_core_stack(
-    out_path: str,
-    times: List[pd.Timestamp],
-    N_vals: np.ndarray,
-    L_vals: np.ndarray,
-    Lam_vals: np.ndarray,
-    w_vals: np.ndarray,
-    *,
-    lambda_pctl_upper: Optional[float] = None,
-    lambda_pctl_lower: Optional[float] = None,
-    lambda_warmup_hours: float = 0.0,
-    caption: Optional[str] = None,
-    arrival_times: Optional[List[pd.Timestamp]] = None,
-    departure_times: Optional[List[pd.Timestamp]] = None,
-    with_event_marks: bool = False,
-    unit: str = "timestamp",
-    show_title: bool = True,
-    title_N: str = "N(t) — Sample Path",
-    title_L: str = "L(T) — Time-Average of N(t)",
-    title_Lambda: str = "Λ(T) — Cumulative Arrival Rate",
-    title_w: str = "w(T) — Average Residence Time",
-    show_derivations: bool = False,
+    df: pd.DataFrame,
+    chart_config: ChartConfig,
+    filter_result: Optional[FilterResult],
+    metrics: FlowMetricsResult,
+    out_dir: str,
 ) -> None:
     layout = LayoutSpec(nrows=4, ncols=1, figsize=(12.0, 11.0), sharex=True)
+    caption = resolve_caption(filter_result)
     decor = FigureDecorSpec(
         suptitle="Sample Path Flow Metrics",
         suptitle_y=0.97,
@@ -647,6 +632,8 @@ def plot_core_stack(
         tight_layout=True,
         tight_layout_rect=(0, 0, 1, 0.96),
     )
+    out_path = os.path.join(out_dir, "sample_path_flow_metrics.png")
+    unit = metrics.freq if metrics.freq else "timestamp"
     with layout_context(
         out_path,
         layout=layout,
@@ -658,56 +645,56 @@ def plot_core_stack(
         flat_axes = axes if not isinstance(axes, np.ndarray) else axes.ravel()
 
         NPanel(
-            show_title=show_title,
-            title=title_N,
-            show_derivations=show_derivations,
-            with_event_marks=with_event_marks,
+            show_title=True,
+            title="N(t) — Sample Path",
+            show_derivations=chart_config.show_derivations,
+            with_event_marks=chart_config.with_event_marks,
         ).render(
             flat_axes[0],
-            times,
-            N_vals,
-            arrival_times=arrival_times,
-            departure_times=departure_times,
+            metrics.times,
+            metrics.N,
+            arrival_times=metrics.arrival_times,
+            departure_times=metrics.departure_times,
         )
         LPanel(
-            show_title=show_title,
-            title=title_L,
-            show_derivations=show_derivations,
-            with_event_marks=with_event_marks,
+            show_title=True,
+            title="L(T) — Time-Average of N(t)",
+            show_derivations=chart_config.show_derivations,
+            with_event_marks=chart_config.with_event_marks,
         ).render(
             flat_axes[1],
-            times,
-            L_vals,
-            arrival_times=arrival_times,
-            departure_times=departure_times,
+            metrics.times,
+            metrics.L,
+            arrival_times=metrics.arrival_times,
+            departure_times=metrics.departure_times,
         )
         LambdaPanel(
-            show_title=show_title,
-            title=title_Lambda,
-            show_derivations=show_derivations,
-            with_event_marks=with_event_marks,
+            show_title=True,
+            title="Λ(T) — Cumulative Arrival Rate",
+            show_derivations=chart_config.show_derivations,
+            with_event_marks=chart_config.with_event_marks,
             clip_opts=ClipOptions(
-                pctl_upper=lambda_pctl_upper,
-                pctl_lower=lambda_pctl_lower,
-                warmup_hours=lambda_warmup_hours,
+                pctl_upper=chart_config.lambda_pctl_upper,
+                pctl_lower=chart_config.lambda_pctl_lower,
+                warmup_hours=chart_config.lambda_warmup_hours,
             ),
         ).render(
             flat_axes[2],
-            times,
-            Lam_vals,
-            arrival_times=arrival_times,
+            metrics.times,
+            metrics.Lambda,
+            arrival_times=metrics.arrival_times,
         )
         WPanel(
-            show_title=show_title,
-            title=title_w,
-            show_derivations=show_derivations,
-            with_event_marks=with_event_marks,
+            show_title=True,
+            title="w(T) — Average Residence Time",
+            show_derivations=chart_config.show_derivations,
+            with_event_marks=chart_config.with_event_marks,
         ).render(
             flat_axes[3],
-            times,
-            w_vals,
-            arrival_times=arrival_times,
-            departure_times=departure_times,
+            metrics.times,
+            metrics.w,
+            arrival_times=metrics.arrival_times,
+            departure_times=metrics.departure_times,
         )
 
 
@@ -724,23 +711,7 @@ def plot_core_flow_metrics_charts(
     show_derivations = chart_config.show_derivations
 
     path_stack = os.path.join(out_dir, "sample_path_flow_metrics.png")
-    plot_core_stack(
-        path_stack,
-        metrics.times,
-        metrics.N,
-        metrics.L,
-        metrics.Lambda,
-        metrics.w,
-        lambda_pctl_upper=chart_config.lambda_pctl_upper,
-        lambda_pctl_lower=chart_config.lambda_pctl_lower,
-        lambda_warmup_hours=chart_config.lambda_warmup_hours,
-        caption=caption,
-        arrival_times=metrics.arrival_times,
-        departure_times=metrics.departure_times,
-        with_event_marks=chart_config.with_event_marks,
-        show_derivations=show_derivations,
-        unit=unit,
-    )
+    plot_core_stack(df, chart_config, filter_result, metrics, out_dir)
 
     path_N = os.path.join(core_panels_dir, "sample_path_N.png")
     NPanel(

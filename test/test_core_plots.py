@@ -626,6 +626,14 @@ def test_plot_CFD_uses_single_panel_layout():
 def test_plot_core_stack_calls_all_renderers():
     fig = MagicMock()
     axes = np.array([object() for _ in range(4)], dtype=object)
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig(
+        with_event_marks=True,
+        lambda_pctl_upper=99.0,
+        lambda_pctl_lower=1.0,
+        lambda_warmup_hours=0.5,
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
 
     @contextmanager
     def fake_context(*args, **kwargs):
@@ -639,16 +647,11 @@ def test_plot_core_stack_calls_all_renderers():
         patch("samplepath.plots.core.WPanel.render") as mock_w,
     ):
         core.plot_core_stack(
-            "out.png",
-            [_t("2024-01-01")],
-            np.array([1.0]),
-            np.array([2.0]),
-            np.array([3.0]),
-            np.array([4.0]),
-            lambda_pctl_upper=99.0,
-            lambda_pctl_lower=1.0,
-            lambda_warmup_hours=0.5,
-            with_event_marks=True,
+            None,
+            chart_config,
+            filter_result,
+            metrics,
+            "/tmp/out",
         )
 
     mock_N.assert_called_once()
@@ -660,9 +663,13 @@ def test_plot_core_stack_calls_all_renderers():
 def test_plot_core_stack_applies_layout_and_caption():
     fig = MagicMock()
     axes = np.array([object() for _ in range(4)], dtype=object)
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
 
     @contextmanager
     def fake_context(out_path, *, layout, decor, unit, format_axis_fn, format_targets):
+        assert out_path == "/tmp/out/sample_path_flow_metrics.png"
         assert layout.nrows == 4
         assert layout.ncols == 1
         assert layout.figsize == (12.0, 11.0)
@@ -685,23 +692,24 @@ def test_plot_core_stack_applies_layout_and_caption():
         patch("samplepath.plots.core.WPanel.render"),
     ):
         core.plot_core_stack(
-            "out.png",
-            [_t("2024-01-01")],
-            np.array([1.0]),
-            np.array([2.0]),
-            np.array([3.0]),
-            np.array([4.0]),
-            caption="Filters: test",
+            None,
+            chart_config,
+            filter_result,
+            metrics,
+            "/tmp/out",
         )
 
 
 def test_plot_core_stack_uses_tighter_layout_without_caption():
     fig = MagicMock()
     axes = np.array([object() for _ in range(4)], dtype=object)
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: ", label="")
 
     @contextmanager
     def fake_context(out_path, *, layout, decor, unit, format_axis_fn, format_targets):
-        assert decor.caption is None
+        assert decor.caption == "Filters: None"
         assert decor.tight_layout_rect == (0, 0, 1, 0.96)
         yield fig, axes
 
@@ -713,13 +721,11 @@ def test_plot_core_stack_uses_tighter_layout_without_caption():
         patch("samplepath.plots.core.WPanel.render"),
     ):
         core.plot_core_stack(
-            "out.png",
-            [_t("2024-01-01")],
-            np.array([1.0]),
-            np.array([2.0]),
-            np.array([3.0]),
-            np.array([4.0]),
-            caption=None,
+            None,
+            chart_config,
+            filter_result,
+            metrics,
+            "/tmp/out",
         )
 
 
@@ -803,21 +809,7 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
             None, chart_config, filter_result, metrics, out_dir
         )
     mock_stack.assert_called_once_with(
-        os.path.join(out_dir, "sample_path_flow_metrics.png"),
-        metrics.times,
-        metrics.N,
-        metrics.L,
-        metrics.Lambda,
-        metrics.w,
-        lambda_pctl_upper=98.0,
-        lambda_pctl_lower=2.0,
-        lambda_warmup_hours=1.5,
-        caption="Filters: test",
-        arrival_times=metrics.arrival_times,
-        departure_times=metrics.departure_times,
-        with_event_marks=True,
-        show_derivations=False,
-        unit="D",
+        None, chart_config, filter_result, metrics, out_dir
     )
     mock_plot_N.assert_called_once()
     mock_plot_L.assert_called_once()
@@ -1382,4 +1374,6 @@ def test_core_driver_omits_caption_when_label_empty():
         core.plot_core_flow_metrics_charts(
             None, chart_config, filter_result, metrics, out_dir
         )
-    assert mock_stack.call_args.kwargs["caption"] == "Filters: None"
+    mock_stack.assert_called_once_with(
+        None, chart_config, filter_result, metrics, out_dir
+    )
