@@ -2,6 +2,7 @@
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
 from dataclasses import dataclass
+import os
 from typing import Any, List, Optional, Sequence, Tuple
 
 from matplotlib import pyplot as plt
@@ -54,6 +55,24 @@ def resolve_caption(filter_result: Optional[Any]) -> Optional[str]:
     if filter_result and getattr(filter_result, "label", None):
         return getattr(filter_result, "display", None)
     return "Filters: None"
+
+
+def resolve_chart_path(out_dir: str, base_name: str, chart_format: str) -> str:
+    """Resolve an output path with the requested chart format extension."""
+    root, ext = os.path.splitext(base_name)
+    extension = chart_format.lstrip(".")
+    filename = f"{root}.{extension}" if ext else f"{base_name}.{extension}"
+    return os.path.join(out_dir, filename)
+
+
+def build_chart_save_kwargs(
+    chart_format: str, chart_dpi: Optional[int]
+) -> dict[str, object]:
+    """Build savefig kwargs for the requested chart format."""
+    kwargs: dict[str, object] = {"format": chart_format}
+    if chart_format == "png" and chart_dpi is not None:
+        kwargs["dpi"] = chart_dpi
+    return kwargs
 
 
 def format_date_axis(ax: Axes, unit: str = "timestamp") -> None:

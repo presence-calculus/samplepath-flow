@@ -13,6 +13,7 @@ import pandas as pd
 from samplepath.plots import core
 from samplepath.plots.chart_config import ChartConfig
 from samplepath.plots.core import ClipOptions
+from samplepath.plots.helpers import resolve_chart_path
 
 
 def _t(s: str) -> pd.Timestamp:
@@ -480,6 +481,51 @@ def test_plot_single_panel_calls_renderer():
     mock_render.assert_called_once()
 
 
+def test_NPanel_plot_uses_svg_format():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig(chart_format="svg")
+
+    @contextmanager
+    def fake_context(out_path, **kwargs):
+        assert out_path.endswith(".svg")
+        assert kwargs["save_kwargs"]["format"] == "svg"
+        yield fig, ax
+
+    with patch("samplepath.plots.core.figure_context", side_effect=fake_context):
+        core.NPanel().plot(
+            None,
+            chart_config,
+            SimpleNamespace(display="Filters: test", label="test"),
+            metrics,
+            "/tmp/out",
+        )
+
+
+def test_NPanel_plot_uses_png_dpi():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig(chart_format="png", chart_dpi=200)
+
+    @contextmanager
+    def fake_context(out_path, **kwargs):
+        assert out_path.endswith(".png")
+        assert kwargs["save_kwargs"]["format"] == "png"
+        assert kwargs["save_kwargs"]["dpi"] == 200
+        yield fig, ax
+
+    with patch("samplepath.plots.core.figure_context", side_effect=fake_context):
+        core.NPanel().plot(
+            None,
+            chart_config,
+            SimpleNamespace(display="Filters: test", label="test"),
+            metrics,
+            "/tmp/out",
+        )
+
+
 def test_plot_single_panel_L_calls_renderer():
     fig = MagicMock()
     ax = MagicMock()
@@ -668,8 +714,19 @@ def test_plot_core_stack_applies_layout_and_caption():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
 
     @contextmanager
-    def fake_context(out_path, *, layout, decor, unit, format_axis_fn, format_targets):
-        assert out_path == "/tmp/out/sample_path_flow_metrics.png"
+    def fake_context(
+        out_path,
+        *,
+        layout,
+        decor,
+        unit,
+        format_axis_fn,
+        format_targets,
+        save_kwargs=None,
+    ):
+        assert out_path == resolve_chart_path(
+            "/tmp/out", "sample_path_flow_metrics", chart_config.chart_format
+        )
         assert layout.nrows == 4
         assert layout.ncols == 1
         assert layout.figsize == (12.0, 11.0)
@@ -682,6 +739,7 @@ def test_plot_core_stack_applies_layout_and_caption():
         assert decor.tight_layout_rect == (0, 0, 1, 0.96)
         assert format_axis_fn is not None
         assert format_targets == "bottom_row"
+        assert save_kwargs == {"format": chart_config.chart_format, "dpi": 150}
         yield fig, axes
 
     with (
@@ -708,9 +766,19 @@ def test_plot_core_stack_uses_tighter_layout_without_caption():
     filter_result = SimpleNamespace(display="Filters: ", label="")
 
     @contextmanager
-    def fake_context(out_path, *, layout, decor, unit, format_axis_fn, format_targets):
+    def fake_context(
+        out_path,
+        *,
+        layout,
+        decor,
+        unit,
+        format_axis_fn,
+        format_targets,
+        save_kwargs=None,
+    ):
         assert decor.caption == "Filters: None"
         assert decor.tight_layout_rect == (0, 0, 1, 0.96)
+        assert save_kwargs == {"format": chart_config.chart_format, "dpi": 150}
         yield fig, axes
 
     with (
@@ -751,15 +819,28 @@ def test_core_driver_returns_expected_paths():
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
     chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
+    core_dir = os.path.join(out_dir, "core")
     expected = [
-        os.path.join(out_dir, "core/sample_path_N.png"),
-        os.path.join(out_dir, "core/time_average_N_L.png"),
-        os.path.join(out_dir, "core/cumulative_arrival_rate_Lambda.png"),
-        os.path.join(out_dir, "core/average_residence_time_w.png"),
-        os.path.join(out_dir, "core/cumulative_presence_mass_H.png"),
-        os.path.join(out_dir, "core/cumulative_flow_diagram.png"),
-        os.path.join(out_dir, "core/littles_law_invariant.png"),
-        os.path.join(out_dir, "sample_path_flow_metrics.png"),
+        resolve_chart_path(core_dir, "sample_path_N", chart_config.chart_format),
+        resolve_chart_path(core_dir, "time_average_N_L", chart_config.chart_format),
+        resolve_chart_path(
+            core_dir, "cumulative_arrival_rate_Lambda", chart_config.chart_format
+        ),
+        resolve_chart_path(
+            core_dir, "average_residence_time_w", chart_config.chart_format
+        ),
+        resolve_chart_path(
+            core_dir, "cumulative_presence_mass_H", chart_config.chart_format
+        ),
+        resolve_chart_path(
+            core_dir, "cumulative_flow_diagram", chart_config.chart_format
+        ),
+        resolve_chart_path(
+            core_dir, "littles_law_invariant", chart_config.chart_format
+        ),
+        resolve_chart_path(
+            out_dir, "sample_path_flow_metrics", chart_config.chart_format
+        ),
     ]
     with (
         patch("samplepath.plots.core.plot_core_stack"),
@@ -1017,8 +1098,10 @@ def test_core_driver_calls_plot_H_under_core_dir():
             core.plot_core_flow_metrics_charts(
                 None, chart_config, filter_result, metrics, out_dir
             )
-    assert mock_plot.call_args.args[0] == os.path.join(
-        out_dir, "core/cumulative_presence_mass_H.png"
+    assert mock_plot.call_args.args[0] == resolve_chart_path(
+        os.path.join(out_dir, "core"),
+        "cumulative_presence_mass_H",
+        chart_config.chart_format,
     )
 
 
@@ -1053,8 +1136,10 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
         core.plot_core_flow_metrics_charts(
             None, chart_config, filter_result, metrics, out_dir
         )
-    assert mock_plot.call_args.args[0] == os.path.join(
-        out_dir, "core/cumulative_flow_diagram.png"
+    assert mock_plot.call_args.args[0] == resolve_chart_path(
+        os.path.join(out_dir, "core"),
+        "cumulative_flow_diagram",
+        chart_config.chart_format,
     )
 
 
@@ -1108,7 +1193,7 @@ def test_LLWPanel_renders_invariant_chart():
     ax.set_title.assert_called_once_with("L(T) vs Λ(T).w(T)")
     mock_caption.assert_called_once_with(fig, "Filters: test")
     fig.tight_layout.assert_called_once_with(rect=(0.05, 0, 1, 1))
-    fig.savefig.assert_called_once_with("out.png")
+    fig.savefig.assert_called_once_with("out.png", format="png", dpi=150)
 
 
 def test_LLWPanel_skips_reference_line_on_nonfinite():
@@ -1344,7 +1429,11 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
         title="L(T) vs Λ(T).w(T)",
     )
     mock_panel.return_value.plot.assert_called_once_with(
-        os.path.join(out_dir, "core/littles_law_invariant.png"),
+        resolve_chart_path(
+            os.path.join(out_dir, "core"),
+            "littles_law_invariant",
+            chart_config.chart_format,
+        ),
         metrics.times,
         metrics.L,
         metrics.Lambda,
@@ -1352,6 +1441,7 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
         arrival_times=metrics.arrival_times,
         departure_times=metrics.departure_times,
         caption="Filters: test",
+        chart_config=chart_config,
     )
 
 

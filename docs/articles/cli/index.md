@@ -154,6 +154,12 @@ ______________________________________________________________________
 - **--show-derivations** *(default: `False`)*\
   Show formulas for key metrics in titles/legends of charts. eg. N(t) = A(T) - D(T) see chart reference for more details
 
+- **--chart-format** *(default: `png`)*\
+  Chart output format. Use `svg` for scalable vector output.
+
+- **--chart-dpi** *(default: `150`)*\
+  DPI for PNG output. Ignored for SVG.
+
 ______________________________________________________________________
 
 ### Output Configuration

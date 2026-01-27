@@ -225,6 +225,18 @@ def build_parser() -> tuple[argparse.ArgumentParser, set[str]]:
         default=False,
         help="Append metric derivations to core chart titles",
     )
+    chart_config.add_argument(
+        "--chart-format",
+        choices=["png", "svg"],
+        default="png",
+        help="Chart output format",
+    )
+    chart_config.add_argument(
+        "--chart-dpi",
+        type=int,
+        default=150,
+        help="DPI for PNG output (ignored for SVG)",
+    )
 
     subcommand_names = set(subparsers.choices.keys())
     return parser, subcommand_names

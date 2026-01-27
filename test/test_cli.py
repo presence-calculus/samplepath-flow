@@ -62,6 +62,8 @@ def test_parse_args_defaults_and_types():
     assert args.save_input is True
     assert args.with_event_marks is False
     assert args.show_derivations is False
+    assert args.chart_format == "png"
+    assert args.chart_dpi == 150
 
 
 def test_with_event_marks_flag_can_be_enabled():
@@ -74,6 +76,18 @@ def test_show_derivations_flag_can_be_enabled():
     _, args = cli.parse_args(["flow", "events.csv", "--show-derivations"])
 
     assert args.show_derivations is True
+
+
+def test_chart_format_flag_can_be_enabled():
+    _, args = cli.parse_args(["flow", "events.csv", "--chart-format", "svg"])
+
+    assert args.chart_format == "svg"
+
+
+def test_chart_dpi_flag_can_be_enabled():
+    _, args = cli.parse_args(["flow", "events.csv", "--chart-dpi", "150"])
+
+    assert args.chart_dpi == 150
 
 
 def test_output_dir_expands_user():
