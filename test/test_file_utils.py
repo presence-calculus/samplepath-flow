@@ -70,6 +70,7 @@ def test_ensure_output_dirs_creates_exact_known_subdirs(tmp_path):
     expected = {
         "input",
         "core",
+        "core/panels",
         "convergence",
         "convergence/panels",
         "stability",

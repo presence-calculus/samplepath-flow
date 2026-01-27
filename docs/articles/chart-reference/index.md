@@ -186,20 +186,23 @@ ______________________________________________________________________
 
 ## Component metrics
 
-Each panel in the main chart is also written under
+Stacks (multi-panel composite charts) are written at the root of `core/`:
 
-```
-<scenario>/core/
-```
+| File                            | What it shows                                                                      |
+| ------------------------------- | ---------------------------------------------------------------------------------- |
+| `core/sample_path_flow_metrics.png` | Four-panel stack: `N(t)`, `L(T)`, `Λ(T)`, `w(T)` over the same time axis.      |
+| `core/lt_derivation_stack.png`      | Four-panel stack: CFD, `N(t)`, `H(T)`, `L(T)` showing how L(T) is derived.     |
 
-| File                                      | What it shows                                                                                                         | What it means                                                                                                                  |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `core/sample_path_N.png`                  | Step chart of `N(t)` (count of elements present in the boundary) vs time.                                             | Raw sample path of WIP/presence: queues, surges, and droughts show up directly.                                                |
-| `core/time_average_N_L.png`               | Line chart of `L(T)` = time-average of `N(t)` over `[0, T]`.                                                          | Tracks how average WIP over the observation window converges (or doesn’t). This is the “L” in Little’s Law, measured pathwise. |
-| `core/cumulative_arrival_rate_Lambda.png` | Line chart of `Λ(T)` (cumulative arrival rate `A(T)/(T−t₀)`), with optional percentile clipping and warmup exclusion. | Empirical arrival rate over time, with tools to ignore early transients and outliers.                                          |
-| `core/average_residence_time_w.png`       | Line chart of `w(T)` (average residence time over the window, in hours).                                              | Shows how the time items spend in the boundary evolves; long/fat tails and slow drainage show up as increasing `w(T)`.         |
-| `core/cumulative_presence_mass_H.png`     | Line chart of `H(T)` (cumulative presence mass over the window, in item-hours).                                       | Total presence mass accumulated by items in the system, used in `L(T)` and `w(T)` definitions.                                |
-| `core/littles_law_invariant.png`          | Scatter of `L(T)` (x-axis) vs `Λ(T)·w(T)` (y-axis) with `y=x` reference line, equal aspect ratio.                     | Pure Little’s Law invariant check: all finite points should lie near `y=x` if the metric calculations are consistent.          |
+Individual panels are written under `core/panels/`:
+
+| File                                             | What it shows                                                                                                         | What it means                                                                                                                  |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `core/panels/sample_path_N.png`                  | Step chart of `N(t)` (count of elements present in the boundary) vs time.                                             | Raw sample path of WIP/presence: queues, surges, and droughts show up directly.                                                |
+| `core/panels/time_average_N_L.png`               | Line chart of `L(T)` = time-average of `N(t)` over `[0, T]`.                                                          | Tracks how average WIP over the observation window converges (or doesn't). This is the "L" in Little's Law, measured pathwise. |
+| `core/panels/cumulative_arrival_rate_Lambda.png` | Line chart of `Λ(T)` (cumulative arrival rate `A(T)/(T−t₀)`), with optional percentile clipping and warmup exclusion. | Empirical arrival rate over time, with tools to ignore early transients and outliers.                                          |
+| `core/panels/average_residence_time_w.png`       | Line chart of `w(T)` (average residence time over the window, in hours).                                              | Shows how the time items spend in the boundary evolves; long/fat tails and slow drainage show up as increasing `w(T)`.         |
+| `core/panels/cumulative_presence_mass_H.png`     | Line chart of `H(T)` (cumulative presence mass over the window, in item-hours).                                       | Total presence mass accumulated by items in the system, used in `L(T)` and `w(T)` definitions.                                 |
+| `core/panels/littles_law_invariant.png`          | Scatter of `L(T)` (x-axis) vs `Λ(T)·w(T)` (y-axis) with `y=x` reference line, equal aspect ratio.                     | Pure Little's Law invariant check: all finite points should lie near `y=x` if the metric calculations are consistent.          |
 
 Their detail descriptions follow.
 

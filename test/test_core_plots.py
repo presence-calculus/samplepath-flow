@@ -491,7 +491,7 @@ def test_NPanel_plot_uses_svg_format():
     def fake_context(out_path=None, **kwargs):
         assert out_path is None
         assert kwargs["out_dir"] == "/tmp/out"
-        assert kwargs["subdir"] == "core"
+        assert kwargs["subdir"] == "core/panels"
         assert kwargs["base_name"] == "sample_path_N"
         assert kwargs["chart_config"] == chart_config
         yield fig, ax, "out.png"
@@ -515,7 +515,7 @@ def test_NPanel_plot_uses_png_dpi():
     def fake_context(out_path=None, **kwargs):
         assert out_path is None
         assert kwargs["out_dir"] == "/tmp/out"
-        assert kwargs["subdir"] == "core"
+        assert kwargs["subdir"] == "core/panels"
         assert kwargs["base_name"] == "sample_path_N"
         assert kwargs["chart_config"] == chart_config
         yield fig, ax, "out.png"
@@ -854,11 +854,11 @@ def _fake_llw_context(fig, ax, *, caption: str, out_dir: str = "/tmp/out"):
         assert kwargs["caption"] == caption
         assert kwargs["unit"] is None
         assert kwargs["out_dir"] == out_dir
-        assert kwargs["subdir"] == "core"
+        assert kwargs["subdir"] == "core/panels"
         assert kwargs["base_name"] == "littles_law_invariant"
         chart_format = kwargs["chart_config"].chart_format
         yield fig, ax, resolve_chart_path(
-            out_dir, "core", "littles_law_invariant", chart_format
+            out_dir, "core/panels", "littles_law_invariant", chart_format
         )
 
     return _ctx
@@ -871,24 +871,35 @@ def test_core_driver_returns_expected_paths():
     chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     expected = [
-        resolve_chart_path(out_dir, "core", "sample_path_N", chart_config.chart_format),
         resolve_chart_path(
-            out_dir, "core", "time_average_N_L", chart_config.chart_format
+            out_dir, "core/panels", "sample_path_N", chart_config.chart_format
         ),
         resolve_chart_path(
-            out_dir, "core", "cumulative_arrival_rate_Lambda", chart_config.chart_format
+            out_dir, "core/panels", "time_average_N_L", chart_config.chart_format
         ),
         resolve_chart_path(
-            out_dir, "core", "average_residence_time_w", chart_config.chart_format
+            out_dir,
+            "core/panels",
+            "cumulative_arrival_rate_Lambda",
+            chart_config.chart_format,
         ),
         resolve_chart_path(
-            out_dir, "core", "cumulative_presence_mass_H", chart_config.chart_format
+            out_dir,
+            "core/panels",
+            "average_residence_time_w",
+            chart_config.chart_format,
         ),
         resolve_chart_path(
-            out_dir, "core", "cumulative_flow_diagram", chart_config.chart_format
+            out_dir,
+            "core/panels",
+            "cumulative_presence_mass_H",
+            chart_config.chart_format,
         ),
         resolve_chart_path(
-            out_dir, "core", "littles_law_invariant", chart_config.chart_format
+            out_dir, "core/panels", "cumulative_flow_diagram", chart_config.chart_format
+        ),
+        resolve_chart_path(
+            out_dir, "core/panels", "littles_law_invariant", chart_config.chart_format
         ),
         resolve_chart_path(
             out_dir, None, "sample_path_flow_metrics", chart_config.chart_format
@@ -1229,7 +1240,7 @@ def test_LLWPanel_renders_invariant_chart():
     )
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     expected_path = resolve_chart_path(
-        "/tmp/out", "core", "littles_law_invariant", "png"
+        "/tmp/out", "core/panels", "littles_law_invariant", "png"
     )
     with patch(
         "samplepath.plots.core.figure_context",

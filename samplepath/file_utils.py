@@ -58,6 +58,7 @@ def ensure_output_dirs(
     for chart_dir in [
         "input",
         "core",
+        "core/panels",
         "convergence",
         "convergence/panels",
         "stability/panels",

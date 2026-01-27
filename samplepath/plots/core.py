@@ -114,7 +114,7 @@ class NPanel:
             caption=caption,
             unit=unit,
             out_dir=out_dir,
-            subdir="core",
+            subdir="core/panels",
             base_name="sample_path_N",
         ) as (
             _,
@@ -180,7 +180,7 @@ class LPanel:
             caption=caption,
             unit=unit,
             out_dir=out_dir,
-            subdir="core",
+            subdir="core/panels",
             base_name="time_average_N_L",
         ) as (
             _,
@@ -262,7 +262,7 @@ class LambdaPanel:
             caption=caption,
             unit=unit,
             out_dir=out_dir,
-            subdir="core",
+            subdir="core/panels",
             base_name="cumulative_arrival_rate_Lambda",
         ) as (
             _,
@@ -334,7 +334,7 @@ class WPanel:
             caption=caption,
             unit=unit,
             out_dir=out_dir,
-            subdir="core",
+            subdir="core/panels",
             base_name="average_residence_time_w",
         ) as (
             _,
@@ -388,7 +388,7 @@ class HPanel:
             caption=caption,
             unit=unit,
             out_dir=out_dir,
-            subdir="core",
+            subdir="core/panels",
             base_name="cumulative_presence_mass_H",
         ) as (
             _,
@@ -515,7 +515,7 @@ class CFDPanel:
             caption=caption,
             unit=unit,
             out_dir=out_dir,
-            subdir="core",
+            subdir="core/panels",
             base_name="cumulative_flow_diagram",
         ) as (
             _,
@@ -649,7 +649,7 @@ class LLWPanel:
             caption=caption,
             unit=None,
             out_dir=out_dir,
-            subdir="core",
+            subdir="core/panels",
             base_name="littles_law_invariant",
         ) as (
             _,
