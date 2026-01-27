@@ -11,6 +11,9 @@ Documentation lives in `docs/`; examples in `examples/`. Generated artifacts (`c
 tree under `test/`.
 
 Agent must not modify any file outside the scope of the task being executed.
+----------
+## Coding and architectural guidance
+See decisions/codiing_style_guidelines.md for additional rules.
 
 ______________________________________________________________________
 
@@ -60,13 +63,13 @@ Agent must:
 ------------
 ## Code Review
 When instructed to 'see code feedback':
-- check the latest content of .task/code-review.md
+- check the latest content of task.md which will have feedback on the latest task
 - summarize the changes you plan to make including test changes and get them approved.
 - make the changes and wait for approval
 - commit the changes on approval
 
 When instructed to 'see testing feedback'
-- check the latest content of .task/test-suite-review.md
+- check the latest content of task.md
 - summarize the changes you plan to make and get them approved.
 - make the changes and report test stats
 - commit the changes on approval

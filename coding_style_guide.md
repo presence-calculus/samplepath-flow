@@ -2,8 +2,8 @@
 
 ## General function signature rules
 - Group related keyword args together in signatures: `show_title`, `title`, `show_derivations` (feature toggle first, then feature controls).
+- Maintain a consistent order for calling functions with keyword args: they should be in the same order they are declared in the function signature.
 
-## Title and Derivation Handling (Core Panels)
-- Place default titles as `title: str = "..."` parameters on the canonical renderer for each metric (one default per metric).
-- Use a shared `construct_title(base_title, show_derivations, derivation_key)` helper for derivation-aware titles.
-- Use a single `derivation_key` per title (no varargs) for these renderers.
+## Creating charts and plots
+- Review ADR in decisions/006-plotting-architecture-and-conventions.md
+- After implementing a change to the plot review that the it is compliant with the conventions and report any issues with compliance.
