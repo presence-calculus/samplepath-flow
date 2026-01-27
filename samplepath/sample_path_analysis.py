@@ -38,7 +38,7 @@ def produce_all_charts(df, args, filter_result, metrics, empirical_metrics, out_
     # create plots
     chart_config = ChartConfig.init_from_args(args)
     written += plot_core_flow_metrics_charts(
-        df, chart_config, filter_result, metrics, out_dir
+        metrics, filter_result, chart_config, out_dir
     )
     written += plot_convergence_charts(
         df, args, filter_result, metrics, empirical_metrics, out_dir

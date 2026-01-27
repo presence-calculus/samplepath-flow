@@ -12,15 +12,61 @@ and cleanup. Chart/layout code can focus on rendering onto the provided axes.
 from contextlib import contextmanager
 from dataclasses import dataclass
 import logging
+import os
 from typing import Callable, Iterator, Literal, Optional, Tuple, Union
 
 from matplotlib import pyplot as plt
 import numpy as np
 from pandas.tseries.frequencies import to_offset
 
+from samplepath.plots.chart_config import ChartConfig
 from samplepath.plots.helpers import add_caption
 
 logger = logging.getLogger(__name__)
+
+
+def resolve_chart_path(
+    out_dir: str, subdir: Optional[str], base_name: str, chart_format: str
+) -> str:
+    """Resolve an output path with subdir and the requested format extension."""
+    root, ext = os.path.splitext(base_name)
+    extension = chart_format.lstrip(".")
+    filename = f"{root}.{extension}" if ext else f"{base_name}.{extension}"
+    parts = [out_dir]
+    if subdir:
+        parts.append(subdir)
+    parts.append(filename)
+    return os.path.join(*parts)
+
+
+def build_chart_save_kwargs(
+    chart_format: str, chart_dpi: Optional[int]
+) -> dict[str, object]:
+    """Build savefig kwargs for the requested chart format."""
+    kwargs: dict[str, object] = {"format": chart_format}
+    if chart_format == "png" and chart_dpi is not None:
+        kwargs["dpi"] = chart_dpi
+    return kwargs
+
+
+def _resolve_output(
+    *,
+    chart_config: Optional[ChartConfig],
+    out_path: Optional[str],
+    out_dir: Optional[str],
+    subdir: Optional[str],
+    base_name: Optional[str],
+) -> tuple[str, dict[str, object]]:
+    cfg = chart_config or ChartConfig()
+    resolved_out_path = out_path
+    if resolved_out_path is None:
+        if not out_dir or not base_name:
+            raise ValueError("layout_context requires out_path or (out_dir, base_name)")
+        resolved_out_path = resolve_chart_path(
+            out_dir, subdir, base_name, cfg.chart_format
+        )
+    resolved_save_kwargs = build_chart_save_kwargs(cfg.chart_format, cfg.chart_dpi)
+    return resolved_out_path, resolved_save_kwargs
 
 
 def is_date_axis(unit: Optional[str]) -> bool:
@@ -132,17 +178,29 @@ def _format_targets(
 
 @contextmanager
 def layout_context(
-    out_path: str,
+    out_path: Optional[str] = None,
     *,
+    chart_config: Optional[ChartConfig] = None,
     layout: LayoutSpec,
     decor: Optional[FigureDecorSpec] = None,
+    # x-axis formatting
     unit: Optional[str] = "timestamp",
-    format_axis_fn: Callable[[plt.Axes, Optional[str]], None] = _format_axis_label,
     format_targets: Literal[
         "all", "bottom_row", "left_col", "bottom_left"
     ] = "bottom_row",
-    save_kwargs: Optional[dict] = None,
-) -> Iterator[Tuple[plt.Figure, Union[plt.Axes, np.ndarray]]]:
+    format_axis_fn: Callable[[plt.Axes, Optional[str]], None] = _format_axis_label,
+    # save configuration
+    out_dir: Optional[str] = None,
+    subdir: Optional[str] = None,
+    base_name: Optional[str] = None,
+) -> Iterator[Tuple[plt.Figure, Union[plt.Axes, np.ndarray], str]]:
+    resolved_out_path, resolved_save_kwargs = _resolve_output(
+        chart_config=chart_config,
+        out_path=out_path,
+        out_dir=out_dir,
+        subdir=subdir,
+        base_name=base_name,
+    )
     effective_figsize = layout.figsize or (10.0, 3.4 * max(1, layout.nrows))
     fig, axes = plt.subplots(
         nrows=layout.nrows,
@@ -152,7 +210,7 @@ def layout_context(
         sharey=layout.sharey,
     )
     try:
-        yield fig, axes
+        yield fig, axes, resolved_out_path
 
         targets = _format_targets(axes, policy=format_targets)
         for ax in targets:
@@ -172,25 +230,32 @@ def layout_context(
                     fig.text(0.5, caption_y, decor.caption, ha="center", va="top")
                 else:
                     add_caption(fig, decor.caption)
-        fig.savefig(out_path, **(save_kwargs or {}))
+        fig.savefig(resolved_out_path, **resolved_save_kwargs)
     finally:
         plt.close(fig)
 
 
 @contextmanager
 def figure_context(
-    out_path: str,
+    out_path: Optional[str] = None,
     *,
+    chart_config: Optional[ChartConfig] = None,
+    # plot sizing
     nrows: int = 1,
     ncols: int = 1,
     figsize: Optional[Tuple[float, float]] = None,
-    sharex: bool = False,
-    caption: Optional[str] = None,
-    unit: Optional[str] = "timestamp",
-    save_kwargs: Optional[dict] = None,
     tight_layout: bool = True,
+    # chart decorators
+    caption: Optional[str] = None,
+    # x-axis formatting
+    unit: Optional[str] = "timestamp",
+    sharex: bool = False,
     format_axis_fn: Callable[[plt.Axes, Optional[str]], None] = _format_axis_label,
-) -> Iterator[Tuple[plt.Figure, Union[plt.Axes, np.ndarray]]]:
+    # save configuration
+    out_dir: Optional[str] = None,
+    subdir: Optional[str] = None,
+    base_name: Optional[str] = None,
+) -> Iterator[Tuple[plt.Figure, Union[plt.Axes, np.ndarray], str]]:
     layout = LayoutSpec(
         nrows=nrows,
         ncols=ncols,
@@ -207,11 +272,14 @@ def figure_context(
     format_policy = "bottom_row" if sharex else "all"
     with layout_context(
         out_path,
+        chart_config=chart_config,
         layout=layout,
         decor=decor,
         unit=unit,
-        format_axis_fn=format_axis_fn,
         format_targets=format_policy,
-        save_kwargs=save_kwargs,
-    ) as (fig, axes):
-        yield fig, axes
+        format_axis_fn=format_axis_fn,
+        out_dir=out_dir,
+        subdir=subdir,
+        base_name=base_name,
+    ) as (fig, axes, resolved_out_path):
+        yield fig, axes, resolved_out_path

@@ -4,6 +4,7 @@
 from contextlib import contextmanager
 import os
 from types import SimpleNamespace
+from typing import Optional
 from unittest.mock import MagicMock, patch
 
 from matplotlib import colors as mcolors
@@ -13,7 +14,7 @@ import pandas as pd
 from samplepath.plots import core
 from samplepath.plots.chart_config import ChartConfig
 from samplepath.plots.core import ClipOptions
-from samplepath.plots.helpers import resolve_chart_path
+from samplepath.plots.figure_context import resolve_chart_path
 
 
 def _t(s: str) -> pd.Timestamp:
@@ -465,17 +466,16 @@ def test_plot_single_panel_calls_renderer():
 
     @contextmanager
     def fake_context(*args, **kwargs):
-        yield fig, ax
+        yield fig, ax, "out.png"
 
     with (
         patch("samplepath.plots.core.figure_context", side_effect=fake_context),
         patch("samplepath.plots.core.NPanel.render") as mock_render,
     ):
         core.NPanel(with_event_marks=True).plot(
-            None,
-            ChartConfig(with_event_marks=True),
-            SimpleNamespace(display="Filters: test", label="test"),
             _metrics_fixture(),
+            SimpleNamespace(display="Filters: test", label="test"),
+            ChartConfig(with_event_marks=True),
             "/tmp/out",
         )
     mock_render.assert_called_once()
@@ -488,17 +488,19 @@ def test_NPanel_plot_uses_svg_format():
     chart_config = ChartConfig(chart_format="svg")
 
     @contextmanager
-    def fake_context(out_path, **kwargs):
-        assert out_path.endswith(".svg")
-        assert kwargs["save_kwargs"]["format"] == "svg"
-        yield fig, ax
+    def fake_context(out_path=None, **kwargs):
+        assert out_path is None
+        assert kwargs["out_dir"] == "/tmp/out"
+        assert kwargs["subdir"] == "core"
+        assert kwargs["base_name"] == "sample_path_N"
+        assert kwargs["chart_config"] == chart_config
+        yield fig, ax, "out.png"
 
     with patch("samplepath.plots.core.figure_context", side_effect=fake_context):
         core.NPanel().plot(
-            None,
-            chart_config,
-            SimpleNamespace(display="Filters: test", label="test"),
             metrics,
+            SimpleNamespace(display="Filters: test", label="test"),
+            chart_config,
             "/tmp/out",
         )
 
@@ -510,18 +512,19 @@ def test_NPanel_plot_uses_png_dpi():
     chart_config = ChartConfig(chart_format="png", chart_dpi=200)
 
     @contextmanager
-    def fake_context(out_path, **kwargs):
-        assert out_path.endswith(".png")
-        assert kwargs["save_kwargs"]["format"] == "png"
-        assert kwargs["save_kwargs"]["dpi"] == 200
-        yield fig, ax
+    def fake_context(out_path=None, **kwargs):
+        assert out_path is None
+        assert kwargs["out_dir"] == "/tmp/out"
+        assert kwargs["subdir"] == "core"
+        assert kwargs["base_name"] == "sample_path_N"
+        assert kwargs["chart_config"] == chart_config
+        yield fig, ax, "out.png"
 
     with patch("samplepath.plots.core.figure_context", side_effect=fake_context):
         core.NPanel().plot(
-            None,
-            chart_config,
-            SimpleNamespace(display="Filters: test", label="test"),
             metrics,
+            SimpleNamespace(display="Filters: test", label="test"),
+            chart_config,
             "/tmp/out",
         )
 
@@ -529,143 +532,143 @@ def test_NPanel_plot_uses_png_dpi():
 def test_plot_single_panel_L_calls_renderer():
     fig = MagicMock()
     ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
 
     @contextmanager
     def fake_context(*args, **kwargs):
-        yield fig, ax
+        yield fig, ax, "out.png"
 
     with (
         patch("samplepath.plots.core.figure_context", side_effect=fake_context),
-        patch("samplepath.plots.core.LPanel.plot") as mock_render,
+        patch("samplepath.plots.core.LPanel.render") as mock_render,
     ):
-        core.LPanel().plot("out.png", [_t("2024-01-01")], np.array([2.0]))
+        core.LPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
     mock_render.assert_called_once()
 
 
 def test_plot_single_panel_Lambda_calls_renderer():
     fig = MagicMock()
     ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
 
     @contextmanager
     def fake_context(*args, **kwargs):
-        yield fig, ax
+        yield fig, ax, "out.png"
 
     with (
         patch("samplepath.plots.core.figure_context", side_effect=fake_context),
-        patch("samplepath.plots.core.LambdaPanel.plot") as mock_render,
+        patch("samplepath.plots.core.LambdaPanel.render") as mock_render,
     ):
-        core.LambdaPanel().plot("out.png", [_t("2024-01-01")], np.array([3.0]))
+        core.LambdaPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
     mock_render.assert_called_once()
 
 
 def test_plot_single_panel_w_calls_renderer():
     fig = MagicMock()
     ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
 
     @contextmanager
     def fake_context(*args, **kwargs):
-        yield fig, ax
+        yield fig, ax, "out.png"
 
     with (
         patch("samplepath.plots.core.figure_context", side_effect=fake_context),
-        patch("samplepath.plots.core.WPanel.plot") as mock_render,
+        patch("samplepath.plots.core.WPanel.render") as mock_render,
     ):
-        core.WPanel().plot("out.png", [_t("2024-01-01")], np.array([4.0]))
+        core.WPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
     mock_render.assert_called_once()
 
 
 def test_plot_single_panel_H_calls_renderer():
     fig = MagicMock()
     ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
 
     @contextmanager
     def fake_context(*args, **kwargs):
-        yield fig, ax
+        yield fig, ax, "out.png"
 
     with (
         patch("samplepath.plots.core.figure_context", side_effect=fake_context),
-        patch("samplepath.plots.core.HPanel.plot") as mock_render,
+        patch("samplepath.plots.core.HPanel.render") as mock_render,
     ):
-        core.HPanel().plot("out.png", [_t("2024-01-01")], np.array([5.0]))
+        core.HPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
     mock_render.assert_called_once()
 
 
 def test_plot_single_panel_CFD_calls_renderer():
     fig = MagicMock()
     ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
 
     @contextmanager
     def fake_context(*args, **kwargs):
-        yield fig, ax
+        yield fig, ax, "out.png"
 
     with (
         patch("samplepath.plots.core.figure_context", side_effect=fake_context),
         patch("samplepath.plots.core.CFDPanel.render") as mock_render,
     ):
-        core.CFDPanel().plot(
-            "out.png",
-            [_t("2024-01-01")],
-            np.array([1.0]),
-            np.array([0.0]),
-            arrival_times=[_t("2024-01-01")],
-            departure_times=[_t("2024-01-01")],
-        )
+        core.CFDPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
     mock_render.assert_called_once()
 
 
-def test_plot_CFD_passes_unit():
+def test_CFDPanel_plot_uses_metrics_freq_for_unit():
     fig = MagicMock()
     ax = MagicMock()
+    metrics = _metrics_fixture(freq="W")
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
 
     @contextmanager
     def fake_context(*args, **kwargs):
-        yield fig, ax
+        yield fig, ax, "out.png"
 
     with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
-        core.CFDPanel().plot(
-            "out.png",
-            [_t("2024-01-01")],
-            np.array([1.0]),
-            np.array([0.0]),
-            unit="W",
-        )
+        core.CFDPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
     assert ctx.call_args.kwargs["unit"] == "W"
 
 
-def test_plot_CFD_passes_caption():
+def test_CFDPanel_plot_uses_filter_caption():
     fig = MagicMock()
     ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
 
     @contextmanager
     def fake_context(*args, **kwargs):
-        yield fig, ax
+        yield fig, ax, "out.png"
 
     with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
-        core.CFDPanel().plot(
-            "out.png",
-            [_t("2024-01-01")],
-            np.array([1.0]),
-            np.array([0.0]),
-            caption="Filters: test",
-        )
+        core.CFDPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
     assert ctx.call_args.kwargs["caption"] == "Filters: test"
 
 
 def test_plot_CFD_uses_single_panel_layout():
     fig = MagicMock()
     ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
 
     @contextmanager
     def fake_context(*args, **kwargs):
-        yield fig, ax
+        yield fig, ax, "out.png"
 
     with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
-        core.CFDPanel().plot(
-            "out.png",
-            [_t("2024-01-01")],
-            np.array([1.0]),
-            np.array([0.0]),
-        )
+        core.CFDPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
     assert ctx.call_args.kwargs["nrows"] == 1
 
 
@@ -683,7 +686,7 @@ def test_plot_core_stack_calls_all_renderers():
 
     @contextmanager
     def fake_context(*args, **kwargs):
-        yield fig, axes
+        yield fig, axes, "out.png"
 
     with (
         patch("samplepath.plots.core.layout_context", side_effect=fake_context),
@@ -693,10 +696,9 @@ def test_plot_core_stack_calls_all_renderers():
         patch("samplepath.plots.core.WPanel.render") as mock_w,
     ):
         core.plot_core_stack(
-            None,
-            chart_config,
-            filter_result,
             metrics,
+            filter_result,
+            chart_config,
             "/tmp/out",
         )
 
@@ -712,21 +714,27 @@ def test_plot_core_stack_applies_layout_and_caption():
     metrics = _metrics_fixture()
     chart_config = ChartConfig()
     filter_result = SimpleNamespace(display="Filters: test", label="test")
+    outer_chart_config = chart_config
 
     @contextmanager
     def fake_context(
-        out_path,
+        out_path=None,
         *,
         layout,
         decor,
         unit,
         format_axis_fn,
         format_targets,
-        save_kwargs=None,
+        chart_config=None,
+        out_dir=None,
+        subdir=None,
+        base_name=None,
     ):
-        assert out_path == resolve_chart_path(
-            "/tmp/out", "sample_path_flow_metrics", chart_config.chart_format
-        )
+        assert out_path is None
+        assert chart_config == outer_chart_config
+        assert out_dir == "/tmp/out"
+        assert subdir is None
+        assert base_name == "sample_path_flow_metrics"
         assert layout.nrows == 4
         assert layout.ncols == 1
         assert layout.figsize == (12.0, 11.0)
@@ -739,8 +747,7 @@ def test_plot_core_stack_applies_layout_and_caption():
         assert decor.tight_layout_rect == (0, 0, 1, 0.96)
         assert format_axis_fn is not None
         assert format_targets == "bottom_row"
-        assert save_kwargs == {"format": chart_config.chart_format, "dpi": 150}
-        yield fig, axes
+        yield fig, axes, "out.png"
 
     with (
         patch("samplepath.plots.core.layout_context", side_effect=fake_context),
@@ -750,10 +757,9 @@ def test_plot_core_stack_applies_layout_and_caption():
         patch("samplepath.plots.core.WPanel.render"),
     ):
         core.plot_core_stack(
-            None,
-            chart_config,
-            filter_result,
             metrics,
+            filter_result,
+            chart_config,
             "/tmp/out",
         )
 
@@ -764,22 +770,30 @@ def test_plot_core_stack_uses_tighter_layout_without_caption():
     metrics = _metrics_fixture()
     chart_config = ChartConfig()
     filter_result = SimpleNamespace(display="Filters: ", label="")
+    outer_chart_config = chart_config
 
     @contextmanager
     def fake_context(
-        out_path,
+        out_path=None,
         *,
         layout,
         decor,
         unit,
         format_axis_fn,
         format_targets,
-        save_kwargs=None,
+        chart_config=None,
+        out_dir=None,
+        subdir=None,
+        base_name=None,
     ):
+        assert out_path is None
+        assert chart_config == outer_chart_config
+        assert out_dir == "/tmp/out"
+        assert subdir is None
+        assert base_name == "sample_path_flow_metrics"
         assert decor.caption == "Filters: None"
         assert decor.tight_layout_rect == (0, 0, 1, 0.96)
-        assert save_kwargs == {"format": chart_config.chart_format, "dpi": 150}
-        yield fig, axes
+        yield fig, axes, "out.png"
 
     with (
         patch("samplepath.plots.core.layout_context", side_effect=fake_context),
@@ -789,10 +803,9 @@ def test_plot_core_stack_uses_tighter_layout_without_caption():
         patch("samplepath.plots.core.WPanel.render"),
     ):
         core.plot_core_stack(
-            None,
-            chart_config,
-            filter_result,
             metrics,
+            filter_result,
+            chart_config,
             "/tmp/out",
         )
 
@@ -813,37 +826,76 @@ def _metrics_fixture(freq: str | None = "D"):
     )
 
 
+def _llw_metrics(
+    *,
+    times: list[pd.Timestamp],
+    L_vals: np.ndarray,
+    Lam_vals: np.ndarray,
+    w_vals: np.ndarray,
+    arrival_times: Optional[list[pd.Timestamp]] = None,
+    departure_times: Optional[list[pd.Timestamp]] = None,
+):
+    return SimpleNamespace(
+        times=times,
+        L=L_vals,
+        Lambda=Lam_vals,
+        w=w_vals,
+        arrival_times=arrival_times or [],
+        departure_times=departure_times or [],
+        freq=None,
+    )
+
+
+def _fake_llw_context(fig, ax, *, caption: str, out_dir: str = "/tmp/out"):
+    @contextmanager
+    def _ctx(out_path=None, **kwargs):
+        assert out_path is None
+        assert kwargs["figsize"] == (6.0, 6.0)
+        assert kwargs["caption"] == caption
+        assert kwargs["unit"] is None
+        assert kwargs["out_dir"] == out_dir
+        assert kwargs["subdir"] == "core"
+        assert kwargs["base_name"] == "littles_law_invariant"
+        chart_format = kwargs["chart_config"].chart_format
+        yield fig, ax, resolve_chart_path(
+            out_dir, "core", "littles_law_invariant", chart_format
+        )
+
+    return _ctx
+
+
 def test_core_driver_returns_expected_paths():
     metrics = _metrics_fixture()
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
     chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
-    core_dir = os.path.join(out_dir, "core")
     expected = [
-        resolve_chart_path(core_dir, "sample_path_N", chart_config.chart_format),
-        resolve_chart_path(core_dir, "time_average_N_L", chart_config.chart_format),
+        resolve_chart_path(out_dir, "core", "sample_path_N", chart_config.chart_format),
         resolve_chart_path(
-            core_dir, "cumulative_arrival_rate_Lambda", chart_config.chart_format
+            out_dir, "core", "time_average_N_L", chart_config.chart_format
         ),
         resolve_chart_path(
-            core_dir, "average_residence_time_w", chart_config.chart_format
+            out_dir, "core", "cumulative_arrival_rate_Lambda", chart_config.chart_format
         ),
         resolve_chart_path(
-            core_dir, "cumulative_presence_mass_H", chart_config.chart_format
+            out_dir, "core", "average_residence_time_w", chart_config.chart_format
         ),
         resolve_chart_path(
-            core_dir, "cumulative_flow_diagram", chart_config.chart_format
+            out_dir, "core", "cumulative_presence_mass_H", chart_config.chart_format
         ),
         resolve_chart_path(
-            core_dir, "littles_law_invariant", chart_config.chart_format
+            out_dir, "core", "cumulative_flow_diagram", chart_config.chart_format
         ),
         resolve_chart_path(
-            out_dir, "sample_path_flow_metrics", chart_config.chart_format
+            out_dir, "core", "littles_law_invariant", chart_config.chart_format
+        ),
+        resolve_chart_path(
+            out_dir, None, "sample_path_flow_metrics", chart_config.chart_format
         ),
     ]
     with (
-        patch("samplepath.plots.core.plot_core_stack"),
+        patch("samplepath.plots.core.plot_core_stack") as mock_stack,
         patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
         patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
         patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
@@ -852,8 +904,16 @@ def test_core_driver_returns_expected_paths():
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot_CFD,
         patch("samplepath.plots.core.LLWPanel.plot") as mock_plot_llw,
     ):
+        mock_stack.return_value = expected[-1]
+        mock_plot_N.return_value = expected[0]
+        mock_plot_L.return_value = expected[1]
+        mock_plot_Lam.return_value = expected[2]
+        mock_plot_w.return_value = expected[3]
+        mock_plot_H.return_value = expected[4]
+        mock_plot_CFD.return_value = expected[5]
+        mock_plot_llw.return_value = expected[6]
         written = core.plot_core_flow_metrics_charts(
-            None, chart_config, filter_result, metrics, out_dir
+            metrics, filter_result, chart_config, out_dir
         )
     assert written == expected
     mock_plot_N.assert_called_once()
@@ -887,11 +947,9 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
         patch("samplepath.plots.core.LLWPanel.plot"),
     ):
         core.plot_core_flow_metrics_charts(
-            None, chart_config, filter_result, metrics, out_dir
+            metrics, filter_result, chart_config, out_dir
         )
-    mock_stack.assert_called_once_with(
-        None, chart_config, filter_result, metrics, out_dir
-    )
+    mock_stack.assert_called_once_with(metrics, filter_result, chart_config, out_dir)
     mock_plot_N.assert_called_once()
     mock_plot_L.assert_called_once()
     mock_plot_Lam.assert_called_once()
@@ -922,7 +980,7 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w():
         patch("samplepath.plots.core.WPanel") as mock_w_cls,
     ):
         core.plot_core_flow_metrics_charts(
-            None, chart_config, filter_result, metrics, out_dir
+            metrics, filter_result, chart_config, out_dir
         )
     assert mock_lam_cls.call_args.kwargs["with_event_marks"] is True
     assert mock_w_cls.call_args.kwargs["with_event_marks"] is True
@@ -955,7 +1013,7 @@ def test_core_driver_passes_show_derivations_to_CFD():
         patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
     ):
         core.plot_core_flow_metrics_charts(
-            None, chart_config, filter_result, metrics, out_dir
+            metrics, filter_result, chart_config, out_dir
         )
     assert mock_cfd_cls.call_args.kwargs["show_derivations"] is True
     mock_plot_N.assert_called_once()
@@ -984,33 +1042,25 @@ def test_core_driver_uses_metrics_freq_for_unit():
             patch("samplepath.plots.core.LLWPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
-                None, chart_config, filter_result, metrics, out_dir
+                metrics, filter_result, chart_config, out_dir
             )
-    assert mock_plot.call_args.args[1] == chart_config
+    assert mock_plot.call_args.args[2] == chart_config
 
 
-def test_core_driver_falls_back_to_timestamp_unit():
+def test_LambdaPanel_plot_falls_back_to_timestamp_unit():
+    fig = MagicMock()
+    ax = MagicMock()
     metrics = _metrics_fixture(freq=None)
-    out_dir = "/tmp/out"
-    args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
-    chart_config = ChartConfig.init_from_args(args)
+    chart_config = ChartConfig()
     filter_result = SimpleNamespace(display="Filters: test", label="test")
-    with (
-        patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot,
-    ):
-        with (
-            patch("samplepath.plots.core.NPanel.plot"),
-            patch("samplepath.plots.core.LPanel.plot"),
-            patch("samplepath.plots.core.WPanel.plot"),
-            patch("samplepath.plots.core.HPanel.plot"),
-            patch("samplepath.plots.core.CFDPanel.plot"),
-            patch("samplepath.plots.core.LLWPanel.plot"),
-        ):
-            core.plot_core_flow_metrics_charts(
-                None, chart_config, filter_result, metrics, out_dir
-            )
-    assert mock_plot.call_args.kwargs["unit"] == "timestamp"
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
+        core.LambdaPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
+    assert ctx.call_args.kwargs["unit"] == "timestamp"
 
 
 def test_NPanel_plot_uses_metrics_freq_for_unit():
@@ -1020,14 +1070,13 @@ def test_NPanel_plot_uses_metrics_freq_for_unit():
 
     @contextmanager
     def fake_context(*args, **kwargs):
-        yield fig, ax
+        yield fig, ax, "out.png"
 
     with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
         core.NPanel().plot(
-            None,
-            ChartConfig(),
-            SimpleNamespace(display="Filters: test", label="test"),
             metrics,
+            SimpleNamespace(display="Filters: test", label="test"),
+            ChartConfig(),
             "/tmp/out",
         )
     assert ctx.call_args.kwargs["unit"] == "W"
@@ -1040,41 +1089,32 @@ def test_NPanel_plot_falls_back_to_timestamp_unit():
 
     @contextmanager
     def fake_context(*args, **kwargs):
-        yield fig, ax
+        yield fig, ax, "out.png"
 
     with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
         core.NPanel().plot(
-            None,
-            ChartConfig(),
-            SimpleNamespace(display="Filters: test", label="test"),
             metrics,
+            SimpleNamespace(display="Filters: test", label="test"),
+            ChartConfig(),
             "/tmp/out",
         )
     assert ctx.call_args.kwargs["unit"] == "timestamp"
 
 
-def test_core_driver_uses_filter_display_caption():
+def test_WPanel_plot_uses_filter_display_caption():
+    fig = MagicMock()
+    ax = MagicMock()
     metrics = _metrics_fixture()
-    out_dir = "/tmp/out"
-    args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
-    chart_config = ChartConfig.init_from_args(args)
+    chart_config = ChartConfig()
     filter_result = SimpleNamespace(display="Filters: test", label="test")
-    with (
-        patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.WPanel.plot") as mock_plot,
-    ):
-        with (
-            patch("samplepath.plots.core.NPanel.plot"),
-            patch("samplepath.plots.core.LPanel.plot"),
-            patch("samplepath.plots.core.LambdaPanel.plot"),
-            patch("samplepath.plots.core.HPanel.plot"),
-            patch("samplepath.plots.core.CFDPanel.plot"),
-            patch("samplepath.plots.core.LLWPanel.plot"),
-        ):
-            core.plot_core_flow_metrics_charts(
-                None, chart_config, filter_result, metrics, out_dir
-            )
-    assert mock_plot.call_args.kwargs["caption"] == "Filters: test"
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with patch("samplepath.plots.core.figure_context", side_effect=fake_context) as ctx:
+        core.WPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
+    assert ctx.call_args.kwargs["caption"] == "Filters: test"
 
 
 def test_core_driver_calls_plot_H_under_core_dir():
@@ -1096,13 +1136,9 @@ def test_core_driver_calls_plot_H_under_core_dir():
             patch("samplepath.plots.core.LLWPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
-                None, chart_config, filter_result, metrics, out_dir
+                metrics, filter_result, chart_config, out_dir
             )
-    assert mock_plot.call_args.args[0] == resolve_chart_path(
-        os.path.join(out_dir, "core"),
-        "cumulative_presence_mass_H",
-        chart_config.chart_format,
-    )
+    assert mock_plot.call_args.args[-1] == out_dir
 
 
 def test_core_driver_calls_plot_CFD_under_core_dir():
@@ -1134,13 +1170,9 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot,
     ):
         core.plot_core_flow_metrics_charts(
-            None, chart_config, filter_result, metrics, out_dir
+            metrics, filter_result, chart_config, out_dir
         )
-    assert mock_plot.call_args.args[0] == resolve_chart_path(
-        os.path.join(out_dir, "core"),
-        "cumulative_flow_diagram",
-        chart_config.chart_format,
-    )
+    assert mock_plot.call_args.args[-1] == out_dir
 
 
 def test_core_driver_passes_event_marks_to_CFD():
@@ -1165,7 +1197,7 @@ def test_core_driver_passes_event_marks_to_CFD():
         patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
     ):
         core.plot_core_flow_metrics_charts(
-            None, chart_config, filter_result, metrics, out_dir
+            metrics, filter_result, chart_config, out_dir
         )
     assert mock_cfd_cls.call_args.kwargs["with_event_marks"] is True
 
@@ -1173,17 +1205,25 @@ def test_core_driver_passes_event_marks_to_CFD():
 def test_LLWPanel_renders_invariant_chart():
     fig = MagicMock()
     ax = MagicMock()
-    with (
-        patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)),
-        patch("samplepath.plots.core.add_caption") as mock_caption,
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Lam_vals=np.array([1.0, 1.5]),
+        w_vals=np.array([2.0, 1.0]),
+        arrival_times=[times[0]],
+        departure_times=[times[1]],
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    expected_path = resolve_chart_path(
+        "/tmp/out", "core", "littles_law_invariant", "png"
+    )
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
     ):
-        core.LLWPanel(title="L(T) vs Λ(T).w(T)").plot(
-            "out.png",
-            [_t("2024-01-01"), _t("2024-01-02")],
-            np.array([1.0, 2.0]),
-            np.array([1.0, 1.5]),
-            np.array([2.0, 1.0]),
-            caption="Filters: test",
+        written = core.LLWPanel(title="L(T) vs Λ(T).w(T)").plot(
+            metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     ax.plot.assert_called_once()
     ax.set_aspect.assert_called_once_with("equal", adjustable="box")
@@ -1191,22 +1231,25 @@ def test_LLWPanel_renders_invariant_chart():
     ax.set_xlabel.assert_called_once_with("L(T)")
     ax.set_ylabel.assert_called_once_with("Λ(T)·w(T)")
     ax.set_title.assert_called_once_with("L(T) vs Λ(T).w(T)")
-    mock_caption.assert_called_once_with(fig, "Filters: test")
-    fig.tight_layout.assert_called_once_with(rect=(0.05, 0, 1, 1))
-    fig.savefig.assert_called_once_with("out.png", format="png", dpi=150)
+    assert written == expected_path
 
 
 def test_LLWPanel_skips_reference_line_on_nonfinite():
     fig = MagicMock()
     ax = MagicMock()
-    with (patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)),):
-        core.LLWPanel().plot(
-            "out.png",
-            [_t("2024-01-01")],
-            np.array([np.nan]),
-            np.array([np.nan]),
-            np.array([np.nan]),
-        )
+    times = [_t("2024-01-01")]
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([np.nan]),
+        Lam_vals=np.array([np.nan]),
+        w_vals=np.array([np.nan]),
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
+    ):
+        core.LLWPanel().plot(metrics, filter_result, ChartConfig(), "/tmp/out")
     ax.plot.assert_not_called()
     ax.scatter.assert_not_called()
 
@@ -1215,15 +1258,21 @@ def test_LLWPanel_event_marks_colors_arrivals_purple():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
-    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Lam_vals=np.array([1.0, 1.0]),
+        w_vals=np.array([1.0, 1.0]),
+        arrival_times=[times[0]],
+        departure_times=[times[1]],
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
+    ):
         core.LLWPanel(with_event_marks=True).plot(
-            "out.png",
-            times,
-            np.array([1.0, 2.0]),
-            np.array([1.0, 1.0]),
-            np.array([1.0, 1.0]),
-            arrival_times=[times[0]],
-            departure_times=[times[1]],
+            metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.scatter.call_args.kwargs["color"]
     assert colors[0][:3] == mcolors.to_rgba("purple")[:3]
@@ -1233,15 +1282,21 @@ def test_LLWPanel_event_marks_colors_departures_green():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
-    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Lam_vals=np.array([1.0, 1.0]),
+        w_vals=np.array([1.0, 1.0]),
+        arrival_times=[times[0]],
+        departure_times=[times[1]],
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
+    ):
         core.LLWPanel(with_event_marks=True).plot(
-            "out.png",
-            times,
-            np.array([1.0, 2.0]),
-            np.array([1.0, 1.0]),
-            np.array([1.0, 1.0]),
-            arrival_times=[times[0]],
-            departure_times=[times[1]],
+            metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.scatter.call_args.kwargs["color"]
     assert colors[1][:3] == mcolors.to_rgba("green")[:3]
@@ -1251,15 +1306,21 @@ def test_LLWPanel_event_marks_alpha_increases():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
-    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Lam_vals=np.array([1.0, 1.0]),
+        w_vals=np.array([1.0, 1.0]),
+        arrival_times=[times[0]],
+        departure_times=[times[1]],
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
+    ):
         core.LLWPanel(with_event_marks=True).plot(
-            "out.png",
-            times,
-            np.array([1.0, 2.0]),
-            np.array([1.0, 1.0]),
-            np.array([1.0, 1.0]),
-            arrival_times=[times[0]],
-            departure_times=[times[1]],
+            metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.scatter.call_args.kwargs["color"]
     assert colors[0][3] < colors[1][3]
@@ -1269,15 +1330,21 @@ def test_LLWPanel_event_marks_drop_lines_arrival_color():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
-    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Lam_vals=np.array([1.0, 1.0]),
+        w_vals=np.array([1.0, 1.0]),
+        arrival_times=[times[0]],
+        departure_times=[times[1]],
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
+    ):
         core.LLWPanel(with_event_marks=True).plot(
-            "out.png",
-            times,
-            np.array([1.0, 2.0]),
-            np.array([1.0, 1.0]),
-            np.array([1.0, 1.0]),
-            arrival_times=[times[0]],
-            departure_times=[times[1]],
+            metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.vlines.call_args.kwargs["colors"]
     assert colors[0] == mcolors.to_rgba("purple", alpha=0.25)
@@ -1287,15 +1354,21 @@ def test_LLWPanel_event_marks_drop_lines_departure_color():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
-    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Lam_vals=np.array([1.0, 1.0]),
+        w_vals=np.array([1.0, 1.0]),
+        arrival_times=[times[0]],
+        departure_times=[times[1]],
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
+    ):
         core.LLWPanel(with_event_marks=True).plot(
-            "out.png",
-            times,
-            np.array([1.0, 2.0]),
-            np.array([1.0, 1.0]),
-            np.array([1.0, 1.0]),
-            arrival_times=[times[0]],
-            departure_times=[times[1]],
+            metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.vlines.call_args.kwargs["colors"]
     assert colors[1] == mcolors.to_rgba("green", alpha=0.25)
@@ -1305,15 +1378,21 @@ def test_LLWPanel_event_marks_hlines_arrival_color():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
-    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Lam_vals=np.array([1.0, 1.0]),
+        w_vals=np.array([1.0, 1.0]),
+        arrival_times=[times[0]],
+        departure_times=[times[1]],
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
+    ):
         core.LLWPanel(with_event_marks=True).plot(
-            "out.png",
-            times,
-            np.array([1.0, 2.0]),
-            np.array([1.0, 1.0]),
-            np.array([1.0, 1.0]),
-            arrival_times=[times[0]],
-            departure_times=[times[1]],
+            metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.hlines.call_args.kwargs["colors"]
     assert colors[0] == mcolors.to_rgba("purple", alpha=0.25)
@@ -1323,15 +1402,21 @@ def test_LLWPanel_event_marks_hlines_departure_color():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
-    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Lam_vals=np.array([1.0, 1.0]),
+        w_vals=np.array([1.0, 1.0]),
+        arrival_times=[times[0]],
+        departure_times=[times[1]],
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
+    ):
         core.LLWPanel(with_event_marks=True).plot(
-            "out.png",
-            times,
-            np.array([1.0, 2.0]),
-            np.array([1.0, 1.0]),
-            np.array([1.0, 1.0]),
-            arrival_times=[times[0]],
-            departure_times=[times[1]],
+            metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.hlines.call_args.kwargs["colors"]
     assert colors[1] == mcolors.to_rgba("green", alpha=0.25)
@@ -1341,15 +1426,21 @@ def test_LLWPanel_event_marks_adds_legend():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
-    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Lam_vals=np.array([1.0, 1.0]),
+        w_vals=np.array([1.0, 1.0]),
+        arrival_times=[times[0]],
+        departure_times=[times[1]],
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
+    ):
         core.LLWPanel(with_event_marks=True).plot(
-            "out.png",
-            times,
-            np.array([1.0, 2.0]),
-            np.array([1.0, 1.0]),
-            np.array([1.0, 1.0]),
-            arrival_times=[times[0]],
-            departure_times=[times[1]],
+            metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     ax.legend.assert_called_once()
 
@@ -1358,13 +1449,19 @@ def test_LLWPanel_no_event_marks_alpha_increases():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
-    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Lam_vals=np.array([1.0, 1.0]),
+        w_vals=np.array([1.0, 1.0]),
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
+    ):
         core.LLWPanel(with_event_marks=False).plot(
-            "out.png",
-            times,
-            np.array([1.0, 2.0]),
-            np.array([1.0, 1.0]),
-            np.array([1.0, 1.0]),
+            metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.scatter.call_args.kwargs["color"]
     assert colors[0][3] < colors[1][3]
@@ -1374,13 +1471,19 @@ def test_LLWPanel_no_event_marks_has_no_legend():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
-    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Lam_vals=np.array([1.0, 1.0]),
+        w_vals=np.array([1.0, 1.0]),
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
+    ):
         core.LLWPanel(with_event_marks=False).plot(
-            "out.png",
-            times,
-            np.array([1.0, 2.0]),
-            np.array([1.0, 1.0]),
-            np.array([1.0, 1.0]),
+            metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     ax.legend.assert_not_called()
 
@@ -1389,15 +1492,21 @@ def test_LLWPanel_departure_overrides_arrival_color():
     fig = MagicMock()
     ax = MagicMock()
     times = [_t("2024-01-01")]
-    with patch("samplepath.plots.core.plt.subplots", return_value=(fig, ax)):
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([1.0]),
+        Lam_vals=np.array([1.0]),
+        w_vals=np.array([1.0]),
+        arrival_times=times,
+        departure_times=times,
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
+    ):
         core.LLWPanel(with_event_marks=True).plot(
-            "out.png",
-            times,
-            np.array([1.0]),
-            np.array([1.0]),
-            np.array([1.0]),
-            arrival_times=times,
-            departure_times=times,
+            metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.scatter.call_args.kwargs["color"]
     assert colors[0][:3] == mcolors.to_rgba("green")[:3]
@@ -1422,26 +1531,16 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
             patch("samplepath.plots.core.CFDPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
-                None, chart_config, filter_result, metrics, out_dir
+                metrics, filter_result, chart_config, out_dir
             )
     mock_panel.assert_called_once_with(
         with_event_marks=False,
-        title="L(T) vs Λ(T).w(T)",
     )
     mock_panel.return_value.plot.assert_called_once_with(
-        resolve_chart_path(
-            os.path.join(out_dir, "core"),
-            "littles_law_invariant",
-            chart_config.chart_format,
-        ),
-        metrics.times,
-        metrics.L,
-        metrics.Lambda,
-        metrics.w,
-        arrival_times=metrics.arrival_times,
-        departure_times=metrics.departure_times,
-        caption="Filters: test",
-        chart_config=chart_config,
+        metrics,
+        filter_result,
+        chart_config,
+        out_dir,
     )
 
 
@@ -1462,8 +1561,6 @@ def test_core_driver_omits_caption_when_label_empty():
         patch("samplepath.plots.core.LLWPanel.plot"),
     ):
         core.plot_core_flow_metrics_charts(
-            None, chart_config, filter_result, metrics, out_dir
+            metrics, filter_result, chart_config, out_dir
         )
-    mock_stack.assert_called_once_with(
-        None, chart_config, filter_result, metrics, out_dir
-    )
+    mock_stack.assert_called_once_with(metrics, filter_result, chart_config, out_dir)

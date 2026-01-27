@@ -11,7 +11,6 @@ path is validated.
 """
 
 from dataclasses import dataclass
-import os
 from typing import List, Optional, Sequence
 
 from matplotlib import colors as mcolors, pyplot as plt
@@ -32,15 +31,12 @@ from samplepath.plots.figure_context import (
 from samplepath.plots.helpers import (
     ScatterOverlay,
     _clip_axis_to_percentile,
-    add_caption,
-    build_chart_save_kwargs,
     build_event_overlays,
     format_date_axis,
     render_line_chart,
     render_scatter_chart,
     render_step_chart,
     resolve_caption,
-    resolve_chart_path,
 )
 
 
@@ -104,33 +100,26 @@ class NPanel:
 
     def plot(
         self,
-        df: pd.DataFrame,
-        chart_config: ChartConfig,
-        filter_result: Optional[FilterResult],
         metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
         out_dir: str,
-    ) -> None:
-        del df
-        out_path = resolve_chart_path(
-            os.path.join(out_dir, "core"),
-            "sample_path_N",
-            chart_config.chart_format,
-        )
+    ) -> str:
         unit = metrics.freq if metrics.freq else "timestamp"
         caption = resolve_caption(filter_result)
-        save_kwargs = build_chart_save_kwargs(
-            chart_config.chart_format, chart_config.chart_dpi
-        )
         with figure_context(
-            out_path,
+            chart_config=chart_config,
             nrows=1,
             ncols=1,
-            unit=unit,
             caption=caption,
-            save_kwargs=save_kwargs,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core",
+            base_name="sample_path_N",
         ) as (
             _,
             axes,
+            resolved_out_path,
         ):
             ax = _first_axis(axes)
             self.render(
@@ -140,6 +129,7 @@ class NPanel:
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
             )
+        return resolved_out_path
 
 
 @dataclass
@@ -176,37 +166,36 @@ class LPanel:
 
     def plot(
         self,
-        out_path: str,
-        times: List[pd.Timestamp],
-        L_vals: Sequence[float],
-        *,
-        arrival_times: Optional[List[pd.Timestamp]] = None,
-        departure_times: Optional[List[pd.Timestamp]] = None,
-        unit: str = "timestamp",
-        caption: Optional[str] = None,
-        chart_config: Optional[ChartConfig] = None,
-    ) -> None:
-        cfg = chart_config or ChartConfig()
-        save_kwargs = build_chart_save_kwargs(cfg.chart_format, cfg.chart_dpi)
+        metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
         with figure_context(
-            out_path,
+            chart_config=chart_config,
             nrows=1,
             ncols=1,
-            unit=unit,
             caption=caption,
-            save_kwargs=save_kwargs,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core",
+            base_name="time_average_N_L",
         ) as (
             _,
             axes,
+            resolved_out_path,
         ):
             ax = _first_axis(axes)
             self.render(
                 ax,
-                times,
-                L_vals,
-                arrival_times=arrival_times,
-                departure_times=departure_times,
+                metrics.times,
+                metrics.L,
+                arrival_times=metrics.arrival_times,
+                departure_times=metrics.departure_times,
             )
+        return resolved_out_path
 
 
 @dataclass
@@ -259,35 +248,35 @@ class LambdaPanel:
 
     def plot(
         self,
-        out_path: str,
-        times: List[pd.Timestamp],
-        Lam_vals: Sequence[float],
-        *,
-        arrival_times: Optional[List[pd.Timestamp]] = None,
-        unit: str = "timestamp",
-        caption: Optional[str] = None,
-        chart_config: Optional[ChartConfig] = None,
-    ) -> None:
-        cfg = chart_config or ChartConfig()
-        save_kwargs = build_chart_save_kwargs(cfg.chart_format, cfg.chart_dpi)
+        metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
         with figure_context(
-            out_path,
+            chart_config=chart_config,
             nrows=1,
             ncols=1,
-            unit=unit,
             caption=caption,
-            save_kwargs=save_kwargs,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core",
+            base_name="cumulative_arrival_rate_Lambda",
         ) as (
             _,
             axes,
+            resolved_out_path,
         ):
             ax = _first_axis(axes)
             self.render(
                 ax,
-                times,
-                Lam_vals,
-                arrival_times=arrival_times,
+                metrics.times,
+                metrics.Lambda,
+                arrival_times=metrics.arrival_times,
             )
+        return resolved_out_path
 
 
 @dataclass
@@ -331,37 +320,36 @@ class WPanel:
 
     def plot(
         self,
-        out_path: str,
-        times: List[pd.Timestamp],
-        w_vals: Sequence[float],
-        *,
-        arrival_times: Optional[List[pd.Timestamp]] = None,
-        departure_times: Optional[List[pd.Timestamp]] = None,
-        unit: str = "timestamp",
-        caption: Optional[str] = None,
-        chart_config: Optional[ChartConfig] = None,
-    ) -> None:
-        cfg = chart_config or ChartConfig()
-        save_kwargs = build_chart_save_kwargs(cfg.chart_format, cfg.chart_dpi)
+        metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
         with figure_context(
-            out_path,
+            chart_config=chart_config,
             nrows=1,
             ncols=1,
-            unit=unit,
             caption=caption,
-            save_kwargs=save_kwargs,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core",
+            base_name="average_residence_time_w",
         ) as (
             _,
             axes,
+            resolved_out_path,
         ):
             ax = _first_axis(axes)
             self.render(
                 ax,
-                times,
-                w_vals,
-                arrival_times=arrival_times,
-                departure_times=departure_times,
+                metrics.times,
+                metrics.w,
+                arrival_times=metrics.arrival_times,
+                departure_times=metrics.departure_times,
             )
+        return resolved_out_path
 
 
 @dataclass
@@ -386,33 +374,34 @@ class HPanel:
 
     def plot(
         self,
-        out_path: str,
-        times: List[pd.Timestamp],
-        H_vals: Sequence[float],
-        *,
-        unit: str = "timestamp",
-        caption: Optional[str] = None,
-        chart_config: Optional[ChartConfig] = None,
-    ) -> None:
-        cfg = chart_config or ChartConfig()
-        save_kwargs = build_chart_save_kwargs(cfg.chart_format, cfg.chart_dpi)
+        metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
         with figure_context(
-            out_path,
+            chart_config=chart_config,
             nrows=1,
             ncols=1,
-            unit=unit,
             caption=caption,
-            save_kwargs=save_kwargs,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core",
+            base_name="cumulative_presence_mass_H",
         ) as (
             _,
             axes,
+            resolved_out_path,
         ):
             ax = _first_axis(axes)
             self.render(
                 ax,
-                times,
-                H_vals,
+                metrics.times,
+                metrics.H,
             )
+        return resolved_out_path
 
 
 @dataclass
@@ -512,39 +501,37 @@ class CFDPanel:
 
     def plot(
         self,
-        out_path: str,
-        times: List[pd.Timestamp],
-        arrivals_cum: Sequence[float],
-        departures_cum: Sequence[float],
-        *,
-        arrival_times: Optional[List[pd.Timestamp]] = None,
-        departure_times: Optional[List[pd.Timestamp]] = None,
-        unit: str = "timestamp",
-        caption: Optional[str] = None,
-        chart_config: Optional[ChartConfig] = None,
-    ) -> None:
-        cfg = chart_config or ChartConfig()
-        save_kwargs = build_chart_save_kwargs(cfg.chart_format, cfg.chart_dpi)
+        metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
         with figure_context(
-            out_path,
+            chart_config=chart_config,
             nrows=1,
             ncols=1,
-            unit=unit,
             caption=caption,
-            save_kwargs=save_kwargs,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core",
+            base_name="cumulative_flow_diagram",
         ) as (
             _,
             axes,
+            resolved_out_path,
         ):
             ax = _first_axis(axes)
             self.render(
                 ax,
-                times,
-                arrivals_cum,
-                departures_cum,
-                arrival_times=arrival_times,
-                departure_times=departure_times,
+                metrics.times,
+                metrics.Arrivals,
+                metrics.Departures,
+                arrival_times=metrics.arrival_times,
+                departure_times=metrics.departure_times,
             )
+        return resolved_out_path
 
 
 @dataclass(frozen=True)
@@ -648,34 +635,38 @@ class LLWPanel:
 
     def plot(
         self,
-        out_path: str,
-        times: List[pd.Timestamp],
-        L_vals: np.ndarray,
-        Lam_vals: np.ndarray,
-        w_vals: np.ndarray,
-        *,
-        arrival_times: Optional[List[pd.Timestamp]] = None,
-        departure_times: Optional[List[pd.Timestamp]] = None,
-        caption: Optional[str] = None,
-        chart_config: Optional[ChartConfig] = None,
-    ) -> None:
-        fig, ax = plt.subplots(figsize=(6.0, 6.0))
-        self.render(
-            ax,
-            times,
-            L_vals,
-            Lam_vals,
-            w_vals,
-            arrival_times=arrival_times,
-            departure_times=departure_times,
-        )
-        if caption:
-            add_caption(fig, caption)
-        fig.tight_layout(rect=(0.05, 0, 1, 1))
-        cfg = chart_config or ChartConfig()
-        save_kwargs = build_chart_save_kwargs(cfg.chart_format, cfg.chart_dpi)
-        fig.savefig(out_path, **save_kwargs)
-        plt.close(fig)
+        metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        caption = resolve_caption(filter_result)
+        with figure_context(
+            chart_config=chart_config,
+            nrows=1,
+            ncols=1,
+            figsize=(6.0, 6.0),
+            caption=caption,
+            unit=None,
+            out_dir=out_dir,
+            subdir="core",
+            base_name="littles_law_invariant",
+        ) as (
+            _,
+            axes,
+            resolved_out_path,
+        ):
+            ax = _first_axis(axes)
+            self.render(
+                ax,
+                metrics.times,
+                metrics.L,
+                metrics.Lambda,
+                metrics.w,
+                arrival_times=metrics.arrival_times,
+                departure_times=metrics.departure_times,
+            )
+        return resolved_out_path
 
 
 # ---------------------------------------------------------------------------
@@ -684,12 +675,11 @@ class LLWPanel:
 
 
 def plot_core_stack(
-    df: pd.DataFrame,
-    chart_config: ChartConfig,
-    filter_result: Optional[FilterResult],
     metrics: FlowMetricsResult,
+    filter_result: Optional[FilterResult],
+    chart_config: ChartConfig,
     out_dir: str,
-) -> None:
+) -> str:
     layout = LayoutSpec(nrows=4, ncols=1, figsize=(12.0, 11.0), sharex=True)
     caption = resolve_caption(filter_result)
     decor = FigureDecorSpec(
@@ -701,22 +691,17 @@ def plot_core_stack(
         tight_layout=True,
         tight_layout_rect=(0, 0, 1, 0.96),
     )
-    out_path = resolve_chart_path(
-        out_dir, "sample_path_flow_metrics", chart_config.chart_format
-    )
     unit = metrics.freq if metrics.freq else "timestamp"
-    save_kwargs = build_chart_save_kwargs(
-        chart_config.chart_format, chart_config.chart_dpi
-    )
     with layout_context(
-        out_path,
+        chart_config=chart_config,
         layout=layout,
         decor=decor,
         unit=unit,
-        format_axis_fn=format_date_axis,
         format_targets="bottom_row",
-        save_kwargs=save_kwargs,
-    ) as (_, axes):
+        format_axis_fn=format_date_axis,
+        out_dir=out_dir,
+        base_name="sample_path_flow_metrics",
+    ) as (_, axes, resolved_out_path):
         flat_axes = axes if not isinstance(axes, np.ndarray) else axes.ravel()
 
         NPanel(
@@ -763,54 +748,30 @@ def plot_core_stack(
             arrival_times=metrics.arrival_times,
             departure_times=metrics.departure_times,
         )
+    return resolved_out_path
 
 
 def plot_core_flow_metrics_charts(
-    df: pd.DataFrame,
-    chart_config: ChartConfig,
-    filter_result: Optional[FilterResult],
     metrics: FlowMetricsResult,
+    filter_result: Optional[FilterResult],
+    chart_config: ChartConfig,
     out_dir: str,
 ) -> List[str]:
-    core_panels_dir = os.path.join(out_dir, "core")
-    unit = metrics.freq if metrics.freq else "timestamp"
-    caption = resolve_caption(filter_result)
     show_derivations = chart_config.show_derivations
 
-    path_stack = resolve_chart_path(
-        out_dir, "sample_path_flow_metrics", chart_config.chart_format
-    )
-    plot_core_stack(df, chart_config, filter_result, metrics, out_dir)
+    path_stack = plot_core_stack(metrics, filter_result, chart_config, out_dir)
 
-    path_N = resolve_chart_path(
-        core_panels_dir, "sample_path_N", chart_config.chart_format
-    )
-    NPanel(
+    path_N = NPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
-    ).plot(df, chart_config, filter_result, metrics, out_dir)
+    ).plot(metrics, filter_result, chart_config, out_dir)
 
-    path_L = resolve_chart_path(
-        core_panels_dir, "time_average_N_L", chart_config.chart_format
-    )
-    LPanel(
+    path_L = LPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
-    ).plot(
-        path_L,
-        metrics.times,
-        metrics.L,
-        arrival_times=metrics.arrival_times,
-        departure_times=metrics.departure_times,
-        unit=unit,
-        caption=caption,
-        chart_config=chart_config,
-    )
+    ).plot(metrics, filter_result, chart_config, out_dir)
 
-    path_Lam = resolve_chart_path(
-        core_panels_dir, "cumulative_arrival_rate_Lambda", chart_config.chart_format
-    )
-    LambdaPanel(
+    path_Lam = LambdaPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
         clip_opts=ClipOptions(
@@ -818,80 +779,25 @@ def plot_core_flow_metrics_charts(
             pctl_lower=chart_config.lambda_pctl_lower,
             warmup_hours=chart_config.lambda_warmup_hours,
         ),
-    ).plot(
-        path_Lam,
-        metrics.times,
-        metrics.Lambda,
-        arrival_times=metrics.arrival_times,
-        unit=unit,
-        caption=caption,
-        chart_config=chart_config,
-    )
+    ).plot(metrics, filter_result, chart_config, out_dir)
 
-    path_w = resolve_chart_path(
-        core_panels_dir, "average_residence_time_w", chart_config.chart_format
-    )
-    WPanel(
+    path_w = WPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
-    ).plot(
-        path_w,
-        metrics.times,
-        metrics.w,
-        arrival_times=metrics.arrival_times,
-        departure_times=metrics.departure_times,
-        unit=unit,
-        caption=caption,
-        chart_config=chart_config,
+    ).plot(metrics, filter_result, chart_config, out_dir)
+
+    path_H = HPanel(show_derivations=show_derivations).plot(
+        metrics, filter_result, chart_config, out_dir
     )
 
-    path_H = resolve_chart_path(
-        core_panels_dir, "cumulative_presence_mass_H", chart_config.chart_format
-    )
-    HPanel(show_derivations=show_derivations).plot(
-        path_H,
-        metrics.times,
-        metrics.H,
-        unit=unit,
-        caption=caption,
-        chart_config=chart_config,
-    )
-
-    path_CFD = resolve_chart_path(
-        core_panels_dir, "cumulative_flow_diagram", chart_config.chart_format
-    )
-    CFDPanel(
+    path_CFD = CFDPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
-    ).plot(
-        path_CFD,
-        metrics.times,
-        metrics.Arrivals,
-        metrics.Departures,
-        arrival_times=metrics.arrival_times,
-        departure_times=metrics.departure_times,
-        unit=unit,
-        caption=caption,
-        chart_config=chart_config,
-    )
+    ).plot(metrics, filter_result, chart_config, out_dir)
 
-    path_invariant = resolve_chart_path(
-        core_panels_dir, "littles_law_invariant", chart_config.chart_format
-    )
-    LLWPanel(
+    path_invariant = LLWPanel(
         with_event_marks=chart_config.with_event_marks,
-        title="L(T) vs Λ(T).w(T)",
-    ).plot(
-        path_invariant,
-        metrics.times,
-        metrics.L,
-        metrics.Lambda,
-        metrics.w,
-        arrival_times=metrics.arrival_times,
-        departure_times=metrics.departure_times,
-        caption=caption,
-        chart_config=chart_config,
-    )
+    ).plot(metrics, filter_result, chart_config, out_dir)
 
     return [
         path_N,
