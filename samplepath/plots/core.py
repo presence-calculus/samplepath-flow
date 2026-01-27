@@ -751,6 +751,78 @@ def plot_core_stack(
     return resolved_out_path
 
 
+def plot_LT_derivation_stack(
+    metrics: FlowMetricsResult,
+    filter_result: Optional[FilterResult],
+    chart_config: ChartConfig,
+    out_dir: str,
+) -> str:
+    layout = LayoutSpec(nrows=4, ncols=1, figsize=(12.0, 11.0), sharex=True)
+    caption = resolve_caption(filter_result)
+    decor = FigureDecorSpec(
+        suptitle="L(T) Derivation from Cumulative Flow Diagram",
+        suptitle_y=0.97,
+        caption=caption,
+        caption_position="top",
+        caption_y=0.945,
+        tight_layout=True,
+        tight_layout_rect=(0, 0, 1, 0.96),
+    )
+    unit = metrics.freq if metrics.freq else "timestamp"
+    with layout_context(
+        chart_config=chart_config,
+        layout=layout,
+        decor=decor,
+        unit=unit,
+        format_targets="bottom_row",
+        format_axis_fn=format_date_axis,
+        out_dir=out_dir,
+        subdir="core",
+        base_name="lt_derivation_stack",
+    ) as (_, axes, resolved_out_path):
+        flat_axes = axes if not isinstance(axes, np.ndarray) else axes.ravel()
+
+        CFDPanel(
+            show_derivations=chart_config.show_derivations,
+            with_event_marks=chart_config.with_event_marks,
+        ).render(
+            flat_axes[0],
+            metrics.times,
+            metrics.Arrivals,
+            metrics.Departures,
+            arrival_times=metrics.arrival_times,
+            departure_times=metrics.departure_times,
+        )
+        NPanel(
+            show_derivations=chart_config.show_derivations,
+            with_event_marks=chart_config.with_event_marks,
+        ).render(
+            flat_axes[1],
+            metrics.times,
+            metrics.N,
+            arrival_times=metrics.arrival_times,
+            departure_times=metrics.departure_times,
+        )
+        HPanel(
+            show_derivations=chart_config.show_derivations,
+        ).render(
+            flat_axes[2],
+            metrics.times,
+            metrics.H,
+        )
+        LPanel(
+            show_derivations=chart_config.show_derivations,
+            with_event_marks=chart_config.with_event_marks,
+        ).render(
+            flat_axes[3],
+            metrics.times,
+            metrics.L,
+            arrival_times=metrics.arrival_times,
+            departure_times=metrics.departure_times,
+        )
+    return resolved_out_path
+
+
 def plot_core_flow_metrics_charts(
     metrics: FlowMetricsResult,
     filter_result: Optional[FilterResult],
@@ -760,6 +832,10 @@ def plot_core_flow_metrics_charts(
     show_derivations = chart_config.show_derivations
 
     path_stack = plot_core_stack(metrics, filter_result, chart_config, out_dir)
+
+    path_LT_derivation = plot_LT_derivation_stack(
+        metrics, filter_result, chart_config, out_dir
+    )
 
     path_N = NPanel(
         with_event_marks=chart_config.with_event_marks,
@@ -808,4 +884,5 @@ def plot_core_flow_metrics_charts(
         path_CFD,
         path_invariant,
         path_stack,
+        path_LT_derivation,
     ]

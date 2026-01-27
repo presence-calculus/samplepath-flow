@@ -893,9 +893,13 @@ def test_core_driver_returns_expected_paths():
         resolve_chart_path(
             out_dir, None, "sample_path_flow_metrics", chart_config.chart_format
         ),
+        resolve_chart_path(
+            out_dir, "core", "lt_derivation_stack", chart_config.chart_format
+        ),
     ]
     with (
         patch("samplepath.plots.core.plot_core_stack") as mock_stack,
+        patch("samplepath.plots.core.plot_LT_derivation_stack") as mock_lt_stack,
         patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
         patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
         patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
@@ -904,7 +908,8 @@ def test_core_driver_returns_expected_paths():
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot_CFD,
         patch("samplepath.plots.core.LLWPanel.plot") as mock_plot_llw,
     ):
-        mock_stack.return_value = expected[-1]
+        mock_stack.return_value = expected[7]
+        mock_lt_stack.return_value = expected[8]
         mock_plot_N.return_value = expected[0]
         mock_plot_L.return_value = expected[1]
         mock_plot_Lam.return_value = expected[2]
@@ -923,6 +928,7 @@ def test_core_driver_returns_expected_paths():
     mock_plot_H.assert_called_once()
     mock_plot_CFD.assert_called_once()
     mock_plot_llw.assert_called_once()
+    mock_lt_stack.assert_called_once()
 
 
 def test_core_driver_calls_plot_core_stack_with_expected_args():
@@ -938,6 +944,7 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack") as mock_stack,
+        patch("samplepath.plots.core.plot_LT_derivation_stack"),
         patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
         patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
         patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
@@ -971,6 +978,7 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
+        patch("samplepath.plots.core.plot_LT_derivation_stack"),
         patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
         patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
         patch("samplepath.plots.core.HPanel.plot"),
@@ -1004,6 +1012,7 @@ def test_core_driver_passes_show_derivations_to_CFD():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
+        patch("samplepath.plots.core.plot_LT_derivation_stack"),
         patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
         patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
         patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
@@ -1031,6 +1040,7 @@ def test_core_driver_uses_metrics_freq_for_unit():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
+        patch("samplepath.plots.core.plot_LT_derivation_stack"),
         patch("samplepath.plots.core.NPanel.plot") as mock_plot,
     ):
         with (
@@ -1125,6 +1135,7 @@ def test_core_driver_calls_plot_H_under_core_dir():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
+        patch("samplepath.plots.core.plot_LT_derivation_stack"),
         patch("samplepath.plots.core.HPanel.plot") as mock_plot,
     ):
         with (
@@ -1161,6 +1172,7 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
     )
     with (
         patch("samplepath.plots.core.plot_core_stack"),
+        patch("samplepath.plots.core.plot_LT_derivation_stack"),
         patch("samplepath.plots.core.NPanel.plot"),
         patch("samplepath.plots.core.LPanel.plot"),
         patch("samplepath.plots.core.LambdaPanel.plot"),
@@ -1188,6 +1200,7 @@ def test_core_driver_passes_event_marks_to_CFD():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
+        patch("samplepath.plots.core.plot_LT_derivation_stack"),
         patch("samplepath.plots.core.NPanel.plot"),
         patch("samplepath.plots.core.LPanel.plot"),
         patch("samplepath.plots.core.LambdaPanel.plot"),
@@ -1520,6 +1533,7 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
         patch("samplepath.plots.core.plot_core_stack"),
+        patch("samplepath.plots.core.plot_LT_derivation_stack"),
         patch("samplepath.plots.core.LLWPanel") as mock_panel,
     ):
         with (
@@ -1552,6 +1566,7 @@ def test_core_driver_omits_caption_when_label_empty():
     filter_result = SimpleNamespace(display="Filters: ", label="")
     with (
         patch("samplepath.plots.core.plot_core_stack") as mock_stack,
+        patch("samplepath.plots.core.plot_LT_derivation_stack"),
         patch("samplepath.plots.core.NPanel.plot"),
         patch("samplepath.plots.core.LPanel.plot"),
         patch("samplepath.plots.core.LambdaPanel.plot"),
@@ -1564,3 +1579,211 @@ def test_core_driver_omits_caption_when_label_empty():
             metrics, filter_result, chart_config, out_dir
         )
     mock_stack.assert_called_once_with(metrics, filter_result, chart_config, out_dir)
+
+
+def _call_LT_derivation_stack_with_mocks():
+    """Helper to call plot_LT_derivation_stack with standard mocks."""
+    fig = MagicMock()
+    axes = np.array([object() for _ in range(4)], dtype=object)
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig(with_event_marks=True, show_derivations=True)
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, axes, "out.png"
+
+    mocks = {}
+    with (
+        patch("samplepath.plots.core.layout_context", side_effect=fake_context),
+        patch("samplepath.plots.core.CFDPanel.render") as mock_CFD,
+        patch("samplepath.plots.core.NPanel.render") as mock_N,
+        patch("samplepath.plots.core.HPanel.render") as mock_H,
+        patch("samplepath.plots.core.LPanel.render") as mock_L,
+    ):
+        core.plot_LT_derivation_stack(metrics, filter_result, chart_config, "/tmp/out")
+        mocks["CFD"] = mock_CFD
+        mocks["N"] = mock_N
+        mocks["H"] = mock_H
+        mocks["L"] = mock_L
+    return mocks
+
+
+def test_plot_LT_derivation_stack_calls_CFD_render():
+    mocks = _call_LT_derivation_stack_with_mocks()
+    mocks["CFD"].assert_called_once()
+
+
+def test_plot_LT_derivation_stack_calls_N_render():
+    mocks = _call_LT_derivation_stack_with_mocks()
+    mocks["N"].assert_called_once()
+
+
+def test_plot_LT_derivation_stack_calls_H_render():
+    mocks = _call_LT_derivation_stack_with_mocks()
+    mocks["H"].assert_called_once()
+
+
+def test_plot_LT_derivation_stack_calls_L_render():
+    mocks = _call_LT_derivation_stack_with_mocks()
+    mocks["L"].assert_called_once()
+
+
+def _capture_LT_derivation_stack_layout_context():
+    """Helper to capture layout_context kwargs from plot_LT_derivation_stack."""
+    fig = MagicMock()
+    axes = np.array([object() for _ in range(4)], dtype=object)
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    captured = {}
+
+    @contextmanager
+    def fake_context(out_path=None, **kwargs):
+        captured["out_path"] = out_path
+        captured.update(kwargs)
+        yield fig, axes, "out.png"
+
+    with (
+        patch("samplepath.plots.core.layout_context", side_effect=fake_context),
+        patch("samplepath.plots.core.CFDPanel.render"),
+        patch("samplepath.plots.core.NPanel.render"),
+        patch("samplepath.plots.core.HPanel.render"),
+        patch("samplepath.plots.core.LPanel.render"),
+    ):
+        core.plot_LT_derivation_stack(metrics, filter_result, chart_config, "/tmp/out")
+    captured["outer_chart_config"] = chart_config
+    return captured
+
+
+def test_plot_LT_derivation_stack_out_path_is_none():
+    captured = _capture_LT_derivation_stack_layout_context()
+    assert captured["out_path"] is None
+
+
+def test_plot_LT_derivation_stack_passes_chart_config():
+    captured = _capture_LT_derivation_stack_layout_context()
+    assert captured["chart_config"] == captured["outer_chart_config"]
+
+
+def test_plot_LT_derivation_stack_uses_correct_out_dir():
+    captured = _capture_LT_derivation_stack_layout_context()
+    assert captured["out_dir"] == "/tmp/out"
+
+
+def test_plot_LT_derivation_stack_uses_core_subdir():
+    captured = _capture_LT_derivation_stack_layout_context()
+    assert captured["subdir"] == "core"
+
+
+def test_plot_LT_derivation_stack_uses_correct_base_name():
+    captured = _capture_LT_derivation_stack_layout_context()
+    assert captured["base_name"] == "lt_derivation_stack"
+
+
+def test_plot_LT_derivation_stack_layout_has_4_rows():
+    captured = _capture_LT_derivation_stack_layout_context()
+    assert captured["layout"].nrows == 4
+
+
+def test_plot_LT_derivation_stack_layout_has_1_col():
+    captured = _capture_LT_derivation_stack_layout_context()
+    assert captured["layout"].ncols == 1
+
+
+def test_plot_LT_derivation_stack_layout_figsize():
+    captured = _capture_LT_derivation_stack_layout_context()
+    assert captured["layout"].figsize == (12.0, 11.0)
+
+
+def test_plot_LT_derivation_stack_layout_sharex():
+    captured = _capture_LT_derivation_stack_layout_context()
+    assert captured["layout"].sharex is True
+
+
+def test_plot_LT_derivation_stack_suptitle():
+    captured = _capture_LT_derivation_stack_layout_context()
+    assert captured["decor"].suptitle == "L(T) Derivation from Cumulative Flow Diagram"
+
+
+def test_plot_LT_derivation_stack_caption():
+    captured = _capture_LT_derivation_stack_layout_context()
+    assert captured["decor"].caption == "Filters: test"
+
+
+def test_plot_LT_derivation_stack_format_axis_fn_set():
+    captured = _capture_LT_derivation_stack_layout_context()
+    assert captured["format_axis_fn"] is not None
+
+
+def test_plot_LT_derivation_stack_format_targets():
+    captured = _capture_LT_derivation_stack_layout_context()
+    assert captured["format_targets"] == "bottom_row"
+
+
+def _call_LT_derivation_stack_capturing_panel_classes(
+    with_event_marks: bool = True, show_derivations: bool = True
+):
+    """Helper to capture panel constructor kwargs from plot_LT_derivation_stack."""
+    fig = MagicMock()
+    axes = np.array([object() for _ in range(4)], dtype=object)
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig(
+        with_event_marks=with_event_marks,
+        show_derivations=show_derivations,
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, axes, "out.png"
+
+    mocks = {}
+    with (
+        patch("samplepath.plots.core.layout_context", side_effect=fake_context),
+        patch("samplepath.plots.core.CFDPanel") as mock_CFD,
+        patch("samplepath.plots.core.NPanel") as mock_N,
+        patch("samplepath.plots.core.HPanel") as mock_H,
+        patch("samplepath.plots.core.LPanel") as mock_L,
+    ):
+        core.plot_LT_derivation_stack(metrics, filter_result, chart_config, "/tmp/out")
+        mocks["CFD"] = mock_CFD
+        mocks["N"] = mock_N
+        mocks["H"] = mock_H
+        mocks["L"] = mock_L
+    return mocks
+
+
+def test_plot_LT_derivation_stack_passes_event_marks_to_CFD():
+    mocks = _call_LT_derivation_stack_capturing_panel_classes(with_event_marks=True)
+    assert mocks["CFD"].call_args.kwargs["with_event_marks"] is True
+
+
+def test_plot_LT_derivation_stack_passes_show_derivations_to_CFD():
+    mocks = _call_LT_derivation_stack_capturing_panel_classes(show_derivations=True)
+    assert mocks["CFD"].call_args.kwargs["show_derivations"] is True
+
+
+def test_plot_LT_derivation_stack_passes_event_marks_to_N():
+    mocks = _call_LT_derivation_stack_capturing_panel_classes(with_event_marks=True)
+    assert mocks["N"].call_args.kwargs["with_event_marks"] is True
+
+
+def test_plot_LT_derivation_stack_passes_show_derivations_to_N():
+    mocks = _call_LT_derivation_stack_capturing_panel_classes(show_derivations=True)
+    assert mocks["N"].call_args.kwargs["show_derivations"] is True
+
+
+def test_plot_LT_derivation_stack_passes_show_derivations_to_H():
+    mocks = _call_LT_derivation_stack_capturing_panel_classes(show_derivations=True)
+    assert mocks["H"].call_args.kwargs["show_derivations"] is True
+
+
+def test_plot_LT_derivation_stack_passes_event_marks_to_L():
+    mocks = _call_LT_derivation_stack_capturing_panel_classes(with_event_marks=True)
+    assert mocks["L"].call_args.kwargs["with_event_marks"] is True
+
+
+def test_plot_LT_derivation_stack_passes_show_derivations_to_L():
+    mocks = _call_LT_derivation_stack_capturing_panel_classes(show_derivations=True)
+    assert mocks["L"].call_args.kwargs["show_derivations"] is True
