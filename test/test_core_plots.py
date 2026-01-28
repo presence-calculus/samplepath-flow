@@ -156,6 +156,46 @@ def test_render_H_title_appends_derivation_when_enabled():
     assert ax.set_title.call_args[0][0] == "Base Title: DERIVATION"
 
 
+def test_render_H_colors_grey_when_overlays():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([2.0])
+    overlays = ["overlay"]
+    with (
+        patch("samplepath.plots.core.build_event_overlays", return_value=overlays),
+        patch("samplepath.plots.core.render_line_chart") as mock_render,
+    ):
+        core.HPanel(with_event_marks=True).render(
+            ax,
+            times,
+            values,
+            arrival_times=[times[0]],
+            departure_times=[times[0]],
+        )
+    _, kwargs = mock_render.call_args
+    assert kwargs["color"] == "grey"
+
+
+def test_render_H_passes_overlays():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([2.0])
+    overlays = ["overlay"]
+    with (
+        patch("samplepath.plots.core.build_event_overlays", return_value=overlays),
+        patch("samplepath.plots.core.render_line_chart") as mock_render,
+    ):
+        core.HPanel(with_event_marks=True).render(
+            ax,
+            times,
+            values,
+            arrival_times=[times[0]],
+            departure_times=[times[0]],
+        )
+    _, kwargs = mock_render.call_args
+    assert kwargs["overlays"] == overlays
+
+
 def test_render_L_colors_grey_when_overlays():
     ax = MagicMock()
     times = [_t("2024-01-01")]
@@ -603,6 +643,37 @@ def test_plot_single_panel_H_calls_renderer():
     ):
         core.HPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
     mock_render.assert_called_once()
+
+
+def _plot_H_panel_capture_render_kwargs(with_event_marks: bool = False):
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig(with_event_marks=with_event_marks)
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.HPanel.render") as mock_render,
+    ):
+        core.HPanel(with_event_marks=with_event_marks).plot(
+            metrics, filter_result, chart_config, "/tmp/out"
+        )
+    return mock_render.call_args.kwargs, metrics
+
+
+def test_plot_H_passes_arrival_times():
+    kwargs, metrics = _plot_H_panel_capture_render_kwargs(with_event_marks=True)
+    assert kwargs["arrival_times"] == metrics.arrival_times
+
+
+def test_plot_H_passes_departure_times():
+    kwargs, metrics = _plot_H_panel_capture_render_kwargs(with_event_marks=True)
+    assert kwargs["departure_times"] == metrics.departure_times
 
 
 def test_plot_single_panel_CFD_calls_renderer():
@@ -1788,6 +1859,11 @@ def test_plot_LT_derivation_stack_passes_show_derivations_to_N():
 def test_plot_LT_derivation_stack_passes_show_derivations_to_H():
     mocks = _call_LT_derivation_stack_capturing_panel_classes(show_derivations=True)
     assert mocks["H"].call_args.kwargs["show_derivations"] is True
+
+
+def test_plot_LT_derivation_stack_passes_event_marks_to_H():
+    mocks = _call_LT_derivation_stack_capturing_panel_classes(with_event_marks=True)
+    assert mocks["H"].call_args.kwargs["with_event_marks"] is True
 
 
 def test_plot_LT_derivation_stack_passes_event_marks_to_L():

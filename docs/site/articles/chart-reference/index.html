@@ -455,9 +455,9 @@ Samplepath Analysis Toolkit</em></a></p></p>
         <li><a href="#the-sample-path-nt"
         id="toc-the-sample-path-nt">The sample path <span
         class="math inline">\(N(t)\)</span></a></li>
-        <li><a href="#the-area-under-the-sample-path"
-        id="toc-the-area-under-the-sample-path">The area under the
-        sample path</a></li>
+        <li><a href="#the-cumulative-presence-mass"
+        id="toc-the-cumulative-presence-mass">The cumulative presence
+        mass</a></li>
         <li><a href="#lt-time-average-of-nt"
         id="toc-lt-time-average-of-nt"><span
         class="math inline">\(L(T)\)</span>: Time average of <span
@@ -587,8 +587,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
             class="math inline">\(N(t)\)</span>.</p>
             <p>There are four core functionals:</p>
             <ul>
-            <li><span class="math inline">\(H(T)\)</span>: the area
-            under the sample path over <span
+            <li><span class="math inline">\(H(T)\)</span>: the
+            cumulative presence mass under the sample path over <span
             class="math inline">\([0,T]\)</span>.</li>
             <li><span class="math inline">\(L(T)\)</span>: the time
             average of <span class="math inline">\(N(t)\)</span>,
@@ -739,13 +739,41 @@ Samplepath Analysis Toolkit</em></a></p></p>
             this means.</p>
             <hr />
             <h2 id="component-metrics">3.3 Component metrics</h2>
-            <p>Each panel in the main chart is also written under</p>
-            <pre><code>&lt;scenario&gt;/core/</code></pre>
+            <p>Stacks (multi-panel composite charts) are written at the
+            root of <code>core/</code>:</p>
             <table>
             <colgroup>
-            <col style="width: 14%" />
-            <col style="width: 41%" />
-            <col style="width: 44%" />
+            <col style="width: 27%" />
+            <col style="width: 72%" />
+            </colgroup>
+            <thead>
+            <tr>
+            <th>File</th>
+            <th>What it shows</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+            <td><code>core/sample_path_flow_metrics.png</code></td>
+            <td>Four-panel stack: <code>N(t)</code>, <code>L(T)</code>,
+            <code>Λ(T)</code>, <code>w(T)</code> over the same time
+            axis.</td>
+            </tr>
+            <tr>
+            <td><code>core/lt_derivation_stack.png</code></td>
+            <td>Four-panel stack: CFD, <code>N(t)</code>,
+            <code>H(T)</code>, <code>L(T)</code> showing how L(T) is
+            derived.</td>
+            </tr>
+            </tbody>
+            </table>
+            <p>Individual panels are written under
+            <code>core/panels/</code>:</p>
+            <table>
+            <colgroup>
+            <col style="width: 16%" />
+            <col style="width: 40%" />
+            <col style="width: 43%" />
             </colgroup>
             <thead>
             <tr>
@@ -756,14 +784,14 @@ Samplepath Analysis Toolkit</em></a></p></p>
             </thead>
             <tbody>
             <tr>
-            <td><code>core/sample_path_N.png</code></td>
+            <td><code>core/panels/sample_path_N.png</code></td>
             <td>Step chart of <code>N(t)</code> (count of elements
             present in the boundary) vs time.</td>
             <td>Raw sample path of WIP/presence: queues, surges, and
             droughts show up directly.</td>
             </tr>
             <tr>
-            <td><code>core/time_average_N_L.png</code></td>
+            <td><code>core/panels/time_average_N_L.png</code></td>
             <td>Line chart of <code>L(T)</code> = time-average of
             <code>N(t)</code> over <code>[0, T]</code>.</td>
             <td>Tracks how average WIP over the observation window
@@ -771,7 +799,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             measured pathwise.</td>
             </tr>
             <tr>
-            <td><code>core/cumulative_arrival_rate_Lambda.png</code></td>
+            <td><code>core/panels/cumulative_arrival_rate_Lambda.png</code></td>
             <td>Line chart of <code>Λ(T)</code> (cumulative arrival rate
             <code>A(T)/(T−t₀)</code>), with optional percentile clipping
             and warmup exclusion.</td>
@@ -779,7 +807,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             early transients and outliers.</td>
             </tr>
             <tr>
-            <td><code>core/average_residence_time_w.png</code></td>
+            <td><code>core/panels/average_residence_time_w.png</code></td>
             <td>Line chart of <code>w(T)</code> (average residence time
             over the window, in hours).</td>
             <td>Shows how the time items spend in the boundary evolves;
@@ -787,7 +815,15 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <code>w(T)</code>.</td>
             </tr>
             <tr>
-            <td><code>core/littles_law_invariant.png</code></td>
+            <td><code>core/panels/cumulative_presence_mass_H.png</code></td>
+            <td>Line chart of <code>H(T)</code> (cumulative presence
+            mass over the window, in item-hours).</td>
+            <td>Total presence mass accumulated by items in the system,
+            used in <code>L(T)</code> and <code>w(T)</code>
+            definitions.</td>
+            </tr>
+            <tr>
+            <td><code>core/panels/littles_law_invariant.png</code></td>
             <td>Scatter of <code>L(T)</code> (x-axis) vs
             <code>Λ(T)·w(T)</code> (y-axis) with <code>y=x</code>
             reference line, equal aspect ratio.</td>
@@ -824,15 +860,15 @@ Samplepath Analysis Toolkit</em></a></p></p>
             alt="Sample Path" />
             <figcaption aria-hidden="true">Sample Path</figcaption>
             </figure>
-            <h3 id="the-area-under-the-sample-path">The area under the
-            sample path</h3>
-            <p>A key quantity in sample path analysis is the <em>area
-            under the sample path</em>. This is calculated as the
+            <h3 id="the-cumulative-presence-mass">The cumulative
+            presence mass</h3>
+            <p>A key quantity in sample path analysis is the
+            <em>cumulative presence mass</em>. This is calculated as the
             definite integral of the sample path curve over [0,T]</p>
             <p><span class="math display">\[
             H(T) = \int_0^T N(t) dt
             \]</span></p>
-            <p>Since the area is a product of the number of items
+            <p>Since the mass is a product of the number of items
             present over time, the units of H(T) are in item-time. In
             the language of the Presence Calculus, <span
             class="math inline">\(H(T)\)</span> is <em>cumulative
@@ -847,8 +883,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
             class="math inline">\(N(t)\)</span></h3>
             <p><code>time_average_N_L.png</code></p>
             <p>Time-average WIP:</p>
-            <p><code>L(T)</code> is the time average of the area under
-            the sample path. May also be viewed as the rate at which the
+            <p><code>L(T)</code> is the time average of the cumulative
+            presence mass. May also be viewed as the rate at which the
             area H(T) grows.</p>
             <p>Its units are in items.</p>
             <pre><code>L(T) = (1/T) H(T)</code></pre>
@@ -1040,7 +1076,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             | File                                                        | What it shows                                                                                                                                            | What it means                                                                                                                                                                         |
             | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
             | `advanced/residence_convergence_errors.png`                 | Three-row stack: (1) `w(T)` vs `W*(t)` (dynamic); (2) `Λ(T)` vs `λ*(t)` (dynamic); (3) error magnitudes `e_W(T)` and `e_Λ(T)` with optional ε threshold. | Tracks *how* coherence is approached or violated, with explicit error terms for residence time and arrival rate over time.                                                            |
-            | `advanced/residence_time_convergence_errors_endeffects.png` | Four-row stack: same as above plus an end-effects panel with `r_A(T)` (mass share), `r_B(T)` (boundary share), and `ρ(T)=T/W*(t)`.                       | Decomposes residual errors into end-effect contributions and time-scaling, making it clear when divergence is driven by boundary conditions vs ongoing dynamics.                      |
+            | `advanced/residence_time_convergence_errors_endeffects.png` | Four-row stack: same as above plus an end-effects panel with `r_H(T)` (mass share), `r_B(T)` (boundary share), and `ρ(T)=T/W*(t)`.                       | Decomposes residual errors into end-effect contributions and time-scaling, making it clear when divergence is driven by boundary conditions vs ongoing dynamics.                      |
             | `advanced/invariant_manifold3D_log.png`                     | 3D log–log–log manifold plot: `x = log Λ(T)`, `y = log w(T)`, `z = log L(T)`, plotting the sample-path trajectory on the plane `z = x + y`.              | Geometric view of Little’s Law as an invariant plane; lets you see whether the observed trajectory sticks to the manifold and how it moves across regimes in (rate, time, WIP) space. |
 
             Written under:
@@ -1059,7 +1095,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
 
             ## `advanced/residence_time_convergence_errors_endeffects.png`
 
-            Adds end-effects: `r_A(T)`, `r_B(T)`, `ρ(T)`.
+            Adds end-effects: `r_H(T)`, `r_B(T)`, `ρ(T)`.
 
             ## `advanced/invariant_manifold3D_log.png`
 

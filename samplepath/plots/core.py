@@ -357,19 +357,32 @@ class HPanel:
     show_title: bool = True
     title: str = "H(T) — Cumulative Presence Mass"
     show_derivations: bool = False
+    with_event_marks: bool = False
 
     def render(
         self,
         ax,
         times: Sequence[pd.Timestamp],
         H_vals: Sequence[float],
+        *,
+        arrival_times: Optional[List[pd.Timestamp]] = None,
+        departure_times: Optional[List[pd.Timestamp]] = None,
     ) -> None:
-        render_line_chart(ax, times, H_vals, label="H(T) [hrs·items]", color="tab:blue")
+        label = "H(T) [hrs·items]"
+        overlays = (
+            build_event_overlays(times, H_vals, arrival_times, departure_times)
+            if self.with_event_marks
+            else None
+        )
+        color = "grey" if overlays else "tab:blue"
+        render_line_chart(
+            ax, times, H_vals, label=label, color=color, overlays=overlays
+        )
         if self.show_title:
             ax.set_title(
                 construct_title(self.title, self.show_derivations, derivation_key="H")
             )
-        ax.set_ylabel("H(T) [hrs·items]")
+        ax.set_ylabel(label)
         ax.legend()
 
     def plot(
@@ -400,6 +413,8 @@ class HPanel:
                 ax,
                 metrics.times,
                 metrics.H,
+                arrival_times=metrics.arrival_times,
+                departure_times=metrics.departure_times,
             )
         return resolved_out_path
 
@@ -805,10 +820,13 @@ def plot_LT_derivation_stack(
         )
         HPanel(
             show_derivations=chart_config.show_derivations,
+            with_event_marks=chart_config.with_event_marks,
         ).render(
             flat_axes[2],
             metrics.times,
             metrics.H,
+            arrival_times=metrics.arrival_times,
+            departure_times=metrics.departure_times,
         )
         LPanel(
             show_derivations=chart_config.show_derivations,
@@ -862,9 +880,10 @@ def plot_core_flow_metrics_charts(
         show_derivations=show_derivations,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
-    path_H = HPanel(show_derivations=show_derivations).plot(
-        metrics, filter_result, chart_config, out_dir
-    )
+    path_H = HPanel(
+        show_derivations=show_derivations,
+        with_event_marks=chart_config.with_event_marks,
+    ).plot(metrics, filter_result, chart_config, out_dir)
 
     path_CFD = CFDPanel(
         with_event_marks=chart_config.with_event_marks,
