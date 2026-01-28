@@ -25,10 +25,12 @@ class FlowMetricsResult:
     L : np.ndarray                # processes
     Lambda : np.ndarray           # processes/hour
     w : np.ndarray                # hours (finite-window average residence contribution per arrival)
+    w_prime : np.ndarray          # hours (finite-window average residence contribution per departure)
     N : np.ndarray                # processes
     H : np.ndarray                # process·hours
     Arrivals : np.ndarray         # cumulative arrivals Arr(T) in (t0, T]
     Departures : np.ndarray       # cumulative departures Dep(T) in (t0, T]
+    Theta : np.ndarray            # processes/hour
     mode : Literal["event","calendar"]
         Observation schedule flavor used by the driver.
     freq : str | None
@@ -45,7 +47,8 @@ class FlowMetricsResult:
     Methods
     -------
     to_dataframe() -> pd.DataFrame
-        Tabular view with columns: time, L, Lambda, w, N, H, Arrivals, Departures.
+        Tabular view with columns: time, L, Lambda, Theta, w, w_prime, N, H,
+        Arrivals, Departures.
     """
 
     events: List[Tuple[pd.Timestamp, int, int]]
@@ -53,10 +56,12 @@ class FlowMetricsResult:
     L: np.ndarray
     Lambda: np.ndarray
     w: np.ndarray
+    w_prime: np.ndarray
     N: np.ndarray
     H: np.ndarray
     Arrivals: np.ndarray
     Departures: np.ndarray
+    Theta: np.ndarray
     mode: Literal["event", "calendar"]
     freq: Optional[str]
     t0: pd.Timestamp | NaTType = pd.NaT
@@ -71,10 +76,12 @@ class FlowMetricsResult:
                 "L": self.L,
                 "Lambda": self.Lambda,
                 "w": self.w,
+                "w_prime": self.w_prime,
                 "N": self.N,
                 "H": self.H,
                 "Arrivals": self.Arrivals,
                 "Departures": self.Departures,
+                "Theta": self.Theta,
             }
         )
 
@@ -89,7 +96,9 @@ class MetricDerivations:
         "H": "H(T) = ∫₀ᵀ N(t) dt",
         "L": "L(T) = H(T) / T",
         "Lambda": "Λ(T) = A(T) / T",
+        "Theta": "Θ(T) = D(T) / T",
         "w": "w(T) = H(T) / A(T)",
+        "w_prime": "w'(T) = H(T) / D(T)",
     }
 
     @classmethod
@@ -98,11 +107,13 @@ class MetricDerivations:
 
 
 # --- Core Metrics Calculations
-def compute_sample_path_metrics(
+def compute_sample_path_flow_metrics(
     events: List[Tuple[pd.Timestamp, int, int]],
     sample_times: List[pd.Timestamp],
 ) -> Tuple[
     List[pd.Timestamp],
+    np.ndarray,
+    np.ndarray,
     np.ndarray,
     np.ndarray,
     np.ndarray,
@@ -136,6 +147,8 @@ def compute_sample_path_metrics(
     H(T)     : np.ndarray  (process·hours)        cumulative presence mass from t0 to T
     Arr(T)   : np.ndarray  (count)                cumulative arrivals in (t0, T]
     Dep(T)   : np.ndarray  (count)                cumulative departures in (t0, T]
+    w'(T)    : np.ndarray  (hours)                finite-window average residence contribution per departure
+    Θ(T)     : np.ndarray  (processes/hour)       average departure rate since t0
 
     Notes
     -----
@@ -147,6 +160,8 @@ def compute_sample_path_metrics(
         T = sorted(sample_times)
         return (
             T,
+            np.array([], dtype=float),
+            np.array([], dtype=float),
             np.array([], dtype=float),
             np.array([], dtype=float),
             np.array([], dtype=float),
@@ -169,6 +184,7 @@ def compute_sample_path_metrics(
     prev = t0
 
     out_L, out_Lam, out_w, out_N, out_H, out_Arr, out_Dep = ([] for _ in range(7))
+    out_w_prime, out_Theta = ([] for _ in range(2))
     i = 0  # event index
 
     for t in T:
@@ -201,6 +217,8 @@ def compute_sample_path_metrics(
         L = (H / elapsed_h) if elapsed_h > 0 else np.nan
         Lam = (cum_arr / elapsed_h) if elapsed_h > 0 else np.nan
         w = (H / cum_arr) if cum_arr > 0 else np.nan
+        w_prime = (H / cum_dep) if cum_dep > 0 else np.nan
+        Theta = (cum_dep / elapsed_h) if elapsed_h > 0 else np.nan
 
         out_L.append(L)
         out_Lam.append(Lam)
@@ -209,6 +227,8 @@ def compute_sample_path_metrics(
         out_H.append(H)
         out_Arr.append(cum_arr)
         out_Dep.append(cum_dep)
+        out_w_prime.append(w_prime)
+        out_Theta.append(Theta)
 
     return (
         T,
@@ -219,6 +239,8 @@ def compute_sample_path_metrics(
         np.array(out_H, dtype=float),
         np.array(out_Arr, dtype=float),
         np.array(out_Dep, dtype=float),
+        np.array(out_w_prime, dtype=float),
+        np.array(out_Theta, dtype=float),
     )
 
 
@@ -252,7 +274,7 @@ def compute_finite_window_flow_metrics(
     FlowMetricsResult with:
       • reference to prepped `events`
       • observation `times`
-      • L, Lambda, w, N, H
+      • L, Lambda, Theta, w, w_prime, N, H
       • cumulative Arrivals(T) and Departures(T)
       • mode, freq, t0, tn
     """
@@ -264,10 +286,12 @@ def compute_finite_window_flow_metrics(
             L=np.array([]),
             Lambda=np.array([]),
             w=np.array([]),
+            w_prime=np.array([]),
             N=np.array([]),
             H=np.array([]),
             Arrivals=np.array([]),
             Departures=np.array([]),
+            Theta=np.array([]),
             mode="event" if freq is None else "calendar",
             freq=freq if freq is not None else None,
             t0=pd.NaT,
@@ -321,10 +345,12 @@ def compute_finite_window_flow_metrics(
             L=np.array([]),
             Lambda=np.array([]),
             w=np.array([]),
+            w_prime=np.array([]),
             N=np.array([]),
             H=np.array([]),
             Arrivals=np.array([]),
             Departures=np.array([]),
+            Theta=np.array([]),
             mode=mode,
             freq=resolved_freq,
             t0=pd.NaT,
@@ -340,7 +366,9 @@ def compute_finite_window_flow_metrics(
         events_prepped.append((t, dN, 0 if t < t0 else a))
 
     # Compute metrics
-    T, L, Lam, w, N, H, Arr, Dep = compute_sample_path_metrics(events_prepped, obs)
+    T, L, Lam, w, N, H, Arr, Dep, w_prime, Theta = compute_sample_path_flow_metrics(
+        events_prepped, obs
+    )
 
     # Extract arrival and departure timestamps for overlay plotting
     arrival_times: List[pd.Timestamp] = []
@@ -358,10 +386,12 @@ def compute_finite_window_flow_metrics(
         L=L,
         Lambda=Lam,
         w=w,
+        w_prime=w_prime,
         N=N,
         H=H,
         Arrivals=Arr,
         Departures=Dep,
+        Theta=Theta,
         mode=mode,
         freq=resolved_freq,
         t0=t0,

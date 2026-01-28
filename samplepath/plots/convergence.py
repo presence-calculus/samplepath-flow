@@ -55,7 +55,7 @@ def plot_sojourn_time_scatter(args, df, filter_result, metrics, out_dir) -> str:
         draw_line_chart_with_scatter(
             metrics.times,
             metrics.w,
-            f"Element {label} vs Average residence time",
+            f"Element {label} vs Average residence time per arrival",
             f"Time [hrs]",
             ts_w_scatter,
             t_scatter_times,
@@ -75,7 +75,7 @@ def draw_line_chart_with_scatter(
     out_path: str,
     scatter_times: List[pd.Timestamp],
     scatter_values: np.ndarray,
-    line_label: str = "Average Residence Time",
+    line_label: str = "Average Residence Time per Arrival",
     scatter_label: str = "element sojourn time",
     unit: str = "timestamp",
     caption: Optional[str] = None,
@@ -398,7 +398,7 @@ def draw_residence_vs_sojourn_stack(
     caption: Optional[str] = None,
 ) -> None:
     """
-    Top panel:  w(T) vs W*(t)  — Average Residence Time vs empirical average sojourn time
+    Top panel:  w(T) vs W*(t)  — Average Residence Time per Arrival vs empirical average sojourn time
     Bottom:     Sojourn-time scatter vs w(T)
 
     Assumptions:
@@ -442,8 +442,10 @@ def draw_residence_vs_sojourn_stack(
         axes[1].scatter(
             soj_times, soj_vals_h, s=18, alpha=0.55, label="element sojourn time"
         )
-    axes[1].plot(times, w_series_hours, label="Average Residence Time", zorder=3)
-    axes[1].set_title("Element sojourn time vs Average residence time")
+    axes[1].plot(
+        times, w_series_hours, label="Average Residence Time per Arrival", zorder=3
+    )
+    axes[1].set_title("Element sojourn time vs Average residence time per arrival")
     axes[1].set_ylabel("Time [hrs]")
     axes[1].legend(loc="best")
     format_date_axis(axes[1])
@@ -625,7 +627,7 @@ def plot_residence_vs_sojourn_stack(
 
     Expects from FlowMetricsResult:
       • metrics.times              : List[pd.Timestamp]
-      • metrics.w                  : np.ndarray (Average Residence Time series in HOURS)
+      • metrics.w                  : np.ndarray (Average Residence Time per Arrival series in HOURS)
 
     Uses compute_dynamic_empirical_series(df, metrics.times) for W*(t).
     Writes: timestamp_residence_vs_sojourn_stack.png

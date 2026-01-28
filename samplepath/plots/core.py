@@ -215,7 +215,13 @@ class LambdaPanel:
         arrival_times: Optional[List[pd.Timestamp]] = None,
     ) -> None:
         overlays = (
-            build_event_overlays(times, Lam_vals, arrival_times, [], drop_lines=True)
+            build_event_overlays(
+                times,
+                Lam_vals,
+                arrival_times,
+                [],
+                drop_lines_for_arrivals=True,
+            )
             if self.with_event_marks
             else None
         )
@@ -280,9 +286,76 @@ class LambdaPanel:
 
 
 @dataclass
+class ThetaPanel:
+    show_title: bool = True
+    title: str = "Θ(T) — Cumulative Departure Rate"
+    show_derivations: bool = False
+    with_event_marks: bool = False
+
+    def render(
+        self,
+        ax,
+        times: Sequence[pd.Timestamp],
+        theta_vals: Sequence[float],
+        *,
+        departure_times: Optional[List[pd.Timestamp]] = None,
+    ) -> None:
+        label = "Θ(T) [1/hr]"
+        overlays = (
+            build_event_overlays(times, theta_vals, [], departure_times)
+            if self.with_event_marks and departure_times is not None
+            else None
+        )
+        color = "grey" if overlays else "tab:blue"
+        render_line_chart(
+            ax, times, theta_vals, label=label, color=color, overlays=overlays
+        )
+        if self.show_title:
+            ax.set_title(
+                construct_title(
+                    self.title, self.show_derivations, derivation_key="Theta"
+                )
+            )
+        ax.set_ylabel(label)
+        ax.legend()
+
+    def plot(
+        self,
+        metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
+        with figure_context(
+            chart_config=chart_config,
+            nrows=1,
+            ncols=1,
+            caption=caption,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core/panels",
+            base_name="cumulative_departure_rate_Theta",
+        ) as (
+            _,
+            axes,
+            resolved_out_path,
+        ):
+            ax = _first_axis(axes)
+            self.render(
+                ax,
+                metrics.times,
+                metrics.Theta,
+                departure_times=metrics.departure_times,
+            )
+        return resolved_out_path
+
+
+@dataclass
 class WPanel:
     show_title: bool = True
-    title: str = "w(T) — Average Residence Time"
+    title: str = "w(T) — Average Residence Time per Arrival"
     show_derivations: bool = False
     with_event_marks: bool = False
 
@@ -302,7 +375,7 @@ class WPanel:
                 w_vals,
                 arrival_times,
                 departure_times,
-                drop_lines=True,
+                drop_lines_for_arrivals=True,
                 drop_lines_for_departures=False,
             )
             if self.with_event_marks
@@ -413,6 +486,82 @@ class HPanel:
                 ax,
                 metrics.times,
                 metrics.H,
+                arrival_times=metrics.arrival_times,
+                departure_times=metrics.departure_times,
+            )
+        return resolved_out_path
+
+
+@dataclass
+class WPrimePanel:
+    show_title: bool = True
+    title: str = "w'(T) — Average Residence Time per Departure"
+    show_derivations: bool = False
+    with_event_marks: bool = False
+
+    def render(
+        self,
+        ax,
+        times: Sequence[pd.Timestamp],
+        w_prime_vals: Sequence[float],
+        *,
+        arrival_times: Optional[List[pd.Timestamp]] = None,
+        departure_times: Optional[List[pd.Timestamp]] = None,
+    ) -> None:
+        label = "w'(T) [hrs]"
+        overlays = (
+            build_event_overlays(
+                times,
+                w_prime_vals,
+                arrival_times,
+                departure_times,
+                drop_lines_for_arrivals=False,
+                drop_lines_for_departures=True,
+            )
+            if self.with_event_marks
+            else None
+        )
+        color = "grey" if overlays else "tab:blue"
+        render_line_chart(
+            ax, times, w_prime_vals, label=label, color=color, overlays=overlays
+        )
+        if self.show_title:
+            ax.set_title(
+                construct_title(
+                    self.title, self.show_derivations, derivation_key="w_prime"
+                )
+            )
+        ax.set_ylabel(label)
+        ax.legend()
+
+    def plot(
+        self,
+        metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
+        with figure_context(
+            chart_config=chart_config,
+            nrows=1,
+            ncols=1,
+            caption=caption,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core/panels",
+            base_name="average_residence_time_w_prime",
+        ) as (
+            _,
+            axes,
+            resolved_out_path,
+        ):
+            ax = _first_axis(axes)
+            self.render(
+                ax,
+                metrics.times,
+                metrics.w_prime,
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
             )
@@ -594,22 +743,26 @@ class LLWPanel:
                 color=colors,
                 label=None,
             )
-            ax.vlines(
-                x,
-                0,
-                y,
-                colors=drop_colors,
-                linewidths=0.5,
-                alpha=0.25,
+            drop_mask = np.array(
+                [time_val in arrival_set for time_val in t], dtype=bool
             )
-            ax.hlines(
-                y,
-                0,
-                x,
-                colors=drop_colors,
-                linewidths=0.5,
-                alpha=0.25,
-            )
+            if drop_mask.any():
+                ax.vlines(
+                    x[drop_mask],
+                    0,
+                    y[drop_mask],
+                    colors=np.array(drop_colors, dtype=object)[drop_mask],
+                    linewidths=0.5,
+                    alpha=0.25,
+                )
+                ax.hlines(
+                    y[drop_mask],
+                    0,
+                    x[drop_mask],
+                    colors=np.array(drop_colors, dtype=object)[drop_mask],
+                    linewidths=0.5,
+                    alpha=0.25,
+                )
             if self.with_event_marks:
                 ax.legend(
                     handles=[
@@ -678,6 +831,145 @@ class LLWPanel:
                 metrics.L,
                 metrics.Lambda,
                 metrics.w,
+                arrival_times=metrics.arrival_times,
+                departure_times=metrics.departure_times,
+            )
+        return resolved_out_path
+
+
+@dataclass(frozen=True)
+class LThetaWPrimePanel:
+    show_title: bool = True
+    title: str = "L(T) vs Θ(T).w'(T)"
+    with_event_marks: bool = False
+
+    def render(
+        self,
+        ax: plt.Axes,
+        times: List[pd.Timestamp],
+        L_vals: np.ndarray,
+        Theta_vals: np.ndarray,
+        w_prime_vals: np.ndarray,
+        *,
+        arrival_times: Optional[List[pd.Timestamp]] = None,
+        departure_times: Optional[List[pd.Timestamp]] = None,
+    ) -> None:
+        x = np.asarray(L_vals, dtype=float)
+        y = np.asarray(Theta_vals, dtype=float) * np.asarray(w_prime_vals, dtype=float)
+        t = np.asarray(times, dtype=object)
+        mask = np.isfinite(x) & np.isfinite(y)
+        x, y, t = x[mask], y[mask], t[mask]
+
+        if x.size:
+            arrival_set = set(arrival_times or [])
+            departure_set = set(departure_times or [])
+            alphas = np.linspace(0.2, 1.0, num=len(t))
+            colors = []
+            drop_colors = []
+            for idx, time_val in enumerate(t):
+                base = "tab:blue"
+                if self.with_event_marks:
+                    if time_val in departure_set:
+                        base = "green"
+                    elif time_val in arrival_set:
+                        base = "purple"
+                colors.append(mcolors.to_rgba(base, alpha=float(alphas[idx])))
+                drop_colors.append(mcolors.to_rgba(base, alpha=0.25))
+            ax.scatter(
+                x,
+                y,
+                s=18,
+                color=colors,
+                label=None,
+            )
+            drop_mask = np.array(
+                [time_val in departure_set for time_val in t], dtype=bool
+            )
+            if drop_mask.any():
+                ax.vlines(
+                    x[drop_mask],
+                    0,
+                    y[drop_mask],
+                    colors=np.array(drop_colors, dtype=object)[drop_mask],
+                    linewidths=0.5,
+                    alpha=0.25,
+                )
+                ax.hlines(
+                    y[drop_mask],
+                    0,
+                    x[drop_mask],
+                    colors=np.array(drop_colors, dtype=object)[drop_mask],
+                    linewidths=0.5,
+                    alpha=0.25,
+                )
+            if self.with_event_marks:
+                ax.legend(
+                    handles=[
+                        Line2D(
+                            [0],
+                            [0],
+                            marker="o",
+                            color="purple",
+                            linestyle="None",
+                            label="Arrival",
+                        ),
+                        Line2D(
+                            [0],
+                            [0],
+                            marker="o",
+                            color="green",
+                            linestyle="None",
+                            label="Departure",
+                        ),
+                    ],
+                    loc="best",
+                )
+
+        if x.size and y.size:
+            mn = float(np.nanmin([x.min(), y.min()]))
+            mx = float(np.nanmax([x.max(), y.max()]))
+            pad = 0.03 * (mx - mn if mx > mn else 1.0)
+            lo, hi = mn - pad, mx + pad
+            ax.plot([lo, hi], [lo, hi], linestyle="--")
+            ax.set_xlim(lo, hi)
+            ax.set_ylim(lo, hi)
+
+        ax.set_aspect("equal", adjustable="box")
+        ax.set_xlabel("L(T)")
+        ax.set_ylabel("Θ(T)·w'(T)")
+        if self.show_title:
+            ax.set_title(self.title)
+
+    def plot(
+        self,
+        metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        caption = resolve_caption(filter_result)
+        with figure_context(
+            chart_config=chart_config,
+            nrows=1,
+            ncols=1,
+            figsize=(6.0, 6.0),
+            caption=caption,
+            unit=None,
+            out_dir=out_dir,
+            subdir="core/panels",
+            base_name="departure_littles_law_invariant",
+        ) as (
+            _,
+            axes,
+            resolved_out_path,
+        ):
+            ax = _first_axis(axes)
+            self.render(
+                ax,
+                metrics.times,
+                metrics.L,
+                metrics.Theta,
+                metrics.w_prime,
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
             )
@@ -841,6 +1133,79 @@ def plot_LT_derivation_stack(
     return resolved_out_path
 
 
+def plot_departure_flow_metrics_stack(
+    metrics: FlowMetricsResult,
+    filter_result: Optional[FilterResult],
+    chart_config: ChartConfig,
+    out_dir: str,
+) -> str:
+    layout = LayoutSpec(nrows=4, ncols=1, figsize=(12.0, 11.0), sharex=True)
+    caption = resolve_caption(filter_result)
+    decor = FigureDecorSpec(
+        suptitle="Departure-Focused Flow Metrics",
+        suptitle_y=0.97,
+        caption=caption,
+        caption_position="top",
+        caption_y=0.945,
+        tight_layout=True,
+        tight_layout_rect=(0, 0, 1, 0.96),
+    )
+    unit = metrics.freq if metrics.freq else "timestamp"
+    with layout_context(
+        chart_config=chart_config,
+        layout=layout,
+        decor=decor,
+        unit=unit,
+        format_targets="bottom_row",
+        format_axis_fn=format_date_axis,
+        out_dir=out_dir,
+        subdir="core",
+        base_name="departure_flow_metrics",
+    ) as (_, axes, resolved_out_path):
+        flat_axes = axes if not isinstance(axes, np.ndarray) else axes.ravel()
+
+        NPanel(
+            show_derivations=chart_config.show_derivations,
+            with_event_marks=chart_config.with_event_marks,
+        ).render(
+            flat_axes[0],
+            metrics.times,
+            metrics.N,
+            arrival_times=metrics.arrival_times,
+            departure_times=metrics.departure_times,
+        )
+        LPanel(
+            show_derivations=chart_config.show_derivations,
+            with_event_marks=chart_config.with_event_marks,
+        ).render(
+            flat_axes[1],
+            metrics.times,
+            metrics.L,
+            arrival_times=metrics.arrival_times,
+            departure_times=metrics.departure_times,
+        )
+        ThetaPanel(
+            show_derivations=chart_config.show_derivations,
+            with_event_marks=chart_config.with_event_marks,
+        ).render(
+            flat_axes[2],
+            metrics.times,
+            metrics.Theta,
+            departure_times=metrics.departure_times,
+        )
+        WPrimePanel(
+            show_derivations=chart_config.show_derivations,
+            with_event_marks=chart_config.with_event_marks,
+        ).render(
+            flat_axes[3],
+            metrics.times,
+            metrics.w_prime,
+            arrival_times=metrics.arrival_times,
+            departure_times=metrics.departure_times,
+        )
+    return resolved_out_path
+
+
 def plot_core_flow_metrics_charts(
     metrics: FlowMetricsResult,
     filter_result: Optional[FilterResult],
@@ -852,6 +1217,10 @@ def plot_core_flow_metrics_charts(
     path_stack = plot_core_stack(metrics, filter_result, chart_config, out_dir)
 
     path_LT_derivation = plot_LT_derivation_stack(
+        metrics, filter_result, chart_config, out_dir
+    )
+
+    path_departure_stack = plot_departure_flow_metrics_stack(
         metrics, filter_result, chart_config, out_dir
     )
 
@@ -875,7 +1244,17 @@ def plot_core_flow_metrics_charts(
         ),
     ).plot(metrics, filter_result, chart_config, out_dir)
 
+    path_Theta = ThetaPanel(
+        with_event_marks=chart_config.with_event_marks,
+        show_derivations=show_derivations,
+    ).plot(metrics, filter_result, chart_config, out_dir)
+
     path_w = WPanel(
+        with_event_marks=chart_config.with_event_marks,
+        show_derivations=show_derivations,
+    ).plot(metrics, filter_result, chart_config, out_dir)
+
+    path_w_prime = WPrimePanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
     ).plot(metrics, filter_result, chart_config, out_dir)
@@ -894,14 +1273,22 @@ def plot_core_flow_metrics_charts(
         with_event_marks=chart_config.with_event_marks,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
+    path_departure_invariant = LThetaWPrimePanel(
+        with_event_marks=chart_config.with_event_marks,
+    ).plot(metrics, filter_result, chart_config, out_dir)
+
     return [
         path_N,
         path_L,
         path_Lam,
+        path_Theta,
         path_w,
+        path_w_prime,
         path_H,
         path_CFD,
         path_invariant,
+        path_departure_invariant,
         path_stack,
         path_LT_derivation,
+        path_departure_stack,
     ]

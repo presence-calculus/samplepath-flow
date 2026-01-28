@@ -295,7 +295,8 @@ def test_build_event_overlays_sets_colors_labels_and_drop_lines():
         values,
         [_t("2024-01-01 00:00")],
         [_t("2024-01-01 00:00")],
-        drop_lines=True,
+        drop_lines_for_arrivals=True,
+        drop_lines_for_departures=True,
     )
     assert overlays is not None
     arrival_overlay, departure_overlay = overlays

@@ -146,5 +146,53 @@ def test_empty_events_returns_empty_arrays():
     res = compute_finite_window_flow_metrics([], freq="day")
     assert all(
         getattr(res, name).size == 0
-        for name in ["L", "Lambda", "w", "N", "H", "Arrivals", "Departures"]
+        for name in [
+            "L",
+            "Lambda",
+            "Theta",
+            "w",
+            "w_prime",
+            "N",
+            "H",
+            "Arrivals",
+            "Departures",
+        ]
     )
+
+
+def test_w_prime_matches_presence_mass_per_departure():
+    t0 = pd.Timestamp("2024-01-01 00:00:00")
+    t1 = pd.Timestamp("2024-01-01 01:00:00")
+    t2 = pd.Timestamp("2024-01-01 02:00:00")
+    events = [
+        (t0, 1, 1),  # first arrival
+        (t1, 1, 1),  # second arrival
+        (t2, -2, 0),  # two departures
+    ]
+    res = compute_finite_window_flow_metrics(events, freq=None)
+    assert res.w_prime[-1] == 1.5
+
+
+@pytest.mark.parametrize(
+    ("events", "expected_theta"),
+    [
+        (
+            [
+                (_t("2024-01-01 00:00"), 1, 1),
+                (_t("2024-01-01 01:00"), -1, 0),
+            ],
+            1.0,
+        ),
+        (
+            [
+                (_t("2024-01-01 00:00"), 1, 1),
+                (_t("2024-01-01 01:00"), 1, 1),
+                (_t("2024-01-01 03:00"), -2, 0),
+            ],
+            2 / 3,
+        ),
+    ],
+)
+def test_theta_matches_departures_per_elapsed_hour(events, expected_theta):
+    res = compute_finite_window_flow_metrics(events, freq=None)
+    assert np.isclose(res.Theta[-1], expected_theta)

@@ -101,42 +101,63 @@ process](https://www.polaris-flow-dispatch.com/i/172332418/flow-processes).
 
 The input to the analysis is a sample path $N(t)$.
 
-There are four core functionals:
+There are six core functionals:
 
 - $H(T)$: the cumulative presence mass under the sample path over $[0,T]$.
 - $L(T)$: the time average of $N(t)$, defined as $L(T)=\frac{H(T)}{T}$.
 - $\Lambda(T)$: the cumulative arrival rate, defined as $\Lambda(T)=\frac{A(T)}{T}$.
-- $w(T)$: the average residence time, defined as $w(T)=\frac{H(T)}{A(T)}$.
+- $w(T)$: the average residence time per arrival, defined as $w(T)=\frac{H(T)}{A(T)}$.
+- $\Theta(T)$: the cumulative departure rate, defined as $\Theta(T)=\frac{D(T)}{T}$.
+- $w'(T)$: the average residence time per departure, defined as $w'(T)=\frac{H(T)}{D(T)}$.
 
-From these definitions it follows that
+We may write L(T) as
 
 $$
 L(T) = \frac{H(T)}{T}
      = \frac{A(T)}{T}.\frac{H(T)}{A(T)}.
 $$
 
-Equivalently,
+Which we may write as,
 
 $$
 L(T) = \Lambda(T).w(T).
 $$
 
-This is the finite version of Little’s Law.
+This is a finite version of Little’s Law, which we call the _Presence Invariant for arrivals_.
 
-It is a _deterministic identity_ that holds for every finite observation window $[0,T]$ with $0 < T < \infty$ and $A(T) > 0$.
-This implies that the three component functions _always_ evolve in a way that preserves the identity.
+>It is a deterministic accounting identity that expresses the relationship between the time average
+of cumulative presence mass and same cumulative presence mass averaged across arrivals when viewed over
+a consistent observation winodw.
 
-The finite version of Little's Law is thus a _deterministic constraint_ that governs the global dynamics of _any_ flow process, _even ones that operate in complex adaptive systems_. It is the foundation for adapting Little's Law for use in complex systems.
+Interestingly we can repeat these calculations with departures instead of arrivals.
 
-> **Note**: As we discuss in the [Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law), while the $L=\lambda.W$ form of Little's Law is incredibly powerful in operations management, much more can be unlocked once we consider the general $H=\lambda.G$ form of Little's Law.
->
-> The current version of the library does not provide the representations needed to _compute sample paths_ for this general form of the law. But the key thing to note is that the analysis of this general form and all the charts we see here depend only on the _shape of the sample path_.
->
-> Thus what is missing are the sample path construction algorithms that lie upstream of this analysis and the algorithms to compute the necessary functionals for $H(T)$. Once we provide this. the charts we produce are exactly the same for both forms of the law. This is why this set of charts is a very powerful tool to reason about flow dynamics.
->
-> So while it is easier to relate to these concepts expressed in terms of familiar ideas like WIP, Arrivals/Departure and Residence Time, all these concepts have natural generalizations when viewed from the lens of the general $H=\lambda.G$ form.
->
-> This is the generalization we provide in [The Presence Calculus](https://docs.pcalc.org/articles/intro-to-presence-calculus/).
+$$
+L(T) = \frac{H(T)}{T}
+     = \frac{D(T)}{T}.\frac{H(T)}{D(T)}.
+$$
+
+which we may write as
+
+$$
+L(T) = \Theta(T).w'(T).
+$$
+
+Thus we have the *Presence Invariant for departures*:
+
+$$
+\Lambda(T).w(T) = L(T) = \Theta(T).w'(T)
+$$
+
+and this holds _for all time points over all finite observation windows_.
+
+>The Presence Invariant defined above are _deterministic identities_ that hold *simultaneously *for every point in time in every finite observation window $[0,T]$ with $0 < T < \infty$ and $A(T) > 0$.
+
+This implies that the three component functions in each invariant _always_ evolve in a way that preserves the identity, *even when the arrival and departure focused
+arrival/departure rates, and residence times are not equal*.
+
+These invariants are thus _deterministic constraints_ that governs the global dynamics of _any_ flow process, even those that are not operating in steady state. It is the foundation for adapting Little's Law for use in processes that operate far
+from steady state equilibrium like most software processes are.
+
 
 ## Summary chart
 
@@ -195,17 +216,21 @@ Stacks (multi-panel composite charts) are written at the root of `core/`:
 | ------------------------------- | ---------------------------------------------------------------------------------- |
 | `core/sample_path_flow_metrics.png` | Four-panel stack: `N(t)`, `L(T)`, `Λ(T)`, `w(T)` over the same time axis.      |
 | `core/lt_derivation_stack.png`      | Four-panel stack: CFD, `N(t)`, `H(T)`, `L(T)` showing how L(T) is derived.     |
+| `core/departure_flow_metrics.png`   | Four-panel stack: `N(T)`, `L(T)`, `Θ(T)`, `w'(T)` over the same time axis.      |
 
 Individual panels are written under `core/panels/`:
 
 | File                                             | What it shows                                                                                                         | What it means                                                                                                                  |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |--------------------------------------------------------------------------------------------------------------------------------|
 | `core/panels/sample_path_N.png`                  | Step chart of `N(t)` (count of elements present in the boundary) vs time.                                             | Raw sample path of WIP/presence: queues, surges, and droughts show up directly.                                                |
 | `core/panels/time_average_N_L.png`               | Line chart of `L(T)` = time-average of `N(t)` over `[0, T]`.                                                          | Tracks how average WIP over the observation window converges (or doesn't). This is the "L" in Little's Law, measured pathwise. |
 | `core/panels/cumulative_arrival_rate_Lambda.png` | Line chart of `Λ(T)` (cumulative arrival rate `A(T)/(T−t₀)`), with optional percentile clipping and warmup exclusion. | Empirical arrival rate over time, with tools to ignore early transients and outliers.                                          |
-| `core/panels/average_residence_time_w.png`       | Line chart of `w(T)` (average residence time over the window, in hours).                                              | Shows how the time items spend in the boundary evolves; long/fat tails and slow drainage show up as increasing `w(T)`.         |
+| `core/panels/average_residence_time_w.png`       | Line chart of `w(T)` (average residence time per arrival over the window, in hours).                                  | Shows how the time items spend in the boundary evolves; long/fat tails and slow drainage show up as increasing `w(T)`.         |
+| `core/panels/cumulative_departure_rate_Theta.png` | Line chart of `Θ(T)` (cumulative departure rate `D(T)/(T−t₀)`).                                                       | Tracks how average departures per unit time evolve along the observation window.                                               |
+| `core/panels/average_residence_time_w_prime.png`  | Line chart of `w'(T)` (average residence time per departure, in hours).                                                | Shows how average residence time per departure evolves; divergence signals increasing drag on departures.                      |
 | `core/panels/cumulative_presence_mass_H.png`     | Line chart of `H(T)` (cumulative presence mass over the window, in item-hours).                                       | Total presence mass accumulated by items in the system, used in `L(T)` and `w(T)` definitions.                                 |
-| `core/panels/littles_law_invariant.png`          | Scatter of `L(T)` (x-axis) vs `Λ(T)·w(T)` (y-axis) with `y=x` reference line, equal aspect ratio.                     | Pure Little's Law invariant check: all finite points should lie near `y=x` if the metric calculations are consistent.          |
+| `core/panels/littles_law_invariant.png`          | Scatter of `L(T)` (x-axis) vs `Λ(T)·w(T)` (y-axis) with `y=x` reference line, equal aspect ratio.                     | Pure Little's Law invariant check: all finite points should lie on `y=x` if the metric calculations are consistent.            |
+| `core/panels/departure_littles_law_invariant.png` | Scatter of `L(T)` (x-axis) vs `Θ(T)·w'(T)` (y-axis) with `y=x` reference line, equal aspect ratio.                    | Departure-focused invariant check: all finite points should lie on `y=x` if the metric calculations are consistent.            |
 
 Their detail descriptions follow.
 
@@ -284,7 +309,7 @@ observe the process for longer periods, those initial end-effects get averaged o
 
 ![Cumulative Arrival Rate](images/core/time_average_N_L.png)
 
-### $w(T)$: Average residence time
+### $w(T)$: Average residence time per arrival
 
 `average_residence_time_w.png`
 
@@ -307,7 +332,7 @@ _Understanding the difference and relationship between residence time and famili
 metrics like Lead Time, Cycle Time and Work Item Age is crucial for understanding why
 sample path analysis works and these posts explain this._
 
-![Average Residence Time](images/core/average_residence_time_w.png)
+![Average Residence Time per Arrival](images/core/average_residence_time_w.png)
 
 ## The finite version of Little's Law
 

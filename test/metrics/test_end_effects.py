@@ -9,7 +9,7 @@ import pytest
 from samplepath.metrics import (
     compute_elementwise_empirical_metrics,
     compute_end_effect_series,
-    compute_sample_path_metrics,
+    compute_sample_path_flow_metrics,
 )
 
 
@@ -52,7 +52,9 @@ def events_one_item(df_one_item):
 @pytest.fixture
 def H_vals(events_one_item, times_three):
     # Use the module’s sampler to produce H aligned to times
-    _, _, _, _, _, H, _, _ = compute_sample_path_metrics(events_one_item, times_three)
+    _, _, _, _, _, H, _, _, _, _ = compute_sample_path_flow_metrics(
+        events_one_item, times_three
+    )
     return H
 
 

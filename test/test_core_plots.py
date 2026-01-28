@@ -196,6 +196,83 @@ def test_render_H_passes_overlays():
     assert kwargs["overlays"] == overlays
 
 
+def test_render_Theta_label():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    with patch("samplepath.plots.core.render_line_chart") as mock_render:
+        core.ThetaPanel().render(ax, times, values)
+    assert mock_render.call_args.kwargs["label"] == "Θ(T) [1/hr]"
+
+
+def test_render_Theta_sets_ylabel():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    with patch("samplepath.plots.core.render_line_chart"):
+        core.ThetaPanel().render(ax, times, values)
+    assert ax.set_ylabel.call_args[0][0] == "Θ(T) [1/hr]"
+
+
+def test_render_Theta_passes_overlays():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    overlays = ["overlay"]
+    with (
+        patch("samplepath.plots.core.build_event_overlays", return_value=overlays),
+        patch("samplepath.plots.core.render_line_chart") as mock_render,
+    ):
+        core.ThetaPanel(with_event_marks=True).render(
+            ax,
+            times,
+            values,
+            departure_times=[times[0]],
+        )
+    assert mock_render.call_args.kwargs["overlays"] == overlays
+
+
+def test_render_w_prime_label():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    with patch("samplepath.plots.core.render_line_chart") as mock_render:
+        core.WPrimePanel().render(ax, times, values)
+    assert mock_render.call_args.kwargs["label"] == "w'(T) [hrs]"
+
+
+def test_render_w_prime_sets_ylabel():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    with patch("samplepath.plots.core.render_line_chart"):
+        core.WPrimePanel().render(ax, times, values)
+    assert ax.set_ylabel.call_args[0][0] == "w'(T) [hrs]"
+
+
+def test_render_w_prime_passes_overlays():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    overlays = ["overlay"]
+    with (
+        patch(
+            "samplepath.plots.core.build_event_overlays", return_value=overlays
+        ) as mock_overlays,
+        patch("samplepath.plots.core.render_line_chart") as mock_render,
+    ):
+        core.WPrimePanel(with_event_marks=True).render(
+            ax,
+            times,
+            values,
+            arrival_times=[times[0]],
+            departure_times=[times[0]],
+        )
+    assert mock_render.call_args.kwargs["overlays"] == overlays
+    assert mock_overlays.call_args.kwargs["drop_lines_for_arrivals"] is False
+    assert mock_overlays.call_args.kwargs["drop_lines_for_departures"] is True
+
+
 def test_render_L_colors_grey_when_overlays():
     ax = MagicMock()
     times = [_t("2024-01-01")]
@@ -645,6 +722,44 @@ def test_plot_single_panel_H_calls_renderer():
     mock_render.assert_called_once()
 
 
+def test_plot_single_panel_Theta_calls_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.ThetaPanel.render") as mock_render,
+    ):
+        core.ThetaPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
+    mock_render.assert_called_once()
+
+
+def test_plot_single_panel_w_prime_calls_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.WPrimePanel.render") as mock_render,
+    ):
+        core.WPrimePanel().plot(metrics, filter_result, chart_config, "/tmp/out")
+    mock_render.assert_called_once()
+
+
 def _plot_H_panel_capture_render_kwargs(with_event_marks: bool = False):
     fig = MagicMock()
     ax = MagicMock()
@@ -888,9 +1003,11 @@ def _metrics_fixture(freq: str | None = "D"):
         L=np.array([2.0]),
         Lambda=np.array([3.0]),
         w=np.array([4.0]),
+        w_prime=np.array([4.5]),
         H=np.array([5.0]),
         Arrivals=np.array([1.0]),
         Departures=np.array([0.0]),
+        Theta=np.array([0.0]),
         arrival_times=[_t("2024-01-01")],
         departure_times=[_t("2024-01-02")],
         freq=freq,
@@ -917,6 +1034,26 @@ def _llw_metrics(
     )
 
 
+def _ltheta_metrics(
+    *,
+    times: list[pd.Timestamp],
+    L_vals: np.ndarray,
+    Theta_vals: np.ndarray,
+    w_prime_vals: np.ndarray,
+    arrival_times: Optional[list[pd.Timestamp]] = None,
+    departure_times: Optional[list[pd.Timestamp]] = None,
+):
+    return SimpleNamespace(
+        times=times,
+        L=L_vals,
+        Theta=Theta_vals,
+        w_prime=w_prime_vals,
+        arrival_times=arrival_times or [],
+        departure_times=departure_times or [],
+        freq=None,
+    )
+
+
 def _fake_llw_context(fig, ax, *, caption: str, out_dir: str = "/tmp/out"):
     @contextmanager
     def _ctx(out_path=None, **kwargs):
@@ -930,6 +1067,24 @@ def _fake_llw_context(fig, ax, *, caption: str, out_dir: str = "/tmp/out"):
         chart_format = kwargs["chart_config"].chart_format
         yield fig, ax, resolve_chart_path(
             out_dir, "core/panels", "littles_law_invariant", chart_format
+        )
+
+    return _ctx
+
+
+def _fake_ltheta_context(fig, ax, *, caption: str, out_dir: str = "/tmp/out"):
+    @contextmanager
+    def _ctx(out_path=None, **kwargs):
+        assert out_path is None
+        assert kwargs["figsize"] == (6.0, 6.0)
+        assert kwargs["caption"] == caption
+        assert kwargs["unit"] is None
+        assert kwargs["out_dir"] == out_dir
+        assert kwargs["subdir"] == "core/panels"
+        assert kwargs["base_name"] == "departure_littles_law_invariant"
+        chart_format = kwargs["chart_config"].chart_format
+        yield fig, ax, resolve_chart_path(
+            out_dir, "core/panels", "departure_littles_law_invariant", chart_format
         )
 
     return _ctx
@@ -957,7 +1112,19 @@ def test_core_driver_returns_expected_paths():
         resolve_chart_path(
             out_dir,
             "core/panels",
+            "cumulative_departure_rate_Theta",
+            chart_config.chart_format,
+        ),
+        resolve_chart_path(
+            out_dir,
+            "core/panels",
             "average_residence_time_w",
+            chart_config.chart_format,
+        ),
+        resolve_chart_path(
+            out_dir,
+            "core/panels",
+            "average_residence_time_w_prime",
             chart_config.chart_format,
         ),
         resolve_chart_path(
@@ -973,32 +1140,51 @@ def test_core_driver_returns_expected_paths():
             out_dir, "core/panels", "littles_law_invariant", chart_config.chart_format
         ),
         resolve_chart_path(
+            out_dir,
+            "core/panels",
+            "departure_littles_law_invariant",
+            chart_config.chart_format,
+        ),
+        resolve_chart_path(
             out_dir, None, "sample_path_flow_metrics", chart_config.chart_format
         ),
         resolve_chart_path(
             out_dir, "core", "lt_derivation_stack", chart_config.chart_format
         ),
+        resolve_chart_path(
+            out_dir, "core", "departure_flow_metrics", chart_config.chart_format
+        ),
     ]
     with (
         patch("samplepath.plots.core.plot_core_stack") as mock_stack,
         patch("samplepath.plots.core.plot_LT_derivation_stack") as mock_lt_stack,
+        patch(
+            "samplepath.plots.core.plot_departure_flow_metrics_stack"
+        ) as mock_departure_stack,
         patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
         patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
         patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
+        patch("samplepath.plots.core.ThetaPanel.plot") as mock_plot_Theta,
         patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
+        patch("samplepath.plots.core.WPrimePanel.plot") as mock_plot_w_prime,
         patch("samplepath.plots.core.HPanel.plot") as mock_plot_H,
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot_CFD,
         patch("samplepath.plots.core.LLWPanel.plot") as mock_plot_llw,
+        patch("samplepath.plots.core.LThetaWPrimePanel.plot") as mock_plot_ltheta,
     ):
-        mock_stack.return_value = expected[7]
-        mock_lt_stack.return_value = expected[8]
+        mock_stack.return_value = expected[10]
+        mock_lt_stack.return_value = expected[11]
+        mock_departure_stack.return_value = expected[12]
         mock_plot_N.return_value = expected[0]
         mock_plot_L.return_value = expected[1]
         mock_plot_Lam.return_value = expected[2]
-        mock_plot_w.return_value = expected[3]
-        mock_plot_H.return_value = expected[4]
-        mock_plot_CFD.return_value = expected[5]
-        mock_plot_llw.return_value = expected[6]
+        mock_plot_Theta.return_value = expected[3]
+        mock_plot_w.return_value = expected[4]
+        mock_plot_w_prime.return_value = expected[5]
+        mock_plot_H.return_value = expected[6]
+        mock_plot_CFD.return_value = expected[7]
+        mock_plot_llw.return_value = expected[8]
+        mock_plot_ltheta.return_value = expected[9]
         written = core.plot_core_flow_metrics_charts(
             metrics, filter_result, chart_config, out_dir
         )
@@ -1006,11 +1192,15 @@ def test_core_driver_returns_expected_paths():
     mock_plot_N.assert_called_once()
     mock_plot_L.assert_called_once()
     mock_plot_Lam.assert_called_once()
+    mock_plot_Theta.assert_called_once()
     mock_plot_w.assert_called_once()
+    mock_plot_w_prime.assert_called_once()
     mock_plot_H.assert_called_once()
     mock_plot_CFD.assert_called_once()
     mock_plot_llw.assert_called_once()
+    mock_plot_ltheta.assert_called_once()
     mock_lt_stack.assert_called_once()
+    mock_departure_stack.assert_called_once()
 
 
 def test_core_driver_calls_plot_core_stack_with_expected_args():
@@ -1027,13 +1217,17 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
     with (
         patch("samplepath.plots.core.plot_core_stack") as mock_stack,
         patch("samplepath.plots.core.plot_LT_derivation_stack"),
+        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
         patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
         patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
+        patch("samplepath.plots.core.ThetaPanel.plot") as mock_plot_Theta,
         patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
+        patch("samplepath.plots.core.WPrimePanel.plot") as mock_plot_w_prime,
         patch("samplepath.plots.core.HPanel.plot") as mock_plot_H,
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot_CFD,
         patch("samplepath.plots.core.LLWPanel.plot"),
+        patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
     ):
         core.plot_core_flow_metrics_charts(
             metrics, filter_result, chart_config, out_dir
@@ -1042,7 +1236,9 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
     mock_plot_N.assert_called_once()
     mock_plot_L.assert_called_once()
     mock_plot_Lam.assert_called_once()
+    mock_plot_Theta.assert_called_once()
     mock_plot_w.assert_called_once()
+    mock_plot_w_prime.assert_called_once()
     mock_plot_H.assert_called_once()
     mock_plot_CFD.assert_called_once()
 
@@ -1061,24 +1257,32 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w():
     with (
         patch("samplepath.plots.core.plot_core_stack"),
         patch("samplepath.plots.core.plot_LT_derivation_stack"),
+        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
         patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
         patch("samplepath.plots.core.HPanel.plot"),
         patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
         patch("samplepath.plots.core.LLWPanel"),
+        patch("samplepath.plots.core.LThetaWPrimePanel"),
         patch("samplepath.plots.core.LambdaPanel") as mock_lam_cls,
+        patch("samplepath.plots.core.ThetaPanel") as mock_theta_cls,
         patch("samplepath.plots.core.WPanel") as mock_w_cls,
+        patch("samplepath.plots.core.WPrimePanel") as mock_w_prime_cls,
     ):
         core.plot_core_flow_metrics_charts(
             metrics, filter_result, chart_config, out_dir
         )
     assert mock_lam_cls.call_args.kwargs["with_event_marks"] is True
+    assert mock_theta_cls.call_args.kwargs["with_event_marks"] is True
     assert mock_w_cls.call_args.kwargs["with_event_marks"] is True
+    assert mock_w_prime_cls.call_args.kwargs["with_event_marks"] is True
     assert mock_cfd_cls.call_args.kwargs["with_event_marks"] is True
     mock_plot_N.assert_called_once()
     mock_plot_L.assert_called_once()
     mock_lam_cls.assert_called_once()
+    mock_theta_cls.assert_called_once()
     mock_w_cls.assert_called_once()
+    mock_w_prime_cls.assert_called_once()
 
 
 def test_core_driver_passes_show_derivations_to_CFD():
@@ -1095,12 +1299,16 @@ def test_core_driver_passes_show_derivations_to_CFD():
     with (
         patch("samplepath.plots.core.plot_core_stack"),
         patch("samplepath.plots.core.plot_LT_derivation_stack"),
+        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
         patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
         patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
+        patch("samplepath.plots.core.ThetaPanel.plot") as mock_plot_Theta,
         patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
+        patch("samplepath.plots.core.WPrimePanel.plot") as mock_plot_w_prime,
         patch("samplepath.plots.core.HPanel.plot") as mock_plot_H,
         patch("samplepath.plots.core.LLWPanel.plot"),
+        patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
         patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
     ):
         core.plot_core_flow_metrics_charts(
@@ -1110,7 +1318,9 @@ def test_core_driver_passes_show_derivations_to_CFD():
     mock_plot_N.assert_called_once()
     mock_plot_L.assert_called_once()
     mock_plot_Lam.assert_called_once()
+    mock_plot_Theta.assert_called_once()
     mock_plot_w.assert_called_once()
+    mock_plot_w_prime.assert_called_once()
     mock_plot_H.assert_called_once()
 
 
@@ -1123,15 +1333,19 @@ def test_core_driver_uses_metrics_freq_for_unit():
     with (
         patch("samplepath.plots.core.plot_core_stack"),
         patch("samplepath.plots.core.plot_LT_derivation_stack"),
+        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.NPanel.plot") as mock_plot,
     ):
         with (
             patch("samplepath.plots.core.LPanel.plot"),
             patch("samplepath.plots.core.LambdaPanel.plot"),
+            patch("samplepath.plots.core.ThetaPanel.plot"),
             patch("samplepath.plots.core.WPanel.plot"),
+            patch("samplepath.plots.core.WPrimePanel.plot"),
             patch("samplepath.plots.core.HPanel.plot"),
             patch("samplepath.plots.core.CFDPanel.plot"),
             patch("samplepath.plots.core.LLWPanel.plot"),
+            patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
                 metrics, filter_result, chart_config, out_dir
@@ -1218,15 +1432,19 @@ def test_core_driver_calls_plot_H_under_core_dir():
     with (
         patch("samplepath.plots.core.plot_core_stack"),
         patch("samplepath.plots.core.plot_LT_derivation_stack"),
+        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.HPanel.plot") as mock_plot,
     ):
         with (
             patch("samplepath.plots.core.NPanel.plot"),
             patch("samplepath.plots.core.LPanel.plot"),
             patch("samplepath.plots.core.LambdaPanel.plot"),
+            patch("samplepath.plots.core.ThetaPanel.plot"),
             patch("samplepath.plots.core.WPanel.plot"),
+            patch("samplepath.plots.core.WPrimePanel.plot"),
             patch("samplepath.plots.core.CFDPanel.plot"),
             patch("samplepath.plots.core.LLWPanel.plot"),
+            patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
                 metrics, filter_result, chart_config, out_dir
@@ -1255,12 +1473,16 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
     with (
         patch("samplepath.plots.core.plot_core_stack"),
         patch("samplepath.plots.core.plot_LT_derivation_stack"),
+        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.NPanel.plot"),
         patch("samplepath.plots.core.LPanel.plot"),
         patch("samplepath.plots.core.LambdaPanel.plot"),
+        patch("samplepath.plots.core.ThetaPanel.plot"),
         patch("samplepath.plots.core.WPanel.plot"),
+        patch("samplepath.plots.core.WPrimePanel.plot"),
         patch("samplepath.plots.core.HPanel.plot"),
         patch("samplepath.plots.core.LLWPanel.plot"),
+        patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot,
     ):
         core.plot_core_flow_metrics_charts(
@@ -1283,18 +1505,54 @@ def test_core_driver_passes_event_marks_to_CFD():
     with (
         patch("samplepath.plots.core.plot_core_stack"),
         patch("samplepath.plots.core.plot_LT_derivation_stack"),
+        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.NPanel.plot"),
         patch("samplepath.plots.core.LPanel.plot"),
         patch("samplepath.plots.core.LambdaPanel.plot"),
+        patch("samplepath.plots.core.ThetaPanel.plot"),
         patch("samplepath.plots.core.WPanel.plot"),
+        patch("samplepath.plots.core.WPrimePanel.plot"),
         patch("samplepath.plots.core.HPanel.plot"),
         patch("samplepath.plots.core.LLWPanel"),
+        patch("samplepath.plots.core.LThetaWPrimePanel"),
         patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
     ):
         core.plot_core_flow_metrics_charts(
             metrics, filter_result, chart_config, out_dir
         )
     assert mock_cfd_cls.call_args.kwargs["with_event_marks"] is True
+
+
+def test_core_driver_passes_event_marks_to_departure_invariant():
+    metrics = _metrics_fixture()
+    out_dir = "/tmp/out"
+    args = SimpleNamespace(
+        lambda_pctl=None,
+        lambda_lower_pctl=None,
+        lambda_warmup=0.0,
+        with_event_marks=True,
+    )
+    chart_config = ChartConfig.init_from_args(args)
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with (
+        patch("samplepath.plots.core.plot_core_stack"),
+        patch("samplepath.plots.core.plot_LT_derivation_stack"),
+        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
+        patch("samplepath.plots.core.NPanel.plot"),
+        patch("samplepath.plots.core.LPanel.plot"),
+        patch("samplepath.plots.core.LambdaPanel.plot"),
+        patch("samplepath.plots.core.ThetaPanel.plot"),
+        patch("samplepath.plots.core.WPanel.plot"),
+        patch("samplepath.plots.core.WPrimePanel.plot"),
+        patch("samplepath.plots.core.HPanel.plot"),
+        patch("samplepath.plots.core.CFDPanel.plot"),
+        patch("samplepath.plots.core.LLWPanel.plot"),
+        patch("samplepath.plots.core.LThetaWPrimePanel") as mock_panel,
+    ):
+        core.plot_core_flow_metrics_charts(
+            metrics, filter_result, chart_config, out_dir
+        )
+    assert mock_panel.call_args.kwargs["with_event_marks"] is True
 
 
 def test_LLWPanel_renders_invariant_chart():
@@ -1327,6 +1585,73 @@ def test_LLWPanel_renders_invariant_chart():
     ax.set_ylabel.assert_called_once_with("Λ(T)·w(T)")
     ax.set_title.assert_called_once_with("L(T) vs Λ(T).w(T)")
     assert written == expected_path
+
+
+def test_LThetaWPrimePanel_writes_expected_path():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    metrics = _ltheta_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Theta_vals=np.array([1.0, 2.0]),
+        w_prime_vals=np.array([2.0, 1.0]),
+        arrival_times=[times[0]],
+        departure_times=[times[1]],
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    expected_path = resolve_chart_path(
+        "/tmp/out", "core/panels", "departure_littles_law_invariant", "png"
+    )
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_ltheta_context(fig, ax, caption="Filters: test"),
+    ):
+        written = core.LThetaWPrimePanel(title="L(T) vs Θ(T).w'(T)").plot(
+            metrics, filter_result, ChartConfig(), "/tmp/out"
+        )
+    assert written == expected_path
+
+
+def test_LThetaWPrimePanel_sets_ylabel():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    metrics = _ltheta_metrics(
+        times=times,
+        L_vals=np.array([1.0]),
+        Theta_vals=np.array([2.0]),
+        w_prime_vals=np.array([3.0]),
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_ltheta_context(fig, ax, caption="Filters: test"),
+    ):
+        core.LThetaWPrimePanel().plot(metrics, filter_result, ChartConfig(), "/tmp/out")
+    assert ax.set_ylabel.call_args.args[0] == "Θ(T)·w'(T)"
+
+
+def test_LThetaWPrimePanel_scatter_uses_theta_w_prime_product():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    Theta_vals = np.array([2.0, 3.0])
+    w_prime_vals = np.array([4.0, 5.0])
+    metrics = _ltheta_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Theta_vals=Theta_vals,
+        w_prime_vals=w_prime_vals,
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_ltheta_context(fig, ax, caption="Filters: test"),
+    ):
+        core.LThetaWPrimePanel().plot(metrics, filter_result, ChartConfig(), "/tmp/out")
+    plotted = ax.scatter.call_args.args[1]
+    assert np.allclose(plotted, Theta_vals * w_prime_vals)
 
 
 def test_LLWPanel_skips_reference_line_on_nonfinite():
@@ -1442,7 +1767,7 @@ def test_LLWPanel_event_marks_drop_lines_arrival_color():
             metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.vlines.call_args.kwargs["colors"]
-    assert colors[0] == mcolors.to_rgba("purple", alpha=0.25)
+    assert np.allclose(colors[0], mcolors.to_rgba("purple", alpha=0.25))
 
 
 def test_LLWPanel_event_marks_drop_lines_departure_color():
@@ -1466,7 +1791,31 @@ def test_LLWPanel_event_marks_drop_lines_departure_color():
             metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.vlines.call_args.kwargs["colors"]
-    assert colors[1] == mcolors.to_rgba("green", alpha=0.25)
+    assert np.allclose(colors, [mcolors.to_rgba("purple", alpha=0.25)])
+
+
+def test_LLWPanel_event_marks_drop_lines_only_for_arrivals():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Lam_vals=np.array([1.0, 1.0]),
+        w_vals=np.array([1.0, 1.0]),
+        arrival_times=[times[0]],
+        departure_times=[times[1]],
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
+    ):
+        core.LLWPanel(with_event_marks=True).plot(
+            metrics, filter_result, ChartConfig(), "/tmp/out"
+        )
+    vlines_x = ax.vlines.call_args.args[0]
+    assert np.allclose(vlines_x, np.array([1.0]))
 
 
 def test_LLWPanel_event_marks_hlines_arrival_color():
@@ -1514,7 +1863,79 @@ def test_LLWPanel_event_marks_hlines_departure_color():
             metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.hlines.call_args.kwargs["colors"]
-    assert colors[1] == mcolors.to_rgba("green", alpha=0.25)
+    assert np.allclose(colors, [mcolors.to_rgba("purple", alpha=0.25)])
+
+
+def test_LLWPanel_event_marks_hlines_only_for_arrivals():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    metrics = _llw_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Lam_vals=np.array([1.0, 1.0]),
+        w_vals=np.array([1.0, 1.0]),
+        arrival_times=[times[0]],
+        departure_times=[times[1]],
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_llw_context(fig, ax, caption="Filters: test"),
+    ):
+        core.LLWPanel(with_event_marks=True).plot(
+            metrics, filter_result, ChartConfig(), "/tmp/out"
+        )
+    hlines_y = ax.hlines.call_args.args[0]
+    assert np.allclose(hlines_y, np.array([1.0]))
+
+
+def test_LThetaWPrimePanel_event_marks_drop_lines_only_for_departures():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    metrics = _ltheta_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Theta_vals=np.array([1.0, 1.0]),
+        w_prime_vals=np.array([1.0, 1.0]),
+        arrival_times=[times[0]],
+        departure_times=[times[1]],
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_ltheta_context(fig, ax, caption="Filters: test"),
+    ):
+        core.LThetaWPrimePanel(with_event_marks=True).plot(
+            metrics, filter_result, ChartConfig(), "/tmp/out"
+        )
+    vlines_x = ax.vlines.call_args.args[0]
+    assert np.allclose(vlines_x, np.array([2.0]))
+
+
+def test_LThetaWPrimePanel_event_marks_hlines_only_for_departures():
+    fig = MagicMock()
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    metrics = _ltheta_metrics(
+        times=times,
+        L_vals=np.array([1.0, 2.0]),
+        Theta_vals=np.array([1.0, 1.0]),
+        w_prime_vals=np.array([1.0, 1.0]),
+        arrival_times=[times[0]],
+        departure_times=[times[1]],
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with patch(
+        "samplepath.plots.core.figure_context",
+        side_effect=_fake_ltheta_context(fig, ax, caption="Filters: test"),
+    ):
+        core.LThetaWPrimePanel(with_event_marks=True).plot(
+            metrics, filter_result, ChartConfig(), "/tmp/out"
+        )
+    hlines_y = ax.hlines.call_args.args[0]
+    assert np.allclose(hlines_y, np.array([1.0]))
 
 
 def test_LLWPanel_event_marks_adds_legend():
@@ -1616,13 +2037,17 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
     with (
         patch("samplepath.plots.core.plot_core_stack"),
         patch("samplepath.plots.core.plot_LT_derivation_stack"),
+        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.LLWPanel") as mock_panel,
+        patch("samplepath.plots.core.LThetaWPrimePanel"),
     ):
         with (
             patch("samplepath.plots.core.NPanel.plot"),
             patch("samplepath.plots.core.LPanel.plot"),
             patch("samplepath.plots.core.LambdaPanel.plot"),
+            patch("samplepath.plots.core.ThetaPanel.plot"),
             patch("samplepath.plots.core.WPanel.plot"),
+            patch("samplepath.plots.core.WPrimePanel.plot"),
             patch("samplepath.plots.core.HPanel.plot"),
             patch("samplepath.plots.core.CFDPanel.plot"),
         ):
@@ -1640,6 +2065,35 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
     )
 
 
+def test_core_driver_calls_departure_invariant_plot_under_core_dir():
+    metrics = _metrics_fixture()
+    out_dir = "/tmp/out"
+    args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
+    chart_config = ChartConfig.init_from_args(args)
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    with (
+        patch("samplepath.plots.core.plot_core_stack"),
+        patch("samplepath.plots.core.plot_LT_derivation_stack"),
+        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
+        patch("samplepath.plots.core.LLWPanel"),
+        patch("samplepath.plots.core.LThetaWPrimePanel") as mock_panel,
+    ):
+        with (
+            patch("samplepath.plots.core.NPanel.plot"),
+            patch("samplepath.plots.core.LPanel.plot"),
+            patch("samplepath.plots.core.LambdaPanel.plot"),
+            patch("samplepath.plots.core.ThetaPanel.plot"),
+            patch("samplepath.plots.core.WPanel.plot"),
+            patch("samplepath.plots.core.WPrimePanel.plot"),
+            patch("samplepath.plots.core.HPanel.plot"),
+            patch("samplepath.plots.core.CFDPanel.plot"),
+        ):
+            core.plot_core_flow_metrics_charts(
+                metrics, filter_result, chart_config, out_dir
+            )
+    assert mock_panel.call_args.kwargs["with_event_marks"] is False
+
+
 def test_core_driver_omits_caption_when_label_empty():
     metrics = _metrics_fixture()
     out_dir = "/tmp/out"
@@ -1649,13 +2103,17 @@ def test_core_driver_omits_caption_when_label_empty():
     with (
         patch("samplepath.plots.core.plot_core_stack") as mock_stack,
         patch("samplepath.plots.core.plot_LT_derivation_stack"),
+        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.NPanel.plot"),
         patch("samplepath.plots.core.LPanel.plot"),
         patch("samplepath.plots.core.LambdaPanel.plot"),
+        patch("samplepath.plots.core.ThetaPanel.plot"),
         patch("samplepath.plots.core.WPanel.plot"),
+        patch("samplepath.plots.core.WPrimePanel.plot"),
         patch("samplepath.plots.core.HPanel.plot"),
         patch("samplepath.plots.core.CFDPanel.plot"),
         patch("samplepath.plots.core.LLWPanel.plot"),
+        patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
     ):
         core.plot_core_flow_metrics_charts(
             metrics, filter_result, chart_config, out_dir
@@ -1738,6 +2196,63 @@ def _capture_LT_derivation_stack_layout_context():
     return captured
 
 
+def _call_departure_flow_metrics_stack_with_mocks():
+    fig = MagicMock()
+    axes = np.array([object() for _ in range(4)], dtype=object)
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig(with_event_marks=True, show_derivations=True)
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, axes, "out.png"
+
+    mocks = {}
+    with (
+        patch("samplepath.plots.core.layout_context", side_effect=fake_context),
+        patch("samplepath.plots.core.NPanel.render") as mock_N,
+        patch("samplepath.plots.core.LPanel.render") as mock_L,
+        patch("samplepath.plots.core.ThetaPanel.render") as mock_Theta,
+        patch("samplepath.plots.core.WPrimePanel.render") as mock_w_prime,
+    ):
+        core.plot_departure_flow_metrics_stack(
+            metrics, filter_result, chart_config, "/tmp/out"
+        )
+        mocks["N"] = mock_N
+        mocks["L"] = mock_L
+        mocks["Theta"] = mock_Theta
+        mocks["w_prime"] = mock_w_prime
+    return mocks
+
+
+def _capture_departure_flow_metrics_stack_layout_context():
+    fig = MagicMock()
+    axes = np.array([object() for _ in range(4)], dtype=object)
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    captured = {}
+
+    @contextmanager
+    def fake_context(out_path=None, **kwargs):
+        captured["out_path"] = out_path
+        captured.update(kwargs)
+        yield fig, axes, "out.png"
+
+    with (
+        patch("samplepath.plots.core.layout_context", side_effect=fake_context),
+        patch("samplepath.plots.core.NPanel.render"),
+        patch("samplepath.plots.core.LPanel.render"),
+        patch("samplepath.plots.core.ThetaPanel.render"),
+        patch("samplepath.plots.core.WPrimePanel.render"),
+    ):
+        core.plot_departure_flow_metrics_stack(
+            metrics, filter_result, chart_config, "/tmp/out"
+        )
+    captured["outer_chart_config"] = chart_config
+    return captured
+
+
 def test_plot_LT_derivation_stack_out_path_is_none():
     captured = _capture_LT_derivation_stack_layout_context()
     assert captured["out_path"] is None
@@ -1800,6 +2315,91 @@ def test_plot_LT_derivation_stack_format_axis_fn_set():
 
 def test_plot_LT_derivation_stack_format_targets():
     captured = _capture_LT_derivation_stack_layout_context()
+    assert captured["format_targets"] == "bottom_row"
+
+
+def test_plot_departure_flow_metrics_stack_calls_N_render():
+    mocks = _call_departure_flow_metrics_stack_with_mocks()
+    mocks["N"].assert_called_once()
+
+
+def test_plot_departure_flow_metrics_stack_calls_L_render():
+    mocks = _call_departure_flow_metrics_stack_with_mocks()
+    mocks["L"].assert_called_once()
+
+
+def test_plot_departure_flow_metrics_stack_calls_Theta_render():
+    mocks = _call_departure_flow_metrics_stack_with_mocks()
+    mocks["Theta"].assert_called_once()
+
+
+def test_plot_departure_flow_metrics_stack_calls_w_prime_render():
+    mocks = _call_departure_flow_metrics_stack_with_mocks()
+    mocks["w_prime"].assert_called_once()
+
+
+def test_plot_departure_flow_metrics_stack_out_path_is_none():
+    captured = _capture_departure_flow_metrics_stack_layout_context()
+    assert captured["out_path"] is None
+
+
+def test_plot_departure_flow_metrics_stack_passes_chart_config():
+    captured = _capture_departure_flow_metrics_stack_layout_context()
+    assert captured["chart_config"] == captured["outer_chart_config"]
+
+
+def test_plot_departure_flow_metrics_stack_uses_correct_out_dir():
+    captured = _capture_departure_flow_metrics_stack_layout_context()
+    assert captured["out_dir"] == "/tmp/out"
+
+
+def test_plot_departure_flow_metrics_stack_uses_correct_base_name():
+    captured = _capture_departure_flow_metrics_stack_layout_context()
+    assert captured["base_name"] == "departure_flow_metrics"
+
+
+def test_plot_departure_flow_metrics_stack_uses_core_subdir():
+    captured = _capture_departure_flow_metrics_stack_layout_context()
+    assert captured["subdir"] == "core"
+
+
+def test_plot_departure_flow_metrics_stack_layout_has_4_rows():
+    captured = _capture_departure_flow_metrics_stack_layout_context()
+    assert captured["layout"].nrows == 4
+
+
+def test_plot_departure_flow_metrics_stack_layout_has_1_col():
+    captured = _capture_departure_flow_metrics_stack_layout_context()
+    assert captured["layout"].ncols == 1
+
+
+def test_plot_departure_flow_metrics_stack_layout_figsize():
+    captured = _capture_departure_flow_metrics_stack_layout_context()
+    assert captured["layout"].figsize == (12.0, 11.0)
+
+
+def test_plot_departure_flow_metrics_stack_layout_sharex():
+    captured = _capture_departure_flow_metrics_stack_layout_context()
+    assert captured["layout"].sharex is True
+
+
+def test_plot_departure_flow_metrics_stack_suptitle():
+    captured = _capture_departure_flow_metrics_stack_layout_context()
+    assert captured["decor"].suptitle == "Departure-Focused Flow Metrics"
+
+
+def test_plot_departure_flow_metrics_stack_caption():
+    captured = _capture_departure_flow_metrics_stack_layout_context()
+    assert captured["decor"].caption == "Filters: test"
+
+
+def test_plot_departure_flow_metrics_stack_format_axis_fn_set():
+    captured = _capture_departure_flow_metrics_stack_layout_context()
+    assert captured["format_axis_fn"] is not None
+
+
+def test_plot_departure_flow_metrics_stack_format_targets():
+    captured = _capture_departure_flow_metrics_stack_layout_context()
     assert captured["format_targets"] == "bottom_row"
 
 

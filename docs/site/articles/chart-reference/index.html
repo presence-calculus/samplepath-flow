@@ -466,10 +466,10 @@ Samplepath Analysis Toolkit</em></a></p></p>
         id="toc-lambdat-cumulative-arrival-rate"><span
         class="math inline">\(\Lambda(T)\)</span>: Cumulative arrival
         rate</a></li>
-        <li><a href="#wt-average-residence-time"
-        id="toc-wt-average-residence-time"><span
-        class="math inline">\(w(T)\)</span>: Average residence
-        time</a></li>
+        <li><a href="#wt-average-residence-time-per-arrival"
+        id="toc-wt-average-residence-time-per-arrival"><span
+        class="math inline">\(w(T)\)</span>: Average residence time per
+        arrival</a></li>
         </ul></li>
         <li><a href="#the-finite-version-of-littles-law"
         id="toc-the-finite-version-of-littles-law">3.4 The finite
@@ -588,7 +588,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             Calculations for Little’s Law</h2>
             <p>The input to the analysis is a sample path <span
             class="math inline">\(N(t)\)</span>.</p>
-            <p>There are four core functionals:</p>
+            <p>There are six core functionals:</p>
             <ul>
             <li><span class="math inline">\(H(T)\)</span>: the
             cumulative presence mass under the sample path over <span
@@ -601,64 +601,70 @@ Samplepath Analysis Toolkit</em></a></p></p>
             cumulative arrival rate, defined as <span
             class="math inline">\(\Lambda(T)=\frac{A(T)}{T}\)</span>.</li>
             <li><span class="math inline">\(w(T)\)</span>: the average
-            residence time, defined as <span
+            residence time per arrival, defined as <span
             class="math inline">\(w(T)=\frac{H(T)}{A(T)}\)</span>.</li>
+            <li><span class="math inline">\(\Theta(T)\)</span>: the
+            cumulative departure rate, defined as <span
+            class="math inline">\(\Theta(T)=\frac{D(T)}{T}\)</span>.</li>
+            <li><span class="math inline">\(w&#39;(T)\)</span>: the
+            average residence time per departure, defined as <span
+            class="math inline">\(w&#39;(T)=\frac{H(T)}{D(T)}\)</span>.</li>
             </ul>
-            <p>From these definitions it follows that</p>
+            <p>We may write L(T) as</p>
             <p><span class="math display">\[
             L(T) = \frac{H(T)}{T}
                  = \frac{A(T)}{T}.\frac{H(T)}{A(T)}.
             \]</span></p>
-            <p>Equivalently,</p>
+            <p>Which we may write as,</p>
             <p><span class="math display">\[
             L(T) = \Lambda(T).w(T).
             \]</span></p>
-            <p>This is the finite version of Little’s Law.</p>
-            <p>It is a <em>deterministic identity</em> that holds for
-            every finite observation window <span
+            <p>This is a finite version of Little’s Law, which we call
+            the <em>Presence Invariant for arrivals</em>.</p>
+            <blockquote>
+            <p>It is a deterministic accounting identity that expresses
+            the relationship between the time average of cumulative
+            presence mass and same cumulative presence mass averaged
+            across arrivals when viewed over a consistent observation
+            winodw.</p>
+            </blockquote>
+            <p>Interestingly we can repeat these calculations with
+            departures instead of arrivals.</p>
+            <p><span class="math display">\[
+            L(T) = \frac{H(T)}{T}
+                 = \frac{D(T)}{T}.\frac{H(T)}{D(T)}.
+            \]</span></p>
+            <p>which we may write as</p>
+            <p><span class="math display">\[
+            L(T) = \Theta(T).w&#39;(T).
+            \]</span></p>
+            <p>Thus we have the <em>Presence Invariant for
+            departures</em>:</p>
+            <p><span class="math display">\[
+            \Lambda(T).w(T) = L(T) = \Theta(T).w&#39;(T)
+            \]</span></p>
+            <p>and this holds <em>for all time points over all finite
+            observation windows</em>.</p>
+            <blockquote>
+            <p>The Presence Invariant defined above are
+            <em>deterministic identities</em> that hold
+            <em>simultaneously </em>for every point in time in every
+            finite observation window <span
             class="math inline">\([0,T]\)</span> with <span
             class="math inline">\(0 &lt; T &lt; \infty\)</span> and
-            <span class="math inline">\(A(T) &gt; 0\)</span>. This
-            implies that the three component functions <em>always</em>
-            evolve in a way that preserves the identity.</p>
-            <p>The finite version of Little’s Law is thus a
-            <em>deterministic constraint</em> that governs the global
-            dynamics of <em>any</em> flow process, <em>even ones that
-            operate in complex adaptive systems</em>. It is the
-            foundation for adapting Little’s Law for use in complex
-            systems.</p>
-            <blockquote>
-            <p><strong>Note</strong>: As we discuss in the <a
-            href="https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law">Many
-            Faces of Little’s Law</a>, while the <span
-            class="math inline">\(L=\lambda.W\)</span> form of Little’s
-            Law is incredibly powerful in operations management, much
-            more can be unlocked once we consider the general <span
-            class="math inline">\(H=\lambda.G\)</span> form of Little’s
-            Law.</p>
-            <p>The current version of the library does not provide the
-            representations needed to <em>compute sample paths</em> for
-            this general form of the law. But the key thing to note is
-            that the analysis of this general form and all the charts we
-            see here depend only on the <em>shape of the sample
-            path</em>.</p>
-            <p>Thus what is missing are the sample path construction
-            algorithms that lie upstream of this analysis and the
-            algorithms to compute the necessary functionals for <span
-            class="math inline">\(H(T)\)</span>. Once we provide this.
-            the charts we produce are exactly the same for both forms of
-            the law. This is why this set of charts is a very powerful
-            tool to reason about flow dynamics.</p>
-            <p>So while it is easier to relate to these concepts
-            expressed in terms of familiar ideas like WIP,
-            Arrivals/Departure and Residence Time, all these concepts
-            have natural generalizations when viewed from the lens of
-            the general <span class="math inline">\(H=\lambda.G\)</span>
-            form.</p>
-            <p>This is the generalization we provide in <a
-            href="https://docs.pcalc.org/articles/intro-to-presence-calculus/">The
-            Presence Calculus</a>.</p>
+            <span class="math inline">\(A(T) &gt; 0\)</span>.</p>
             </blockquote>
+            <p>This implies that the three component functions in each
+            invariant <em>always</em> evolve in a way that preserves the
+            identity, <em>even when the arrival and departure focused
+            arrival/departure rates, and residence times are not
+            equal</em>.</p>
+            <p>These invariants are thus <em>deterministic
+            constraints</em> that governs the global dynamics of
+            <em>any</em> flow process, even those that are not operating
+            in steady state. It is the foundation for adapting Little’s
+            Law for use in processes that operate far from steady state
+            equilibrium like most software processes are.</p>
             <h2 id="summary-chart">3.2 Summary chart</h2>
             <p>This chart can be found at the top level under
             <code>&lt;scenario&gt;/</code></p>
@@ -768,6 +774,12 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <code>H(T)</code>, <code>L(T)</code> showing how L(T) is
             derived.</td>
             </tr>
+            <tr>
+            <td><code>core/departure_flow_metrics.png</code></td>
+            <td>Four-panel stack: <code>N(T)</code>, <code>L(T)</code>,
+            <code>Θ(T)</code>, <code>w'(T)</code> over the same time
+            axis.</td>
+            </tr>
             </tbody>
             </table>
             <p>Individual panels are written under
@@ -775,7 +787,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <table>
             <colgroup>
             <col style="width: 16%" />
-            <col style="width: 40%" />
+            <col style="width: 39%" />
             <col style="width: 43%" />
             </colgroup>
             <thead>
@@ -812,10 +824,24 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <tr>
             <td><code>core/panels/average_residence_time_w.png</code></td>
             <td>Line chart of <code>w(T)</code> (average residence time
-            over the window, in hours).</td>
+            per arrival over the window, in hours).</td>
             <td>Shows how the time items spend in the boundary evolves;
             long/fat tails and slow drainage show up as increasing
             <code>w(T)</code>.</td>
+            </tr>
+            <tr>
+            <td><code>core/panels/cumulative_departure_rate_Theta.png</code></td>
+            <td>Line chart of <code>Θ(T)</code> (cumulative departure
+            rate <code>D(T)/(T−t₀)</code>).</td>
+            <td>Tracks how average departures per unit time evolve along
+            the observation window.</td>
+            </tr>
+            <tr>
+            <td><code>core/panels/average_residence_time_w_prime.png</code></td>
+            <td>Line chart of <code>w'(T)</code> (average residence time
+            per departure, in hours).</td>
+            <td>Shows how average residence time per departure evolves;
+            divergence signals increasing drag on departures.</td>
             </tr>
             <tr>
             <td><code>core/panels/cumulative_presence_mass_H.png</code></td>
@@ -831,7 +857,16 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <code>Λ(T)·w(T)</code> (y-axis) with <code>y=x</code>
             reference line, equal aspect ratio.</td>
             <td>Pure Little’s Law invariant check: all finite points
-            should lie near <code>y=x</code> if the metric calculations
+            should lie on <code>y=x</code> if the metric calculations
+            are consistent.</td>
+            </tr>
+            <tr>
+            <td><code>core/panels/departure_littles_law_invariant.png</code></td>
+            <td>Scatter of <code>L(T)</code> (x-axis) vs
+            <code>Θ(T)·w'(T)</code> (y-axis) with <code>y=x</code>
+            reference line, equal aspect ratio.</td>
+            <td>Departure-focused invariant check: all finite points
+            should lie on <code>y=x</code> if the metric calculations
             are consistent.</td>
             </tr>
             </tbody>
@@ -922,9 +957,9 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <figcaption aria-hidden="true">Cumulative Arrival
             Rate</figcaption>
             </figure>
-            <h3 id="wt-average-residence-time"><span
-            class="math inline">\(w(T)\)</span>: Average residence
-            time</h3>
+            <h3 id="wt-average-residence-time-per-arrival"><span
+            class="math inline">\(w(T)\)</span>: Average residence time
+            per arrival</h3>
             <p><code>average_residence_time_w.png</code></p>
             <p>Average time items are observed as spending in the
             observation window up to time T (clips the time that is
@@ -945,9 +980,9 @@ Samplepath Analysis Toolkit</em></a></p></p>
             this.</em></p>
             <figure>
             <img src="images/core/average_residence_time_w.png"
-            alt="Average Residence Time" />
-            <figcaption aria-hidden="true">Average Residence
-            Time</figcaption>
+            alt="Average Residence Time per Arrival" />
+            <figcaption aria-hidden="true">Average Residence Time per
+            Arrival</figcaption>
             </figure>
             <h2 id="the-finite-version-of-littles-law">3.4 The finite
             version of Little’s Law</h2>
