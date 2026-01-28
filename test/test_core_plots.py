@@ -1839,7 +1839,7 @@ def test_LLWPanel_event_marks_hlines_arrival_color():
             metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.hlines.call_args.kwargs["colors"]
-    assert colors[0] == mcolors.to_rgba("purple", alpha=0.25)
+    assert np.allclose(colors[0], mcolors.to_rgba("purple", alpha=0.25))
 
 
 def test_LLWPanel_event_marks_hlines_departure_color():
