@@ -80,6 +80,6 @@ Examples:
   - Derivations sourced from the centralized class (mock/patch to assert lookup).
 
 ## Non-Goals (for Phase 1)
-- No derivations for convergence/misc/stability/advanced charts.
+- No derivations for convergence/stability/advanced charts.
 - No legend/caption text changes.
 - No LaTeX rendering, only Unicode strings.

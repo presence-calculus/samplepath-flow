@@ -47,8 +47,11 @@ For input `events.csv`, output is organized as follows:
     └── <scenario>/                 # e.g., latest
         ├── input/                  # a snapshot  of the input csv data
         ├── core/                   # core flow metrics & tables
+        │   └── panels/             # single-panel charts
         ├── convergence/            # convergence vs divergence
+        │   └── panels/             # single-panel charts
         ├── stability/              # boundedness and existence of limits
+        │   └── panels/             # single-panel charts
         ├── advanced/               # optional deep-dive charts
 ```
 

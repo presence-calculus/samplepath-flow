@@ -76,7 +76,6 @@ def test_ensure_output_dirs_creates_exact_known_subdirs(tmp_path):
         "stability",
         "stability/panels",
         "advanced",
-        "misc",
     }
 
     # Collect all directories created under the scenario root (relative paths, POSIX style)

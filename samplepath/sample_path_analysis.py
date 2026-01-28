@@ -26,7 +26,6 @@ from .plots import (
     plot_advanced_charts,
     plot_convergence_charts,
     plot_core_flow_metrics_charts,
-    plot_misc_charts,
     plot_stability_charts,
 )
 from .plots.chart_config import ChartConfig
@@ -45,7 +44,6 @@ def produce_all_charts(df, args, filter_result, metrics, empirical_metrics, out_
     )
     written += plot_stability_charts(df, args, filter_result, metrics, out_dir)
     written += plot_advanced_charts(df, args, filter_result, metrics, out_dir)
-    written += plot_misc_charts(df, args, filter_result, metrics, out_dir)
     return written
 
 

@@ -178,4 +178,4 @@ When adding or migrating plots:
 
 ## Status
 
-Core panels and core stack follow this architecture. Remaining modules (convergence, stability, misc, advanced) should be migrated to match these conventions.
+Core panels and core stack follow this architecture. Remaining modules (convergence, stability, advanced) should be migrated to match these conventions.

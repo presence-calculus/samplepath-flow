@@ -29,7 +29,6 @@ def test_produce_all_charts_calls_core_driver():
         ),
         patch("samplepath.sample_path_analysis.plot_stability_charts", return_value=[]),
         patch("samplepath.sample_path_analysis.plot_advanced_charts", return_value=[]),
-        patch("samplepath.sample_path_analysis.plot_misc_charts", return_value=[]),
     ):
         sample_path_analysis.produce_all_charts(
             df, args, filter_result, metrics, empirical_metrics, out_dir
@@ -56,15 +55,11 @@ def test_produce_all_charts_returns_concatenated_list():
             "samplepath.sample_path_analysis.plot_advanced_charts",
             return_value=["adv.png"],
         ),
-        patch(
-            "samplepath.sample_path_analysis.plot_misc_charts",
-            return_value=["misc.png"],
-        ),
     ):
         written = sample_path_analysis.produce_all_charts(
             df, args, filter_result, metrics, empirical_metrics, out_dir
         )
-    assert written == ["core.png", "conv.png", "stab.png", "adv.png", "misc.png"]
+    assert written == ["core.png", "conv.png", "stab.png", "adv.png"]
 
 
 def test_plots_export_uses_core_driver():

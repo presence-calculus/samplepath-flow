@@ -63,7 +63,6 @@ def ensure_output_dirs(
         "convergence/panels",
         "stability/panels",
         "advanced",
-        "misc",
     ]:
         sub_dir = os.path.join(out_dir, chart_dir)
         os.makedirs(sub_dir, exist_ok=True)

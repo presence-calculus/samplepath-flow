@@ -1,7 +1,8 @@
 ---
-ID: 17
-Task: Support event-overlay in H-Panel
-Branch: h-panel-events
+ID: 18
+Task: remove  misc charts
+Branch: misc-charts-removal
 ---
 
-Spec: The H-Panel currently does not support event overlays. It needs to do so with both arrival and departure events
+Spec: All the charts in misc.py are now superfluous. Remove this module and all its references. In top level directories created in the file_utils module, tests and in
+the chart documentation at docs/articles/chart-reference/index.md

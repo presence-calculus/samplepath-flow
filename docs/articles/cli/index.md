@@ -219,7 +219,6 @@ For input `events.csv`, output is organized as:
         ├── convergence/panels/     # multi-panel figures
         ├── stability/panels/       # stability/variance panels
         ├── advanced/               # optional deep-dive charts
-        └── misc/                   # ancillary artifacts
 ```
 
 \--
