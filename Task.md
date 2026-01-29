@@ -1,17 +1,13 @@
 ---
-ID: 21
-Task: Sojourn time panel
-Branch: sojourn-time-panel
+ID: 22
+Task: Process time convergence
+Branch: process-time-convergence
 ---
 
-Spec: Add Sojourn time panel to core panels. This is the first of metrics that we will pull from Elementwise Empirical Metrics.
-The sojourn time is stored in the w* field of the Empirical flow metrics. We will need to extend the api of plot_core_flow_metrics_charts to include this.
+Spec: In the convergence.py module, add a new panel, using the new panel conventions and design.
+This panel should plot w(T), w'(T) and W*(T) against T. It should support event overlays,
+w(T) should show drop lines on arrivals, w'(T) and W*(T) on departures.
 
-
-The arg order should be:
-plot_core_flow_metrics_charts(
-    metrics: FlowMetricsResult,
-    empirical_metics: ElementWiseEmpiricalMetrics,
-    filter_result: Optional[FilterResult],
-    chart_config: ChartConfig,
-    out_dir: str,
+Additional info
+1. This should be a standalone panel written to convergence/panels and wired into plot_convergence_cahrts
+2. Title is "Process Time Convergence" y label is "hours"

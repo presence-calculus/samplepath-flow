@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
+from dataclasses import dataclass
 import os
 from typing import List, Optional, Tuple
 
@@ -17,13 +18,18 @@ from samplepath.metrics import (
     compute_end_effect_series,
     compute_tracking_errors,
 )
+from samplepath.plots.chart_config import ChartConfig
 from samplepath.plots.core import CFDPanel
+from samplepath.plots.figure_context import _first_axis, figure_context
 from samplepath.plots.helpers import (
     _clip_axis_to_percentile,
     add_caption,
+    build_event_overlays,
     format_and_save,
     format_date_axis,
     init_fig_ax,
+    render_line_chart,
+    resolve_caption,
 )
 
 
@@ -124,6 +130,127 @@ def draw_residence_time_convergence_panel(
 
     fig.savefig(out_path)
     plt.close(fig)
+
+
+@dataclass
+class ProcessTimeConvergencePanel:
+    show_title: bool = True
+    title: str = "Process Time Convergence"
+    with_event_marks: bool = False
+
+    def render(
+        self,
+        ax,
+        times: List[pd.Timestamp],
+        w_vals: np.ndarray,
+        w_prime_vals: np.ndarray,
+        w_star_vals: np.ndarray,
+        *,
+        arrival_times: Optional[List[pd.Timestamp]] = None,
+        departure_times: Optional[List[pd.Timestamp]] = None,
+    ) -> None:
+        arrivals = arrival_times or []
+        departures = departure_times or []
+        w_overlays = (
+            build_event_overlays(
+                times,
+                w_vals,
+                arrivals,
+                [],
+                drop_lines_for_arrivals=True,
+                drop_lines_for_departures=False,
+            )
+            if self.with_event_marks
+            else None
+        )
+        w_prime_overlays = (
+            build_event_overlays(
+                times,
+                w_prime_vals,
+                [],
+                departures,
+                drop_lines_for_arrivals=False,
+                drop_lines_for_departures=True,
+            )
+            if self.with_event_marks
+            else None
+        )
+        w_star_overlays = (
+            build_event_overlays(
+                times,
+                w_star_vals,
+                [],
+                departures,
+                drop_lines_for_arrivals=False,
+                drop_lines_for_departures=True,
+            )
+            if self.with_event_marks
+            else None
+        )
+        render_line_chart(
+            ax,
+            times,
+            w_vals,
+            label="w(T) [hrs]",
+            color="tab:blue",
+            overlays=w_overlays,
+        )
+        render_line_chart(
+            ax,
+            times,
+            w_prime_vals,
+            label="w'(T) [hrs]",
+            color="tab:orange",
+            overlays=w_prime_overlays,
+        )
+        render_line_chart(
+            ax,
+            times,
+            w_star_vals,
+            label="W*(t) [hrs]",
+            color="tab:green",
+            overlays=w_star_overlays,
+        )
+        if self.show_title:
+            ax.set_title(self.title)
+        ax.set_ylabel("hours")
+        ax.legend()
+
+    def plot(
+        self,
+        metrics: FlowMetricsResult,
+        empirical_metrics: ElementWiseEmpiricalMetrics,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
+        with figure_context(
+            chart_config=chart_config,
+            nrows=1,
+            ncols=1,
+            caption=caption,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="convergence/panels",
+            base_name="process_time_convergence",
+        ) as (
+            _,
+            axes,
+            resolved_out_path,
+        ):
+            ax = _first_axis(axes)
+            self.render(
+                ax,
+                metrics.times,
+                metrics.w,
+                metrics.w_prime,
+                empirical_metrics.W_star,
+                arrival_times=metrics.arrival_times,
+                departure_times=metrics.departure_times,
+            )
+        return resolved_out_path
 
 
 def draw_cumulative_arrival_rate_convergence_panel(
@@ -834,9 +961,16 @@ def plot_convergence_charts(
     out_dir: str,
 ) -> List[str]:
     written = []
+    chart_config = ChartConfig.init_from_args(args)
 
     written += plot_arrival_rate_convergence(
         args, filter_result, metrics, empirical_metrics, out_dir
+    )
+
+    written.append(
+        ProcessTimeConvergencePanel(
+            with_event_marks=chart_config.with_event_marks
+        ).plot(metrics, empirical_metrics, filter_result, chart_config, out_dir)
     )
 
     # soujourn time scatter plot
