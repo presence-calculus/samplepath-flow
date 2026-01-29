@@ -1395,6 +1395,7 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
         patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
         patch("samplepath.plots.core.EventIndicatorPanel.plot"),
         patch("samplepath.plots.core.ArrivalsPanel.plot"),
+        patch("samplepath.plots.core.DeparturesPanel.plot"),
     ):
         core.plot_core_flow_metrics_charts(
             metrics, filter_result, chart_config, out_dir
@@ -1431,6 +1432,9 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w():
         patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
         patch("samplepath.plots.core.LLWPanel"),
         patch("samplepath.plots.core.LThetaWPrimePanel"),
+        patch("samplepath.plots.core.EventIndicatorPanel"),
+        patch("samplepath.plots.core.ArrivalsPanel"),
+        patch("samplepath.plots.core.DeparturesPanel"),
         patch("samplepath.plots.core.LambdaPanel") as mock_lam_cls,
         patch("samplepath.plots.core.ThetaPanel") as mock_theta_cls,
         patch("samplepath.plots.core.WPanel") as mock_w_cls,
@@ -1477,6 +1481,9 @@ def test_core_driver_passes_show_derivations_to_CFD():
         patch("samplepath.plots.core.LLWPanel.plot"),
         patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
         patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
+        patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+        patch("samplepath.plots.core.ArrivalsPanel.plot"),
+        patch("samplepath.plots.core.DeparturesPanel.plot"),
     ):
         core.plot_core_flow_metrics_charts(
             metrics, filter_result, chart_config, out_dir
@@ -1659,6 +1666,7 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot,
         patch("samplepath.plots.core.EventIndicatorPanel.plot"),
         patch("samplepath.plots.core.ArrivalsPanel.plot"),
+        patch("samplepath.plots.core.DeparturesPanel.plot"),
     ):
         core.plot_core_flow_metrics_charts(
             metrics, filter_result, chart_config, out_dir
@@ -2231,6 +2239,9 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
             patch("samplepath.plots.core.WPrimePanel.plot"),
             patch("samplepath.plots.core.HPanel.plot"),
             patch("samplepath.plots.core.CFDPanel.plot"),
+            patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+            patch("samplepath.plots.core.ArrivalsPanel.plot"),
+            patch("samplepath.plots.core.DeparturesPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
                 metrics, filter_result, chart_config, out_dir
@@ -2268,6 +2279,9 @@ def test_core_driver_calls_departure_invariant_plot_under_core_dir():
             patch("samplepath.plots.core.WPrimePanel.plot"),
             patch("samplepath.plots.core.HPanel.plot"),
             patch("samplepath.plots.core.CFDPanel.plot"),
+            patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+            patch("samplepath.plots.core.ArrivalsPanel.plot"),
+            patch("samplepath.plots.core.DeparturesPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
                 metrics, filter_result, chart_config, out_dir
@@ -2295,6 +2309,9 @@ def test_core_driver_omits_caption_when_label_empty():
         patch("samplepath.plots.core.CFDPanel.plot"),
         patch("samplepath.plots.core.LLWPanel.plot"),
         patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
+        patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+        patch("samplepath.plots.core.ArrivalsPanel.plot"),
+        patch("samplepath.plots.core.DeparturesPanel.plot"),
     ):
         core.plot_core_flow_metrics_charts(
             metrics, filter_result, chart_config, out_dir
