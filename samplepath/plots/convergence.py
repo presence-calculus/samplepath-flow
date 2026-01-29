@@ -20,7 +20,13 @@ from samplepath.metrics import (
 )
 from samplepath.plots.chart_config import ChartConfig
 from samplepath.plots.core import CFDPanel
-from samplepath.plots.figure_context import _first_axis, figure_context
+from samplepath.plots.figure_context import (
+    FigureDecorSpec,
+    LayoutSpec,
+    _first_axis,
+    figure_context,
+    layout_context,
+)
 from samplepath.plots.helpers import (
     _clip_axis_to_percentile,
     add_caption,
@@ -29,107 +35,9 @@ from samplepath.plots.helpers import (
     format_date_axis,
     init_fig_ax,
     render_line_chart,
+    render_scatter_chart,
     resolve_caption,
 )
-
-
-def plot_sojourn_time_scatter(args, df, filter_result, metrics, out_dir) -> str:
-    t_scatter_times: List[pd.Timestamp] = []
-    t_scatter_vals = np.array([])
-    if args.incomplete:
-        if len(metrics.times) > 0:
-            t_end = metrics.times[-1]
-            t_scatter_times = df["start_ts"].tolist()
-            t_scatter_vals = (
-                (t_end - df["start_ts"]).dt.total_seconds() / 3600.0
-            ).to_numpy()
-
-    else:
-        df_c = df[df["end_ts"].notna()].copy()
-        if not df_c.empty:
-            t_scatter_times = df_c["end_ts"].tolist()
-            t_scatter_vals = df_c["duration_hr"].to_numpy()
-
-    if len(t_scatter_times) == 0:
-        return []
-
-    if len(t_scatter_times) > 0:
-        ts_w_scatter = os.path.join(
-            out_dir, "convergence/panels/residence_time_sojourn_time_scatter.png"
-        )
-        label = "age" if args.incomplete else "sojourn time"
-        draw_line_chart_with_scatter(
-            metrics.times,
-            metrics.w,
-            f"Element {label} vs Average residence time per arrival",
-            f"Time [hrs]",
-            ts_w_scatter,
-            t_scatter_times,
-            t_scatter_vals,
-            scatter_label=f"element {label}",
-            caption=filter_result.label if filter_result else None,
-        )
-
-    return [ts_w_scatter]
-
-
-def draw_line_chart_with_scatter(
-    times: List[pd.Timestamp],
-    values: np.ndarray,
-    title: str,
-    ylabel: str,
-    out_path: str,
-    scatter_times: List[pd.Timestamp],
-    scatter_values: np.ndarray,
-    line_label: str = "Average Residence Time per Arrival",
-    scatter_label: str = "element sojourn time",
-    unit: str = "timestamp",
-    caption: Optional[str] = None,
-) -> None:
-    fig, ax = plt.subplots(figsize=(10, 4))
-    ax.plot(times, values, label=line_label)
-    if (
-        scatter_times is not None
-        and scatter_values is not None
-        and len(scatter_times) > 0
-    ):
-        ax.scatter(
-            scatter_times,
-            scatter_values,
-            s=16,
-            alpha=0.6,
-            marker="o",
-            label=scatter_label,
-        )
-
-    format_and_save(fig, ax, title, ylabel, unit, caption, out_path)
-
-
-def draw_residence_time_convergence_panel(
-    times: List[pd.Timestamp],
-    w_vals: np.ndarray,
-    W_star: np.ndarray,
-    title: str,
-    out_path: str,
-    caption: Optional[str] = None,
-) -> None:
-    fig, ax = plt.subplots(figsize=(12, 6.5))
-
-    ax.plot(times, w_vals, label="w(T) [hrs]")
-    ax.plot(times, W_star, linestyle="--", label="W*(t) [hrs] (completed ≤ t)")
-    ax.set_title("w(T) vs W*(t)")
-    ax.set_ylabel("hours")
-    ax.legend()
-
-    format_date_axis(ax)
-
-    fig.suptitle(title)
-    if caption:
-        add_caption(fig, caption)  # uses the helper
-    fig.tight_layout(rect=(0, 0, 1, 1))
-
-    fig.savefig(out_path)
-    plt.close(fig)
 
 
 @dataclass
@@ -249,6 +157,110 @@ class ProcessTimeConvergencePanel:
                 empirical_metrics.W_star,
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
+            )
+        return resolved_out_path
+
+
+@dataclass
+class SojournTimeScatterPanel:
+    show_title: bool = True
+    title: str = "Sojourn Time vs Residence Times"
+    with_event_marks: bool = False
+
+    def render(
+        self,
+        ax,
+        times: List[pd.Timestamp],
+        w_vals: np.ndarray,
+        w_prime_vals: np.ndarray,
+        departure_times: List[pd.Timestamp],
+        sojourn_vals: np.ndarray,
+    ) -> None:
+        departures = departure_times or []
+        w_overlays = (
+            build_event_overlays(
+                times,
+                w_vals,
+                [],
+                departures,
+                drop_lines_for_arrivals=False,
+                drop_lines_for_departures=True,
+            )
+            if self.with_event_marks
+            else None
+        )
+        w_prime_overlays = (
+            build_event_overlays(
+                times,
+                w_prime_vals,
+                [],
+                departures,
+                drop_lines_for_arrivals=False,
+                drop_lines_for_departures=True,
+            )
+            if self.with_event_marks
+            else None
+        )
+        render_scatter_chart(
+            ax,
+            departures,
+            sojourn_vals,
+            label="Sojourn time (departures)",
+            color="tab:purple",
+        )
+        render_line_chart(
+            ax,
+            times,
+            w_vals,
+            label="w(T) [hrs]",
+            color="tab:blue",
+            overlays=w_overlays,
+        )
+        render_line_chart(
+            ax,
+            times,
+            w_prime_vals,
+            label="w'(T) [hrs]",
+            color="tab:orange",
+            overlays=w_prime_overlays,
+        )
+        if self.show_title:
+            ax.set_title(self.title)
+        ax.set_ylabel("Time [hrs]")
+        ax.legend()
+
+    def plot(
+        self,
+        metrics: FlowMetricsResult,
+        empirical_metrics: ElementWiseEmpiricalMetrics,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
+        with figure_context(
+            chart_config=chart_config,
+            nrows=1,
+            ncols=1,
+            caption=caption,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="convergence/panels",
+            base_name="residence_time_sojourn_time_scatter_plot",
+        ) as (
+            _,
+            axes,
+            resolved_out_path,
+        ):
+            ax = _first_axis(axes)
+            self.render(
+                ax,
+                metrics.times,
+                metrics.w,
+                metrics.w_prime,
+                metrics.departure_times,
+                empirical_metrics.sojourn_vals,
             )
         return resolved_out_path
 
@@ -516,78 +528,6 @@ def draw_arrival_departure_convergence_stack(
     plt.close(fig)
 
 
-def draw_residence_vs_sojourn_stack(
-    times: List[pd.Timestamp],
-    w_series_hours: np.ndarray,  # w(T) aligned to `times` (avg residence time, hours)
-    df: pd.DataFrame,  # original events with start_ts / end_ts
-    title: str,
-    out_path: str,
-    caption: Optional[str] = None,
-) -> None:
-    """
-    Top panel:  w(T) vs W*(t)  — Average Residence Time per Arrival vs empirical average sojourn time
-    Bottom:     Sojourn-time scatter vs w(T)
-
-    Assumptions:
-      • df has 'start_ts' and 'end_ts' columns (tz-aware OK).
-      • W*(t) is computed via your existing helper:
-          compute_dynamic_empirical_series(df, times) -> (W_star, lam_star)
-        We use only W_star here.
-      • w_series_hours is aligned to `times` and in HOURS.
-    """
-    # --- Compute W*(t) aligned to `times`
-    if len(times) > 0:
-        W_star_hours, _ = compute_elementwise_empirical_metrics(df, times).as_tuple()
-    else:
-        W_star_hours = np.array([])
-
-    # --- Build scatter (completed items only)
-    df_c = df[df["end_ts"].notna()].copy()
-    if not df_c.empty:
-        soj_times = df_c["end_ts"].tolist()
-        soj_vals_h = (
-            (df_c["end_ts"] - df_c["start_ts"]).dt.total_seconds() / 3600.0
-        ).to_numpy()
-    else:
-        soj_times, soj_vals_h = [], np.array([])
-
-    # --- Figure
-    fig, axes = plt.subplots(2, 1, figsize=(12, 6.5), sharex=True)
-
-    # Panel 1: w(T) vs W*(t)
-    axes[0].plot(times, w_series_hours, label="w(T) [hrs]")
-    axes[0].plot(
-        times, W_star_hours, linestyle="--", label="W*(t) [hrs] (completed ≤ t)"
-    )
-    axes[0].set_title("w(T) vs W*(t) — residence vs sojourn")
-    axes[0].set_ylabel("hours")
-    axes[0].legend(loc="best")
-    format_date_axis(axes[0])
-
-    # Panel 2: Sojourn scatter vs w(T)
-    if len(soj_times) > 0:
-        axes[1].scatter(
-            soj_times, soj_vals_h, s=18, alpha=0.55, label="element sojourn time"
-        )
-    axes[1].plot(
-        times, w_series_hours, label="Average Residence Time per Arrival", zorder=3
-    )
-    axes[1].set_title("Element sojourn time vs Average residence time per arrival")
-    axes[1].set_ylabel("Time [hrs]")
-    axes[1].legend(loc="best")
-    format_date_axis(axes[1])
-
-    fig.suptitle(title)
-    if caption:
-        fig.text(0.5, 0.01, caption, ha="center", va="bottom", fontsize=9)
-        plt.tight_layout(rect=(0, 0.03, 1, 0.96))
-    else:
-        plt.tight_layout(rect=(0, 0, 1, 0.96))
-
-    fig.savefig(out_path)
-    plt.close(fig)
-
-
 def plot_arrival_rate_convergence(
     args,
     filter_result: Optional[FilterResult],
@@ -677,18 +617,6 @@ def plot_residence_time_sojourn_time_coherence_charts(
         )
     # Convergence diagnostics (timestamp)
     if len(metrics.times) > 0:
-        ts_conv_dyn = os.path.join(
-            out_dir, "convergence/panels/residence_time_convergence.png"
-        )
-        draw_residence_time_convergence_panel(
-            metrics.times,
-            metrics.w,
-            W_star_ts,
-            title=f"Residence Time Convergence",
-            out_path=ts_conv_dyn,
-            caption=filter_result.display,
-        )
-        written.append(ts_conv_dyn)
 
         ts_conv_dyn3 = os.path.join(
             out_dir, "advanced/residence_convergence_errors.png"
@@ -743,35 +671,57 @@ def plot_residence_time_sojourn_time_coherence_charts(
 
 
 def plot_residence_vs_sojourn_stack(
-    df: pd.DataFrame,
-    args,
     filter_result: Optional[FilterResult],
     metrics: FlowMetricsResult,
+    empirical_metrics: ElementWiseEmpiricalMetrics,
+    chart_config: ChartConfig,
     out_dir: str,
 ) -> List[str]:
-    """
-    Orchestrator mirroring your other plot_* wrappers.
+    caption = resolve_caption(filter_result)
 
-    Expects from FlowMetricsResult:
-      • metrics.times              : List[pd.Timestamp]
-      • metrics.w                  : np.ndarray (Average Residence Time per Arrival series in HOURS)
-
-    Uses compute_dynamic_empirical_series(df, metrics.times) for W*(t).
-    Writes: timestamp_residence_vs_sojourn_stack.png
-    """
-
-    caption = filter_result.display if filter_result else None
-
-    out_path = os.path.join(out_dir, "convergence/residence_sojourn_coherence.png")
-    draw_residence_vs_sojourn_stack(
-        metrics.times,
-        metrics.w,  # w(T) [hrs] aligned to times
-        df,
-        title="Flow Coherence: Residence Time/Sojourn Time Convergence",
-        out_path=out_path,
+    layout = LayoutSpec(nrows=2, ncols=1, figsize=(12.0, 6.5), sharex=True)
+    decor = FigureDecorSpec(
+        suptitle="Process Time Convergence Stack",
+        suptitle_y=0.97,
         caption=caption,
+        caption_position="top",
+        caption_y=0.945,
+        tight_layout=True,
+        tight_layout_rect=(0, 0, 1, 0.96),
     )
-    return [out_path]
+    unit = metrics.freq if metrics.freq else "timestamp"
+    with layout_context(
+        chart_config=chart_config,
+        layout=layout,
+        decor=decor,
+        unit=unit,
+        format_targets="bottom_row",
+        format_axis_fn=format_date_axis,
+        out_dir=out_dir,
+        subdir="convergence",
+        base_name="process_time_convergence_stack",
+    ) as (_, axes, resolved_out_path):
+        flat_axes = axes if not isinstance(axes, np.ndarray) else axes.ravel()
+        ProcessTimeConvergencePanel(
+            with_event_marks=chart_config.with_event_marks
+        ).render(
+            flat_axes[0],
+            metrics.times,
+            metrics.w,
+            metrics.w_prime,
+            empirical_metrics.W_star,
+            arrival_times=metrics.arrival_times,
+            departure_times=metrics.departure_times,
+        )
+        SojournTimeScatterPanel(with_event_marks=chart_config.with_event_marks).render(
+            flat_axes[1],
+            metrics.times,
+            metrics.w,
+            metrics.w_prime,
+            metrics.departure_times,
+            empirical_metrics.sojourn_vals,
+        )
+    return [resolved_out_path]
 
 
 def draw_ll_scatter_coherence(
@@ -973,15 +923,18 @@ def plot_convergence_charts(
         ).plot(metrics, empirical_metrics, filter_result, chart_config, out_dir)
     )
 
-    # soujourn time scatter plot
-    written += plot_sojourn_time_scatter(args, df, filter_result, metrics, out_dir)
+    written.append(
+        SojournTimeScatterPanel(with_event_marks=chart_config.with_event_marks).plot(
+            metrics, empirical_metrics, filter_result, chart_config, out_dir
+        )
+    )
 
     written += plot_residence_time_sojourn_time_coherence_charts(
         df, args, filter_result, metrics, out_dir
     )
 
     written += plot_residence_vs_sojourn_stack(
-        df, args, filter_result, metrics, out_dir
+        filter_result, metrics, empirical_metrics, chart_config, out_dir
     )
 
     written += plot_sample_path_convergence(df, args, filter_result, metrics, out_dir)

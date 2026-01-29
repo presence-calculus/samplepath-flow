@@ -1,13 +1,13 @@
 ---
-ID: 22
-Task: Process time convergence
-Branch: process-time-convergence
+ID: 23
+Task: Process Time Convergence Stack
+Branch: process-time-convergence-stack
 ---
 
-Spec: In the convergence.py module, add a new panel, using the new panel conventions and design.
-This panel should plot w(T), w'(T) and W*(T) against T. It should support event overlays,
-w(T) should show drop lines on arrivals, w'(T) and W*(T) on departures.
+Spec: In convergence.py, the function plot_residence_vs_sojourn_stack should be replaced with
+a stack that uses the modern panel plot design. The top panel is the process time convergence panel that we just built in task 22. The bottom panel is a new panel that plots a scatter plot of sojourn times for departures vs the two average residence time plots - w(T) and w'(T). This is basically the bottom panel of the current plot_residence_time_vs_sojourn_stack but extended to include both w and w' instead of just w.
 
-Additional info
-1. This should be a standalone panel written to convergence/panels and wired into plot_convergence_cahrts
-2. Title is "Process Time Convergence" y label is "hours"
+So the task is
+1. Define and implement the new panel.
+2. Wire it up under convergence charts and save it under convergence/panels/residence_time_sojourn_time_scatter_plot.png
+3. Create a new stack with process_time_convergence as the top panel and this one as the bottom panel and save it as converegence/process_time_convergence_stack

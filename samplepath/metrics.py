@@ -460,6 +460,8 @@ class ElementWiseEmpiricalMetrics:
         aligned to the same sample times.
         Each element represents the cumulative number of arrivals
         per unit time observed up to that point.
+        sojourn_vals : np.ndarray
+        Sojourn times in hours aligned to departure timestamps.
 
     Notes
     -----
@@ -482,6 +484,7 @@ class ElementWiseEmpiricalMetrics:
     times: List[pd.Timestamp]
     W_star: np.ndarray
     lam_star: np.ndarray
+    sojourn_vals: np.ndarray
 
     def as_tuple(self) -> [np.ndarray, np.ndarray]:
         return self.W_star, self.lam_star
@@ -492,18 +495,20 @@ def compute_elementwise_empirical_metrics(
 ) -> ElementWiseEmpiricalMetrics:
     def _compute_elementwise_empirical_metrics(
         df: pd.DataFrame, times: List[pd.Timestamp]
-    ) -> Tuple[np.ndarray, np.ndarray]:
-        """Return W*(t) and λ*(t) aligned to `times`."""
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Return W*(t), λ*(t), and sojourn values aligned to `times`."""
         n = len(times)
         W_star = np.full(n, np.nan, dtype=float)
         lam_star = np.full(n, np.nan, dtype=float)
+        sojourn_vals = np.array([])
         if n == 0:
-            return W_star, lam_star
+            return W_star, lam_star, sojourn_vals
 
         comp = df[df["end_ts"].notna()].copy().sort_values("end_ts")
-        comp_durations = (
-            (comp["end_ts"] - comp["start_ts"]).dt.total_seconds() / 3600.0
-        ).to_numpy()
+        if not comp.empty:
+            sojourn_vals = (
+                (comp["end_ts"] - comp["start_ts"]).dt.total_seconds() / 3600.0
+            ).to_numpy()
         comp_end_times = comp["end_ts"].to_list()
 
         starts = df["start_ts"].sort_values().to_list()
@@ -517,7 +522,7 @@ def compute_elementwise_empirical_metrics(
 
         for i, t in enumerate(times):
             while j < len(comp_end_times) and comp_end_times[j] <= t:
-                sum_c += comp_durations[j]
+                sum_c += sojourn_vals[j]
                 count_c += 1
                 j += 1
             if count_c > 0:
@@ -530,10 +535,15 @@ def compute_elementwise_empirical_metrics(
             if elapsed_h > 0:
                 lam_star[i] = count_starts / elapsed_h
 
-        return W_star, lam_star
+        return W_star, lam_star, sojourn_vals
 
-    W_star, lam_star = _compute_elementwise_empirical_metrics(df, times)
-    return ElementWiseEmpiricalMetrics(times=times, W_star=W_star, lam_star=lam_star)
+    W_star, lam_star, sojourn_vals = _compute_elementwise_empirical_metrics(df, times)
+    return ElementWiseEmpiricalMetrics(
+        times=times,
+        W_star=W_star,
+        lam_star=lam_star,
+        sojourn_vals=sojourn_vals,
+    )
 
 
 # --------- Calculating end effects and tracking errors ------ #

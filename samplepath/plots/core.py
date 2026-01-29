@@ -827,7 +827,8 @@ class EventIndicatorPanel:
         if self.show_title:
             ax.set_title(self.title)
         ax.set_ylabel("Indicator")
-        ax.legend()
+        if overlays and any(overlay.x for overlay in overlays):
+            ax.legend()
 
     def plot(
         self,

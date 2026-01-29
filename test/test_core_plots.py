@@ -1193,7 +1193,10 @@ def _empirical_metrics_fixture(
     if W_star is None:
         W_star = np.array([1.0])
     return ElementWiseEmpiricalMetrics(
-        times=times, W_star=W_star, lam_star=np.array([0.25])
+        times=times,
+        W_star=W_star,
+        lam_star=np.array([0.25]),
+        sojourn_vals=np.array([0.5]),
     )
 
 

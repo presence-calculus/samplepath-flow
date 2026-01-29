@@ -12,8 +12,10 @@ from samplepath.metrics import ElementWiseEmpiricalMetrics
 from samplepath.plots.chart_config import ChartConfig
 from samplepath.plots.convergence import (
     ProcessTimeConvergencePanel,
+    SojournTimeScatterPanel,
     draw_arrival_departure_convergence_stack,
     plot_convergence_charts,
+    plot_residence_vs_sojourn_stack,
 )
 
 
@@ -112,7 +114,10 @@ def test_process_time_convergence_panel_plot_calls_renderer():
         freq="D",
     )
     empirical_metrics = ElementWiseEmpiricalMetrics(
-        times=metrics.times, W_star=np.array([3.0]), lam_star=np.array([0.5])
+        times=metrics.times,
+        W_star=np.array([3.0]),
+        lam_star=np.array([0.5]),
+        sojourn_vals=np.array([2.0]),
     )
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     chart_config = ChartConfig()
@@ -138,6 +143,129 @@ def test_process_time_convergence_panel_plot_calls_renderer():
     mock_render.assert_called_once()
 
 
+def test_sojourn_time_scatter_panel_overlays_drop_lines():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    w_vals = np.array([1.0])
+    w_prime_vals = np.array([2.0])
+    sojourn_vals = np.array([3.0])
+    departures = [times[0]]
+    with (
+        patch(
+            "samplepath.plots.convergence.build_event_overlays",
+            return_value=["overlay"],
+        ) as mock_overlays,
+        patch("samplepath.plots.convergence.render_line_chart"),
+        patch("samplepath.plots.convergence.render_scatter_chart"),
+    ):
+        SojournTimeScatterPanel(with_event_marks=True).render(
+            ax,
+            times,
+            w_vals,
+            w_prime_vals,
+            departures,
+            sojourn_vals,
+        )
+    assert mock_overlays.call_count == 2
+    first_args, first_kwargs = (
+        mock_overlays.call_args_list[0].args,
+        mock_overlays.call_args_list[0].kwargs,
+    )
+    assert first_args[2] == []
+    assert first_args[3] == departures
+    assert first_kwargs["drop_lines_for_arrivals"] is False
+    assert first_kwargs["drop_lines_for_departures"] is True
+    second_args, second_kwargs = (
+        mock_overlays.call_args_list[1].args,
+        mock_overlays.call_args_list[1].kwargs,
+    )
+    assert second_args[2] == []
+    assert second_args[3] == departures
+    assert second_kwargs["drop_lines_for_arrivals"] is False
+    assert second_kwargs["drop_lines_for_departures"] is True
+
+
+def test_sojourn_time_scatter_panel_plot_calls_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = SimpleNamespace(
+        times=[_t("2024-01-01")],
+        w=np.array([1.0]),
+        w_prime=np.array([2.0]),
+        departure_times=[_t("2024-01-02")],
+        freq="D",
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    chart_config = ChartConfig()
+    empirical_metrics = ElementWiseEmpiricalMetrics(
+        times=metrics.times,
+        W_star=np.array([3.0]),
+        lam_star=np.array([0.5]),
+        sojourn_vals=np.array([4.0]),
+    )
+
+    @contextmanager
+    def fake_context(out_path=None, **kwargs):
+        assert out_path is None
+        assert kwargs["out_dir"] == "/tmp/out"
+        assert kwargs["subdir"] == "convergence/panels"
+        assert kwargs["base_name"] == "residence_time_sojourn_time_scatter_plot"
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.convergence.figure_context", side_effect=fake_context),
+        patch(
+            "samplepath.plots.convergence.SojournTimeScatterPanel.render"
+        ) as mock_render,
+    ):
+        written = SojournTimeScatterPanel().plot(
+            metrics, empirical_metrics, filter_result, chart_config, "/tmp/out"
+        )
+    assert written == "out.png"
+    mock_render.assert_called_once()
+
+
+def test_process_time_convergence_stack_calls_panel_renderers():
+    fig = MagicMock()
+    axes = np.array([object() for _ in range(2)], dtype=object)
+    metrics = SimpleNamespace(
+        times=[_t("2024-01-01")],
+        w=np.array([1.0]),
+        w_prime=np.array([2.0]),
+        arrival_times=[_t("2024-01-01")],
+        departure_times=[_t("2024-01-02")],
+        freq="D",
+    )
+    empirical_metrics = ElementWiseEmpiricalMetrics(
+        times=metrics.times,
+        W_star=np.array([3.0]),
+        lam_star=np.array([0.5]),
+        sojourn_vals=np.array([4.0]),
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    chart_config = ChartConfig(with_event_marks=True)
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, axes, "out.png"
+
+    with (
+        patch("samplepath.plots.convergence.layout_context", side_effect=fake_context),
+        patch(
+            "samplepath.plots.convergence.ProcessTimeConvergencePanel.render"
+        ) as mock_top,
+        patch(
+            "samplepath.plots.convergence.SojournTimeScatterPanel.render"
+        ) as mock_bottom,
+    ):
+        written = plot_residence_vs_sojourn_stack(
+            filter_result, metrics, empirical_metrics, chart_config, "/tmp/out"
+        )
+    assert written == ["out.png"]
+    mock_top.assert_called_once()
+    mock_bottom.assert_called_once()
+
+
 def test_plot_convergence_charts_includes_process_time_panel():
     df = pd.DataFrame()
     args = SimpleNamespace()
@@ -150,7 +278,10 @@ def test_plot_convergence_charts_includes_process_time_panel():
         freq=None,
     )
     empirical_metrics = ElementWiseEmpiricalMetrics(
-        times=metrics.times, W_star=np.array([3.0]), lam_star=np.array([0.5])
+        times=metrics.times,
+        W_star=np.array([3.0]),
+        lam_star=np.array([0.5]),
+        sojourn_vals=np.array([2.0]),
     )
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (
@@ -159,7 +290,8 @@ def test_plot_convergence_charts_includes_process_time_panel():
             return_value=[],
         ),
         patch(
-            "samplepath.plots.convergence.plot_sojourn_time_scatter", return_value=[]
+            "samplepath.plots.convergence.SojournTimeScatterPanel.plot",
+            return_value="scatter.png",
         ),
         patch(
             "samplepath.plots.convergence.plot_residence_time_sojourn_time_coherence_charts",
@@ -181,4 +313,5 @@ def test_plot_convergence_charts_includes_process_time_panel():
             df, args, filter_result, metrics, empirical_metrics, "/tmp/out"
         )
     assert "process.png" in written
+    assert "scatter.png" in written
     assert isinstance(mock_plot.call_args.args[3], ChartConfig)
