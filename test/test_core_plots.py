@@ -273,6 +273,144 @@ def test_render_w_prime_passes_overlays():
     assert mock_overlays.call_args.kwargs["drop_lines_for_departures"] is True
 
 
+def test_render_indicator_sets_ylabel():
+    ax = MagicMock()
+    with patch("samplepath.plots.core.render_scatter_chart"):
+        core.EventIndicatorPanel().render(ax, [])
+    assert ax.set_ylabel.call_args[0][0] == "Indicator"
+
+
+def test_render_indicator_hides_y_ticks():
+    ax = MagicMock()
+    with patch("samplepath.plots.core.render_scatter_chart"):
+        core.EventIndicatorPanel().render(ax, [])
+    ax.set_yticks.assert_called_once_with([])
+
+
+def test_render_indicator_passes_overlays():
+    ax = MagicMock()
+    arrival = _t("2024-01-01")
+    departure = _t("2024-01-02")
+    with patch("samplepath.plots.core.render_scatter_chart") as mock_render:
+        core.EventIndicatorPanel(with_event_marks=True).render(
+            ax,
+            [arrival, departure],
+            arrival_times=[arrival],
+            departure_times=[departure],
+        )
+    overlays = mock_render.call_args.kwargs["overlays"]
+    assert overlays[0].color == "purple"
+
+
+def test_plot_single_panel_indicator_calls_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.EventIndicatorPanel.render") as mock_render,
+    ):
+        core.EventIndicatorPanel().plot(
+            metrics, filter_result, chart_config, "/tmp/out"
+        )
+    mock_render.assert_called_once()
+
+
+def test_render_arrivals_sets_ylabel():
+    ax = MagicMock()
+    with patch("samplepath.plots.core.render_step_chart"):
+        core.ArrivalsPanel().render(ax, [], [])
+    assert ax.set_ylabel.call_args[0][0] == "count"
+
+
+def test_render_arrivals_passes_overlays():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    overlays = ["overlay"]
+    with (
+        patch("samplepath.plots.core.build_event_overlays", return_value=overlays),
+        patch("samplepath.plots.core.render_step_chart") as mock_render,
+    ):
+        core.ArrivalsPanel(with_event_marks=True).render(
+            ax,
+            times,
+            values,
+            arrival_times=times,
+        )
+    assert mock_render.call_args.kwargs["overlays"] == overlays
+
+
+def test_plot_single_panel_arrivals_calls_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.ArrivalsPanel.render") as mock_render,
+    ):
+        core.ArrivalsPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
+    mock_render.assert_called_once()
+
+
+def test_render_departures_sets_ylabel():
+    ax = MagicMock()
+    with patch("samplepath.plots.core.render_step_chart"):
+        core.DeparturesPanel().render(ax, [], [])
+    assert ax.set_ylabel.call_args[0][0] == "count"
+
+
+def test_render_departures_passes_overlays():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    overlays = ["overlay"]
+    with (
+        patch("samplepath.plots.core.build_event_overlays", return_value=overlays),
+        patch("samplepath.plots.core.render_step_chart") as mock_render,
+    ):
+        core.DeparturesPanel(with_event_marks=True).render(
+            ax,
+            times,
+            values,
+            departure_times=times,
+        )
+    assert mock_render.call_args.kwargs["overlays"] == overlays
+
+
+def test_plot_single_panel_departures_calls_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.DeparturesPanel.render") as mock_render,
+    ):
+        core.DeparturesPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
+    mock_render.assert_called_once()
+
+
 def test_render_L_colors_grey_when_overlays():
     ax = MagicMock()
     times = [_t("2024-01-01")]
@@ -1118,6 +1256,24 @@ def test_core_driver_returns_expected_paths():
         resolve_chart_path(
             out_dir,
             "core/panels",
+            "arrival_departure_indicator_process",
+            chart_config.chart_format,
+        ),
+        resolve_chart_path(
+            out_dir,
+            "core/panels",
+            "cumulative_arrivals_A",
+            chart_config.chart_format,
+        ),
+        resolve_chart_path(
+            out_dir,
+            "core/panels",
+            "cumulative_departures_D",
+            chart_config.chart_format,
+        ),
+        resolve_chart_path(
+            out_dir,
+            "core/panels",
             "average_residence_time_w",
             chart_config.chart_format,
         ),
@@ -1171,20 +1327,26 @@ def test_core_driver_returns_expected_paths():
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot_CFD,
         patch("samplepath.plots.core.LLWPanel.plot") as mock_plot_llw,
         patch("samplepath.plots.core.LThetaWPrimePanel.plot") as mock_plot_ltheta,
+        patch("samplepath.plots.core.EventIndicatorPanel.plot") as mock_plot_indicator,
+        patch("samplepath.plots.core.ArrivalsPanel.plot") as mock_plot_A,
+        patch("samplepath.plots.core.DeparturesPanel.plot") as mock_plot_D,
     ):
-        mock_stack.return_value = expected[10]
-        mock_lt_stack.return_value = expected[11]
-        mock_departure_stack.return_value = expected[12]
+        mock_stack.return_value = expected[13]
+        mock_lt_stack.return_value = expected[14]
+        mock_departure_stack.return_value = expected[15]
         mock_plot_N.return_value = expected[0]
         mock_plot_L.return_value = expected[1]
         mock_plot_Lam.return_value = expected[2]
         mock_plot_Theta.return_value = expected[3]
-        mock_plot_w.return_value = expected[4]
-        mock_plot_w_prime.return_value = expected[5]
-        mock_plot_H.return_value = expected[6]
-        mock_plot_CFD.return_value = expected[7]
-        mock_plot_llw.return_value = expected[8]
-        mock_plot_ltheta.return_value = expected[9]
+        mock_plot_indicator.return_value = expected[4]
+        mock_plot_A.return_value = expected[5]
+        mock_plot_D.return_value = expected[6]
+        mock_plot_w.return_value = expected[7]
+        mock_plot_w_prime.return_value = expected[8]
+        mock_plot_H.return_value = expected[9]
+        mock_plot_CFD.return_value = expected[10]
+        mock_plot_llw.return_value = expected[11]
+        mock_plot_ltheta.return_value = expected[12]
         written = core.plot_core_flow_metrics_charts(
             metrics, filter_result, chart_config, out_dir
         )
@@ -1199,6 +1361,9 @@ def test_core_driver_returns_expected_paths():
     mock_plot_CFD.assert_called_once()
     mock_plot_llw.assert_called_once()
     mock_plot_ltheta.assert_called_once()
+    mock_plot_indicator.assert_called_once()
+    mock_plot_A.assert_called_once()
+    mock_plot_D.assert_called_once()
     mock_lt_stack.assert_called_once()
     mock_departure_stack.assert_called_once()
 
@@ -1228,6 +1393,8 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot_CFD,
         patch("samplepath.plots.core.LLWPanel.plot"),
         patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
+        patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+        patch("samplepath.plots.core.ArrivalsPanel.plot"),
     ):
         core.plot_core_flow_metrics_charts(
             metrics, filter_result, chart_config, out_dir
@@ -1346,6 +1513,9 @@ def test_core_driver_uses_metrics_freq_for_unit():
             patch("samplepath.plots.core.CFDPanel.plot"),
             patch("samplepath.plots.core.LLWPanel.plot"),
             patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
+            patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+            patch("samplepath.plots.core.ArrivalsPanel.plot"),
+            patch("samplepath.plots.core.DeparturesPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
                 metrics, filter_result, chart_config, out_dir
@@ -1445,6 +1615,9 @@ def test_core_driver_calls_plot_H_under_core_dir():
             patch("samplepath.plots.core.CFDPanel.plot"),
             patch("samplepath.plots.core.LLWPanel.plot"),
             patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
+            patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+            patch("samplepath.plots.core.ArrivalsPanel.plot"),
+            patch("samplepath.plots.core.DeparturesPanel.plot"),
         ):
             core.plot_core_flow_metrics_charts(
                 metrics, filter_result, chart_config, out_dir
@@ -1484,6 +1657,8 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
         patch("samplepath.plots.core.LLWPanel.plot"),
         patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot,
+        patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+        patch("samplepath.plots.core.ArrivalsPanel.plot"),
     ):
         core.plot_core_flow_metrics_charts(
             metrics, filter_result, chart_config, out_dir
@@ -1516,6 +1691,9 @@ def test_core_driver_passes_event_marks_to_CFD():
         patch("samplepath.plots.core.LLWPanel"),
         patch("samplepath.plots.core.LThetaWPrimePanel"),
         patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
+        patch("samplepath.plots.core.EventIndicatorPanel"),
+        patch("samplepath.plots.core.ArrivalsPanel"),
+        patch("samplepath.plots.core.DeparturesPanel"),
     ):
         core.plot_core_flow_metrics_charts(
             metrics, filter_result, chart_config, out_dir
@@ -1548,6 +1726,9 @@ def test_core_driver_passes_event_marks_to_departure_invariant():
         patch("samplepath.plots.core.CFDPanel.plot"),
         patch("samplepath.plots.core.LLWPanel.plot"),
         patch("samplepath.plots.core.LThetaWPrimePanel") as mock_panel,
+        patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+        patch("samplepath.plots.core.ArrivalsPanel.plot"),
+        patch("samplepath.plots.core.DeparturesPanel.plot"),
     ):
         core.plot_core_flow_metrics_charts(
             metrics, filter_result, chart_config, out_dir

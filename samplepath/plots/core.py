@@ -698,6 +698,246 @@ class CFDPanel:
         return resolved_out_path
 
 
+@dataclass
+class EventIndicatorPanel:
+    show_title: bool = True
+    title: str = "Arrival/Departure Indicator Process"
+    with_event_marks: bool = False
+
+    def render(
+        self,
+        ax,
+        times: Sequence[pd.Timestamp],
+        *,
+        arrival_times: Optional[List[pd.Timestamp]] = None,
+        departure_times: Optional[List[pd.Timestamp]] = None,
+    ) -> None:
+        overlays: Optional[List[ScatterOverlay]] = None
+        if self.with_event_marks:
+            overlays = []
+            if arrival_times:
+                overlays.append(
+                    ScatterOverlay(
+                        x=arrival_times,
+                        y=[1] * len(arrival_times),
+                        color="purple",
+                        label="Arrival",
+                        drop_lines=True,
+                    )
+                )
+            if departure_times:
+                overlays.append(
+                    ScatterOverlay(
+                        x=departure_times,
+                        y=[1] * len(departure_times),
+                        color="green",
+                        label="Departure",
+                        drop_lines=True,
+                    )
+                )
+        render_scatter_chart(
+            ax,
+            [],
+            [],
+            color="tab:blue",
+            overlays=overlays,
+        )
+        ax.set_ylim(0, 1.05)
+        ax.set_yticks([])
+        if self.show_title:
+            ax.set_title(self.title)
+        ax.set_ylabel("Indicator")
+        ax.legend()
+
+    def plot(
+        self,
+        metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
+        with figure_context(
+            chart_config=chart_config,
+            nrows=1,
+            ncols=1,
+            caption=caption,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core/panels",
+            base_name="arrival_departure_indicator_process",
+        ) as (
+            _,
+            axes,
+            resolved_out_path,
+        ):
+            ax = _first_axis(axes)
+            self.render(
+                ax,
+                metrics.times,
+                arrival_times=metrics.arrival_times,
+                departure_times=metrics.departure_times,
+            )
+        return resolved_out_path
+
+
+@dataclass
+class ArrivalsPanel:
+    show_title: bool = True
+    title: str = "A(T) — Cumulative Arrivals"
+    show_derivations: bool = False
+    with_event_marks: bool = False
+
+    def render(
+        self,
+        ax,
+        times: Sequence[pd.Timestamp],
+        arrivals_cum: Sequence[float],
+        *,
+        arrival_times: Optional[List[pd.Timestamp]] = None,
+    ) -> None:
+        label = "A(T)"
+        overlays = (
+            build_event_overlays(
+                times,
+                arrivals_cum,
+                arrival_times,
+                [],
+                drop_lines_for_arrivals=True,
+                drop_lines_for_departures=False,
+            )
+            if self.with_event_marks and arrival_times is not None
+            else None
+        )
+        color = "grey" if overlays else "purple"
+        render_step_chart(
+            ax,
+            times,
+            arrivals_cum,
+            label=label,
+            color=color,
+            fill=False,
+            overlays=overlays,
+        )
+        if self.show_title:
+            ax.set_title(
+                construct_title(self.title, self.show_derivations, derivation_key="A")
+            )
+        ax.set_ylabel("count")
+        ax.legend()
+
+    def plot(
+        self,
+        metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
+        with figure_context(
+            chart_config=chart_config,
+            nrows=1,
+            ncols=1,
+            caption=caption,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core/panels",
+            base_name="cumulative_arrivals_A",
+        ) as (
+            _,
+            axes,
+            resolved_out_path,
+        ):
+            ax = _first_axis(axes)
+            self.render(
+                ax,
+                metrics.times,
+                metrics.Arrivals,
+                arrival_times=metrics.arrival_times,
+            )
+        return resolved_out_path
+
+
+@dataclass
+class DeparturesPanel:
+    show_title: bool = True
+    title: str = "D(T) — Cumulative Departures"
+    show_derivations: bool = False
+    with_event_marks: bool = False
+
+    def render(
+        self,
+        ax,
+        times: Sequence[pd.Timestamp],
+        departures_cum: Sequence[float],
+        *,
+        departure_times: Optional[List[pd.Timestamp]] = None,
+    ) -> None:
+        label = "D(T)"
+        overlays = (
+            build_event_overlays(
+                times,
+                departures_cum,
+                [],
+                departure_times,
+                drop_lines_for_arrivals=False,
+                drop_lines_for_departures=True,
+            )
+            if self.with_event_marks and departure_times is not None
+            else None
+        )
+        color = "grey" if overlays else "green"
+        render_step_chart(
+            ax,
+            times,
+            departures_cum,
+            label=label,
+            color=color,
+            fill=False,
+            overlays=overlays,
+        )
+        if self.show_title:
+            ax.set_title(
+                construct_title(self.title, self.show_derivations, derivation_key="D")
+            )
+        ax.set_ylabel("count")
+        ax.legend()
+
+    def plot(
+        self,
+        metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
+        with figure_context(
+            chart_config=chart_config,
+            nrows=1,
+            ncols=1,
+            caption=caption,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core/panels",
+            base_name="cumulative_departures_D",
+        ) as (
+            _,
+            axes,
+            resolved_out_path,
+        ):
+            ax = _first_axis(axes)
+            self.render(
+                ax,
+                metrics.times,
+                metrics.Departures,
+                departure_times=metrics.departure_times,
+            )
+        return resolved_out_path
+
+
 @dataclass(frozen=True)
 class LLWPanel:
     show_title: bool = True
@@ -1249,6 +1489,20 @@ def plot_core_flow_metrics_charts(
         show_derivations=show_derivations,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
+    path_indicator = EventIndicatorPanel(
+        with_event_marks=chart_config.with_event_marks,
+    ).plot(metrics, filter_result, chart_config, out_dir)
+
+    path_A = ArrivalsPanel(
+        with_event_marks=chart_config.with_event_marks,
+        show_derivations=show_derivations,
+    ).plot(metrics, filter_result, chart_config, out_dir)
+
+    path_D = DeparturesPanel(
+        with_event_marks=chart_config.with_event_marks,
+        show_derivations=show_derivations,
+    ).plot(metrics, filter_result, chart_config, out_dir)
+
     path_w = WPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
@@ -1282,6 +1536,9 @@ def plot_core_flow_metrics_charts(
         path_L,
         path_Lam,
         path_Theta,
+        path_indicator,
+        path_A,
+        path_D,
         path_w,
         path_w_prime,
         path_H,
