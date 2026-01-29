@@ -39,25 +39,24 @@ Agent must:
 - Before making any code changes, Agent must present a step-by-step plan and wait for
   explicit approval.
 - After approval, apply patches only to the task branch.
-- After applying patches, stop and wait for review before making additional edits.
 - Agent must not open pull requests unless explicitly instructed.
 
 ### Commit Requirements
 
 - “Every commit must target the current task. Allowed files: only those required by the task specification.”
-  - “Commit message format for all branch commits (not merges): [Task ID]: (Task Name): <short summary> followed by a body listing the changes and rationale.”
-  - “Example: [2]: (cli subcommand refactoring): CLI subcommand refactor with body bullets describing what changed and why.”
-  - “Do not mention file lists in the commit message; reviewers can see this in git.”
-  - “When instructed to ‘commit changed source files only’, stage only source/test files; leave docs, task notes, caches unstaged unless explicitly requested.”
-  - “If a commit fails formatting or hooks, fix the issues and re-run hooks before committing.”
-  - before commiting code provide a summary of the commit message and the files that will be committed.
-  - once approved you can stage and commit the files without asking separately for permission after each step.
+  -Before staging files or proposing a commit:
+  - "Always run the full test suite and ensure all tests pass"
+  - “Always run pre-commit and make sure all checks pass  ”
+  - If Task.md has changed always include it in the commit.
+  - When changing a file under docs/* if the corresponding generated doc under docs/site changes include both in the commit.
+  - When proposing a commit provide a summary of the commit message and the files that will be committed.
+  - Ask for review *only* after all these checks have cleared.
 
     - When merging to `main`, prefer a squash merge. Merge commit message format:
     ```
     [Task ID]: (Task Name): Merge <branch name> to main
     ```
-    Craft a concise yet complete summary of the changes that were made in the squash merge and get the message reviewed before performing the merge.
+    Craft a concise yet complete summary of the changes that were made in the branch being merged and get the message reviewed before performing the merge.
 
 
 ------------
@@ -79,12 +78,14 @@ ______________________________________________________________________
 
 ## Documentation Workflow
 
+This applies only to files in the doc/* sub-directory
 Pandoc converts Markdown to HTML using the tooling in `docs/build/`. Before committing
 Markdown changes:
 
 1. Run `pre-commit`.
 2. If `mdformat` reports changes, present them for review before committing.
 3. Do not rewrite any YAML front matter in markdown files unless explicitly instructed.
+4. If a generated file in docs/site/* has changed because the corresponding .md file has changed, stage both for commit.
 
 ______________________________________________________________________
 
@@ -116,8 +117,6 @@ Agent must always run pre-commit before committing any code.
 pre-commit run
 ```
 
-IF pre-commit checks modify files wait for approval before committing the code.
-
 ______________________________________________________________________
 
 ## Coding Style & Naming Conventions
@@ -142,6 +141,7 @@ Policy for automated test/formatter execution (no per-command prompts):
   - You have blanket approval to run tests and formatters without asking each time, as long as they write only inside the repo workspace.
   - Use local caches to avoid sandbox/network prompts: UV_CACHE_DIR=.uv-cache uv run pytest and PRE_COMMIT_HOME=.pre-commit-cache pre-commit run --all-files.
   - Do not request escalation unless a executing tests must write outside the workspace or needs network; pause and ask only in those cases.
-  - Summarize command results in responses; no need to ask permission for standard test/formatter runs.
+  - IF git actions fail, run with escalation and try again.
+
 
 # End of file

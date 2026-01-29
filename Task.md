@@ -1,12 +1,17 @@
 ---
-ID: 20
-Task: Core primitives
-Branch: core primitives
+ID: 21
+Task: Sojourn time panel
+Branch: sojourn-time-panel
 ---
 
-Spec: Add three more primitive core panels and wire them up into plot_core_flow_metrics
+Spec: Add Sojourn time panel to core panels. This is the first of metrics that we will pull from Elementwise Empirical Metrics.
+The sojourn time is stored in the w* field of the Empirical flow metrics. We will need to extend the api of plot_core_flow_metrics_charts to include this.
 
-1. Indicator process for the arrival departure process. This is a scatter plot with am x-value for each arrival or departure timestamp and a y-value of 1 for each such point. The plot should show a drop line from each point to the x-value. We can think of this as the event overlay over the indicator process for the underlying arrival/departure point process. Use the same conventions on arrival/departure colors for points and drop lines.
-2
-2. A step chart for A(T) that supports event overlays and derivations
-3. A step chart for D(T) that supports event overlays and derivations
+
+The arg order should be:
+plot_core_flow_metrics_charts(
+    metrics: FlowMetricsResult,
+    empirical_metics: ElementWiseEmpiricalMetrics,
+    filter_result: Optional[FilterResult],
+    chart_config: ChartConfig,
+    out_dir: str,

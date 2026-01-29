@@ -99,6 +99,7 @@ class MetricDerivations:
         "Theta": "Θ(T) = D(T) / T",
         "w": "w(T) = H(T) / A(T)",
         "w_prime": "w'(T) = H(T) / D(T)",
+        "W_star": "W*(T) = AVG(departure time − arrival time) for departures in [0, T]",
     }
 
     @classmethod

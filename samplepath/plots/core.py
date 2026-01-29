@@ -19,7 +19,11 @@ import numpy as np
 import pandas as pd
 
 from samplepath.filter import FilterResult
-from samplepath.metrics import FlowMetricsResult, MetricDerivations
+from samplepath.metrics import (
+    ElementWiseEmpiricalMetrics,
+    FlowMetricsResult,
+    MetricDerivations,
+)
 from samplepath.plots.chart_config import ChartConfig
 from samplepath.plots.figure_context import (
     FigureDecorSpec,
@@ -419,6 +423,82 @@ class WPanel:
                 ax,
                 metrics.times,
                 metrics.w,
+                arrival_times=metrics.arrival_times,
+                departure_times=metrics.departure_times,
+            )
+        return resolved_out_path
+
+
+@dataclass
+class SojournTimePanel:
+    show_title: bool = True
+    title: str = "W*(T) — Sojourn Time"
+    show_derivations: bool = False
+    with_event_marks: bool = False
+
+    def render(
+        self,
+        ax,
+        times: Sequence[pd.Timestamp],
+        w_star_vals: Sequence[float],
+        *,
+        arrival_times: Optional[List[pd.Timestamp]] = None,
+        departure_times: Optional[List[pd.Timestamp]] = None,
+    ) -> None:
+        label = "W*(T) [hrs]"
+        overlays = (
+            build_event_overlays(
+                times,
+                w_star_vals,
+                arrival_times,
+                departure_times,
+                drop_lines_for_arrivals=False,
+                drop_lines_for_departures=True,
+            )
+            if self.with_event_marks
+            else None
+        )
+        render_line_chart(
+            ax, times, w_star_vals, label=label, color="tab:blue", overlays=overlays
+        )
+        if self.show_title:
+            ax.set_title(
+                construct_title(
+                    self.title, self.show_derivations, derivation_key="W_star"
+                )
+            )
+        ax.set_ylabel(label)
+        ax.legend()
+
+    def plot(
+        self,
+        metrics: FlowMetricsResult,
+        empirical_metrics: ElementWiseEmpiricalMetrics,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
+        with figure_context(
+            chart_config=chart_config,
+            nrows=1,
+            ncols=1,
+            caption=caption,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core/panels",
+            base_name="sojourn_time_w_star",
+        ) as (
+            _,
+            axes,
+            resolved_out_path,
+        ):
+            ax = _first_axis(axes)
+            self.render(
+                ax,
+                metrics.times,
+                empirical_metrics.W_star,
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
             )
@@ -1448,6 +1528,7 @@ def plot_departure_flow_metrics_stack(
 
 def plot_core_flow_metrics_charts(
     metrics: FlowMetricsResult,
+    empirical_metrics: ElementWiseEmpiricalMetrics,
     filter_result: Optional[FilterResult],
     chart_config: ChartConfig,
     out_dir: str,
@@ -1508,6 +1589,11 @@ def plot_core_flow_metrics_charts(
         show_derivations=show_derivations,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
+    path_w_star = SojournTimePanel(
+        with_event_marks=chart_config.with_event_marks,
+        show_derivations=show_derivations,
+    ).plot(metrics, empirical_metrics, filter_result, chart_config, out_dir)
+
     path_w_prime = WPrimePanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
@@ -1540,6 +1626,7 @@ def plot_core_flow_metrics_charts(
         path_A,
         path_D,
         path_w,
+        path_w_star,
         path_w_prime,
         path_H,
         path_CFD,
