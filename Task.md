@@ -1,13 +1,16 @@
 ---
-ID: 23
-Task: Process Time Convergence Stack
-Branch: process-time-convergence-stack
+ID: 24
+Task: Convergence module clean-up
+Branch: convergence-clean-up
 ---
 
-Spec: In convergence.py, the function plot_residence_vs_sojourn_stack should be replaced with
-a stack that uses the modern panel plot design. The top panel is the process time convergence panel that we just built in task 22. The bottom panel is a new panel that plots a scatter plot of sojourn times for departures vs the two average residence time plots - w(T) and w'(T). This is basically the bottom panel of the current plot_residence_time_vs_sojourn_stack but extended to include both w and w' instead of just w.
+Spec: Bring convergence.py fully up to the new panel/plot architecture.
+1. There are two methods in this module
 
-So the task is
-1. Define and implement the new panel.
-2. Wire it up under convergence charts and save it under convergence/panels/residence_time_sojourn_time_scatter_plot.png
-3. Create a new stack with process_time_convergence as the top panel and this one as the bottom panel and save it as converegence/process_time_convergence_stack
+ - samplepath.plots.convergence.draw_dynamic_convergence_panel_with_errors
+ - samplepath.plots.convergence.draw_dynamic_convergence_panel_with_errors_and_endeffects
+
+that write to plots that are stored under the advanced directory. Move these methods and their associated calls so that they are driven by the top level driver in the advanced module rather than from the convergence module. No need to rewrite the charts yet, we can keep them in teh old format and clean them up later. But there should be no dependence on these charts in the convergence.py module.
+2. What remains are the arrival/departure convergence panels and stacks. Migrate these to the new architecture and wire them up to the driver. These must be done using all the plot/render conventions.
+
+3. Lets finish the cleanup by migrating the last remaining legacy chart samplepath.plots.convergence.plot_sample_path_convergence into a standard Panel structure with plot and render. It will also allow us to remove the args argument from the top level driver signature.

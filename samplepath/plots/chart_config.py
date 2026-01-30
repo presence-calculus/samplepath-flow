@@ -14,6 +14,8 @@ class ChartConfig:
     lambda_pctl_upper: Optional[float] = None
     lambda_pctl_lower: Optional[float] = None
     lambda_warmup_hours: float = 0.0
+    epsilon: float = 0.05
+    horizon_days: float = 28.0
     chart_format: str = "png"
     chart_dpi: Optional[int] = 150
 
@@ -27,6 +29,8 @@ class ChartConfig:
             lambda_pctl_upper=getattr(args, "lambda_pctl", None),
             lambda_pctl_lower=getattr(args, "lambda_lower_pctl", None),
             lambda_warmup_hours=getattr(args, "lambda_warmup", 0.0),
+            epsilon=getattr(args, "epsilon", 0.05),
+            horizon_days=getattr(args, "horizon_days", 28.0),
             chart_format=getattr(args, "chart_format", "png"),
             chart_dpi=getattr(args, "chart_dpi", 150),
         )

@@ -3,12 +3,21 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
+import os
 from typing import List, Optional, Tuple
 
+from matplotlib import pyplot as plt
+import numpy as np
 import pandas as pd
 
 from samplepath.filter import FilterResult
-from samplepath.metrics import FlowMetricsResult
+from samplepath.metrics import (
+    FlowMetricsResult,
+    compute_elementwise_empirical_metrics,
+    compute_end_effect_series,
+    compute_tracking_errors,
+)
+from samplepath.plots.helpers import _clip_axis_to_percentile, format_date_axis
 
 
 def plot_llaw_manifold_3d(
@@ -141,6 +150,214 @@ def plot_llaw_manifold_3d(
     return [out_path]
 
 
+def draw_dynamic_convergence_panel_with_errors(
+    times: List[pd.Timestamp],
+    w_vals: np.ndarray,
+    lam_vals: np.ndarray,
+    W_star: np.ndarray,
+    lam_star: np.ndarray,
+    eW: np.ndarray,
+    eLam: np.ndarray,
+    epsilon: Optional[float],
+    title: str,
+    out_path: str,
+    lambda_pctl_upper: Optional[float] = None,
+    lambda_pctl_lower: Optional[float] = None,
+    lambda_warmup_hours: Optional[float] = None,
+) -> None:
+    fig, axes = plt.subplots(3, 1, figsize=(12, 9.2), sharex=True)
+
+    axes[0].plot(times, w_vals, label="w(T) [hrs]")
+    axes[0].plot(times, W_star, linestyle="--", label="W*(t) [hrs] (completed ≤ t)")
+    axes[0].set_title("w(T) vs W*(t) — dynamic")
+    axes[0].set_ylabel("hours")
+    axes[0].legend()
+
+    axes[1].plot(times, lam_vals, label="Λ(T) [1/hr]")
+    axes[1].plot(times, lam_star, linestyle="--", label="λ*(t) [1/hr] (arrivals ≤ t)")
+    axes[1].set_title("Λ(T) vs λ*(t) — dynamic")
+    axes[1].set_ylabel("1/hr")
+    axes[1].legend()
+    _clip_axis_to_percentile(
+        axes[1],
+        times,
+        lam_vals,
+        upper_p=lambda_pctl_upper,
+        lower_p=lambda_pctl_lower,
+        warmup_hours=lambda_warmup_hours,
+    )
+
+    axes[2].plot(times, eW, label="rel. error e_W")
+    axes[2].plot(times, eLam, label="rel. error e_λ")
+    if epsilon is not None:
+        axes[2].axhline(epsilon, linestyle="--", label=f"ε = {epsilon:g}")
+    axes[2].set_title("Relative tracking errors")
+    axes[2].set_ylabel("relative error")
+    axes[2].set_xlabel("Date")
+    axes[2].legend()
+
+    err = np.concatenate([eW[np.isfinite(eW)], eLam[np.isfinite(eLam)]])
+    if err.size > 0:
+        ub = float(np.nanpercentile(err, 99.5))
+        axes[2].set_ylim(
+            0.0, max(ub, (epsilon if epsilon is not None else 0.0) * 1.5 + 1e-6)
+        )
+
+    for ax in axes:
+        format_date_axis(ax)
+
+    fig.suptitle(title)
+    plt.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.savefig(out_path)
+    plt.close(fig)
+
+
+def draw_dynamic_convergence_panel_with_errors_and_endeffects(
+    times: List[pd.Timestamp],
+    w_vals: np.ndarray,
+    lam_vals: np.ndarray,
+    W_star: np.ndarray,
+    lam_star: np.ndarray,
+    eW: np.ndarray,
+    eLam: np.ndarray,
+    rH: np.ndarray,
+    rB: np.ndarray,
+    rho: np.ndarray,
+    epsilon: Optional[float],
+    title: str,
+    out_path: str,
+    lambda_pctl_upper: Optional[float] = None,
+    lambda_pctl_lower: Optional[float] = None,
+    lambda_warmup_hours: Optional[float] = None,
+) -> None:
+    """Four-row dynamic convergence view with end-effect metrics."""
+    fig, axes = plt.subplots(4, 1, figsize=(12, 12), sharex=True)
+
+    axes[0].plot(times, w_vals, label="w(T) [hrs]")
+    axes[0].plot(times, W_star, linestyle="--", label="W*(t) [hrs] (completed ≤ t)")
+    axes[0].set_title("w(T) vs W*(t) — dynamic")
+    axes[0].set_ylabel("hours")
+    axes[0].legend()
+
+    axes[1].plot(times, lam_vals, label="Λ(T) [1/hr]")
+    axes[1].plot(times, lam_star, linestyle="--", label="λ*(t) [1/hr] (arrivals ≤ t)")
+    axes[1].set_title("Λ(T) vs λ*(t) — dynamic")
+    axes[1].set_ylabel("1/hr")
+    axes[1].legend()
+    _clip_axis_to_percentile(
+        axes[1],
+        times,
+        lam_vals,
+        upper_p=lambda_pctl_upper,
+        lower_p=lambda_pctl_lower,
+        warmup_hours=lambda_warmup_hours,
+    )
+
+    axes[2].plot(times, eW, label="rel. error e_W")
+    axes[2].plot(times, eLam, label="rel. error e_λ")
+    if epsilon is not None:
+        axes[2].axhline(epsilon, linestyle="--", label=f"ε = {epsilon:g}")
+    axes[2].set_title("Relative tracking errors")
+    axes[2].set_ylabel("relative error")
+    axes[2].legend()
+
+    err = np.concatenate([eW[np.isfinite(eW)], eLam[np.isfinite(eLam)]])
+    if err.size > 0:
+        ub = float(np.nanpercentile(err, 99.5))
+        axes[2].set_ylim(
+            0.0, max(ub, (epsilon if epsilon is not None else 0.0) * 1.5 + 1e-6)
+        )
+
+    axes[3].plot(times, rH, label="r_H(T) = E/H", alpha=0.9)
+    axes[3].plot(times, rB, label="r_B(T) = B/starts", alpha=0.9)
+    axes[3].set_title("End-effects: mass share and boundary share")
+    axes[3].set_ylabel("share [0–1]")
+    axes[3].set_ylim(0.0, 1.0)
+    ax2 = axes[3].twinx()
+    ax2.plot(times, rho, linestyle="--", label="ρ(T)=T/W*(t)", alpha=0.7)
+    ax2.set_ylabel("ρ (window / duration)")
+    lines1, labels1 = axes[3].get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    axes[3].legend(lines1 + lines2, labels1 + labels2, loc="upper right")
+
+    for ax in axes:
+        format_date_axis(ax)
+
+    fig.suptitle(title)
+    plt.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.savefig(out_path)
+    plt.close(fig)
+
+
+def plot_residence_time_convergence_error_charts(
+    df: pd.DataFrame,
+    args,
+    filter_result: Optional[FilterResult],
+    metrics: FlowMetricsResult,
+    out_dir: str,
+) -> List[str]:
+    written: List[str] = []
+    if len(metrics.times) == 0:
+        return written
+
+    W_star_ts, lam_star_ts = compute_elementwise_empirical_metrics(
+        df, metrics.times
+    ).as_tuple()
+    eW_ts, eLam_ts, _ = compute_tracking_errors(
+        metrics.times, metrics.w, metrics.Lambda, W_star_ts, lam_star_ts
+    )
+    epsilon = getattr(args, "epsilon", None)
+    mode_label = "complete" if not getattr(args, "incomplete", False) else "incomplete"
+    lambda_pctl_upper = getattr(args, "lambda_pctl", None)
+    lambda_pctl_lower = getattr(args, "lambda_lower_pctl", None)
+    lambda_warmup_hours = getattr(args, "lambda_warmup", None)
+
+    ts_conv_dyn3 = os.path.join(out_dir, "advanced/residence_convergence_errors.png")
+    draw_dynamic_convergence_panel_with_errors(
+        metrics.times,
+        metrics.w,
+        metrics.Lambda,
+        W_star_ts,
+        lam_star_ts,
+        eW_ts,
+        eLam_ts,
+        epsilon,
+        f"Residence time convergence + errors (timestamp, {mode_label})",
+        ts_conv_dyn3,
+        lambda_pctl_upper=lambda_pctl_upper,
+        lambda_pctl_lower=lambda_pctl_lower,
+        lambda_warmup_hours=lambda_warmup_hours,
+    )
+    written.append(ts_conv_dyn3)
+
+    rH_ts, rB_ts, rho_ts = compute_end_effect_series(
+        df, metrics.times, metrics.H, W_star_ts
+    )
+    ts_conv_dyn4 = os.path.join(
+        out_dir, "advanced/residence_time_convergence_errors_endeffects.png"
+    )
+    draw_dynamic_convergence_panel_with_errors_and_endeffects(
+        metrics.times,
+        metrics.w,
+        metrics.Lambda,
+        W_star_ts,
+        lam_star_ts,
+        eW_ts,
+        eLam_ts,
+        rH_ts,
+        rB_ts,
+        rho_ts,
+        epsilon,
+        f"Residence time convergence + errors + end-effects (timestamp, {mode_label})",
+        ts_conv_dyn4,
+        lambda_pctl_upper=lambda_pctl_upper,
+        lambda_pctl_lower=lambda_pctl_lower,
+        lambda_warmup_hours=lambda_warmup_hours,
+    )
+    written.append(ts_conv_dyn4)
+    return written
+
+
 def plot_advanced_charts(
     df: pd.DataFrame,
     args,
@@ -150,4 +367,7 @@ def plot_advanced_charts(
 ) -> List[str]:
     written = []
     written += plot_llaw_manifold_3d(df, metrics, out_dir)
+    written += plot_residence_time_convergence_error_charts(
+        df, args, filter_result, metrics, out_dir
+    )
     return written
