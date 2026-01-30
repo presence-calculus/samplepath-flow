@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from samplepath.metrics import compute_coherence_score, compute_tracking_errors
+from samplepath.plots.advanced import compute_coherence_score, compute_tracking_errors
 
 
 def _make_times(n=4, start="2024-01-01 00:00", step_hours=1):

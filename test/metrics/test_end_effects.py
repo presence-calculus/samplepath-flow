@@ -8,9 +8,9 @@ import pytest
 
 from samplepath.metrics import (
     compute_elementwise_empirical_metrics,
-    compute_end_effect_series,
     compute_sample_path_flow_metrics,
 )
+from samplepath.plots.advanced import compute_end_effect_series
 
 
 def _t(s: str) -> pd.Timestamp:
