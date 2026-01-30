@@ -68,6 +68,14 @@ def plot_core_stack(metrics, filter_result, chart_config, out_dir) -> str:
 - Calls `render()` directly on panels — **not** `plot()`
 - Orchestrates multiple panels into one figure
 
+## Metric computations vs chart rendering
+
+A plot module function should *never* compute a derived metric. It should always take its metrics from
+a precomputed argument passed in by a caller. If you find yourself neededing to compute a new metric inside
+a plot or render function, stop and propose a change to the metrics api, and get it confirmed before proceeding.
+
+
+
 ### Testing Patterns
 
 | Pattern | Approach |
