@@ -470,6 +470,75 @@ def test_render_sojourn_sets_defaults():
     ax.set_ylabel.assert_called_once_with("W*(T) [hrs]")
 
 
+def test_render_sojourn_scatter_uses_departure_times():
+    ax = MagicMock()
+    departures = [_t("2024-01-01"), _t("2024-01-02")]
+    sojourn_vals = np.array([1.0, 2.0])
+    with patch("samplepath.plots.core.render_scatter_chart") as mock_scatter:
+        core.SojournTimeScatterPanel(with_event_marks=True).render(
+            ax, departures, sojourn_vals
+        )
+    assert mock_scatter.call_args.args[1] == departures
+
+
+def test_render_sojourn_scatter_uses_departure_color():
+    ax = MagicMock()
+    departures = [_t("2024-01-01")]
+    sojourn_vals = np.array([1.0])
+    with patch("samplepath.plots.core.render_scatter_chart") as mock_scatter:
+        core.SojournTimeScatterPanel(with_event_marks=True).render(
+            ax, departures, sojourn_vals
+        )
+    assert mock_scatter.call_args.kwargs["color"] == "green"
+
+
+def test_render_sojourn_scatter_drop_lines_when_event_marks():
+    ax = MagicMock()
+    departures = [_t("2024-01-01")]
+    sojourn_vals = np.array([1.0])
+    with patch("samplepath.plots.core.render_scatter_chart") as mock_scatter:
+        core.SojournTimeScatterPanel(with_event_marks=True).render(
+            ax, departures, sojourn_vals
+        )
+    assert mock_scatter.call_args.kwargs["drop_lines"] == "vertical"
+
+
+def test_render_residence_scatter_open_uses_arrival_color():
+    ax = MagicMock()
+    arrivals = [_t("2024-01-01")]
+    vals = np.array([1.0])
+    completed = np.array([False])
+    with patch("samplepath.plots.core.render_scatter_chart") as mock_scatter:
+        core.ResidenceTimeScatterPanel(with_event_marks=True).render(
+            ax, arrivals, vals, completed
+        )
+    assert mock_scatter.call_args.kwargs["color"] == "purple"
+
+
+def test_render_residence_scatter_completed_uses_departure_color():
+    ax = MagicMock()
+    arrivals = [_t("2024-01-01")]
+    vals = np.array([1.0])
+    completed = np.array([True])
+    with patch("samplepath.plots.core.render_scatter_chart") as mock_scatter:
+        core.ResidenceTimeScatterPanel(with_event_marks=True).render(
+            ax, arrivals, vals, completed
+        )
+    assert mock_scatter.call_args.kwargs["color"] == "green"
+
+
+def test_render_residence_scatter_drop_line_color_arrival():
+    ax = MagicMock()
+    arrivals = [_t("2024-01-01")]
+    vals = np.array([1.0])
+    completed = np.array([True])
+    with patch("samplepath.plots.core.render_scatter_chart") as mock_scatter:
+        core.ResidenceTimeScatterPanel(with_event_marks=True).render(
+            ax, arrivals, vals, completed
+        )
+    assert mock_scatter.call_args.kwargs["drop_line_color"] == "purple"
+
+
 def test_render_Lambda_arrival_overlays_when_enabled():
     ax = MagicMock()
     times = [_t("2024-01-01")]
@@ -1197,6 +1266,8 @@ def _empirical_metrics_fixture(
         W_star=W_star,
         lam_star=np.array([0.25]),
         sojourn_vals=np.array([0.5]),
+        residence_time_vals=np.array([1.0]),
+        residence_completed=np.array([True]),
     )
 
 
@@ -1335,6 +1406,18 @@ def test_core_driver_returns_expected_paths():
         resolve_chart_path(
             out_dir,
             "core/panels",
+            "sojourn_time_scatter",
+            chart_config.chart_format,
+        ),
+        resolve_chart_path(
+            out_dir,
+            "core/panels",
+            "residence_time_scatter",
+            chart_config.chart_format,
+        ),
+        resolve_chart_path(
+            out_dir,
+            "core/panels",
             "average_residence_time_w_prime",
             chart_config.chart_format,
         ),
@@ -1378,6 +1461,12 @@ def test_core_driver_returns_expected_paths():
         patch("samplepath.plots.core.ThetaPanel.plot") as mock_plot_Theta,
         patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
         patch("samplepath.plots.core.SojournTimePanel.plot") as mock_plot_w_star,
+        patch(
+            "samplepath.plots.core.SojournTimeScatterPanel.plot"
+        ) as mock_plot_sojourn_scatter,
+        patch(
+            "samplepath.plots.core.ResidenceTimeScatterPanel.plot"
+        ) as mock_plot_residence_scatter,
         patch("samplepath.plots.core.WPrimePanel.plot") as mock_plot_w_prime,
         patch("samplepath.plots.core.HPanel.plot") as mock_plot_H,
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot_CFD,
@@ -1387,9 +1476,9 @@ def test_core_driver_returns_expected_paths():
         patch("samplepath.plots.core.ArrivalsPanel.plot") as mock_plot_A,
         patch("samplepath.plots.core.DeparturesPanel.plot") as mock_plot_D,
     ):
-        mock_stack.return_value = expected[14]
-        mock_lt_stack.return_value = expected[15]
-        mock_departure_stack.return_value = expected[16]
+        mock_stack.return_value = expected[16]
+        mock_lt_stack.return_value = expected[17]
+        mock_departure_stack.return_value = expected[18]
         mock_plot_N.return_value = expected[0]
         mock_plot_L.return_value = expected[1]
         mock_plot_Lam.return_value = expected[2]
@@ -1399,11 +1488,13 @@ def test_core_driver_returns_expected_paths():
         mock_plot_D.return_value = expected[6]
         mock_plot_w.return_value = expected[7]
         mock_plot_w_star.return_value = expected[8]
-        mock_plot_w_prime.return_value = expected[9]
-        mock_plot_H.return_value = expected[10]
-        mock_plot_CFD.return_value = expected[11]
-        mock_plot_llw.return_value = expected[12]
-        mock_plot_ltheta.return_value = expected[13]
+        mock_plot_sojourn_scatter.return_value = expected[9]
+        mock_plot_residence_scatter.return_value = expected[10]
+        mock_plot_w_prime.return_value = expected[11]
+        mock_plot_H.return_value = expected[12]
+        mock_plot_CFD.return_value = expected[13]
+        mock_plot_llw.return_value = expected[14]
+        mock_plot_ltheta.return_value = expected[15]
         written = core.plot_core_flow_metrics_charts(
             metrics, empirical_metrics, filter_result, chart_config, out_dir
         )
@@ -1414,6 +1505,8 @@ def test_core_driver_returns_expected_paths():
     mock_plot_Theta.assert_called_once()
     mock_plot_w.assert_called_once()
     mock_plot_w_star.assert_called_once()
+    mock_plot_sojourn_scatter.assert_called_once()
+    mock_plot_residence_scatter.assert_called_once()
     mock_plot_w_prime.assert_called_once()
     mock_plot_H.assert_called_once()
     mock_plot_CFD.assert_called_once()
@@ -1448,6 +1541,12 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
         patch("samplepath.plots.core.ThetaPanel.plot") as mock_plot_Theta,
         patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
         patch("samplepath.plots.core.SojournTimePanel.plot") as mock_plot_w_star,
+        patch(
+            "samplepath.plots.core.SojournTimeScatterPanel.plot"
+        ) as mock_plot_sojourn_scatter,
+        patch(
+            "samplepath.plots.core.ResidenceTimeScatterPanel.plot"
+        ) as mock_plot_residence_scatter,
         patch("samplepath.plots.core.WPrimePanel.plot") as mock_plot_w_prime,
         patch("samplepath.plots.core.HPanel.plot") as mock_plot_H,
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot_CFD,
@@ -1467,6 +1566,8 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
     mock_plot_Theta.assert_called_once()
     mock_plot_w.assert_called_once()
     mock_plot_w_star.assert_called_once()
+    mock_plot_sojourn_scatter.assert_called_once()
+    mock_plot_residence_scatter.assert_called_once()
     mock_plot_w_prime.assert_called_once()
     mock_plot_H.assert_called_once()
     mock_plot_CFD.assert_called_once()
@@ -1501,6 +1602,12 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w():
         patch("samplepath.plots.core.ThetaPanel") as mock_theta_cls,
         patch("samplepath.plots.core.WPanel") as mock_w_cls,
         patch("samplepath.plots.core.SojournTimePanel") as mock_w_star_cls,
+        patch(
+            "samplepath.plots.core.SojournTimeScatterPanel"
+        ) as mock_sojourn_scatter_cls,
+        patch(
+            "samplepath.plots.core.ResidenceTimeScatterPanel"
+        ) as mock_residence_scatter_cls,
         patch("samplepath.plots.core.WPrimePanel") as mock_w_prime_cls,
     ):
         core.plot_core_flow_metrics_charts(
@@ -1510,6 +1617,8 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w():
     assert mock_theta_cls.call_args.kwargs["with_event_marks"] is True
     assert mock_w_cls.call_args.kwargs["with_event_marks"] is True
     assert mock_w_star_cls.call_args.kwargs["with_event_marks"] is True
+    assert mock_sojourn_scatter_cls.call_args.kwargs["with_event_marks"] is True
+    assert mock_residence_scatter_cls.call_args.kwargs["with_event_marks"] is True
     assert mock_w_prime_cls.call_args.kwargs["with_event_marks"] is True
     assert mock_cfd_cls.call_args.kwargs["with_event_marks"] is True
     mock_plot_N.assert_called_once()
@@ -1542,6 +1651,8 @@ def test_core_driver_passes_show_derivations_to_CFD():
         patch("samplepath.plots.core.ThetaPanel.plot") as mock_plot_Theta,
         patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
         patch("samplepath.plots.core.SojournTimePanel.plot") as mock_plot_w_star,
+        patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
+        patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
         patch("samplepath.plots.core.WPrimePanel.plot") as mock_plot_w_prime,
         patch("samplepath.plots.core.HPanel.plot") as mock_plot_H,
         patch("samplepath.plots.core.LLWPanel.plot"),
@@ -1584,6 +1695,8 @@ def test_core_driver_uses_metrics_freq_for_unit():
             patch("samplepath.plots.core.ThetaPanel.plot"),
             patch("samplepath.plots.core.WPanel.plot"),
             patch("samplepath.plots.core.SojournTimePanel.plot"),
+            patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
+            patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
             patch("samplepath.plots.core.WPrimePanel.plot"),
             patch("samplepath.plots.core.HPanel.plot"),
             patch("samplepath.plots.core.CFDPanel.plot"),
@@ -1689,6 +1802,8 @@ def test_core_driver_calls_plot_H_under_core_dir():
             patch("samplepath.plots.core.ThetaPanel.plot"),
             patch("samplepath.plots.core.WPanel.plot"),
             patch("samplepath.plots.core.SojournTimePanel.plot"),
+            patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
+            patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
             patch("samplepath.plots.core.WPrimePanel.plot"),
             patch("samplepath.plots.core.CFDPanel.plot"),
             patch("samplepath.plots.core.LLWPanel.plot"),
@@ -1732,6 +1847,8 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
         patch("samplepath.plots.core.ThetaPanel.plot"),
         patch("samplepath.plots.core.WPanel.plot"),
         patch("samplepath.plots.core.SojournTimePanel.plot"),
+        patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
+        patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
         patch("samplepath.plots.core.WPrimePanel.plot"),
         patch("samplepath.plots.core.HPanel.plot"),
         patch("samplepath.plots.core.LLWPanel.plot"),
@@ -1769,6 +1886,8 @@ def test_core_driver_passes_event_marks_to_CFD():
         patch("samplepath.plots.core.ThetaPanel.plot"),
         patch("samplepath.plots.core.WPanel.plot"),
         patch("samplepath.plots.core.SojournTimePanel.plot"),
+        patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
+        patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
         patch("samplepath.plots.core.WPrimePanel.plot"),
         patch("samplepath.plots.core.HPanel.plot"),
         patch("samplepath.plots.core.LLWPanel"),
@@ -1806,6 +1925,8 @@ def test_core_driver_passes_event_marks_to_departure_invariant():
         patch("samplepath.plots.core.ThetaPanel.plot"),
         patch("samplepath.plots.core.WPanel.plot"),
         patch("samplepath.plots.core.SojournTimePanel.plot"),
+        patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
+        patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
         patch("samplepath.plots.core.WPrimePanel.plot"),
         patch("samplepath.plots.core.HPanel.plot"),
         patch("samplepath.plots.core.CFDPanel.plot"),
@@ -2315,6 +2436,8 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
             patch("samplepath.plots.core.ThetaPanel.plot"),
             patch("samplepath.plots.core.WPanel.plot"),
             patch("samplepath.plots.core.SojournTimePanel.plot"),
+            patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
+            patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
             patch("samplepath.plots.core.WPrimePanel.plot"),
             patch("samplepath.plots.core.HPanel.plot"),
             patch("samplepath.plots.core.CFDPanel.plot"),
@@ -2357,6 +2480,8 @@ def test_core_driver_calls_departure_invariant_plot_under_core_dir():
             patch("samplepath.plots.core.ThetaPanel.plot"),
             patch("samplepath.plots.core.WPanel.plot"),
             patch("samplepath.plots.core.SojournTimePanel.plot"),
+            patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
+            patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
             patch("samplepath.plots.core.WPrimePanel.plot"),
             patch("samplepath.plots.core.HPanel.plot"),
             patch("samplepath.plots.core.CFDPanel.plot"),
@@ -2387,6 +2512,8 @@ def test_core_driver_omits_caption_when_label_empty():
         patch("samplepath.plots.core.ThetaPanel.plot"),
         patch("samplepath.plots.core.WPanel.plot"),
         patch("samplepath.plots.core.SojournTimePanel.plot"),
+        patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
+        patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
         patch("samplepath.plots.core.WPrimePanel.plot"),
         patch("samplepath.plots.core.HPanel.plot"),
         patch("samplepath.plots.core.CFDPanel.plot"),

@@ -59,6 +59,8 @@ def _call_plot_convergence_charts_with_rate_panels():
         W_star=np.array([1.0]),
         lam_star=np.array([0.5]),
         sojourn_vals=np.array([1.0]),
+        residence_time_vals=np.array([1.0]),
+        residence_completed=np.array([True]),
     )
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     chart_config = ChartConfig()
@@ -241,6 +243,8 @@ def test_process_time_convergence_panel_plot_calls_renderer():
         W_star=np.array([3.0]),
         lam_star=np.array([0.5]),
         sojourn_vals=np.array([2.0]),
+        residence_time_vals=np.array([1.0]),
+        residence_completed=np.array([True]),
     )
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     chart_config = ChartConfig()
@@ -325,6 +329,8 @@ def test_sojourn_time_scatter_panel_plot_calls_renderer():
         W_star=np.array([3.0]),
         lam_star=np.array([0.5]),
         sojourn_vals=np.array([4.0]),
+        residence_time_vals=np.array([1.0]),
+        residence_completed=np.array([True]),
     )
 
     @contextmanager
@@ -364,6 +370,8 @@ def test_process_time_convergence_stack_calls_panel_renderers():
         W_star=np.array([3.0]),
         lam_star=np.array([0.5]),
         sojourn_vals=np.array([4.0]),
+        residence_time_vals=np.array([1.0]),
+        residence_completed=np.array([True]),
     )
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     chart_config = ChartConfig(with_event_marks=True)
@@ -404,6 +412,8 @@ def _call_plot_convergence_charts_with_process_panel():
         W_star=np.array([3.0]),
         lam_star=np.array([0.5]),
         sojourn_vals=np.array([2.0]),
+        residence_time_vals=np.array([1.0]),
+        residence_completed=np.array([True]),
     )
     filter_result = SimpleNamespace(display="Filters: test", label="test")
     with (

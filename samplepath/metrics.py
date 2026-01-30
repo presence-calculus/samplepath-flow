@@ -460,8 +460,18 @@ class ElementWiseEmpiricalMetrics:
         aligned to the same sample times.
         Each element represents the cumulative number of arrivals
         per unit time observed up to that point.
-        sojourn_vals : np.ndarray
+    sojourn_vals : np.ndarray
         Sojourn times in hours aligned to departure timestamps.
+
+    residence_time_vals : np.ndarray
+        Residence times in hours aligned to arrival timestamps.
+
+    residence_completed : np.ndarray
+        Boolean flags aligned to arrival timestamps indicating completion.
+    residence_time_vals : np.ndarray
+        Residence times in hours aligned to arrival timestamps.
+    residence_completed : np.ndarray
+        Boolean flags aligned to arrival timestamps indicating completion.
 
     Notes
     -----
@@ -485,6 +495,8 @@ class ElementWiseEmpiricalMetrics:
     W_star: np.ndarray
     lam_star: np.ndarray
     sojourn_vals: np.ndarray
+    residence_time_vals: np.ndarray
+    residence_completed: np.ndarray
 
     def as_tuple(self) -> [np.ndarray, np.ndarray]:
         return self.W_star, self.lam_star
@@ -495,14 +507,16 @@ def compute_elementwise_empirical_metrics(
 ) -> ElementWiseEmpiricalMetrics:
     def _compute_elementwise_empirical_metrics(
         df: pd.DataFrame, times: List[pd.Timestamp]
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Return W*(t), λ*(t), and sojourn values aligned to `times`."""
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """Return W*(t), λ*(t), sojourn values, and residence values."""
         n = len(times)
         W_star = np.full(n, np.nan, dtype=float)
         lam_star = np.full(n, np.nan, dtype=float)
         sojourn_vals = np.array([])
+        residence_vals = np.array([])
+        residence_completed = np.array([], dtype=bool)
         if n == 0:
-            return W_star, lam_star, sojourn_vals
+            return W_star, lam_star, sojourn_vals, residence_vals, residence_completed
 
         comp = df[df["end_ts"].notna()].copy().sort_values("end_ts")
         if not comp.empty:
@@ -511,7 +525,7 @@ def compute_elementwise_empirical_metrics(
             ).to_numpy()
         comp_end_times = comp["end_ts"].to_list()
 
-        starts = df["start_ts"].sort_values().to_list()
+        starts = df["start_ts"].sort_values(kind="mergesort").to_list()
 
         j = 0
         count_c = 0
@@ -535,14 +549,39 @@ def compute_elementwise_empirical_metrics(
             if elapsed_h > 0:
                 lam_star[i] = count_starts / elapsed_h
 
-        return W_star, lam_star, sojourn_vals
+        arrivals = df.sort_values("start_ts", kind="mergesort").copy()
+        if not arrivals.empty:
+            residence_completed = arrivals["end_ts"].notna().to_numpy(dtype=bool)
+            residence_vals = np.full(len(arrivals), np.nan, dtype=float)
+            completed = arrivals[residence_completed]
+            if not completed.empty:
+                residence_vals[residence_completed] = (
+                    completed["end_ts"] - completed["start_ts"]
+                ).dt.total_seconds().to_numpy(dtype=float) / 3600.0
+            open_items = arrivals[~residence_completed]
+            if not open_items.empty and times:
+                tn = times[-1]
+                if pd.notna(tn):
+                    residence_vals[~residence_completed] = (
+                        tn - open_items["start_ts"]
+                    ).dt.total_seconds().to_numpy(dtype=float) / 3600.0
 
-    W_star, lam_star, sojourn_vals = _compute_elementwise_empirical_metrics(df, times)
+        return W_star, lam_star, sojourn_vals, residence_vals, residence_completed
+
+    (
+        W_star,
+        lam_star,
+        sojourn_vals,
+        residence_vals,
+        residence_completed,
+    ) = _compute_elementwise_empirical_metrics(df, times)
     return ElementWiseEmpiricalMetrics(
         times=times,
         W_star=W_star,
         lam_star=lam_star,
         sojourn_vals=sojourn_vals,
+        residence_time_vals=residence_vals,
+        residence_completed=residence_completed,
     )
 
 

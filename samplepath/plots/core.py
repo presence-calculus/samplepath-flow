@@ -506,6 +506,145 @@ class SojournTimePanel:
 
 
 @dataclass
+class SojournTimeScatterPanel:
+    show_title: bool = True
+    title: str = "Sojourn Time Scatter"
+    with_event_marks: bool = False
+
+    def render(
+        self,
+        ax,
+        departure_times: Sequence[pd.Timestamp],
+        sojourn_vals: Sequence[float],
+    ) -> None:
+        drop_lines = "vertical" if self.with_event_marks else "none"
+        render_scatter_chart(
+            ax,
+            departure_times,
+            sojourn_vals,
+            label="Sojourn time (departures)",
+            color="green",
+            drop_lines=drop_lines,
+            drop_line_color="green",
+        )
+        if self.show_title:
+            ax.set_title(self.title)
+        ax.set_ylabel("Duration [hrs]")
+        ax.legend()
+
+    def plot(
+        self,
+        metrics: FlowMetricsResult,
+        empirical_metrics: ElementWiseEmpiricalMetrics,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
+        with figure_context(
+            chart_config=chart_config,
+            nrows=1,
+            ncols=1,
+            caption=caption,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core/panels",
+            base_name="sojourn_time_scatter",
+        ) as (
+            _,
+            axes,
+            resolved_out_path,
+        ):
+            ax = _first_axis(axes)
+            self.render(
+                ax,
+                metrics.departure_times,
+                empirical_metrics.sojourn_vals,
+            )
+        return resolved_out_path
+
+
+@dataclass
+class ResidenceTimeScatterPanel:
+    show_title: bool = True
+    title: str = "Residence Time Scatter"
+    with_event_marks: bool = False
+
+    def render(
+        self,
+        ax,
+        arrival_times: Sequence[pd.Timestamp],
+        residence_vals: Sequence[float],
+        residence_completed: Sequence[bool],
+    ) -> None:
+        drop_lines = "vertical" if self.with_event_marks else "none"
+        arrival_times_arr = np.asarray(arrival_times, dtype=object)
+        residence_vals_arr = np.asarray(residence_vals, dtype=float)
+        completed_arr = np.asarray(residence_completed, dtype=bool)
+        completed_mask = np.isfinite(residence_vals_arr) & completed_arr
+        open_mask = np.isfinite(residence_vals_arr) & ~completed_arr
+        if completed_mask.any():
+            render_scatter_chart(
+                ax,
+                arrival_times_arr[completed_mask].tolist(),
+                residence_vals_arr[completed_mask],
+                label="Residence time (completed)",
+                color="green",
+                drop_lines=drop_lines,
+                drop_line_color="purple",
+            )
+        if open_mask.any():
+            render_scatter_chart(
+                ax,
+                arrival_times_arr[open_mask].tolist(),
+                residence_vals_arr[open_mask],
+                label="Residence time (open)",
+                color="purple",
+                drop_lines=drop_lines,
+                drop_line_color="purple",
+            )
+        if self.show_title:
+            ax.set_title(self.title)
+        ax.set_ylabel("Duration [hrs]")
+        if completed_mask.any() or open_mask.any():
+            ax.legend()
+
+    def plot(
+        self,
+        metrics: FlowMetricsResult,
+        empirical_metrics: ElementWiseEmpiricalMetrics,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
+        with figure_context(
+            chart_config=chart_config,
+            nrows=1,
+            ncols=1,
+            caption=caption,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core/panels",
+            base_name="residence_time_scatter",
+        ) as (
+            _,
+            axes,
+            resolved_out_path,
+        ):
+            ax = _first_axis(axes)
+            self.render(
+                ax,
+                metrics.arrival_times,
+                empirical_metrics.residence_time_vals,
+                empirical_metrics.residence_completed,
+            )
+        return resolved_out_path
+
+
+@dataclass
 class HPanel:
     show_title: bool = True
     title: str = "H(T) — Cumulative Presence Mass"
@@ -1595,6 +1734,14 @@ def plot_core_flow_metrics_charts(
         show_derivations=show_derivations,
     ).plot(metrics, empirical_metrics, filter_result, chart_config, out_dir)
 
+    path_sojourn_scatter = SojournTimeScatterPanel(
+        with_event_marks=chart_config.with_event_marks,
+    ).plot(metrics, empirical_metrics, filter_result, chart_config, out_dir)
+
+    path_residence_scatter = ResidenceTimeScatterPanel(
+        with_event_marks=chart_config.with_event_marks,
+    ).plot(metrics, empirical_metrics, filter_result, chart_config, out_dir)
+
     path_w_prime = WPrimePanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
@@ -1628,6 +1775,8 @@ def plot_core_flow_metrics_charts(
         path_D,
         path_w,
         path_w_star,
+        path_sojourn_scatter,
+        path_residence_scatter,
         path_w_prime,
         path_H,
         path_CFD,

@@ -86,4 +86,23 @@ def test_lam_star_counts_incomplete_starts(tiny_df, times):
 
 def test_empty_times_returns_empty_arrays(tiny_df):
     ew = compute_elementwise_empirical_metrics(tiny_df, [])
-    assert ew.W_star.size == 0 and ew.lam_star.size == 0
+    assert (
+        ew.W_star.size == 0
+        and ew.lam_star.size == 0
+        and ew.residence_time_vals.size == 0
+    )
+
+
+def test_residence_time_vals_completed_item_duration(tiny_df, times):
+    ew = compute_elementwise_empirical_metrics(tiny_df, times)
+    assert np.isclose(ew.residence_time_vals[0], 2.0)
+
+
+def test_residence_time_vals_open_item_uses_tn(tiny_df, times):
+    ew = compute_elementwise_empirical_metrics(tiny_df, times)
+    assert np.isclose(ew.residence_time_vals[2], 2.0)
+
+
+def test_residence_completed_flags_open_item_false(tiny_df, times):
+    ew = compute_elementwise_empirical_metrics(tiny_df, times)
+    assert ew.residence_completed[2] == False
