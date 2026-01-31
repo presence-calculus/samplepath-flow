@@ -329,7 +329,7 @@ def test_render_arrivals_sets_ylabel():
     ax = MagicMock()
     with patch("samplepath.plots.core.render_step_chart"):
         core.ArrivalsPanel().render(ax, [], [])
-    assert ax.set_ylabel.call_args[0][0] == "count"
+    assert ax.set_ylabel.call_args[0][0] == "Count"
 
 
 def test_render_arrivals_passes_overlays():
@@ -373,7 +373,7 @@ def test_render_departures_sets_ylabel():
     ax = MagicMock()
     with patch("samplepath.plots.core.render_step_chart"):
         core.DeparturesPanel().render(ax, [], [])
-    assert ax.set_ylabel.call_args[0][0] == "count"
+    assert ax.set_ylabel.call_args[0][0] == "Count"
 
 
 def test_render_departures_passes_overlays():
@@ -795,7 +795,7 @@ def test_render_CFD_sets_title():
 
 def test_render_CFD_sets_ylabel():
     ax, _ = _render_cfd_with_mocks()
-    ax.set_ylabel.assert_called_once_with("count")
+    ax.set_ylabel.assert_called_once_with("Count")
 
 
 def test_render_CFD_sets_legend():

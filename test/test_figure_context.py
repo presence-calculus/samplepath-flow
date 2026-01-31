@@ -52,7 +52,7 @@ def test_format_axis_label_date_like_calls_autofmt_and_label():
     ax = MagicMock()
     with patch("samplepath.plots.figure_context.is_date_axis", return_value=True):
         _format_axis_label(ax, unit="W-SUN")
-    ax.set_xlabel.assert_called_once_with("Time (week-SUN)")
+    ax.set_xlabel.assert_called_once_with("Week (SUN)")
     ax.figure.autofmt_xdate.assert_called_once()
 
 
@@ -106,7 +106,7 @@ def test_is_date_axis_token_fallback(tmp_path):
     out_path = tmp_path / "chart.png"
     with figure_context(str(out_path), unit="timestamp") as (_, ax, _):
         pass
-    assert ax.get_xlabel() == "Timestamp"
+    assert ax.get_xlabel() == "Event Timeline"
 
 
 def test_multi_column_axes_formatting(tmp_path):
@@ -351,7 +351,7 @@ def test_format_axis_label_calendar_unit_sets_locator_and_xlabel():
     ax.xaxis.set_major_locator.assert_called_once()
     locator = ax.xaxis.set_major_locator.call_args[0][0]
     assert isinstance(locator, mdates.MonthLocator)
-    ax.set_xlabel.assert_called_once_with("Time (month)")
+    ax.set_xlabel.assert_called_once_with("Month")
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -362,16 +362,16 @@ def test_format_axis_label_calendar_unit_sets_locator_and_xlabel():
 @pytest.mark.parametrize(
     "unit, expected",
     [
-        (None, "Timestamp"),
-        ("timestamp", "Timestamp"),
-        ("D", "Time (day)"),
-        ("W-MON", "Time (week-MON)"),
-        ("W-SUN", "Time (week-SUN)"),
-        ("MS", "Time (month)"),
-        ("QS-JAN", "Time (quarter-JAN)"),
-        ("QS-APR", "Time (quarter-APR)"),
-        ("YS-JAN", "Time (year-JAN)"),
-        ("YS-JUL", "Time (year-JUL)"),
+        (None, "Event Timeline"),
+        ("timestamp", "Event Timeline"),
+        ("D", "Day"),
+        ("W-MON", "Week (MON)"),
+        ("W-SUN", "Week (SUN)"),
+        ("MS", "Month"),
+        ("QS-JAN", "Quarter (JAN)"),
+        ("QS-APR", "Quarter (APR)"),
+        ("YS-JAN", "Year (JAN)"),
+        ("YS-JUL", "Year (JUL)"),
     ],
 )
 def test_freq_display_label(unit, expected):
@@ -379,4 +379,4 @@ def test_freq_display_label(unit, expected):
 
 
 def test_freq_display_label_unrecognised_freq_falls_back():
-    assert ChartConfig.freq_display_label("not-a-freq") == "Timestamp"
+    assert ChartConfig.freq_display_label("not-a-freq") == "Event Timeline"

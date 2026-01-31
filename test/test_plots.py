@@ -807,11 +807,11 @@ def test_format_date_axis_calendar_unit_sets_locator_and_xlabel():
     ax = MagicMock()
     format_date_axis(ax, unit="MS")
     ax.xaxis.set_major_locator.assert_called_once()
-    ax.set_xlabel.assert_called_once_with("Time (month)")
+    ax.set_xlabel.assert_called_once_with("Month")
 
 
 def test_format_date_axis_timestamp_no_locator_but_xlabel_set():
     ax = MagicMock()
     format_date_axis(ax, unit="timestamp")
     ax.xaxis.set_major_locator.assert_not_called()
-    ax.set_xlabel.assert_called_once_with("Timestamp")
+    ax.set_xlabel.assert_called_once_with("Event Timeline")

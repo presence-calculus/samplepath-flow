@@ -56,7 +56,7 @@ class ChartConfig:
         values.  Otherwise returns ``"Time (<readable>)"`` where *readable* is
         a friendly name derived from the pandas offset type.
         """
-        _FALLBACK = "Timestamp"
+        _FALLBACK = "Event Timeline"
         if unit is None or unit == "timestamp":
             return _FALLBACK
         try:
@@ -81,16 +81,17 @@ class ChartConfig:
         ]
 
         if isinstance(offset, pd.tseries.offsets.Day):
-            return "Time (day)"
+            return f"Day"
         if isinstance(offset, pd.tseries.offsets.Week):
             anchor = _WEEKDAY_NAMES[offset.weekday]
-            return f"Time (week-{anchor})"
+            return f"Week ({anchor})"
         if isinstance(offset, pd.tseries.offsets.MonthBegin):
-            return "Time (month)"
+            return "Month"
         if isinstance(offset, pd.tseries.offsets.QuarterBegin):
             anchor = _MONTH_NAMES[offset.startingMonth - 1]
-            return f"Time (quarter-{anchor})"
+            return f"Quarter ({anchor})"
         if isinstance(offset, pd.tseries.offsets.YearBegin):
             anchor = _MONTH_NAMES[offset.month - 1]
-            return f"Time (year-{anchor})"
+            return f"Year ({anchor})"
+
         return _FALLBACK

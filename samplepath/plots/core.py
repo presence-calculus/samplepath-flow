@@ -992,7 +992,7 @@ class CFDPanel:
             )
         if self.show_title:
             ax.set_title(self.title)
-        ax.set_ylabel("count")
+        ax.set_ylabel("Count")
         ax.legend()
 
     def plot(
@@ -1159,7 +1159,7 @@ class ArrivalsPanel:
             ax.set_title(
                 construct_title(self.title, self.show_derivations, derivation_key="A")
             )
-        ax.set_ylabel("count")
+        ax.set_ylabel("Count")
         ax.legend()
 
     def plot(
@@ -1239,7 +1239,7 @@ class DeparturesPanel:
             ax.set_title(
                 construct_title(self.title, self.show_derivations, derivation_key="D")
             )
-        ax.set_ylabel("count")
+        ax.set_ylabel("Count")
         ax.legend()
 
     def plot(
