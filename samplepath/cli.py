@@ -237,6 +237,23 @@ def build_parser() -> tuple[argparse.ArgumentParser, set[str]]:
         default=150,
         help="DPI for PNG output (ignored for SVG)",
     )
+    chart_config.add_argument(
+        "--sampling-frequency",
+        type=str,
+        default=None,
+        help="Calendar frequency for observation times (e.g., 'day', 'week', 'month', "
+        "'quarter', 'year', or pandas aliases like 'D', 'W-MON', 'MS'). "
+        "Default: observe at each event timestamp.",
+    )
+    chart_config.add_argument(
+        "--anchor",
+        type=str,
+        default=None,
+        help="Anchor for calendar frequency boundaries. "
+        "For week: day name (e.g., 'MON', 'WED', 'SUN'). "
+        "For quarter/year: month name (e.g., 'JAN', 'APR'). "
+        "Ignored for day/month.",
+    )
 
     subcommand_names = set(subparsers.choices.keys())
     return parser, subcommand_names

@@ -59,8 +59,16 @@ def run_analysis(csv_path: str, args: Namespace, out_dir: str) -> List[str]:
         to_arrival_departure_process(df)
     )
     # Compute core finite window flow metrics
+    anchor = getattr(args, "anchor", None)
+    anchor_kwargs = {}
+    if anchor is not None:
+        anchor_kwargs["week_anchor"] = anchor
+        anchor_kwargs["quarter_anchor"] = anchor
+        anchor_kwargs["year_anchor"] = anchor
     metrics: FlowMetricsResult = compute_finite_window_flow_metrics(
-        arrival_departure_process
+        arrival_departure_process,
+        freq=args.sampling_frequency,
+        **anchor_kwargs,
     )
 
     # Compute  ElementWiseMetrics once

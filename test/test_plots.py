@@ -10,8 +10,11 @@ import pytest
 
 from samplepath.plots.helpers import (
     ScatterOverlay,
+    _calendar_tick_config,
+    apply_calendar_ticks,
     build_event_overlays,
     draw_step_chart,
+    format_date_axis,
     render_lambda_chart,
     render_line_chart,
     render_LT_chart,
@@ -308,6 +311,75 @@ def test_build_event_overlays_sets_colors_labels_and_drop_lines():
     assert departure_overlay.drop_lines is True
 
 
+def test_build_event_overlays_calendar_mode_keeps_all_events():
+    """In calendar mode, all event timestamps are kept regardless of series times."""
+    series_times = [_t("2024-01-01"), _t("2024-02-01")]
+    values = np.array([1.0, 2.0])
+    arrivals = [_t("2024-01-05"), _t("2024-01-20")]
+    departures = [_t("2024-01-10")]
+
+    overlays = build_event_overlays(
+        series_times, values, arrivals, departures, calendar_mode=True
+    )
+    assert overlays is not None
+    arrival_overlay, departure_overlay = overlays
+    assert arrival_overlay.x == arrivals
+    assert departure_overlay.x == departures
+
+
+def test_build_event_overlays_calendar_mode_sets_y_to_zero():
+    """In calendar mode, all y-values are 0.0 (rug plot)."""
+    series_times = [_t("2024-01-01"), _t("2024-02-01")]
+    values = np.array([5.0, 10.0])
+    arrivals = [_t("2024-01-05"), _t("2024-01-20")]
+    departures = [_t("2024-01-10")]
+
+    overlays = build_event_overlays(
+        series_times, values, arrivals, departures, calendar_mode=True
+    )
+    assert overlays is not None
+    arrival_overlay, departure_overlay = overlays
+    assert arrival_overlay.y == [0.0, 0.0]
+    assert departure_overlay.y == [0.0]
+
+
+def test_build_event_overlays_calendar_mode_disables_drop_lines():
+    """In calendar mode, drop_lines are always False."""
+    series_times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    arrivals = [_t("2024-01-05")]
+    departures = [_t("2024-01-10")]
+
+    overlays = build_event_overlays(
+        series_times,
+        values,
+        arrivals,
+        departures,
+        drop_lines_for_arrivals=True,
+        drop_lines_for_departures=True,
+        calendar_mode=True,
+    )
+    assert overlays is not None
+    arrival_overlay, departure_overlay = overlays
+    assert arrival_overlay.drop_lines is False
+    assert departure_overlay.drop_lines is False
+
+
+def test_build_event_overlays_default_not_calendar_mode():
+    """Default calendar_mode=False preserves existing filtering behaviour."""
+    series_times = [_t("2024-01-01"), _t("2024-02-01")]
+    values = np.array([1.0, 2.0])
+    arrivals = [_t("2024-01-05")]  # not in series_times → dropped
+    departures = [_t("2024-02-01")]  # in series_times → kept
+
+    overlays = build_event_overlays(series_times, values, arrivals, departures)
+    assert overlays is not None
+    arrival_overlay, departure_overlay = overlays
+    assert arrival_overlay.x == []
+    assert departure_overlay.x == [_t("2024-02-01")]
+    assert departure_overlay.y == [2.0]
+
+
 def test_render_step_chart_renders_fill_and_overlays():
     ax = MagicMock()
     overlays = [
@@ -385,7 +457,7 @@ def test_render_lambda_chart_invokes_clipping(mock_clip):
 
 @patch("samplepath.plots.helpers.render_step_chart")
 @patch("samplepath.plots.helpers.build_event_overlays")
-def test_render_N_chart_with_event_marks_uses_overlays(
+def test_render_N_chart_with_event_marks_passes_overlays(
     mock_build_overlays, mock_render_step_chart
 ):
     ax = MagicMock()
@@ -405,7 +477,6 @@ def test_render_N_chart_with_event_marks_uses_overlays(
 
     mock_render_step_chart.assert_called_once()
     _, kwargs = mock_render_step_chart.call_args
-    assert kwargs["color"] == "grey"
     assert kwargs["overlays"] == overlays
     ax.set_title.assert_called_once()
     ax.set_ylabel.assert_called_once()
@@ -421,7 +492,6 @@ def test_render_N_chart_without_event_marks_uses_default_color(mock_render_step_
 
     mock_render_step_chart.assert_called_once()
     _, kwargs = mock_render_step_chart.call_args
-    assert kwargs["color"] == "tab:blue"
     assert kwargs["overlays"] is None
 
 
@@ -447,7 +517,6 @@ def test_render_LT_chart_with_event_marks_uses_overlays(
 
     mock_render_line_chart.assert_called_once()
     _, kwargs = mock_render_line_chart.call_args
-    assert kwargs["color"] == "grey"
     assert kwargs["overlays"] == overlays
     ax.set_title.assert_called_once()
     ax.set_ylabel.assert_called_once()
@@ -463,5 +532,286 @@ def test_render_LT_chart_without_event_marks_uses_default_color(mock_render_line
 
     mock_render_line_chart.assert_called_once()
     _, kwargs = mock_render_line_chart.call_args
-    assert kwargs["color"] == "tab:blue"
     assert kwargs["overlays"] is None
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# render_line_chart marker tests (calendar mode)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+def test_render_line_chart_adds_markers_when_sampling_frequency_set():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-08")]
+    values = np.array([1.0, 2.0])
+
+    render_line_chart(ax, times, values, label="L(T)", sampling_frequency="week")
+
+    _, kwargs = ax.plot.call_args
+    assert kwargs["marker"] == "o"
+    assert kwargs["markersize"] == 4
+
+
+def test_render_line_chart_no_markers_when_sampling_frequency_none():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+
+    render_line_chart(ax, times, values, label="L(T)")
+
+    _, kwargs = ax.plot.call_args
+    assert "marker" not in kwargs
+
+
+def test_render_step_chart_grey_when_overlays_and_no_sampling_frequency():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    overlays = [
+        ScatterOverlay(x=[times[0]], y=[1.0], color="purple", label="evt"),
+    ]
+
+    render_step_chart(ax, times, values, label="N(t)", overlays=overlays)
+
+    _, kwargs = ax.step.call_args
+    assert kwargs["color"] == "grey"
+
+
+def test_render_step_chart_keeps_color_when_overlays_and_sampling_frequency():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    overlays = [
+        ScatterOverlay(x=[times[0]], y=[0.0], color="purple", label="evt"),
+    ]
+
+    render_step_chart(
+        ax, times, values, label="N(t)", overlays=overlays, sampling_frequency="MS"
+    )
+
+    _, kwargs = ax.step.call_args
+    assert kwargs["color"] == "tab:blue"
+
+
+def test_render_step_chart_custom_color_kept_with_sampling_frequency():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    overlays = [
+        ScatterOverlay(x=[times[0]], y=[0.0], color="purple", label="evt"),
+    ]
+
+    render_step_chart(
+        ax,
+        times,
+        values,
+        label="A(T)",
+        color="purple",
+        overlays=overlays,
+        sampling_frequency="MS",
+    )
+
+    _, kwargs = ax.step.call_args
+    assert kwargs["color"] == "purple"
+
+
+def test_render_step_chart_default_color_when_no_overlays():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+
+    render_step_chart(ax, times, values, label="N(t)", color="cyan")
+
+    _, kwargs = ax.step.call_args
+    assert kwargs["color"] == "cyan"
+
+
+def test_render_step_chart_fill_uses_effective_color():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    overlays = [
+        ScatterOverlay(x=[times[0]], y=[1.0], color="purple", label="evt"),
+    ]
+
+    render_step_chart(ax, times, values, label="N(t)", fill=True, overlays=overlays)
+
+    _, kwargs = ax.fill_between.call_args
+    assert kwargs["color"] == "grey"
+
+
+def test_render_line_chart_grey_when_overlays_and_no_sampling_frequency():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    overlays = [
+        ScatterOverlay(x=[times[0]], y=[1.0], color="purple", label="evt"),
+    ]
+
+    render_line_chart(ax, times, values, label="L(T)", overlays=overlays)
+
+    _, kwargs = ax.plot.call_args
+    assert kwargs["color"] == "grey"
+
+
+def test_render_line_chart_keeps_color_when_overlays_and_sampling_frequency():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    overlays = [
+        ScatterOverlay(x=[times[0]], y=[0.0], color="purple", label="evt"),
+    ]
+
+    render_line_chart(
+        ax, times, values, label="L(T)", overlays=overlays, sampling_frequency="MS"
+    )
+
+    _, kwargs = ax.plot.call_args
+    assert kwargs["color"] == "tab:blue"
+
+
+def test_render_line_chart_default_color_when_no_overlays():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+
+    render_line_chart(ax, times, values, label="L(T)", color="cyan")
+
+    _, kwargs = ax.plot.call_args
+    assert kwargs["color"] == "cyan"
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# _calendar_tick_config unit tests
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+import matplotlib.dates as mdates
+
+
+@pytest.mark.parametrize(
+    "freq, expected_locator_type",
+    [
+        ("D", mdates.AutoDateLocator),
+        ("W-MON", mdates.WeekdayLocator),
+        ("W-SUN", mdates.WeekdayLocator),
+        ("MS", mdates.MonthLocator),
+        ("QS-JAN", mdates.MonthLocator),
+        ("QS-APR", mdates.MonthLocator),
+        ("YS-JAN", mdates.YearLocator),
+        ("YS-JUL", mdates.YearLocator),
+    ],
+)
+def test_calendar_tick_config_returns_correct_locator_type(freq, expected_locator_type):
+    result = _calendar_tick_config(freq)
+    assert result is not None
+    locator, formatter, minor = result
+    assert isinstance(locator, expected_locator_type)
+
+
+def test_calendar_tick_config_returns_none_for_timestamp():
+    assert _calendar_tick_config("timestamp") is None
+
+
+def test_calendar_tick_config_returns_none_for_invalid_string():
+    assert _calendar_tick_config("not-a-freq") is None
+
+
+@pytest.mark.parametrize(
+    "freq, expected_weekday_num",
+    [
+        ("W-MON", 0),
+        ("W-SUN", 6),
+        ("W-TUE", 1),
+        ("W-FRI", 4),
+    ],
+)
+def test_calendar_tick_config_weekly_anchor_maps_to_correct_weekday(
+    freq, expected_weekday_num
+):
+    result = _calendar_tick_config(freq)
+    assert result is not None
+    locator, _, _ = result
+    assert isinstance(locator, mdates.WeekdayLocator)
+    assert locator.rule._byweekday == (expected_weekday_num,)
+
+
+@pytest.mark.parametrize(
+    "freq, expected_months",
+    [
+        ("QS-JAN", [1, 4, 7, 10]),
+        ("QS-APR", [4, 7, 10, 1]),
+        ("QS-OCT", [10, 1, 4, 7]),
+    ],
+)
+def test_calendar_tick_config_quarterly_bymonth_correct(freq, expected_months):
+    result = _calendar_tick_config(freq)
+    assert result is not None
+    locator, _, _ = result
+    assert isinstance(locator, mdates.MonthLocator)
+    assert sorted(locator.rule._bymonth) == sorted(expected_months)
+
+
+@pytest.mark.parametrize(
+    "freq, expected_formatter_type",
+    [
+        ("D", mdates.ConciseDateFormatter),
+        ("W-MON", mdates.DateFormatter),
+        ("MS", mdates.DateFormatter),
+        ("QS-JAN", mdates.DateFormatter),
+        ("YS-JAN", mdates.DateFormatter),
+    ],
+)
+def test_calendar_tick_config_returns_correct_formatter_type(
+    freq, expected_formatter_type
+):
+    result = _calendar_tick_config(freq)
+    assert result is not None
+    _, formatter, _ = result
+    assert isinstance(formatter, expected_formatter_type)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# apply_calendar_ticks unit tests
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+def test_apply_calendar_ticks_noop_for_timestamp():
+    ax = MagicMock()
+    apply_calendar_ticks(ax, "timestamp")
+    ax.xaxis.set_major_locator.assert_not_called()
+
+
+def test_apply_calendar_ticks_noop_for_none():
+    ax = MagicMock()
+    apply_calendar_ticks(ax, None)
+    ax.xaxis.set_major_locator.assert_not_called()
+
+
+def test_apply_calendar_ticks_sets_locator_and_formatter_for_ms():
+    ax = MagicMock()
+    apply_calendar_ticks(ax, "MS")
+    ax.xaxis.set_major_locator.assert_called_once()
+    ax.xaxis.set_major_formatter.assert_called_once()
+    locator = ax.xaxis.set_major_locator.call_args[0][0]
+    formatter = ax.xaxis.set_major_formatter.call_args[0][0]
+    assert isinstance(locator, mdates.MonthLocator)
+    assert isinstance(formatter, mdates.DateFormatter)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# format_date_axis integration tests (calendar ticks)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+def test_format_date_axis_calendar_unit_sets_locator_and_xlabel():
+    ax = MagicMock()
+    format_date_axis(ax, unit="MS")
+    ax.xaxis.set_major_locator.assert_called_once()
+    ax.set_xlabel.assert_called_once_with("Time (month)")
+
+
+def test_format_date_axis_timestamp_no_locator_but_xlabel_set():
+    ax = MagicMock()
+    format_date_axis(ax, unit="timestamp")
+    ax.xaxis.set_major_locator.assert_not_called()
+    ax.set_xlabel.assert_called_once_with("Timestamp")

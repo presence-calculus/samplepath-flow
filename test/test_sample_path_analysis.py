@@ -62,5 +62,109 @@ def test_produce_all_charts_returns_concatenated_list():
     assert written == ["core.png", "conv.png", "stab.png", "adv.png"]
 
 
+def test_run_analysis_passes_sampling_frequency_to_metrics():
+    args = SimpleNamespace(
+        sampling_frequency="week",
+        delimiter=None,
+        start_column="start_ts",
+        end_column="end_ts",
+        date_format=None,
+        dayfirst=False,
+        completed=False,
+        incomplete=False,
+        classes=None,
+        outlier_hours=None,
+        outlier_pctl=None,
+        outlier_iqr=None,
+        outlier_iqr_two_sided=False,
+    )
+    import pandas as pd
+
+    fake_df = pd.DataFrame(
+        {
+            "id": [1],
+            "start_ts": [pd.Timestamp("2024-01-01")],
+            "end_ts": [pd.Timestamp("2024-01-02")],
+        }
+    )
+    fake_filter = SimpleNamespace(df=fake_df, display="", label="")
+    with (
+        patch("samplepath.sample_path_analysis.csv_to_dataframe", return_value=fake_df),
+        patch(
+            "samplepath.sample_path_analysis.apply_filters", return_value=fake_filter
+        ),
+        patch(
+            "samplepath.sample_path_analysis.to_arrival_departure_process",
+            return_value=[
+                (pd.Timestamp("2024-01-01"), 1, 1),
+                (pd.Timestamp("2024-01-02"), -1, 0),
+            ],
+        ),
+        patch(
+            "samplepath.sample_path_analysis.compute_finite_window_flow_metrics"
+        ) as mock_metrics,
+        patch("samplepath.sample_path_analysis.compute_elementwise_empirical_metrics"),
+        patch("samplepath.sample_path_analysis.write_limits"),
+        patch("samplepath.sample_path_analysis.produce_all_charts", return_value=[]),
+    ):
+        mock_metrics.return_value = SimpleNamespace(times=[])
+        sample_path_analysis.run_analysis("dummy.csv", args, "/tmp/out")
+    assert mock_metrics.call_args.kwargs["freq"] == "week"
+
+
+def test_run_analysis_passes_anchor_to_metrics():
+    args = SimpleNamespace(
+        sampling_frequency="week",
+        anchor="WED",
+        delimiter=None,
+        start_column="start_ts",
+        end_column="end_ts",
+        date_format=None,
+        dayfirst=False,
+        completed=False,
+        incomplete=False,
+        classes=None,
+        outlier_hours=None,
+        outlier_pctl=None,
+        outlier_iqr=None,
+        outlier_iqr_two_sided=False,
+    )
+    import pandas as pd
+
+    fake_df = pd.DataFrame(
+        {
+            "id": [1],
+            "start_ts": [pd.Timestamp("2024-01-01")],
+            "end_ts": [pd.Timestamp("2024-01-02")],
+        }
+    )
+    fake_filter = SimpleNamespace(df=fake_df, display="", label="")
+    with (
+        patch("samplepath.sample_path_analysis.csv_to_dataframe", return_value=fake_df),
+        patch(
+            "samplepath.sample_path_analysis.apply_filters", return_value=fake_filter
+        ),
+        patch(
+            "samplepath.sample_path_analysis.to_arrival_departure_process",
+            return_value=[
+                (pd.Timestamp("2024-01-01"), 1, 1),
+                (pd.Timestamp("2024-01-02"), -1, 0),
+            ],
+        ),
+        patch(
+            "samplepath.sample_path_analysis.compute_finite_window_flow_metrics"
+        ) as mock_metrics,
+        patch("samplepath.sample_path_analysis.compute_elementwise_empirical_metrics"),
+        patch("samplepath.sample_path_analysis.write_limits"),
+        patch("samplepath.sample_path_analysis.produce_all_charts", return_value=[]),
+    ):
+        mock_metrics.return_value = SimpleNamespace(times=[])
+        sample_path_analysis.run_analysis("dummy.csv", args, "/tmp/out")
+    kwargs = mock_metrics.call_args.kwargs
+    assert kwargs["week_anchor"] == "WED"
+    assert kwargs["quarter_anchor"] == "WED"
+    assert kwargs["year_anchor"] == "WED"
+
+
 def test_plots_export_uses_core_driver():
     assert plot_core_flow_metrics_charts is core.plot_core_flow_metrics_charts

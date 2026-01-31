@@ -90,6 +90,30 @@ def test_chart_dpi_flag_can_be_enabled():
     assert args.chart_dpi == 150
 
 
+def test_sampling_frequency_defaults_to_none():
+    _, args = cli.parse_args(["flow", "events.csv"])
+
+    assert args.sampling_frequency is None
+
+
+def test_sampling_frequency_accepts_value():
+    _, args = cli.parse_args(["flow", "events.csv", "--sampling-frequency", "week"])
+
+    assert args.sampling_frequency == "week"
+
+
+def test_anchor_defaults_to_none():
+    _, args = cli.parse_args(["flow", "events.csv"])
+
+    assert args.anchor is None
+
+
+def test_anchor_accepts_value():
+    _, args = cli.parse_args(["flow", "events.csv", "--anchor", "WED"])
+
+    assert args.anchor == "WED"
+
+
 def test_output_dir_expands_user():
     home = Path("~").expanduser().resolve()
     _, args = cli.parse_args(["flow", "events.csv", "--output-dir", "~"])

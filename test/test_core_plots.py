@@ -22,7 +22,7 @@ def _t(s: str) -> pd.Timestamp:
     return pd.Timestamp(s)
 
 
-def test_render_N_colors_grey_when_overlays():
+def test_render_N_passes_overlays_with_default_color():
     ax = MagicMock()
     times = [_t("2024-01-01")]
     values = np.array([1.0])
@@ -40,7 +40,6 @@ def test_render_N_colors_grey_when_overlays():
         )
     mock_render.assert_called_once()
     _, kwargs = mock_render.call_args
-    assert kwargs["color"] == "grey"
     assert kwargs["fill"] is True
     assert kwargs["overlays"] == overlays
     ax.set_title.assert_called_once()
@@ -157,7 +156,7 @@ def test_render_H_title_appends_derivation_when_enabled():
     assert ax.set_title.call_args[0][0] == "Base Title: DERIVATION"
 
 
-def test_render_H_colors_grey_when_overlays():
+def test_render_H_passes_overlays_with_default_color():
     ax = MagicMock()
     times = [_t("2024-01-01")]
     values = np.array([2.0])
@@ -174,7 +173,8 @@ def test_render_H_colors_grey_when_overlays():
             departure_times=[times[0]],
         )
     _, kwargs = mock_render.call_args
-    assert kwargs["color"] == "grey"
+    assert kwargs["overlays"] == overlays
+    assert "color" not in kwargs or kwargs["color"] == "tab:blue"
 
 
 def test_render_H_passes_overlays():
@@ -412,7 +412,7 @@ def test_plot_single_panel_departures_calls_renderer():
     mock_render.assert_called_once()
 
 
-def test_render_L_colors_grey_when_overlays():
+def test_render_L_passes_overlays_with_default_color():
     ax = MagicMock()
     times = [_t("2024-01-01")]
     values = np.array([2.0])
@@ -429,8 +429,8 @@ def test_render_L_colors_grey_when_overlays():
             departure_times=[times[0]],
         )
     _, kwargs = mock_render.call_args
-    assert kwargs["color"] == "grey"
     assert kwargs["overlays"] == overlays
+    assert "color" not in kwargs or kwargs["color"] == "tab:blue"
     ax.set_title.assert_called_once()
     ax.set_ylabel.assert_called_once_with("L(T)")
 
@@ -2882,3 +2882,29 @@ def test_plot_LT_derivation_stack_passes_event_marks_to_L():
 def test_plot_LT_derivation_stack_passes_show_derivations_to_L():
     mocks = _call_LT_derivation_stack_capturing_panel_classes(show_derivations=True)
     assert mocks["L"].call_args.kwargs["show_derivations"] is True
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# ChartConfig sampling_frequency + panel passthrough tests
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+def test_chart_config_sampling_frequency_defaults_to_none():
+    config = ChartConfig()
+    assert config.sampling_frequency is None
+
+
+def test_chart_config_init_from_args_reads_sampling_frequency():
+    args = SimpleNamespace(sampling_frequency="week")
+    config = ChartConfig.init_from_args(args)
+    assert config.sampling_frequency == "week"
+
+
+def test_LPanel_passes_sampling_frequency_to_render_line_chart():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([2.0])
+    with patch("samplepath.plots.core.render_line_chart") as mock_render:
+        core.LPanel(sampling_frequency="week").render(ax, times, values)
+    _, kwargs = mock_render.call_args
+    assert kwargs["sampling_frequency"] == "week"

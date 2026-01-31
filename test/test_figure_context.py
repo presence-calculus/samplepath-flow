@@ -52,7 +52,7 @@ def test_format_axis_label_date_like_calls_autofmt_and_label():
     ax = MagicMock()
     with patch("samplepath.plots.figure_context.is_date_axis", return_value=True):
         _format_axis_label(ax, unit="W-SUN")
-    ax.set_xlabel.assert_called_once_with("Date (W-SUN)")
+    ax.set_xlabel.assert_called_once_with("Time (week-SUN)")
     ax.figure.autofmt_xdate.assert_called_once()
 
 
@@ -106,7 +106,7 @@ def test_is_date_axis_token_fallback(tmp_path):
     out_path = tmp_path / "chart.png"
     with figure_context(str(out_path), unit="timestamp") as (_, ax, _):
         pass
-    assert ax.get_xlabel() == "Date (timestamp)"
+    assert ax.get_xlabel() == "Timestamp"
 
 
 def test_multi_column_axes_formatting(tmp_path):
@@ -336,3 +336,47 @@ def test_layout_context_figsize_autoscale(tmp_path):
     with layout_context(str(out_path), layout=layout) as (fig, _, _):
         width, height = fig.get_size_inches()
         assert height >= 3.4 * 3 - 0.1
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# _format_axis_label calendar tick integration
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+import matplotlib.dates as mdates
+
+
+def test_format_axis_label_calendar_unit_sets_locator_and_xlabel():
+    ax = MagicMock()
+    _format_axis_label(ax, unit="MS")
+    ax.xaxis.set_major_locator.assert_called_once()
+    locator = ax.xaxis.set_major_locator.call_args[0][0]
+    assert isinstance(locator, mdates.MonthLocator)
+    ax.set_xlabel.assert_called_once_with("Time (month)")
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# ChartConfig.freq_display_label tests
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+@pytest.mark.parametrize(
+    "unit, expected",
+    [
+        (None, "Timestamp"),
+        ("timestamp", "Timestamp"),
+        ("D", "Time (day)"),
+        ("W-MON", "Time (week-MON)"),
+        ("W-SUN", "Time (week-SUN)"),
+        ("MS", "Time (month)"),
+        ("QS-JAN", "Time (quarter-JAN)"),
+        ("QS-APR", "Time (quarter-APR)"),
+        ("YS-JAN", "Time (year-JAN)"),
+        ("YS-JUL", "Time (year-JUL)"),
+    ],
+)
+def test_freq_display_label(unit, expected):
+    assert ChartConfig.freq_display_label(unit) == expected
+
+
+def test_freq_display_label_unrecognised_freq_falls_back():
+    assert ChartConfig.freq_display_label("not-a-freq") == "Timestamp"

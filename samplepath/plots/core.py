@@ -70,6 +70,7 @@ class NPanel:
     title: str = "N(t) — Sample Path"
     show_derivations: bool = False
     with_event_marks: bool = False
+    sampling_frequency: Optional[str] = None
 
     def render(
         self,
@@ -81,19 +82,24 @@ class NPanel:
         departure_times: Optional[List[pd.Timestamp]] = None,
     ) -> None:
         overlays = (
-            build_event_overlays(times, N_vals, arrival_times, departure_times)
+            build_event_overlays(
+                times,
+                N_vals,
+                arrival_times,
+                departure_times,
+                calendar_mode=self.sampling_frequency is not None,
+            )
             if self.with_event_marks
             else None
         )
-        color = "grey" if overlays else "tab:blue"
         render_step_chart(
             ax,
             times,
             N_vals,
             label="N(t)",
-            color=color,
             fill=True,
             overlays=overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(
@@ -142,6 +148,7 @@ class LPanel:
     title: str = "L(T) — Time-Average of N(t)"
     show_derivations: bool = False
     with_event_marks: bool = False
+    sampling_frequency: Optional[str] = None
 
     def render(
         self,
@@ -153,13 +160,23 @@ class LPanel:
         departure_times: Optional[List[pd.Timestamp]] = None,
     ) -> None:
         overlays = (
-            build_event_overlays(times, L_vals, arrival_times, departure_times)
+            build_event_overlays(
+                times,
+                L_vals,
+                arrival_times,
+                departure_times,
+                calendar_mode=self.sampling_frequency is not None,
+            )
             if self.with_event_marks
             else None
         )
-        color = "grey" if overlays else "tab:blue"
         render_line_chart(
-            ax, times, L_vals, label="L(T)", color=color, overlays=overlays
+            ax,
+            times,
+            L_vals,
+            label="L(T)",
+            overlays=overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(
@@ -209,6 +226,7 @@ class LambdaPanel:
     show_derivations: bool = False
     with_event_marks: bool = False
     clip_opts: Optional[ClipOptions] = None
+    sampling_frequency: Optional[str] = None
 
     def render(
         self,
@@ -225,6 +243,7 @@ class LambdaPanel:
                 arrival_times,
                 [],
                 drop_lines_for_arrivals=True,
+                calendar_mode=self.sampling_frequency is not None,
             )
             if self.with_event_marks
             else None
@@ -236,6 +255,7 @@ class LambdaPanel:
             label="Λ(T) [1/hr]",
             color="tab:blue",
             overlays=overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         opts = self.clip_opts or ClipOptions()
         if opts.pctl_upper is not None or opts.pctl_lower is not None:
@@ -295,6 +315,7 @@ class ThetaPanel:
     title: str = "Θ(T) — Cumulative Departure Rate"
     show_derivations: bool = False
     with_event_marks: bool = False
+    sampling_frequency: Optional[str] = None
 
     def render(
         self,
@@ -306,13 +327,23 @@ class ThetaPanel:
     ) -> None:
         label = "Θ(T) [1/hr]"
         overlays = (
-            build_event_overlays(times, theta_vals, [], departure_times)
+            build_event_overlays(
+                times,
+                theta_vals,
+                [],
+                departure_times,
+                calendar_mode=self.sampling_frequency is not None,
+            )
             if self.with_event_marks and departure_times is not None
             else None
         )
-        color = "grey" if overlays else "tab:blue"
         render_line_chart(
-            ax, times, theta_vals, label=label, color=color, overlays=overlays
+            ax,
+            times,
+            theta_vals,
+            label=label,
+            overlays=overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(
@@ -362,6 +393,7 @@ class WPanel:
     title: str = "w(T) — Average Residence Time per Arrival"
     show_derivations: bool = False
     with_event_marks: bool = False
+    sampling_frequency: Optional[str] = None
 
     def render(
         self,
@@ -381,12 +413,19 @@ class WPanel:
                 departure_times,
                 drop_lines_for_arrivals=True,
                 drop_lines_for_departures=False,
+                calendar_mode=self.sampling_frequency is not None,
             )
             if self.with_event_marks
             else None
         )
         render_line_chart(
-            ax, times, w_vals, label=label, color="tab:blue", overlays=overlays
+            ax,
+            times,
+            w_vals,
+            label=label,
+            color="tab:blue",
+            overlays=overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(
@@ -435,6 +474,7 @@ class SojournTimePanel:
     title: str = "W*(T) — Sojourn Time"
     show_derivations: bool = False
     with_event_marks: bool = False
+    sampling_frequency: Optional[str] = None
 
     def render(
         self,
@@ -454,12 +494,19 @@ class SojournTimePanel:
                 departure_times,
                 drop_lines_for_arrivals=False,
                 drop_lines_for_departures=True,
+                calendar_mode=self.sampling_frequency is not None,
             )
             if self.with_event_marks
             else None
         )
         render_line_chart(
-            ax, times, w_star_vals, label=label, color="tab:blue", overlays=overlays
+            ax,
+            times,
+            w_star_vals,
+            label=label,
+            color="tab:blue",
+            overlays=overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(
@@ -650,6 +697,7 @@ class HPanel:
     title: str = "H(T) — Cumulative Presence Mass"
     show_derivations: bool = False
     with_event_marks: bool = False
+    sampling_frequency: Optional[str] = None
 
     def render(
         self,
@@ -662,13 +710,23 @@ class HPanel:
     ) -> None:
         label = "H(T) [hrs·items]"
         overlays = (
-            build_event_overlays(times, H_vals, arrival_times, departure_times)
+            build_event_overlays(
+                times,
+                H_vals,
+                arrival_times,
+                departure_times,
+                calendar_mode=self.sampling_frequency is not None,
+            )
             if self.with_event_marks
             else None
         )
-        color = "grey" if overlays else "tab:blue"
         render_line_chart(
-            ax, times, H_vals, label=label, color=color, overlays=overlays
+            ax,
+            times,
+            H_vals,
+            label=label,
+            overlays=overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(
@@ -717,6 +775,7 @@ class WPrimePanel:
     title: str = "w'(T) — Average Residence Time per Departure"
     show_derivations: bool = False
     with_event_marks: bool = False
+    sampling_frequency: Optional[str] = None
 
     def render(
         self,
@@ -736,13 +795,18 @@ class WPrimePanel:
                 departure_times,
                 drop_lines_for_arrivals=False,
                 drop_lines_for_departures=True,
+                calendar_mode=self.sampling_frequency is not None,
             )
             if self.with_event_marks
             else None
         )
-        color = "grey" if overlays else "tab:blue"
         render_line_chart(
-            ax, times, w_prime_vals, label=label, color=color, overlays=overlays
+            ax,
+            times,
+            w_prime_vals,
+            label=label,
+            overlays=overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(
@@ -1008,6 +1072,7 @@ class ArrivalsPanel:
     title: str = "A(T) — Cumulative Arrivals"
     show_derivations: bool = False
     with_event_marks: bool = False
+    sampling_frequency: Optional[str] = None
 
     def render(
         self,
@@ -1026,19 +1091,20 @@ class ArrivalsPanel:
                 [],
                 drop_lines_for_arrivals=True,
                 drop_lines_for_departures=False,
+                calendar_mode=self.sampling_frequency is not None,
             )
             if self.with_event_marks and arrival_times is not None
             else None
         )
-        color = "grey" if overlays else "purple"
         render_step_chart(
             ax,
             times,
             arrivals_cum,
             label=label,
-            color=color,
+            color="purple",
             fill=False,
             overlays=overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(
@@ -1086,6 +1152,7 @@ class DeparturesPanel:
     title: str = "D(T) — Cumulative Departures"
     show_derivations: bool = False
     with_event_marks: bool = False
+    sampling_frequency: Optional[str] = None
 
     def render(
         self,
@@ -1104,19 +1171,20 @@ class DeparturesPanel:
                 departure_times,
                 drop_lines_for_arrivals=False,
                 drop_lines_for_departures=True,
+                calendar_mode=self.sampling_frequency is not None,
             )
             if self.with_event_marks and departure_times is not None
             else None
         )
-        color = "grey" if overlays else "green"
         render_step_chart(
             ax,
             times,
             departures_cum,
             label=label,
-            color=color,
+            color="green",
             fill=False,
             overlays=overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(
@@ -1474,6 +1542,7 @@ def plot_core_stack(
         NPanel(
             show_derivations=chart_config.show_derivations,
             with_event_marks=chart_config.with_event_marks,
+            sampling_frequency=chart_config.sampling_frequency,
         ).render(
             flat_axes[0],
             metrics.times,
@@ -1484,6 +1553,7 @@ def plot_core_stack(
         LPanel(
             show_derivations=chart_config.show_derivations,
             with_event_marks=chart_config.with_event_marks,
+            sampling_frequency=chart_config.sampling_frequency,
         ).render(
             flat_axes[1],
             metrics.times,
@@ -1499,6 +1569,7 @@ def plot_core_stack(
                 pctl_lower=chart_config.lambda_pctl_lower,
                 warmup_hours=chart_config.lambda_warmup_hours,
             ),
+            sampling_frequency=chart_config.sampling_frequency,
         ).render(
             flat_axes[2],
             metrics.times,
@@ -1508,6 +1579,7 @@ def plot_core_stack(
         WPanel(
             show_derivations=chart_config.show_derivations,
             with_event_marks=chart_config.with_event_marks,
+            sampling_frequency=chart_config.sampling_frequency,
         ).render(
             flat_axes[3],
             metrics.times,
@@ -1563,6 +1635,7 @@ def plot_LT_derivation_stack(
         NPanel(
             show_derivations=chart_config.show_derivations,
             with_event_marks=chart_config.with_event_marks,
+            sampling_frequency=chart_config.sampling_frequency,
         ).render(
             flat_axes[1],
             metrics.times,
@@ -1573,6 +1646,7 @@ def plot_LT_derivation_stack(
         HPanel(
             show_derivations=chart_config.show_derivations,
             with_event_marks=chart_config.with_event_marks,
+            sampling_frequency=chart_config.sampling_frequency,
         ).render(
             flat_axes[2],
             metrics.times,
@@ -1583,6 +1657,7 @@ def plot_LT_derivation_stack(
         LPanel(
             show_derivations=chart_config.show_derivations,
             with_event_marks=chart_config.with_event_marks,
+            sampling_frequency=chart_config.sampling_frequency,
         ).render(
             flat_axes[3],
             metrics.times,
@@ -1627,6 +1702,7 @@ def plot_departure_flow_metrics_stack(
         NPanel(
             show_derivations=chart_config.show_derivations,
             with_event_marks=chart_config.with_event_marks,
+            sampling_frequency=chart_config.sampling_frequency,
         ).render(
             flat_axes[0],
             metrics.times,
@@ -1637,6 +1713,7 @@ def plot_departure_flow_metrics_stack(
         LPanel(
             show_derivations=chart_config.show_derivations,
             with_event_marks=chart_config.with_event_marks,
+            sampling_frequency=chart_config.sampling_frequency,
         ).render(
             flat_axes[1],
             metrics.times,
@@ -1647,6 +1724,7 @@ def plot_departure_flow_metrics_stack(
         ThetaPanel(
             show_derivations=chart_config.show_derivations,
             with_event_marks=chart_config.with_event_marks,
+            sampling_frequency=chart_config.sampling_frequency,
         ).render(
             flat_axes[2],
             metrics.times,
@@ -1656,6 +1734,7 @@ def plot_departure_flow_metrics_stack(
         WPrimePanel(
             show_derivations=chart_config.show_derivations,
             with_event_marks=chart_config.with_event_marks,
+            sampling_frequency=chart_config.sampling_frequency,
         ).render(
             flat_axes[3],
             metrics.times,
@@ -1688,11 +1767,13 @@ def plot_core_flow_metrics_charts(
     path_N = NPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
+        sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
     path_L = LPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
+        sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
     path_Lam = LambdaPanel(
@@ -1703,11 +1784,13 @@ def plot_core_flow_metrics_charts(
             pctl_lower=chart_config.lambda_pctl_lower,
             warmup_hours=chart_config.lambda_warmup_hours,
         ),
+        sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
     path_Theta = ThetaPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
+        sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
     path_indicator = EventIndicatorPanel(
@@ -1717,21 +1800,25 @@ def plot_core_flow_metrics_charts(
     path_A = ArrivalsPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
+        sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
     path_D = DeparturesPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
+        sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
     path_w = WPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
+        sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
     path_w_star = SojournTimePanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
+        sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, empirical_metrics, filter_result, chart_config, out_dir)
 
     path_sojourn_scatter = SojournTimeScatterPanel(
@@ -1745,11 +1832,13 @@ def plot_core_flow_metrics_charts(
     path_w_prime = WPrimePanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
+        sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
     path_H = HPanel(
         show_derivations=show_derivations,
         with_event_marks=chart_config.with_event_marks,
+        sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
     path_CFD = CFDPanel(

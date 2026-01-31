@@ -327,8 +327,12 @@ def compute_finite_window_flow_metrics(
         )
         first_ev = ev_times[0]
         last_ev = ev_times[-1]
-        start_aligned = (start if start is not None else first_ev).floor(resolved_freq)
-        end_aligned = (end if end is not None else last_ev).floor(resolved_freq)
+        start_aligned = _align_to_boundary(
+            start if start is not None else first_ev, resolved_freq
+        )
+        end_aligned = _align_to_boundary(
+            end if end is not None else last_ev, resolved_freq
+        )
         boundaries = pd.date_range(
             start=start_aligned, end=end_aligned, freq=resolved_freq
         )
@@ -437,6 +441,24 @@ def _resolve_freq(
         f"Unknown frequency '{bucket}'. Use pandas alias (e.g., 'D','W-MON','MS','QS-JAN','YS-JAN') "
         f"or one of {{day, week, month, quarter, year}}."
     )
+
+
+def _is_fixed_frequency(off: pd.tseries.offsets.BaseOffset) -> bool:
+    """Fixed offsets (D, h, min, s) have uniform duration; anchored ones do not."""
+    return isinstance(off, pd.tseries.offsets.Tick)
+
+
+def _align_to_boundary(ts: pd.Timestamp, freq: str) -> pd.Timestamp:
+    """Align *ts* to the calendar boundary at or before it for any frequency."""
+    off = pd.tseries.frequencies.to_offset(freq)
+    if _is_fixed_frequency(off):
+        return ts.floor(freq)
+    # Non-fixed offset (W-*, MS, QS-*, YS-*): probe backwards to find boundary
+    probe_start = (ts - off).normalize()
+    boundaries = pd.date_range(start=probe_start, end=ts, freq=freq)
+    if len(boundaries) == 0 or boundaries[-1] > ts:
+        return probe_start
+    return boundaries[-1]
 
 
 # -------- Element-wise empirical metrics ------

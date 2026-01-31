@@ -38,6 +38,7 @@ class ProcessTimeConvergencePanel:
     show_title: bool = True
     title: str = "Process Time Convergence"
     with_event_marks: bool = False
+    sampling_frequency: Optional[str] = None
 
     def render(
         self,
@@ -95,6 +96,7 @@ class ProcessTimeConvergencePanel:
             label="w(T) [hrs]",
             color="tab:blue",
             overlays=w_overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         render_line_chart(
             ax,
@@ -103,6 +105,7 @@ class ProcessTimeConvergencePanel:
             label="w'(T) [hrs]",
             color="tab:orange",
             overlays=w_prime_overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         render_line_chart(
             ax,
@@ -111,6 +114,7 @@ class ProcessTimeConvergencePanel:
             label="W*(t) [hrs]",
             color="tab:green",
             overlays=w_star_overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(self.title)
@@ -159,6 +163,7 @@ class SojournTimeScatterPanel:
     show_title: bool = True
     title: str = "Sojourn Time vs Residence Times"
     with_event_marks: bool = False
+    sampling_frequency: Optional[str] = None
 
     def render(
         self,
@@ -208,6 +213,7 @@ class SojournTimeScatterPanel:
             label="w(T) [hrs]",
             color="tab:blue",
             overlays=w_overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         render_line_chart(
             ax,
@@ -216,6 +222,7 @@ class SojournTimeScatterPanel:
             label="w'(T) [hrs]",
             color="tab:orange",
             overlays=w_prime_overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(self.title)
@@ -264,6 +271,7 @@ class ArrivalDepartureRateConvergencePanel:
     title: str = "Arrival Rate Λ(T) vs Departure Rate θ(T)"
     show_derivations: bool = False
     with_event_marks: bool = False
+    sampling_frequency: Optional[str] = None
 
     def render(
         self,
@@ -341,6 +349,7 @@ class ArrivalDepartureRateConvergencePanel:
             label=lambda_label,
             color="tab:blue",
             overlays=overlays_lambda,
+            sampling_frequency=self.sampling_frequency,
         )
         render_line_chart(
             ax,
@@ -349,6 +358,7 @@ class ArrivalDepartureRateConvergencePanel:
             label=theta_label,
             color="tab:orange",
             overlays=overlays_theta,
+            sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(self.title)
@@ -407,6 +417,7 @@ class CumulativeArrivalRateConvergencePanel:
     title: str = "Λ(T) vs λ*(t) — arrival rate"
     show_derivations: bool = False
     with_event_marks: bool = False
+    sampling_frequency: Optional[str] = None
 
     def render(
         self,
@@ -444,6 +455,7 @@ class CumulativeArrivalRateConvergencePanel:
             label=lambda_label,
             color="tab:blue",
             overlays=overlays,
+            sampling_frequency=self.sampling_frequency,
         )
         render_line_chart(
             ax,
@@ -451,6 +463,7 @@ class CumulativeArrivalRateConvergencePanel:
             lam_star,
             label="λ*(T) (Arrivals ≤ T)",
             color="tab:orange",
+            sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(self.title)
@@ -698,6 +711,7 @@ def plot_arrival_departure_equilibrium_stack(
         ArrivalDepartureRateConvergencePanel(
             with_event_marks=chart_config.with_event_marks,
             show_derivations=chart_config.show_derivations,
+            sampling_frequency=chart_config.sampling_frequency,
         ).render(
             flat_axes[1],
             metrics.times,
@@ -745,7 +759,8 @@ def plot_process_time_convergence_stack(
     ) as (_, axes, resolved_out_path):
         flat_axes = axes if not isinstance(axes, np.ndarray) else axes.ravel()
         ProcessTimeConvergencePanel(
-            with_event_marks=chart_config.with_event_marks
+            with_event_marks=chart_config.with_event_marks,
+            sampling_frequency=chart_config.sampling_frequency,
         ).render(
             flat_axes[0],
             metrics.times,
@@ -755,7 +770,10 @@ def plot_process_time_convergence_stack(
             arrival_times=metrics.arrival_times,
             departure_times=metrics.departure_times,
         )
-        SojournTimeScatterPanel(with_event_marks=chart_config.with_event_marks).render(
+        SojournTimeScatterPanel(
+            with_event_marks=chart_config.with_event_marks,
+            sampling_frequency=chart_config.sampling_frequency,
+        ).render(
             flat_axes[1],
             metrics.times,
             metrics.w,
@@ -778,19 +796,23 @@ def plot_convergence_charts(
     path_lambda = CumulativeArrivalRateConvergencePanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
+        sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, empirical_metrics, filter_result, chart_config, out_dir)
 
     path_rate = ArrivalDepartureRateConvergencePanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
+        sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
     path_process_time = ProcessTimeConvergencePanel(
-        with_event_marks=chart_config.with_event_marks
+        with_event_marks=chart_config.with_event_marks,
+        sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, empirical_metrics, filter_result, chart_config, out_dir)
 
     path_sojourn_scatter = SojournTimeScatterPanel(
-        with_event_marks=chart_config.with_event_marks
+        with_event_marks=chart_config.with_event_marks,
+        sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, empirical_metrics, filter_result, chart_config, out_dir)
 
     path_arrival_departure_stack = plot_arrival_departure_equilibrium_stack(

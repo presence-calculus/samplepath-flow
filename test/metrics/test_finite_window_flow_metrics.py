@@ -70,7 +70,7 @@ def test_event_mode_final_identity_w_equals_A_over_arrivals(simple_events):
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Calendar mode (fixed frequencies only)
+# Calendar mode
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
@@ -79,14 +79,87 @@ def test_calendar_mode_sets_mode_calendar(overlap_events):
     assert res.mode == "calendar"
 
 
-def test_calendar_mode_rejects_week_nonfixed(overlap_events):
-    with pytest.raises(ValueError):
-        compute_finite_window_flow_metrics(overlap_events, freq="week")
+def test_calendar_mode_week_sets_mode_and_freq():
+    events = [
+        (_t("2024-01-03 10:00"), +1, 1),
+        (_t("2024-01-17 10:00"), -1, 0),
+    ]
+    res = compute_finite_window_flow_metrics(events, freq="week")
+    assert res.mode == "calendar"
+    assert res.freq == "W-SUN"
 
 
-def test_calendar_mode_rejects_month_nonfixed(overlap_events):
-    with pytest.raises(ValueError):
-        compute_finite_window_flow_metrics(overlap_events, freq="month")
+def test_calendar_mode_month_sets_mode_and_freq():
+    events = [
+        (_t("2024-01-15 10:00"), +1, 1),
+        (_t("2024-03-15 10:00"), -1, 0),
+    ]
+    res = compute_finite_window_flow_metrics(events, freq="month")
+    assert res.mode == "calendar"
+    assert res.freq == "MS"
+
+
+def test_calendar_mode_week_boundaries_are_aligned():
+    events = [
+        (_t("2024-01-03 10:00"), +1, 1),
+        (_t("2024-01-17 10:00"), -1, 0),
+    ]
+    res = compute_finite_window_flow_metrics(events, freq="week")
+    # W-SUN boundaries fall on Sundays (weekday 6)
+    assert all(t.weekday() == 6 for t in res.times)
+
+
+def test_calendar_mode_month_boundaries_are_month_starts():
+    events = [
+        (_t("2024-01-15 10:00"), +1, 1),
+        (_t("2024-03-15 10:00"), -1, 0),
+    ]
+    res = compute_finite_window_flow_metrics(events, freq="month")
+    assert all(t.day == 1 for t in res.times)
+
+
+@pytest.mark.parametrize("freq", ["day", "week", "month", "quarter", "year"])
+def test_calendar_mode_accepts_all_human_frequencies(freq):
+    events = [
+        (_t("2024-01-03 10:00"), +1, 1),
+        (_t("2025-03-15 10:00"), -1, 0),
+    ]
+    res = compute_finite_window_flow_metrics(events, freq=freq)
+    assert res.mode == "calendar"
+    assert len(res.times) > 0
+
+
+def test_calendar_mode_week_anchor_wed():
+    events = [
+        (_t("2024-01-03 10:00"), +1, 1),
+        (_t("2024-01-24 10:00"), -1, 0),
+    ]
+    res = compute_finite_window_flow_metrics(events, freq="week", week_anchor="WED")
+    # W-WED boundaries fall on Wednesdays (weekday 2)
+    assert all(t.weekday() == 2 for t in res.times)
+
+
+def test_calendar_mode_quarter_anchor_apr():
+    events = [
+        (_t("2024-01-15 10:00"), +1, 1),
+        (_t("2025-01-15 10:00"), -1, 0),
+    ]
+    res = compute_finite_window_flow_metrics(
+        events, freq="quarter", quarter_anchor="APR"
+    )
+    # QS-APR boundaries fall on Apr, Jul, Oct, Jan
+    assert all(t.month in (1, 4, 7, 10) for t in res.times)
+    assert all(t.day == 1 for t in res.times)
+
+
+def test_calendar_mode_year_anchor_jul():
+    events = [
+        (_t("2023-01-15 10:00"), +1, 1),
+        (_t("2025-06-15 10:00"), -1, 0),
+    ]
+    res = compute_finite_window_flow_metrics(events, freq="year", year_anchor="JUL")
+    # YS-JUL boundaries fall on July 1st
+    assert all(t.month == 7 and t.day == 1 for t in res.times)
 
 
 def test_calendar_mode_times_are_midnight_boundaries(overlap_events):

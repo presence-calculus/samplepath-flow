@@ -71,7 +71,15 @@ def estimate_limit(
     T = np.asarray(T, dtype=float)
     Y = np.asarray(Y, dtype=float)
 
-    assert T.ndim == 1 and Y.ndim == 1 and len(T) == len(Y) and len(T) >= 5
+    if T.ndim != 1 or Y.ndim != 1 or len(T) != len(Y) or len(T) < 5:
+        return LimitResult(
+            converged=False,
+            limit=None,
+            uncertainty=None,
+            method="insufficient_data",
+            tests={},
+            tail_idx=0,
+        )
     n = len(T)
     k0 = int(np.floor((1 - tail_frac) * n))
     k0 = max(0, min(n - min_tail_points, k0))
@@ -197,7 +205,15 @@ def estimate_linear_rate(
     """
     T = np.asarray(T, dtype=float)
     C = np.asarray(C, dtype=float)
-    assert T.ndim == 1 and C.ndim == 1 and len(T) == len(C) and len(T) >= 5
+    if T.ndim != 1 or C.ndim != 1 or len(T) != len(C) or len(T) < 5:
+        return LimitResult(
+            converged=False,
+            limit=None,
+            uncertainty=None,
+            method="insufficient_data",
+            tests={},
+            tail_idx=0,
+        )
 
     n = len(T)
     k0 = int(np.floor((1 - tail_frac) * n))
@@ -294,7 +310,15 @@ def compare_series_tail(
     T = np.asarray(T, dtype=float)
     Y1 = np.asarray(Y1, dtype=float)
     Y2 = np.asarray(Y2, dtype=float)
-    assert T.ndim == 1 and len(T) == len(Y1) == len(Y2)
+    if T.ndim != 1 or len(T) != len(Y1) or len(T) != len(Y2) or len(T) < 5:
+        return LimitResult(
+            converged=False,
+            limit=None,
+            uncertainty=None,
+            method="insufficient_data",
+            tests={},
+            tail_idx=0,
+        )
 
     n = len(T)
     k0 = int(np.floor((1 - tail_frac) * n))

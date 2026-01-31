@@ -6,9 +6,11 @@ from typing import Any, List, Optional, Sequence, Tuple
 
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
+import matplotlib.dates as mdates
 from matplotlib.figure import Figure
 import numpy as np
 import pandas as pd
+from pandas.tseries.frequencies import to_offset
 
 
 @dataclass
@@ -56,9 +58,87 @@ def resolve_caption(filter_result: Optional[Any]) -> Optional[str]:
     return "Filters: None"
 
 
+_WEEKDAY_MAP = {
+    "MON": mdates.MONDAY,
+    "TUE": mdates.TUESDAY,
+    "WED": mdates.WEDNESDAY,
+    "THU": mdates.THURSDAY,
+    "FRI": mdates.FRIDAY,
+    "SAT": mdates.SATURDAY,
+    "SUN": mdates.SUNDAY,
+}
+
+
+def _calendar_tick_config(
+    unit: str,
+) -> Optional[
+    Tuple[mdates.DateLocator, mdates.DateFormatter, Optional[mdates.DateLocator]]
+]:
+    """Map a pandas frequency alias to (locator, formatter, minor_locator | None).
+
+    Returns None for unrecognised frequencies.
+    """
+    try:
+        offset = to_offset(unit)
+    except (ValueError, TypeError):
+        return None
+
+    if isinstance(offset, pd.tseries.offsets.Day):
+        locator = mdates.AutoDateLocator()
+        formatter = mdates.ConciseDateFormatter(locator)
+        return locator, formatter, None
+
+    if isinstance(offset, pd.tseries.offsets.Week):
+        anchor_name = offset.weekday  # 0=MON … 6=SUN
+        weekday_const = list(_WEEKDAY_MAP.values())[anchor_name]
+        locator = mdates.WeekdayLocator(byweekday=weekday_const)
+        formatter = mdates.DateFormatter("%b %d")
+        return locator, formatter, None
+
+    if isinstance(offset, pd.tseries.offsets.MonthBegin):
+        locator = mdates.MonthLocator()
+        formatter = mdates.DateFormatter("%b\n%Y")
+        return locator, formatter, None
+
+    if isinstance(offset, pd.tseries.offsets.QuarterBegin):
+        start_month = offset.startingMonth
+        months = sorted([(start_month + 3 * i - 1) % 12 + 1 for i in range(4)])
+        locator = mdates.MonthLocator(bymonth=months)
+        formatter = mdates.DateFormatter("%b\n%Y")
+        return locator, formatter, None
+
+    if isinstance(offset, pd.tseries.offsets.YearBegin):
+        locator = mdates.YearLocator()
+        formatter = mdates.DateFormatter("%Y")
+        return locator, formatter, None
+
+    return None
+
+
+def apply_calendar_ticks(ax: Axes, unit: Optional[str]) -> None:
+    """Apply calendar-aware tick locators and formatters to the x-axis.
+
+    No-op when *unit* is ``None`` or when ``_calendar_tick_config`` returns
+    ``None`` (e.g. for ``"timestamp"`` or unrecognised frequencies).
+    """
+    if unit is None:
+        return
+    config = _calendar_tick_config(unit)
+    if config is None:
+        return
+    locator, formatter, minor = config
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(formatter)
+    if minor is not None:
+        ax.xaxis.set_minor_locator(minor)
+
+
 def format_date_axis(ax: Axes, unit: str = "timestamp") -> None:
     """Format the x-axis for dates if possible."""
-    ax.set_xlabel(f"Date ({unit})")
+    from samplepath.plots.chart_config import ChartConfig
+
+    apply_calendar_ticks(ax, unit)
+    ax.set_xlabel(ChartConfig.freq_display_label(unit))
     try:
         ax.figure.autofmt_xdate()
     except Exception:
@@ -161,6 +241,7 @@ def render_step_chart(
     fill: bool = False,
     linewidth: float = 1.0,
     overlays: Optional[List[ScatterOverlay]] = None,
+    sampling_frequency: Optional[str] = None,
 ) -> None:
     """Render a step chart to an existing axes.
 
@@ -182,10 +263,21 @@ def render_step_chart(
         Line width for the step curve.
     overlays : optional List[ScatterOverlay]
         Scatter series to overlay on the chart.
+    sampling_frequency : optional str
+        When set, keep the original color even with overlays present
+        (rug-plot mode — overlays sit at y=0, so de-emphasis is unnecessary).
     """
-    ax.step(times, values, where="post", label=label, color=color, linewidth=linewidth)
+    effective_color = "grey" if overlays and sampling_frequency is None else color
+    ax.step(
+        times,
+        values,
+        where="post",
+        label=label,
+        color=effective_color,
+        linewidth=linewidth,
+    )
     if fill:
-        ax.fill_between(times, values, step="post", alpha=0.3, color=color)
+        ax.fill_between(times, values, step="post", alpha=0.3, color=effective_color)
     if overlays:
         for i, overlay in enumerate(overlays):
             if not overlay.x:
@@ -219,6 +311,7 @@ def render_line_chart(
     color: str = "tab:blue",
     linewidth: float = 1.0,
     overlays: Optional[List[ScatterOverlay]] = None,
+    sampling_frequency: Optional[str] = None,
 ) -> None:
     """Render a line chart to an existing axes.
 
@@ -238,8 +331,17 @@ def render_line_chart(
         Line width.
     overlays : optional List[ScatterOverlay]
         Scatter series to overlay on the chart.
+    sampling_frequency : optional str
+        When set, add markers to make individual data points visible.
     """
-    ax.plot(times, values, label=label, color=color, linewidth=linewidth)
+    effective_color = "grey" if overlays and sampling_frequency is None else color
+    plot_kwargs: dict[str, Any] = dict(
+        label=label, color=effective_color, linewidth=linewidth
+    )
+    if sampling_frequency is not None:
+        plot_kwargs["marker"] = "o"
+        plot_kwargs["markersize"] = 4
+    ax.plot(times, values, **plot_kwargs)
     if overlays:
         for i, overlay in enumerate(overlays):
             if not overlay.x:
@@ -409,12 +511,17 @@ def build_event_overlays(
     departure_times: Optional[List[pd.Timestamp]],
     drop_lines_for_arrivals: bool = True,
     drop_lines_for_departures: bool = True,
+    calendar_mode: bool = False,
 ) -> Optional[List[ScatterOverlay]]:
     """Build arrival/departure overlays by mapping event x-values to series y-values.
 
     The x-values come from the point events (arrivals/departures).
     The y-values are looked up from the series at those x positions.
     Events with no matching x-value in the series are excluded.
+
+    When *calendar_mode* is True the series timestamps won't match event
+    timestamps, so all events are kept at y=0 (rug plot) with drop lines
+    disabled.
 
     Parameters
     ----------
@@ -430,6 +537,8 @@ def build_event_overlays(
         If True, draw vertical lines for arrivals.
     drop_lines_for_departures : bool
         If True, draw vertical lines for departures.
+    calendar_mode : bool
+        If True, place all events at y=0 (rug plot) with no drop lines.
 
     Returns
     -------
@@ -439,13 +548,19 @@ def build_event_overlays(
     if arrival_times is None or departure_times is None:
         return None
 
-    time_to_idx = {t: i for i, t in enumerate(times)}
-
-    arrival_x = [t for t in arrival_times if t in time_to_idx]
-    arrival_y = [float(values[time_to_idx[t]]) for t in arrival_x]
-
-    departure_x = [t for t in departure_times if t in time_to_idx]
-    departure_y = [float(values[time_to_idx[t]]) for t in departure_x]
+    if calendar_mode:
+        arrival_x = list(arrival_times)
+        arrival_y = [0.0] * len(arrival_x)
+        departure_x = list(departure_times)
+        departure_y = [0.0] * len(departure_x)
+        drop_lines_for_arrivals = False
+        drop_lines_for_departures = False
+    else:
+        time_to_idx = {t: i for i, t in enumerate(times)}
+        arrival_x = [t for t in arrival_times if t in time_to_idx]
+        arrival_y = [float(values[time_to_idx[t]]) for t in arrival_x]
+        departure_x = [t for t in departure_times if t in time_to_idx]
+        departure_y = [float(values[time_to_idx[t]]) for t in departure_x]
 
     return [
         ScatterOverlay(
@@ -510,12 +625,7 @@ def render_N_chart(
         else None
     )
 
-    # Color changes when overlays are present (grey background, colored markers)
-    color = "grey" if overlays is not None else "tab:blue"
-
-    render_step_chart(
-        ax, times, N_vals, label="N(t)", color=color, fill=True, overlays=overlays
-    )
+    render_step_chart(ax, times, N_vals, label="N(t)", fill=True, overlays=overlays)
 
     if show_title:
         ax.set_title("N(t) — Sample Path")
@@ -563,10 +673,7 @@ def render_LT_chart(
         else None
     )
 
-    # Color changes when overlays are present
-    color = "grey" if overlays is not None else "tab:blue"
-
-    render_line_chart(ax, times, L_vals, label="L(T)", color=color, overlays=overlays)
+    render_line_chart(ax, times, L_vals, label="L(T)", overlays=overlays)
 
     if show_title:
         ax.set_title("L(T) — Time-Average of N(t)")

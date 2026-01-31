@@ -20,7 +20,9 @@ import numpy as np
 from pandas.tseries.frequencies import to_offset
 
 from samplepath.plots.chart_config import ChartConfig
-from samplepath.plots.helpers import add_caption
+from samplepath.plots.helpers import add_caption, apply_calendar_ticks
+
+_freq_label = ChartConfig.freq_display_label
 
 logger = logging.getLogger(__name__)
 
@@ -100,18 +102,18 @@ def _format_axis_label(ax, unit: Optional[str]) -> None:
     """
     Set a sensible x-axis label based on a pandas frequency alias or date-like unit.
     Examples:
-      - D -> "Date (D)"
-      - W-SUN -> "Date (W-SUN)"
-      - MS -> "Date (MS)"
+      - D -> "Time (day)"
+      - W-SUN -> "Time (week-SUN)"
+      - MS -> "Time (month)"
     Falls back to the raw unit string when not date-like.
     """
-    label_val = unit
     if is_date_axis(unit):
-        ax.set_xlabel(f"Date ({label_val})")
+        apply_calendar_ticks(ax, unit)
+        ax.set_xlabel(_freq_label(unit))
         try:
             ax.figure.autofmt_xdate()
         except Exception:
-            logger.debug("figure_context: autofmt_xdate failed for label %r", label_val)
+            logger.debug("figure_context: autofmt_xdate failed for label %r", unit)
     elif unit:
         ax.set_xlabel(str(unit))
 

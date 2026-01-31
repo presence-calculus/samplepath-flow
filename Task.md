@@ -1,16 +1,24 @@
 ---
-ID: 25
-Task: Core scatter plots
-Branch: core-scatter-plots
+ID: 26
+Task: Calendar indexed flow metrics
+Branch: calendar-indexed-flow-metrics
 ---
 
-Spec: We need two additional scatter plots in the core panels.
+Spec: We are going to adapt the existing charts so that they work correctly when calendar indexes
+are provided rather than time stamps. In theory, much of this code should "just work", but in practice we
+may have issues. This is an initial exploration to see how far we can get.
 
-1. Sojourn time scatter plot: this is a point process, the very same plot we overlaid with average residence time lines in the convergence module. The x-axis is the sequence of departure time stamps and the y-axis has the sojourn times for each departure.
-2. Residence Time scatter plot: this is a also a point process, but here the x-axis has arrival time stamps and the y-axis has the _current_ residence time for that arrival. For completed items it is the sojourn time, and for incomplete items it is the age of the item at the end of the overall observation window (T).
 
-For these plots assume the following conventions:
-1. Drop lines will use arrival/departure colors.
-2. Points will use arrival colors for incomplete points and departure colors for complete points.
+## Completed subtasks
 
-For each of these, write a standalone core panel and wire it up to the core chart driver.
+| Commit | Subtask | Summary |
+|---|---|---|
+| 9b39e4a | 26.1: Add `--sampling-frequency` CLI argument | Wire up `--sampling-frequency` to `compute_finite_window_flow_metrics` and produce calendar-boundary observation times. |
+| 42d7a7c | 26.2: Support non-fixed frequencies | Handle week/month/quarter/year offsets in `_align_to_boundary` and `_build_calendar_times`. |
+| 23c549c | 26.3: Add `--anchor` CLI argument | Add `--anchor` for week day / quarter-year month and thread through to `_resolve_freq`. |
+| 1627e71 | 26.4: Add markers to line charts in calendar mode | Add `marker="o"` to `render_line_chart` when `sampling_frequency` is set so individual data points are visible. |
+| 28b3640 | 26.5: Calendar-aware x-axis tick formatting | Add `_calendar_tick_config` and `apply_calendar_ticks` in helpers; call from `format_date_axis` and `_format_axis_label`. |
+| dee0eac | Fix: Graceful returns in limits.py | Replace hard asserts in `estimate_limit`, `estimate_linear_rate`, `compare_series_tail` with graceful `LimitResult(method="insufficient_data")` returns for small datasets. |
+| 4bf0b38 | 26.5b: Human-readable x-axis labels | Add `ChartConfig.freq_display_label()` static method; labels now show `"Time (month)"` instead of `"Date (MS)"`. |
+| 1678f0b | Fix: FutureWarning in `_is_fixed_frequency` | Replace deprecated `hasattr(off, "delta")` with `isinstance(off, pd.tseries.offsets.Tick)`. |
+| 73656b1 | 26.6: Rug plot event overlays in calendar mode | Add `calendar_mode` param to `build_event_overlays`; when True, all events placed at y=0 (rug plot) with drop lines disabled. |
