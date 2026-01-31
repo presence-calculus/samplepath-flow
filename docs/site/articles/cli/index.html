@@ -610,6 +610,23 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <li><p><strong>–chart-dpi</strong> <em>(default:
             <code>150</code>)</em><br />
             DPI for PNG output. Ignored for SVG.</p></li>
+            <li><p><strong>–sampling-frequency</strong> <em>(default:
+            <code>None</code>)</em><br />
+            Snap observation times to calendar boundaries instead of
+            using raw event timestamps. Accepts names (<code>day</code>,
+            <code>week</code>, <code>month</code>, <code>quarter</code>,
+            <code>year</code>). When set, charts show markers on data
+            points, x-axis ticks align to calendar boundaries, and event
+            overlays render as rug plots at y=0.</p></li>
+            <li><p><strong>–anchor</strong> <em>(default:
+            <code>None</code>)</em><br />
+            Anchor for calendar frequency boundaries. For
+            <code>week</code>: a day name (e.g., <code>MON</code>,
+            <code>WED</code>, <code>SUN</code>). For
+            <code>quarter</code> or <code>year</code>: a month name
+            (e.g., <code>JAN</code>, <code>APR</code>). Ignored for
+            <code>day</code> and <code>month</code>. Only meaningful
+            when <code>--sampling-frequency</code> is set.</p></li>
             </ul>
             <hr />
             <h3 id="output-configuration">Output Configuration</h3>

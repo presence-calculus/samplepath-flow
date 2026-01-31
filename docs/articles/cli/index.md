@@ -160,6 +160,17 @@ ______________________________________________________________________
 - **--chart-dpi** *(default: `150`)*\
   DPI for PNG output. Ignored for SVG.
 
+- **--sampling-frequency** *(default: `None`)*\
+  Snap observation times to calendar boundaries instead of using raw event timestamps.
+  Accepts names (`day`, `week`, `month`, `quarter`, `year`).
+  When set, charts show markers on data points, x-axis ticks align to calendar
+  boundaries, and event overlays render as rug plots at y=0.
+
+- **--anchor** *(default: `None`)*\
+  Anchor for calendar frequency boundaries. For `week`: a day name (e.g., `MON`, `WED`,
+  `SUN`). For `quarter` or `year`: a month name (e.g., `JAN`, `APR`). Ignored for `day`
+  and `month`. Only meaningful when `--sampling-frequency` is set.
+
 ______________________________________________________________________
 
 ### Output Configuration
