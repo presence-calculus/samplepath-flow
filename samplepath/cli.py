@@ -75,13 +75,13 @@ def build_parser() -> tuple[argparse.ArgumentParser, set[str]]:
     )
 
     csv_group.add_argument(
-        "--start_column",
+        "--start-column",
         type=str,
         help="Name of csv column representing start time",
         default="start_ts",
     )
     csv_group.add_argument(
-        "--end_column",
+        "--end-column",
         type=str,
         help="Name of csv column representing end time",
         default="end_ts",
@@ -95,7 +95,7 @@ def build_parser() -> tuple[argparse.ArgumentParser, set[str]]:
     )
 
     csv_group.add_argument(
-        "--dayfirst",
+        "--day-first",
         action="store_true",
         default=False,
         help="Interpret ambiguous dates as day-first (e.g., 03/04/2024 → 3 April 2024).",

@@ -295,8 +295,8 @@ The CSV requires three columns:
 Additionally you may pass any other columns. They are all ignored for now except for a
 column called _class_, which you can use to filter results by event/item type.
 
-- If your CSV has different column names than the standard names expected, you can map them with `--start_column` and`--end_column` options.
-- If your dates start with day before month pass the `--dayFirst` option
+- If your CSV has different column names than the standard names expected, you can map them with `--start-column` and `--end-column` options.
+- If your dates start with day before month pass the `--day-first` option
 - If that fails you might need to explicitly pass a date format for the time stamps if you see date
   parsing errors. The `--date-format` argument does this. See the CLI documentation for how to specify this.
 

@@ -67,7 +67,7 @@ class CSVLoader:
     time_zone: str = "America/Los_Angeles"
     # date parsing options.
     date_format: Optional[str] = None
-    dayfirst: bool = False
+    day_first: bool = False
 
     # Timezone handling
     normalize_tz: bool = True
@@ -152,7 +152,7 @@ class CSVLoader:
             errors="coerce",
             utc=False,
             format=self.date_format,
-            dayfirst=self.dayfirst,
+            dayfirst=self.day_first,
         )
 
         is_missing_raw = raw.isna() | (raw.astype(str).str.strip() == "")
@@ -358,7 +358,7 @@ def csv_to_dataframe(
         target_tz=target_tz,
         negative_duration_policy=negative_duration_policy,
         date_format=args.date_format,
-        dayfirst=args.dayfirst,
+        day_first=args.day_first,
         delimiter=args.delimiter,
         start_column=args.start_column,
         end_column=args.end_column,

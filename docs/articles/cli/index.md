@@ -73,10 +73,10 @@ ______________________________________________________________________
 - **--delimiter** *(default: `","`)*\
   Optional delimiter override
 
-- **--start_column** *(default: `start_ts`)*\
+- **--start-column** *(default: `start_ts`)*\
   Name of start timestamp column
 
-- **--end_column** *(default: `end_ts`)*\
+- **--end-column** *(default: `end_ts`)*\
   Name of end timestamp column
 
 - **--date-format** *(default: `None`)*\
@@ -204,8 +204,8 @@ The csv requires three columns
 Additionally you may pass any other columns. They are all ignored for now, except for a
 column called _class_ which you can use to filter results by event/item type.
 
-- If your csv has different column names, you can map them with `--start_column` and
-  `--end_column` options.
+- If your csv has different column names, you can map them with `--start-column` and
+  `--end-column` options.
 - You might need to explicitly pass a date format for the time stamps if you see date
   parsing errors. The `--date-format` argument does this.
 
