@@ -50,7 +50,7 @@ def test_single_boxcar_initial_counts(single_boxcar):
 
 def test_single_boxcar_final_area(single_boxcar):
     _, _, _, _, _, H, _, _, _, _ = single_boxcar
-    assert np.isclose(H[1], 2.0)
+    assert np.isclose(H[1], 7200.0)
 
 
 def test_single_boxcar_final_L(single_boxcar):
@@ -60,12 +60,12 @@ def test_single_boxcar_final_L(single_boxcar):
 
 def test_single_boxcar_final_Lambda(single_boxcar):
     _, _, Lam, _, _, _, _, _, _, _ = single_boxcar
-    assert np.isclose(Lam[1], 0.5)
+    assert np.isclose(Lam[1], 0.5 / 3600.0)
 
 
 def test_single_boxcar_final_w(single_boxcar):
     _, _, _, w, _, _, _, _, _, _ = single_boxcar
-    assert np.isclose(w[1], 2.0)
+    assert np.isclose(w[1], 7200.0)
 
 
 def test_single_boxcar_final_counts(single_boxcar):
@@ -98,9 +98,9 @@ def test_overlapping_items_final_area(overlapping_items):
     T, _, _, _, _, H, _, _, _, _ = overlapping_items
     t0, t1, t2, t3 = T
     expected_area = (
-        1 * (t1 - t0).total_seconds() / 3600.0
-        + 2 * (t2 - t1).total_seconds() / 3600.0
-        + 1 * (t3 - t2).total_seconds() / 3600.0
+        1 * (t1 - t0).total_seconds()
+        + 2 * (t2 - t1).total_seconds()
+        + 1 * (t3 - t2).total_seconds()
     )
     assert np.isclose(H[-1], expected_area)
 
@@ -117,7 +117,7 @@ def test_overlapping_items_departures(overlapping_items):
 
 def test_overlapping_items_final_L_equals_A_over_elapsed(overlapping_items):
     T, L, _, _, _, H, _, _, _, _ = overlapping_items
-    elapsed = (T[-1] - T[0]).total_seconds() / 3600.0
+    elapsed = (T[-1] - T[0]).total_seconds()
     assert np.isclose(L[-1], H[-1] / elapsed)
 
 

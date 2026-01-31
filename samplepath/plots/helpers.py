@@ -187,7 +187,7 @@ def _clip_axis_to_percentile(
     values: Sequence[float],
     upper_p: Optional[float] = None,
     lower_p: Optional[float] = None,
-    warmup_hours: float = 0.0,
+    warmup_seconds: float = 0.0,
 ) -> None:
     """Clip y-axis limits based on percentiles of the data.
 
@@ -203,8 +203,8 @@ def _clip_axis_to_percentile(
         Upper percentile for y-axis limit (e.g., 99.5).
     lower_p : optional float
         Lower percentile for y-axis limit.
-    warmup_hours : float
-        Hours from start to exclude from percentile calculation.
+    warmup_seconds : float
+        Seconds from start to exclude from percentile calculation.
     """
     if upper_p is None and lower_p is None:
         return
@@ -212,10 +212,10 @@ def _clip_axis_to_percentile(
     if vals.size == 0:
         return
     mask = np.isfinite(vals)
-    if warmup_hours and times:
+    if warmup_seconds and times:
         t0 = times[0]
-        ages_hr = np.array([(t - t0).total_seconds() / 3600.0 for t in times])
-        mask &= ages_hr >= float(warmup_hours)
+        ages_seconds = np.array([(t - t0).total_seconds() for t in times])
+        mask &= ages_seconds >= float(warmup_seconds)
     data = vals[mask]
     if data.size == 0 or not np.isfinite(data).any():
         return
@@ -467,7 +467,7 @@ def render_lambda_chart(
     linewidth: float = 1.0,
     pctl_upper: Optional[float] = None,
     pctl_lower: Optional[float] = None,
-    warmup_hours: float = 0.0,
+    warmup_seconds: float = 0.0,
 ) -> None:
     """Render Λ(T) chart with optional percentile-based y-axis clipping.
 
@@ -489,13 +489,13 @@ def render_lambda_chart(
         Upper percentile for y-axis clipping (e.g., 99.5).
     pctl_lower : optional float
         Lower percentile for y-axis clipping.
-    warmup_hours : float
-        Hours to exclude from percentile calculation (warmup period).
+    warmup_seconds : float
+        Seconds to exclude from percentile calculation (warmup period).
     """
     ax.plot(times, values, label=label, color=color, linewidth=linewidth)
     if pctl_upper is not None or pctl_lower is not None:
         _clip_axis_to_percentile(
-            ax, list(times), values, pctl_upper, pctl_lower, warmup_hours
+            ax, list(times), values, pctl_upper, pctl_lower, warmup_seconds
         )
 
 

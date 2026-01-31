@@ -12,7 +12,7 @@ def _stub_inputs():
     df = None
     args = SimpleNamespace()
     filter_result = SimpleNamespace()
-    metrics = SimpleNamespace()
+    metrics = SimpleNamespace(w=[0.0])
     empirical_metrics = SimpleNamespace()
     out_dir = "/tmp/out"
     return df, args, filter_result, metrics, empirical_metrics, out_dir

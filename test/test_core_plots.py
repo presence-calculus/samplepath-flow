@@ -16,6 +16,7 @@ from samplepath.plots import core
 from samplepath.plots.chart_config import ChartConfig
 from samplepath.plots.core import ClipOptions
 from samplepath.plots.figure_context import resolve_chart_path
+from samplepath.utils.duration_scale import MINUTES
 
 
 def _t(s: str) -> pd.Timestamp:
@@ -439,14 +440,18 @@ def test_render_Lambda_passes_clip_options():
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
     values = np.array([1.0, 2.0])
-    clip = ClipOptions(pctl_upper=99.0, pctl_lower=1.0, warmup_hours=0.5)
+    clip = ClipOptions(pctl_upper=99.0, pctl_lower=1.0, warmup_seconds=1800.0)
     with (
         patch("samplepath.plots.core.render_line_chart") as mock_line,
         patch("samplepath.plots.core._clip_axis_to_percentile") as mock_clip,
     ):
         core.LambdaPanel(clip_opts=clip).render(ax, times, values)
     mock_line.assert_called_once()
-    mock_clip.assert_called_once_with(ax, list(times), values, 99.0, 1.0, 0.5)
+    args = mock_clip.call_args.args
+    assert args[0] == ax
+    assert args[1] == list(times)
+    assert np.allclose(args[2], values * 3600.0)
+    assert args[3:] == (99.0, 1.0, 1800.0)
     ax.set_ylabel.assert_called_once_with("Λ(T) [1/hr]")
 
 
@@ -458,6 +463,26 @@ def test_render_w_sets_defaults():
         core.WPanel().render(ax, times, values)
     mock_line.assert_called_once()
     ax.set_ylabel.assert_called_once_with("w(T) [hrs]")
+
+
+def test_render_Lambda_scales_rate_values():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([2.0])
+    with patch("samplepath.plots.core.render_line_chart") as mock_line:
+        core.LambdaPanel().render(ax, times, values, scale=MINUTES)
+    assert mock_line.call_args.kwargs["label"] == "Λ(T) [1/min]"
+    assert np.allclose(mock_line.call_args.args[2], values * 60.0)
+
+
+def test_render_w_scales_duration_values():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([120.0])
+    with patch("samplepath.plots.core.render_line_chart") as mock_line:
+        core.WPanel().render(ax, times, values, scale=MINUTES)
+    assert mock_line.call_args.kwargs["label"] == "w(T) [min]"
+    assert np.allclose(mock_line.call_args.args[2], values / 60.0)
 
 
 def test_render_sojourn_sets_defaults():
@@ -1106,7 +1131,7 @@ def test_plot_core_stack_calls_all_renderers():
         with_event_marks=True,
         lambda_pctl_upper=99.0,
         lambda_pctl_lower=1.0,
-        lambda_warmup_hours=0.5,
+        lambda_warmup_seconds=1800.0,
     )
     filter_result = SimpleNamespace(display="Filters: test", label="test")
 

@@ -19,6 +19,7 @@ from samplepath.plots.convergence import (
     plot_convergence_charts,
     plot_process_time_convergence_stack,
 )
+from samplepath.utils.duration_scale import MINUTES
 
 
 def _t(s: str) -> pd.Timestamp:
@@ -41,7 +42,7 @@ def test_arrival_departure_rate_panel_clips_lambda():
             lambda_rate,
             lambda_pctl_upper=99.0,
             lambda_pctl_lower=1.0,
-            lambda_warmup_hours=0.5,
+            lambda_warmup_seconds=1800.0,
         )
     mock_clip.assert_called_once()
 
@@ -171,7 +172,7 @@ def test_sample_path_convergence_panel_render_scores_points():
         W_star,
         times,
         epsilon=0.5,
-        horizon_days=0.0,
+        horizon_seconds=0.0,
     )
     assert result == (1.0, 2, 2)
 
@@ -225,6 +226,26 @@ def test_process_time_convergence_panel_overlays_drop_lines():
     assert third_args[3] == departures
     assert third_kwargs["drop_lines_for_arrivals"] is False
     assert third_kwargs["drop_lines_for_departures"] is True
+
+
+def test_process_time_convergence_panel_scales_values():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    w_vals = np.array([120.0])
+    w_prime_vals = np.array([60.0])
+    w_star_vals = np.array([180.0])
+    with patch("samplepath.plots.convergence.render_line_chart") as mock_render:
+        ProcessTimeConvergencePanel().render(
+            ax,
+            times,
+            w_vals,
+            w_prime_vals,
+            w_star_vals,
+            scale=MINUTES,
+        )
+    first_call = mock_render.call_args_list[0]
+    assert first_call.kwargs["label"] == "w(T) [min]"
+    assert np.allclose(first_call.args[2], w_vals / 60.0)
 
 
 def test_process_time_convergence_panel_plot_calls_renderer():
@@ -310,6 +331,27 @@ def test_sojourn_time_scatter_panel_overlays_drop_lines():
     assert second_args[3] == departures
     assert second_kwargs["drop_lines_for_arrivals"] is False
     assert second_kwargs["drop_lines_for_departures"] is True
+
+
+def test_arrival_departure_rate_panel_scales_rates():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    departures = np.array([0.0, 1.0])
+    lambda_rate = np.array([0.5, 0.75])
+    with (
+        patch("samplepath.plots.convergence.render_line_chart") as mock_render,
+        patch("samplepath.plots.convergence._clip_axis_to_percentile"),
+    ):
+        ArrivalDepartureRateConvergencePanel().render(
+            ax,
+            times,
+            departures,
+            lambda_rate,
+            scale=MINUTES,
+        )
+    first_call = mock_render.call_args_list[0]
+    assert "1/min" in first_call.kwargs["label"]
+    assert np.allclose(first_call.args[2], lambda_rate * 60.0)
 
 
 def test_sojourn_time_scatter_panel_plot_calls_renderer():

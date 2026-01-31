@@ -42,6 +42,13 @@ def carry_in_events():
     return [(pre, +1, 1), (end, -1, 0)]
 
 
+@pytest.fixture
+def single_item_one_hour_events():
+    t0 = _t("2024-01-01 00:00")
+    t1 = _t("2024-01-01 01:00")
+    return [(t0, +1, 1), (t1, -1, 0)]
+
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Event mode (freq=None)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -60,7 +67,7 @@ def test_event_mode_times_include_first_and_last_event(simple_events):
 def test_event_mode_final_identity_L_equals_A_over_elapsed(simple_events):
     res = compute_finite_window_flow_metrics(simple_events, freq=None)
     t0, tn = res.times[0], res.times[-1]
-    elapsed = (tn - t0).total_seconds() / 3600.0
+    elapsed = (tn - t0).total_seconds()
     assert np.isclose(res.L[-1], res.H[-1] / elapsed)
 
 
@@ -243,7 +250,7 @@ def test_w_prime_matches_presence_mass_per_departure():
         (t2, -2, 0),  # two departures
     ]
     res = compute_finite_window_flow_metrics(events, freq=None)
-    assert res.w_prime[-1] == 1.5
+    assert res.w_prime[-1] == 5400.0
 
 
 @pytest.mark.parametrize(
@@ -254,7 +261,7 @@ def test_w_prime_matches_presence_mass_per_departure():
                 (_t("2024-01-01 00:00"), 1, 1),
                 (_t("2024-01-01 01:00"), -1, 0),
             ],
-            1.0,
+            1 / 3600,
         ),
         (
             [
@@ -262,10 +269,32 @@ def test_w_prime_matches_presence_mass_per_departure():
                 (_t("2024-01-01 01:00"), 1, 1),
                 (_t("2024-01-01 03:00"), -2, 0),
             ],
-            2 / 3,
+            2 / (3 * 3600),
         ),
     ],
 )
-def test_theta_matches_departures_per_elapsed_hour(events, expected_theta):
+def test_theta_matches_departures_per_elapsed_second(events, expected_theta):
     res = compute_finite_window_flow_metrics(events, freq=None)
     assert np.isclose(res.Theta[-1], expected_theta)
+
+
+def test_lambda_matches_arrivals_per_elapsed_second(single_item_one_hour_events):
+    res = compute_finite_window_flow_metrics(single_item_one_hour_events, freq=None)
+    assert np.isclose(res.Lambda[-1], 1.0 / 3600.0)
+
+
+def test_lambda_scaled_to_per_hour_matches_expected(single_item_one_hour_events):
+    res = compute_finite_window_flow_metrics(single_item_one_hour_events, freq=None)
+    assert np.isclose(res.Lambda[-1] * 3600.0, 1.0)
+
+
+def test_w_matches_seconds_per_arrival(single_item_one_hour_events):
+    res = compute_finite_window_flow_metrics(single_item_one_hour_events, freq=None)
+    assert np.isclose(res.w[-1], 3600.0)
+
+
+def test_lambda_w_scaled_product_matches_L(single_item_one_hour_events):
+    res = compute_finite_window_flow_metrics(single_item_one_hour_events, freq=None)
+    lambda_per_hour = res.Lambda[-1] * 3600.0
+    w_hours = res.w[-1] / 3600.0
+    assert np.isclose(lambda_per_hour * w_hours, res.L[-1])

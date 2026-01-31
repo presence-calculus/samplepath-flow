@@ -56,32 +56,32 @@ def test_initial_values_nan_when_elapsed_zero(tiny_df, times):
 def test_W_star_after_first_completion_is_item_duration_mean(tiny_df, times):
     ew = compute_elementwise_empirical_metrics(tiny_df, times)
     # At 02:00, only first item completed: mean duration = 2.0 hours
-    assert np.isclose(ew.W_star[1], 2.0)
+    assert np.isclose(ew.W_star[1], 7200.0)
 
 
 def test_W_star_after_two_completions_is_mean_of_two(tiny_df, times):
     ew = compute_elementwise_empirical_metrics(tiny_df, times)
     # At 05:00, completed durations are 2h and 3h → mean = 2.5
-    assert np.isclose(ew.W_star[2], 2.5)
+    assert np.isclose(ew.W_star[2], 9000.0)
 
 
 def test_incomplete_items_ignored_in_W_star(tiny_df, times):
     ew = compute_elementwise_empirical_metrics(tiny_df, times)
     # The third (incomplete) item must not affect W*(t)
     # If it did, mean would deviate from 2.5 at t=05:00
-    assert np.isclose(ew.W_star[2], 2.5)
+    assert np.isclose(ew.W_star[2], 9000.0)
 
 
 def test_lam_star_uses_starts_per_elapsed_hour_at_first_completion(tiny_df, times):
     ew = compute_elementwise_empirical_metrics(tiny_df, times)
     # By 02:00, there are 2 starts (00:00 and 01:00); elapsed=2h → 2/2 = 1.0
-    assert np.isclose(ew.lam_star[1], 1.0)
+    assert np.isclose(ew.lam_star[1], 1.0 / 3600.0)
 
 
 def test_lam_star_counts_incomplete_starts(tiny_df, times):
     ew = compute_elementwise_empirical_metrics(tiny_df, times)
     # By 05:00, there are 3 starts (including the incomplete one at 03:00); elapsed=5h → 3/5 = 0.6
-    assert np.isclose(ew.lam_star[2], 0.6)
+    assert np.isclose(ew.lam_star[2], 0.6 / 3600.0)
 
 
 def test_empty_times_returns_empty_arrays(tiny_df):
@@ -95,12 +95,12 @@ def test_empty_times_returns_empty_arrays(tiny_df):
 
 def test_residence_time_vals_completed_item_duration(tiny_df, times):
     ew = compute_elementwise_empirical_metrics(tiny_df, times)
-    assert np.isclose(ew.residence_time_vals[0], 2.0)
+    assert np.isclose(ew.residence_time_vals[0], 7200.0)
 
 
 def test_residence_time_vals_open_item_uses_tn(tiny_df, times):
     ew = compute_elementwise_empirical_metrics(tiny_df, times)
-    assert np.isclose(ew.residence_time_vals[2], 2.0)
+    assert np.isclose(ew.residence_time_vals[2], 7200.0)
 
 
 def test_residence_completed_flags_open_item_false(tiny_df, times):

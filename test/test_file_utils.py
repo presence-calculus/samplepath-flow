@@ -9,7 +9,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from samplepath.file_utils import (
+from samplepath.utils.file_utils import (
     copy_input_csv_to_output,
     ensure_output_dirs,
     make_fresh_dir,

@@ -30,20 +30,27 @@ from .plots import (
 )
 from .plots.chart_config import ChartConfig
 from .point_process import to_arrival_departure_process
+from .utils.duration_scale import infer_duration_scale
 
 
 def produce_all_charts(df, args, filter_result, metrics, empirical_metrics, out_dir):
     written: List[str] = []
     # create plots
     chart_config = ChartConfig.init_from_args(args)
+    if chart_config.duration_scale is None:
+        chart_config = chart_config.with_duration_scale(
+            infer_duration_scale(pd.Series(metrics.w, dtype=float).to_numpy())
+        )
     written += plot_core_flow_metrics_charts(
         metrics, empirical_metrics, filter_result, chart_config, out_dir
     )
     written += plot_convergence_charts(
         metrics, empirical_metrics, filter_result, chart_config, out_dir
     )
-    written += plot_stability_charts(df, args, filter_result, metrics, out_dir)
-    written += plot_advanced_charts(df, args, filter_result, metrics, out_dir)
+    written += plot_stability_charts(df, chart_config, filter_result, metrics, out_dir)
+    written += plot_advanced_charts(
+        df, args, chart_config, filter_result, metrics, out_dir
+    )
     return written
 
 

@@ -12,22 +12,28 @@ import pandas as pd
 
 from samplepath.filter import FilterResult
 from samplepath.metrics import FlowMetricsResult, compute_elementwise_empirical_metrics
+from samplepath.plots.chart_config import ChartConfig
 from samplepath.plots.core import NPanel
 from samplepath.plots.helpers import (
     _clip_axis_to_percentile,
     add_caption,
     format_date_axis,
 )
+from samplepath.utils.duration_scale import HOURS, DurationScale
+
+
+def _resolve_duration_scale(chart_config: ChartConfig) -> DurationScale:
+    return chart_config.duration_scale or HOURS
 
 
 def compute_total_active_age_series(
     df: pd.DataFrame, times: List[pd.Timestamp]
 ) -> np.ndarray:
     """
-    Return R(T) aligned to `times`: total age (HOURS) of ACTIVE elements at T.
+    Return R(T) aligned to `times`: total age (SECONDS) of ACTIVE elements at T.
 
     Numerically safe: all prefix sums are done in time **relative to t0** and
-    in float64 HOURS (not ns) to avoid int64 overflows.
+    in float64 SECONDS (not ns) to avoid int64 overflows.
 
     active(T): start <= T and (end > T or end is NaT)
     window clip: ages measured from s' = max(start, t0), so R(t0) = 0.
@@ -54,17 +60,17 @@ def compute_total_active_age_series(
     ends_dt = pd.to_datetime(ended["end_ts"]).to_numpy(dtype="datetime64[ns]")
     ended_starts_dt = pd.to_datetime(ended["start_ts"]).to_numpy(dtype="datetime64[ns]")
 
-    # ----------------- Relative-to-t0 in HOURS (float64) -----------------
-    # Convert to ns int for relative deltas, then to hours
+    # ----------------- Relative-to-t0 in SECONDS (float64) -----------------
+    # Convert to ns int for relative deltas, then to seconds
     starts_ns = starts_dt.astype("int64")
-    starts_rel_h = np.maximum((starts_ns - t0_ns) / 3.6e12, 0.0).astype(np.float64)
-    starts_rel_cumsum_h = np.cumsum(starts_rel_h, dtype=np.float64)
+    starts_rel_s = np.maximum((starts_ns - t0_ns) / 1e9, 0.0).astype(np.float64)
+    starts_rel_cumsum_s = np.cumsum(starts_rel_s, dtype=np.float64)
 
     ended_starts_ns = ended_starts_dt.astype("int64")
-    ended_starts_rel_h = np.maximum((ended_starts_ns - t0_ns) / 3.6e12, 0.0).astype(
+    ended_starts_rel_s = np.maximum((ended_starts_ns - t0_ns) / 1e9, 0.0).astype(
         np.float64
     )
-    ended_starts_rel_cumsum_h = np.cumsum(ended_starts_rel_h, dtype=np.float64)
+    ended_starts_rel_cumsum_s = np.cumsum(ended_starts_rel_s, dtype=np.float64)
 
     # Pointers over sorted arrays
     S = starts_dt.size
@@ -87,24 +93,24 @@ def compute_total_active_age_series(
             R[i] = 0.0
             continue
 
-        # Sum of clipped (relative) starts up to T, in HOURS
-        S_le_T_rel_h = starts_rel_cumsum_h[i_s - 1] if i_s > 0 else 0.0
-        S_le_T_ended_rel_h = ended_starts_rel_cumsum_h[i_e - 1] if i_e > 0 else 0.0
-        S_active_rel_h = max(S_le_T_rel_h - S_le_T_ended_rel_h, 0.0)
+        # Sum of clipped (relative) starts up to T, in SECONDS
+        S_le_T_rel_s = starts_rel_cumsum_s[i_s - 1] if i_s > 0 else 0.0
+        S_le_T_ended_rel_s = ended_starts_rel_cumsum_s[i_e - 1] if i_e > 0 else 0.0
+        S_active_rel_s = max(S_le_T_rel_s - S_le_T_ended_rel_s, 0.0)
 
-        # R_h = N_active * (T - t0) [hours] - sum_active_clipped_starts [hours]
-        T_rel_h = (pd.Timestamp(T).value - t0_ns) / 3.6e12  # ns → hours
-        R_h = float(N_active) * T_rel_h - S_active_rel_h
+        # R_s = N_active * (T - t0) [seconds] - sum_active_clipped_starts [seconds]
+        T_rel_s = (pd.Timestamp(T).value - t0_ns) / 1e9  # ns → seconds
+        R_s = float(N_active) * T_rel_s - S_active_rel_s
 
         # Numerical safety: never negative
-        R[i] = max(R_h, 0.0)
+        R[i] = max(R_s, 0.0)
 
     return R
 
 
 def plot_rate_stability_charts(
     df: pd.DataFrame,
-    args,  # kept for signature consistency
+    chart_config: ChartConfig,
     filter_result,  # may provide .title_prefix and .display
     metrics,  # FlowMetricsResult with .times, .N, .t0, .w
     out_dir: str,
@@ -124,16 +130,14 @@ def plot_rate_stability_charts(
     if not times:
         return written
 
-    # Elapsed hours since t0
+    # Elapsed seconds since t0
     t0 = metrics.t0 if hasattr(metrics, "t0") and pd.notna(metrics.t0) else times[0]
-    elapsed_h = np.array(
-        [(t - t0).total_seconds() / 3600.0 for t in times], dtype=float
-    )
-    denom = np.where(elapsed_h > 0.0, elapsed_h, np.nan)
+    elapsed_s = np.array([(t - t0).total_seconds() for t in times], dtype=float)
+    denom = np.where(elapsed_s > 0.0, elapsed_s, np.nan)
 
     # Core rate series
     N_raw = np.asarray(metrics.N, dtype=float)
-    R_raw = compute_total_active_age_series(df, times)  # hours
+    R_raw = compute_total_active_age_series(df, times)  # seconds
 
     with np.errstate(divide="ignore", invalid="ignore"):
         N_over_T = N_raw / denom
@@ -142,6 +146,11 @@ def plot_rate_stability_charts(
     # Dynamic empirical series (for λ* and W*)
     W_star_ts, lam_star_ts = compute_elementwise_empirical_metrics(df, times).as_tuple()
     w_ts = np.asarray(metrics.w, dtype=float)
+    duration_scale = _resolve_duration_scale(chart_config)
+    R_raw_scaled = R_raw / duration_scale.divisor
+    W_star_scaled = np.asarray(W_star_ts, dtype=float) / duration_scale.divisor
+    w_scaled = np.asarray(w_ts, dtype=float) / duration_scale.divisor
+    lam_star_scaled = np.asarray(lam_star_ts, dtype=float) * duration_scale.divisor
 
     # Optional display bits
     title_prefix = getattr(filter_result, "title_prefix", None)
@@ -188,8 +197,14 @@ def plot_rate_stability_charts(
 
     # Top: R(t) — total age of WIP at time t
     ax_top = axes[0]
-    ax_top.plot(times, R_raw, label="R(t) [hours]", linewidth=1.5, zorder=3)
-    ax_top.set_ylabel("hours")
+    ax_top.plot(
+        times,
+        R_raw_scaled,
+        label=f"R(t) [{duration_scale.label}]",
+        linewidth=1.5,
+        zorder=3,
+    )
+    ax_top.set_ylabel(duration_scale.label)
     ax_top.set_title("R(t) — Total age of WIP")
     ax_top.legend(loc="best")
     format_date_axis(ax_top)
@@ -257,10 +272,16 @@ def plot_rate_stability_charts(
 
     # Panel 3: λ*(T)
     axLam = axes[2]
-    axLam.plot(times, lam_star_ts, label="λ*(T) [1/hr]", linewidth=1.9, zorder=3)
+    axLam.plot(
+        times,
+        lam_star_scaled,
+        label=f"λ*(T) [{duration_scale.rate_label}]",
+        linewidth=1.9,
+        zorder=3,
+    )
     axLam.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
     format_date_axis(axLam)
-    axLam.set_ylabel("[1/hr]")
+    axLam.set_ylabel(f"[{duration_scale.rate_label}]")
     axLam.set_title("λ*(T) — running arrival rate")
     axLam.legend(loc="best")
     # Clip like other charts
@@ -268,21 +289,27 @@ def plot_rate_stability_charts(
         _clip_axis_to_percentile(
             axLam,
             times,
-            lam_star_ts,
-            upper_p=getattr(args, "lambda_pctl", None),
-            lower_p=getattr(args, "lambda_lower_pctl", None),
-            warmup_hours=float(getattr(args, "lambda_warmup", 0.0) or 0.0),
+            lam_star_scaled,
+            upper_p=chart_config.lambda_pctl_upper,
+            lower_p=chart_config.lambda_pctl_lower,
+            warmup_seconds=chart_config.lambda_warmup_seconds,
         )
     except Exception:
         pass
 
     # Panel 4: W-coherence overlay
     axW = axes[3]
-    axW.plot(times, w_ts, label="w(T) [hrs] (finite-window)", linewidth=1.9, zorder=3)
     axW.plot(
         times,
-        W_star_ts,
-        label="W*(T) [hrs] (completed mean)",
+        w_scaled,
+        label=f"w(T) [{duration_scale.label}] (finite-window)",
+        linewidth=1.9,
+        zorder=3,
+    )
+    axW.plot(
+        times,
+        W_star_scaled,
+        label=f"W*(T) [{duration_scale.label}] (completed mean)",
         linewidth=1.9,
         linestyle="--",
         zorder=3,
@@ -290,7 +317,7 @@ def plot_rate_stability_charts(
     axW.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
     format_date_axis(axW)
     axW.set_xlabel("time")
-    axW.set_ylabel("hours")
+    axW.set_ylabel(duration_scale.label)
     axW.set_title("w(T) vs W*(T) — coherence")
     axW.legend(loc="best")
 
@@ -312,11 +339,13 @@ def plot_rate_stability_charts(
 
 def plot_stability_charts(
     df: pd.DataFrame,
-    args,
+    chart_config: ChartConfig,
     filter_result: Optional[FilterResult],
     metrics: FlowMetricsResult,
     out_dir: str,
 ) -> List[str]:
     written = []
-    written += plot_rate_stability_charts(df, args, filter_result, metrics, out_dir)
+    written += plot_rate_stability_charts(
+        df, chart_config, filter_result, metrics, out_dir
+    )
     return written

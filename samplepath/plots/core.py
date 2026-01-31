@@ -42,6 +42,7 @@ from samplepath.plots.helpers import (
     render_step_chart,
     resolve_caption,
 )
+from samplepath.utils.duration_scale import HOURS, DurationScale
 
 
 @dataclass
@@ -50,7 +51,7 @@ class ClipOptions:
 
     pctl_upper: Optional[float] = None
     pctl_lower: Optional[float] = None
-    warmup_hours: float = 0.0
+    warmup_seconds: float = 0.0
 
 
 def construct_title(
@@ -62,6 +63,10 @@ def construct_title(
         return base_title
     derivation = MetricDerivations.get(derivation_key)
     return f"{base_title}: {derivation}" if derivation else base_title
+
+
+def _resolve_duration_scale(chart_config: ChartConfig) -> DurationScale:
+    return chart_config.duration_scale or HOURS
 
 
 @dataclass
@@ -235,11 +240,14 @@ class LambdaPanel:
         Lam_vals: Sequence[float],
         *,
         arrival_times: Optional[List[pd.Timestamp]] = None,
+        scale: Optional[DurationScale] = None,
     ) -> None:
+        duration_scale = scale or HOURS
+        Lam_scaled = np.asarray(Lam_vals, dtype=float) * duration_scale.divisor
         overlays = (
             build_event_overlays(
                 times,
-                Lam_vals,
+                Lam_scaled,
                 arrival_times,
                 [],
                 drop_lines_for_arrivals=True,
@@ -248,11 +256,12 @@ class LambdaPanel:
             if self.with_event_marks
             else None
         )
+        label = f"Λ(T) [{duration_scale.rate_label}]"
         render_line_chart(
             ax,
             times,
-            Lam_vals,
-            label="Λ(T) [1/hr]",
+            Lam_scaled,
+            label=label,
             color="tab:blue",
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
@@ -262,10 +271,10 @@ class LambdaPanel:
             _clip_axis_to_percentile(
                 ax,
                 list(times),
-                Lam_vals,
+                Lam_scaled,
                 opts.pctl_upper,
                 opts.pctl_lower,
-                opts.warmup_hours,
+                opts.warmup_seconds,
             )
         if self.show_title:
             ax.set_title(
@@ -273,7 +282,7 @@ class LambdaPanel:
                     self.title, self.show_derivations, derivation_key="Lambda"
                 )
             )
-        ax.set_ylabel("Λ(T) [1/hr]")
+        ax.set_ylabel(label)
         ax.legend()
 
     def plot(
@@ -300,11 +309,13 @@ class LambdaPanel:
             resolved_out_path,
         ):
             ax = _first_axis(axes)
+            scale = _resolve_duration_scale(chart_config)
             self.render(
                 ax,
                 metrics.times,
                 metrics.Lambda,
                 arrival_times=metrics.arrival_times,
+                scale=scale,
             )
         return resolved_out_path
 
@@ -324,12 +335,15 @@ class ThetaPanel:
         theta_vals: Sequence[float],
         *,
         departure_times: Optional[List[pd.Timestamp]] = None,
+        scale: Optional[DurationScale] = None,
     ) -> None:
-        label = "Θ(T) [1/hr]"
+        duration_scale = scale or HOURS
+        theta_scaled = np.asarray(theta_vals, dtype=float) * duration_scale.divisor
+        label = f"Θ(T) [{duration_scale.rate_label}]"
         overlays = (
             build_event_overlays(
                 times,
-                theta_vals,
+                theta_scaled,
                 [],
                 departure_times,
                 calendar_mode=self.sampling_frequency is not None,
@@ -340,7 +354,7 @@ class ThetaPanel:
         render_line_chart(
             ax,
             times,
-            theta_vals,
+            theta_scaled,
             label=label,
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
@@ -378,11 +392,13 @@ class ThetaPanel:
             resolved_out_path,
         ):
             ax = _first_axis(axes)
+            scale = _resolve_duration_scale(chart_config)
             self.render(
                 ax,
                 metrics.times,
                 metrics.Theta,
                 departure_times=metrics.departure_times,
+                scale=scale,
             )
         return resolved_out_path
 
@@ -403,12 +419,15 @@ class WPanel:
         *,
         arrival_times: Optional[List[pd.Timestamp]] = None,
         departure_times: Optional[List[pd.Timestamp]] = None,
+        scale: Optional[DurationScale] = None,
     ) -> None:
-        label = "w(T) [hrs]"
+        duration_scale = scale or HOURS
+        w_scaled = np.asarray(w_vals, dtype=float) / duration_scale.divisor
+        label = f"w(T) [{duration_scale.label}]"
         overlays = (
             build_event_overlays(
                 times,
-                w_vals,
+                w_scaled,
                 arrival_times,
                 departure_times,
                 drop_lines_for_arrivals=True,
@@ -421,7 +440,7 @@ class WPanel:
         render_line_chart(
             ax,
             times,
-            w_vals,
+            w_scaled,
             label=label,
             color="tab:blue",
             overlays=overlays,
@@ -458,12 +477,14 @@ class WPanel:
             resolved_out_path,
         ):
             ax = _first_axis(axes)
+            scale = _resolve_duration_scale(chart_config)
             self.render(
                 ax,
                 metrics.times,
                 metrics.w,
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
+                scale=scale,
             )
         return resolved_out_path
 
@@ -484,12 +505,15 @@ class SojournTimePanel:
         *,
         arrival_times: Optional[List[pd.Timestamp]] = None,
         departure_times: Optional[List[pd.Timestamp]] = None,
+        scale: Optional[DurationScale] = None,
     ) -> None:
-        label = "W*(T) [hrs]"
+        duration_scale = scale or HOURS
+        w_star_scaled = np.asarray(w_star_vals, dtype=float) / duration_scale.divisor
+        label = f"W*(T) [{duration_scale.label}]"
         overlays = (
             build_event_overlays(
                 times,
-                w_star_vals,
+                w_star_scaled,
                 arrival_times,
                 departure_times,
                 drop_lines_for_arrivals=False,
@@ -502,7 +526,7 @@ class SojournTimePanel:
         render_line_chart(
             ax,
             times,
-            w_star_vals,
+            w_star_scaled,
             label=label,
             color="tab:blue",
             overlays=overlays,
@@ -542,12 +566,14 @@ class SojournTimePanel:
             resolved_out_path,
         ):
             ax = _first_axis(axes)
+            scale = _resolve_duration_scale(chart_config)
             self.render(
                 ax,
                 metrics.times,
                 empirical_metrics.W_star,
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
+                scale=scale,
             )
         return resolved_out_path
 
@@ -563,12 +589,16 @@ class SojournTimeScatterPanel:
         ax,
         departure_times: Sequence[pd.Timestamp],
         sojourn_vals: Sequence[float],
+        *,
+        scale: Optional[DurationScale] = None,
     ) -> None:
         drop_lines = "vertical" if self.with_event_marks else "none"
+        duration_scale = scale or HOURS
+        sojourn_scaled = np.asarray(sojourn_vals, dtype=float) / duration_scale.divisor
         render_scatter_chart(
             ax,
             departure_times,
-            sojourn_vals,
+            sojourn_scaled,
             label="Sojourn time (departures)",
             color="green",
             drop_lines=drop_lines,
@@ -576,7 +606,7 @@ class SojournTimeScatterPanel:
         )
         if self.show_title:
             ax.set_title(self.title)
-        ax.set_ylabel("Duration [hrs]")
+        ax.set_ylabel(f"Duration [{duration_scale.label}]")
         ax.legend()
 
     def plot(
@@ -604,10 +634,12 @@ class SojournTimeScatterPanel:
             resolved_out_path,
         ):
             ax = _first_axis(axes)
+            scale = _resolve_duration_scale(chart_config)
             self.render(
                 ax,
                 metrics.departure_times,
                 empirical_metrics.sojourn_vals,
+                scale=scale,
             )
         return resolved_out_path
 
@@ -624,10 +656,15 @@ class ResidenceTimeScatterPanel:
         arrival_times: Sequence[pd.Timestamp],
         residence_vals: Sequence[float],
         residence_completed: Sequence[bool],
+        *,
+        scale: Optional[DurationScale] = None,
     ) -> None:
         drop_lines = "vertical" if self.with_event_marks else "none"
         arrival_times_arr = np.asarray(arrival_times, dtype=object)
-        residence_vals_arr = np.asarray(residence_vals, dtype=float)
+        duration_scale = scale or HOURS
+        residence_vals_arr = (
+            np.asarray(residence_vals, dtype=float) / duration_scale.divisor
+        )
         completed_arr = np.asarray(residence_completed, dtype=bool)
         completed_mask = np.isfinite(residence_vals_arr) & completed_arr
         open_mask = np.isfinite(residence_vals_arr) & ~completed_arr
@@ -653,7 +690,7 @@ class ResidenceTimeScatterPanel:
             )
         if self.show_title:
             ax.set_title(self.title)
-        ax.set_ylabel("Duration [hrs]")
+        ax.set_ylabel(f"Duration [{duration_scale.label}]")
         if completed_mask.any() or open_mask.any():
             ax.legend()
 
@@ -682,11 +719,13 @@ class ResidenceTimeScatterPanel:
             resolved_out_path,
         ):
             ax = _first_axis(axes)
+            scale = _resolve_duration_scale(chart_config)
             self.render(
                 ax,
                 metrics.arrival_times,
                 empirical_metrics.residence_time_vals,
                 empirical_metrics.residence_completed,
+                scale=scale,
             )
         return resolved_out_path
 
@@ -707,12 +746,15 @@ class HPanel:
         *,
         arrival_times: Optional[List[pd.Timestamp]] = None,
         departure_times: Optional[List[pd.Timestamp]] = None,
+        scale: Optional[DurationScale] = None,
     ) -> None:
-        label = "H(T) [hrs·items]"
+        duration_scale = scale or HOURS
+        H_scaled = np.asarray(H_vals, dtype=float) / duration_scale.divisor
+        label = f"H(T) [{duration_scale.label}·items]"
         overlays = (
             build_event_overlays(
                 times,
-                H_vals,
+                H_scaled,
                 arrival_times,
                 departure_times,
                 calendar_mode=self.sampling_frequency is not None,
@@ -723,7 +765,7 @@ class HPanel:
         render_line_chart(
             ax,
             times,
-            H_vals,
+            H_scaled,
             label=label,
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
@@ -759,12 +801,14 @@ class HPanel:
             resolved_out_path,
         ):
             ax = _first_axis(axes)
+            scale = _resolve_duration_scale(chart_config)
             self.render(
                 ax,
                 metrics.times,
                 metrics.H,
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
+                scale=scale,
             )
         return resolved_out_path
 
@@ -785,12 +829,15 @@ class WPrimePanel:
         *,
         arrival_times: Optional[List[pd.Timestamp]] = None,
         departure_times: Optional[List[pd.Timestamp]] = None,
+        scale: Optional[DurationScale] = None,
     ) -> None:
-        label = "w'(T) [hrs]"
+        duration_scale = scale or HOURS
+        w_prime_scaled = np.asarray(w_prime_vals, dtype=float) / duration_scale.divisor
+        label = f"w'(T) [{duration_scale.label}]"
         overlays = (
             build_event_overlays(
                 times,
-                w_prime_vals,
+                w_prime_scaled,
                 arrival_times,
                 departure_times,
                 drop_lines_for_arrivals=False,
@@ -803,7 +850,7 @@ class WPrimePanel:
         render_line_chart(
             ax,
             times,
-            w_prime_vals,
+            w_prime_scaled,
             label=label,
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
@@ -841,12 +888,14 @@ class WPrimePanel:
             resolved_out_path,
         ):
             ax = _first_axis(axes)
+            scale = _resolve_duration_scale(chart_config)
             self.render(
                 ax,
                 metrics.times,
                 metrics.w_prime,
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
+                scale=scale,
             )
         return resolved_out_path
 
@@ -1538,6 +1587,7 @@ def plot_core_stack(
         base_name="sample_path_flow_metrics",
     ) as (_, axes, resolved_out_path):
         flat_axes = axes if not isinstance(axes, np.ndarray) else axes.ravel()
+        scale = _resolve_duration_scale(chart_config)
 
         NPanel(
             show_derivations=chart_config.show_derivations,
@@ -1567,7 +1617,7 @@ def plot_core_stack(
             clip_opts=ClipOptions(
                 pctl_upper=chart_config.lambda_pctl_upper,
                 pctl_lower=chart_config.lambda_pctl_lower,
-                warmup_hours=chart_config.lambda_warmup_hours,
+                warmup_seconds=chart_config.lambda_warmup_seconds,
             ),
             sampling_frequency=chart_config.sampling_frequency,
         ).render(
@@ -1575,6 +1625,7 @@ def plot_core_stack(
             metrics.times,
             metrics.Lambda,
             arrival_times=metrics.arrival_times,
+            scale=scale,
         )
         WPanel(
             show_derivations=chart_config.show_derivations,
@@ -1586,6 +1637,7 @@ def plot_core_stack(
             metrics.w,
             arrival_times=metrics.arrival_times,
             departure_times=metrics.departure_times,
+            scale=scale,
         )
     return resolved_out_path
 
@@ -1620,6 +1672,7 @@ def plot_LT_derivation_stack(
         base_name="lt_derivation_stack",
     ) as (_, axes, resolved_out_path):
         flat_axes = axes if not isinstance(axes, np.ndarray) else axes.ravel()
+        scale = _resolve_duration_scale(chart_config)
 
         CFDPanel(
             show_derivations=chart_config.show_derivations,
@@ -1653,6 +1706,7 @@ def plot_LT_derivation_stack(
             metrics.H,
             arrival_times=metrics.arrival_times,
             departure_times=metrics.departure_times,
+            scale=scale,
         )
         LPanel(
             show_derivations=chart_config.show_derivations,
@@ -1698,6 +1752,7 @@ def plot_departure_flow_metrics_stack(
         base_name="departure_flow_metrics",
     ) as (_, axes, resolved_out_path):
         flat_axes = axes if not isinstance(axes, np.ndarray) else axes.ravel()
+        scale = _resolve_duration_scale(chart_config)
 
         NPanel(
             show_derivations=chart_config.show_derivations,
@@ -1730,6 +1785,7 @@ def plot_departure_flow_metrics_stack(
             metrics.times,
             metrics.Theta,
             departure_times=metrics.departure_times,
+            scale=scale,
         )
         WPrimePanel(
             show_derivations=chart_config.show_derivations,
@@ -1741,6 +1797,7 @@ def plot_departure_flow_metrics_stack(
             metrics.w_prime,
             arrival_times=metrics.arrival_times,
             departure_times=metrics.departure_times,
+            scale=scale,
         )
     return resolved_out_path
 
@@ -1782,7 +1839,7 @@ def plot_core_flow_metrics_charts(
         clip_opts=ClipOptions(
             pctl_upper=chart_config.lambda_pctl_upper,
             pctl_lower=chart_config.lambda_pctl_lower,
-            warmup_hours=chart_config.lambda_warmup_hours,
+            warmup_seconds=chart_config.lambda_warmup_seconds,
         ),
         sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, filter_result, chart_config, out_dir)

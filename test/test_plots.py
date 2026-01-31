@@ -449,10 +449,10 @@ def test_render_lambda_chart_invokes_clipping(mock_clip):
         label="Λ(T)",
         pctl_upper=99.0,
         pctl_lower=1.0,
-        warmup_hours=0.5,
+        warmup_seconds=1800.0,
     )
 
-    mock_clip.assert_called_once_with(ax, list(times), values, 99.0, 1.0, 0.5)
+    mock_clip.assert_called_once_with(ax, list(times), values, 99.0, 1.0, 1800.0)
 
 
 @patch("samplepath.plots.helpers.render_step_chart")

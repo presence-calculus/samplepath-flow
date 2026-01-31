@@ -23,14 +23,14 @@ class FlowMetricsResult:
     times : list[pd.Timestamp]
         Observation times in ascending order (report points).
     L : np.ndarray                # processes
-    Lambda : np.ndarray           # processes/hour
-    w : np.ndarray                # hours (finite-window average residence contribution per arrival)
-    w_prime : np.ndarray          # hours (finite-window average residence contribution per departure)
+    Lambda : np.ndarray           # processes/second
+    w : np.ndarray                # seconds (finite-window average residence contribution per arrival)
+    w_prime : np.ndarray          # seconds (finite-window average residence contribution per departure)
     N : np.ndarray                # processes
-    H : np.ndarray                # process·hours
+    H : np.ndarray                # process·seconds
     Arrivals : np.ndarray         # cumulative arrivals Arr(T) in (t0, T]
     Departures : np.ndarray       # cumulative departures Dep(T) in (t0, T]
-    Theta : np.ndarray            # processes/hour
+    Theta : np.ndarray            # processes/second
     mode : Literal["event","calendar"]
         Observation schedule flavor used by the driver.
     freq : str | None
@@ -142,14 +142,14 @@ def compute_sample_path_flow_metrics(
     -------
     T_sorted : list[pd.Timestamp]
     L(T)     : np.ndarray  (processes)            Time-Average WIP since t0
-    Lambda(T): np.ndarray  (processes/hour)       average arrival rate since t0
-    w(T)     : np.ndarray  (hours)                finite-window average residence contribution per arrival
+    Lambda(T): np.ndarray  (processes/second)     average arrival rate since t0
+    w(T)     : np.ndarray  (seconds)              finite-window average residence contribution per arrival
     N(T)     : np.ndarray  (processes)            number in system right after events ≤ T
-    H(T)     : np.ndarray  (process·hours)        cumulative presence mass from t0 to T
+    H(T)     : np.ndarray  (process·seconds)      cumulative presence mass from t0 to T
     Arr(T)   : np.ndarray  (count)                cumulative arrivals in (t0, T]
     Dep(T)   : np.ndarray  (count)                cumulative departures in (t0, T]
-    w'(T)    : np.ndarray  (hours)                finite-window average residence contribution per departure
-    Θ(T)     : np.ndarray  (processes/hour)       average departure rate since t0
+    w'(T)    : np.ndarray  (seconds)              finite-window average residence contribution per departure
+    Θ(T)     : np.ndarray  (processes/second)     average departure rate since t0
 
     Notes
     -----
@@ -193,9 +193,9 @@ def compute_sample_path_flow_metrics(
         while i < len(events) and events[i][0] <= t:
             t_ev, dN, a = events[i]
             # Area up to event
-            dt_h = (t_ev - prev).total_seconds() / 3600.0
-            if dt_h > 0:
-                H += N * dt_h
+            dt_s = (t_ev - prev).total_seconds()
+            if dt_s > 0:
+                H += N * dt_s
                 prev = t_ev
             # Jump and counts at event
             N += dN
@@ -208,18 +208,18 @@ def compute_sample_path_flow_metrics(
             i += 1
 
         # Tail from last event to t
-        dt_h = (t - prev).total_seconds() / 3600.0
-        if dt_h > 0:
-            H += N * dt_h
+        dt_s = (t - prev).total_seconds()
+        if dt_s > 0:
+            H += N * dt_s
             prev = t
 
         # Report metrics at t
-        elapsed_h = (t - t0).total_seconds() / 3600.0
-        L = (H / elapsed_h) if elapsed_h > 0 else np.nan
-        Lam = (cum_arr / elapsed_h) if elapsed_h > 0 else np.nan
+        elapsed_s = (t - t0).total_seconds()
+        L = (H / elapsed_s) if elapsed_s > 0 else np.nan
+        Lam = (cum_arr / elapsed_s) if elapsed_s > 0 else np.nan
         w = (H / cum_arr) if cum_arr > 0 else np.nan
         w_prime = (H / cum_dep) if cum_dep > 0 else np.nan
-        Theta = (cum_dep / elapsed_h) if elapsed_h > 0 else np.nan
+        Theta = (cum_dep / elapsed_s) if elapsed_s > 0 else np.nan
 
         out_L.append(L)
         out_Lam.append(Lam)
@@ -484,10 +484,10 @@ class ElementWiseEmpiricalMetrics:
         per unit time observed up to that point.
 
     sojourn_vals : np.ndarray
-        Sojourn times in hours aligned to departure timestamps.
+        Sojourn times in seconds aligned to departure timestamps.
 
     residence_time_vals : np.ndarray
-        Residence times in hours aligned to arrival timestamps.
+        Residence times in seconds aligned to arrival timestamps.
     residence_completed : np.ndarray
         Boolean flags aligned to arrival timestamps indicating completion.
 
@@ -540,8 +540,8 @@ def compute_elementwise_empirical_metrics(
         comp = df[df["end_ts"].notna()].copy().sort_values("end_ts")
         if not comp.empty:
             sojourn_vals = (
-                (comp["end_ts"] - comp["start_ts"]).dt.total_seconds() / 3600.0
-            ).to_numpy()
+                (comp["end_ts"] - comp["start_ts"]).dt.total_seconds().to_numpy()
+            )
         comp_end_times = comp["end_ts"].to_list()
 
         starts = df["start_ts"].sort_values(kind="mergesort").to_list()
@@ -564,9 +564,9 @@ def compute_elementwise_empirical_metrics(
             while k < len(starts) and starts[k] <= t:
                 count_starts += 1
                 k += 1
-            elapsed_h = (t - t0).total_seconds() / 3600.0
-            if elapsed_h > 0:
-                lam_star[i] = count_starts / elapsed_h
+            elapsed_s = (t - t0).total_seconds()
+            if elapsed_s > 0:
+                lam_star[i] = count_starts / elapsed_s
 
         arrivals = df.sort_values("start_ts", kind="mergesort").copy()
         if not arrivals.empty:
@@ -575,15 +575,19 @@ def compute_elementwise_empirical_metrics(
             completed = arrivals[residence_completed]
             if not completed.empty:
                 residence_vals[residence_completed] = (
-                    completed["end_ts"] - completed["start_ts"]
-                ).dt.total_seconds().to_numpy(dtype=float) / 3600.0
+                    (completed["end_ts"] - completed["start_ts"])
+                    .dt.total_seconds()
+                    .to_numpy(dtype=float)
+                )
             open_items = arrivals[~residence_completed]
             if not open_items.empty and times:
                 tn = times[-1]
                 if pd.notna(tn):
                     residence_vals[~residence_completed] = (
-                        tn - open_items["start_ts"]
-                    ).dt.total_seconds().to_numpy(dtype=float) / 3600.0
+                        (tn - open_items["start_ts"])
+                        .dt.total_seconds()
+                        .to_numpy(dtype=float)
+                    )
 
         return W_star, lam_star, sojourn_vals, residence_vals, residence_completed
 

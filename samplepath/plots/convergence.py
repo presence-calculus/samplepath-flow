@@ -31,6 +31,11 @@ from samplepath.plots.helpers import (
     render_scatter_chart,
     resolve_caption,
 )
+from samplepath.utils.duration_scale import HOURS, DurationScale
+
+
+def _resolve_duration_scale(chart_config: ChartConfig) -> DurationScale:
+    return chart_config.duration_scale or HOURS
 
 
 @dataclass
@@ -50,13 +55,18 @@ class ProcessTimeConvergencePanel:
         *,
         arrival_times: Optional[List[pd.Timestamp]] = None,
         departure_times: Optional[List[pd.Timestamp]] = None,
+        scale: Optional[DurationScale] = None,
     ) -> None:
+        duration_scale = scale or HOURS
+        w_scaled = np.asarray(w_vals, dtype=float) / duration_scale.divisor
+        w_prime_scaled = np.asarray(w_prime_vals, dtype=float) / duration_scale.divisor
+        w_star_scaled = np.asarray(w_star_vals, dtype=float) / duration_scale.divisor
         arrivals = arrival_times or []
         departures = departure_times or []
         w_overlays = (
             build_event_overlays(
                 times,
-                w_vals,
+                w_scaled,
                 arrivals,
                 [],
                 drop_lines_for_arrivals=True,
@@ -68,7 +78,7 @@ class ProcessTimeConvergencePanel:
         w_prime_overlays = (
             build_event_overlays(
                 times,
-                w_prime_vals,
+                w_prime_scaled,
                 [],
                 departures,
                 drop_lines_for_arrivals=False,
@@ -80,7 +90,7 @@ class ProcessTimeConvergencePanel:
         w_star_overlays = (
             build_event_overlays(
                 times,
-                w_star_vals,
+                w_star_scaled,
                 [],
                 departures,
                 drop_lines_for_arrivals=False,
@@ -92,8 +102,8 @@ class ProcessTimeConvergencePanel:
         render_line_chart(
             ax,
             times,
-            w_vals,
-            label="w(T) [hrs]",
+            w_scaled,
+            label=f"w(T) [{duration_scale.label}]",
             color="tab:blue",
             overlays=w_overlays,
             sampling_frequency=self.sampling_frequency,
@@ -101,8 +111,8 @@ class ProcessTimeConvergencePanel:
         render_line_chart(
             ax,
             times,
-            w_prime_vals,
-            label="w'(T) [hrs]",
+            w_prime_scaled,
+            label=f"w'(T) [{duration_scale.label}]",
             color="tab:orange",
             overlays=w_prime_overlays,
             sampling_frequency=self.sampling_frequency,
@@ -110,15 +120,15 @@ class ProcessTimeConvergencePanel:
         render_line_chart(
             ax,
             times,
-            w_star_vals,
-            label="W*(t) [hrs]",
+            w_star_scaled,
+            label=f"W*(t) [{duration_scale.label}]",
             color="tab:green",
             overlays=w_star_overlays,
             sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(self.title)
-        ax.set_ylabel("hours")
+        ax.set_ylabel(f"Duration [{duration_scale.label}]")
         ax.legend()
 
     def plot(
@@ -146,6 +156,7 @@ class ProcessTimeConvergencePanel:
             resolved_out_path,
         ):
             ax = _first_axis(axes)
+            scale = _resolve_duration_scale(chart_config)
             self.render(
                 ax,
                 metrics.times,
@@ -154,6 +165,7 @@ class ProcessTimeConvergencePanel:
                 empirical_metrics.W_star,
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
+                scale=scale,
             )
         return resolved_out_path
 
@@ -173,12 +185,18 @@ class SojournTimeScatterPanel:
         w_prime_vals: np.ndarray,
         departure_times: List[pd.Timestamp],
         sojourn_vals: np.ndarray,
+        *,
+        scale: Optional[DurationScale] = None,
     ) -> None:
+        duration_scale = scale or HOURS
+        w_scaled = np.asarray(w_vals, dtype=float) / duration_scale.divisor
+        w_prime_scaled = np.asarray(w_prime_vals, dtype=float) / duration_scale.divisor
+        sojourn_scaled = np.asarray(sojourn_vals, dtype=float) / duration_scale.divisor
         departures = departure_times or []
         w_overlays = (
             build_event_overlays(
                 times,
-                w_vals,
+                w_scaled,
                 [],
                 departures,
                 drop_lines_for_arrivals=False,
@@ -190,7 +208,7 @@ class SojournTimeScatterPanel:
         w_prime_overlays = (
             build_event_overlays(
                 times,
-                w_prime_vals,
+                w_prime_scaled,
                 [],
                 departures,
                 drop_lines_for_arrivals=False,
@@ -202,15 +220,15 @@ class SojournTimeScatterPanel:
         render_scatter_chart(
             ax,
             departures,
-            sojourn_vals,
+            sojourn_scaled,
             label="Sojourn time (departures)",
             color="tab:purple",
         )
         render_line_chart(
             ax,
             times,
-            w_vals,
-            label="w(T) [hrs]",
+            w_scaled,
+            label=f"w(T) [{duration_scale.label}]",
             color="tab:blue",
             overlays=w_overlays,
             sampling_frequency=self.sampling_frequency,
@@ -218,15 +236,15 @@ class SojournTimeScatterPanel:
         render_line_chart(
             ax,
             times,
-            w_prime_vals,
-            label="w'(T) [hrs]",
+            w_prime_scaled,
+            label=f"w'(T) [{duration_scale.label}]",
             color="tab:orange",
             overlays=w_prime_overlays,
             sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(self.title)
-        ax.set_ylabel("Time [hrs]")
+        ax.set_ylabel(f"Duration [{duration_scale.label}]")
         ax.legend()
 
     def plot(
@@ -254,6 +272,7 @@ class SojournTimeScatterPanel:
             resolved_out_path,
         ):
             ax = _first_axis(axes)
+            scale = _resolve_duration_scale(chart_config)
             self.render(
                 ax,
                 metrics.times,
@@ -261,6 +280,7 @@ class SojournTimeScatterPanel:
                 metrics.w_prime,
                 metrics.departure_times,
                 empirical_metrics.sojourn_vals,
+                scale=scale,
             )
         return resolved_out_path
 
@@ -284,19 +304,27 @@ class ArrivalDepartureRateConvergencePanel:
         departure_times: Optional[List[pd.Timestamp]] = None,
         lambda_pctl_upper: Optional[float] = None,
         lambda_pctl_lower: Optional[float] = None,
-        lambda_warmup_hours: Optional[float] = None,
+        lambda_warmup_seconds: Optional[float] = None,
+        scale: Optional[DurationScale] = None,
     ) -> None:
+        duration_scale = scale or HOURS
         n = len(times)
         if n > 0:
             t0 = times[0]
-            elapsed_h = np.array(
-                [(t - t0).total_seconds() / 3600.0 for t in times], dtype=float
+            elapsed_seconds = np.array(
+                [(t - t0).total_seconds() for t in times], dtype=float
             )
         else:
-            elapsed_h = np.array([], dtype=float)
+            elapsed_seconds = np.array([], dtype=float)
 
         with np.errstate(divide="ignore", invalid="ignore"):
-            theta_rate = np.where(elapsed_h > 0.0, departures_cum / elapsed_h, np.nan)
+            theta_rate = np.where(
+                elapsed_seconds > 0.0, departures_cum / elapsed_seconds, np.nan
+            )
+        lambda_rate_scaled = (
+            np.asarray(lambda_cum_rate, dtype=float) * duration_scale.divisor
+        )
+        theta_rate_scaled = np.asarray(theta_rate, dtype=float) * duration_scale.divisor
 
         last_dep_idx = -1
         if len(departures_cum) > 0:
@@ -321,7 +349,7 @@ class ArrivalDepartureRateConvergencePanel:
         overlays_lambda = (
             build_event_overlays(
                 times,
-                lambda_cum_rate,
+                lambda_rate_scaled,
                 arrival_times or [],
                 [],
                 drop_lines_for_arrivals=True,
@@ -333,7 +361,7 @@ class ArrivalDepartureRateConvergencePanel:
         overlays_theta = (
             build_event_overlays(
                 times,
-                theta_rate,
+                theta_rate_scaled,
                 [],
                 departure_times or [],
                 drop_lines_for_arrivals=False,
@@ -345,8 +373,8 @@ class ArrivalDepartureRateConvergencePanel:
         render_line_chart(
             ax,
             times,
-            lambda_cum_rate,
-            label=lambda_label,
+            lambda_rate_scaled,
+            label=f"{lambda_label} [{duration_scale.rate_label}]",
             color="tab:blue",
             overlays=overlays_lambda,
             sampling_frequency=self.sampling_frequency,
@@ -354,23 +382,23 @@ class ArrivalDepartureRateConvergencePanel:
         render_line_chart(
             ax,
             times,
-            theta_rate,
-            label=theta_label,
+            theta_rate_scaled,
+            label=f"{theta_label} [{duration_scale.rate_label}]",
             color="tab:orange",
             overlays=overlays_theta,
             sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(self.title)
-        ax.set_ylabel("Rate [per hr]")
+        ax.set_ylabel(f"Rate [{duration_scale.rate_label}]")
         ax.legend(loc="best")
         _clip_axis_to_percentile(
             ax,
             times,
-            lambda_cum_rate,
+            lambda_rate_scaled,
             upper_p=lambda_pctl_upper,
             lower_p=lambda_pctl_lower,
-            warmup_hours=(lambda_warmup_hours or 0.0),
+            warmup_seconds=(lambda_warmup_seconds or 0.0),
         )
 
     def plot(
@@ -397,6 +425,7 @@ class ArrivalDepartureRateConvergencePanel:
             resolved_out_path,
         ):
             ax = _first_axis(axes)
+            scale = _resolve_duration_scale(chart_config)
             self.render(
                 ax,
                 metrics.times,
@@ -406,7 +435,8 @@ class ArrivalDepartureRateConvergencePanel:
                 departure_times=metrics.departure_times,
                 lambda_pctl_upper=chart_config.lambda_pctl_upper,
                 lambda_pctl_lower=chart_config.lambda_pctl_lower,
-                lambda_warmup_hours=chart_config.lambda_warmup_hours,
+                lambda_warmup_seconds=chart_config.lambda_warmup_seconds,
+                scale=scale,
             )
         return resolved_out_path
 
@@ -429,8 +459,12 @@ class CumulativeArrivalRateConvergencePanel:
         arrival_times: Optional[List[pd.Timestamp]] = None,
         lambda_pctl_upper: Optional[float] = None,
         lambda_pctl_lower: Optional[float] = None,
-        lambda_warmup_hours: Optional[float] = None,
+        lambda_warmup_seconds: Optional[float] = None,
+        scale: Optional[DurationScale] = None,
     ) -> None:
+        duration_scale = scale or HOURS
+        lam_vals_scaled = np.asarray(lam_vals, dtype=float) * duration_scale.divisor
+        lam_star_scaled = np.asarray(lam_star, dtype=float) * duration_scale.divisor
         lambda_label = "Λ(T) - Cumulative Arrival Rate"
         if self.show_derivations:
             deriv_lambda = MetricDerivations.get("Lambda")
@@ -439,7 +473,7 @@ class CumulativeArrivalRateConvergencePanel:
         overlays = (
             build_event_overlays(
                 times,
-                lam_vals,
+                lam_vals_scaled,
                 arrival_times or [],
                 [],
                 drop_lines_for_arrivals=True,
@@ -451,8 +485,8 @@ class CumulativeArrivalRateConvergencePanel:
         render_line_chart(
             ax,
             times,
-            lam_vals,
-            label=lambda_label,
+            lam_vals_scaled,
+            label=f"{lambda_label} [{duration_scale.rate_label}]",
             color="tab:blue",
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
@@ -460,22 +494,22 @@ class CumulativeArrivalRateConvergencePanel:
         render_line_chart(
             ax,
             times,
-            lam_star,
-            label="λ*(T) (Arrivals ≤ T)",
+            lam_star_scaled,
+            label=f"λ*(T) (Arrivals ≤ T) [{duration_scale.rate_label}]",
             color="tab:orange",
             sampling_frequency=self.sampling_frequency,
         )
         if self.show_title:
             ax.set_title(self.title)
-        ax.set_ylabel("Arrival Rate [per hr]")
+        ax.set_ylabel(f"Arrival Rate [{duration_scale.rate_label}]")
         ax.legend()
         _clip_axis_to_percentile(
             ax,
             times,
-            lam_vals,
+            lam_vals_scaled,
             upper_p=lambda_pctl_upper,
             lower_p=lambda_pctl_lower,
-            warmup_hours=lambda_warmup_hours,
+            warmup_seconds=lambda_warmup_seconds,
         )
 
     def plot(
@@ -503,6 +537,7 @@ class CumulativeArrivalRateConvergencePanel:
             resolved_out_path,
         ):
             ax = _first_axis(axes)
+            scale = _resolve_duration_scale(chart_config)
             self.render(
                 ax,
                 metrics.times,
@@ -511,7 +546,8 @@ class CumulativeArrivalRateConvergencePanel:
                 arrival_times=metrics.arrival_times,
                 lambda_pctl_upper=chart_config.lambda_pctl_upper,
                 lambda_pctl_lower=chart_config.lambda_pctl_lower,
-                lambda_warmup_hours=chart_config.lambda_warmup_hours,
+                lambda_warmup_seconds=chart_config.lambda_warmup_seconds,
+                scale=scale,
             )
         return resolved_out_path
 
@@ -526,32 +562,31 @@ class SamplePathConvergencePanel:
         ax: plt.Axes,
         L_vals: np.ndarray,
         lam_star: np.ndarray,
-        W_star_hours: np.ndarray,
+        W_star_seconds: np.ndarray,
         times: List[pd.Timestamp],
         *,
         epsilon: float,
-        horizon_days: float,
+        horizon_seconds: float,
     ) -> Tuple[float, int, int]:
         """
         Scatter points x=L(T) vs y=λ*(t)·W*(t), draw x=y and an ε relative band.
         Return (score, ok_count, total_count) using only points with elapsed >= horizon.
         """
-        y_vals = lam_star * W_star_hours
+        y_vals = lam_star * W_star_seconds
         x_vals = np.asarray(L_vals, dtype=float)
 
         n = len(times)
         if n > 0:
             t0 = times[0]
-            elapsed_h = np.array(
-                [(t - t0).total_seconds() / 3600.0 for t in times], dtype=float
+            elapsed_seconds = np.array(
+                [(t - t0).total_seconds() for t in times], dtype=float
             )
         else:
-            elapsed_h = np.array([], dtype=float)
+            elapsed_seconds = np.array([], dtype=float)
 
         finite_mask = np.isfinite(x_vals) & np.isfinite(y_vals) & (x_vals > 0.0)
-        horizon_hours = float(horizon_days) * 24.0
-        if horizon_hours and horizon_hours > 0.0:
-            finite_mask &= elapsed_h >= float(horizon_hours)
+        if horizon_seconds and horizon_seconds > 0.0:
+            finite_mask &= elapsed_seconds >= float(horizon_seconds)
 
         X = x_vals[finite_mask]
         Y = y_vals[finite_mask]
@@ -598,7 +633,7 @@ class SamplePathConvergencePanel:
             ax.text(
                 0.02,
                 0.98,
-                f"ε={epsilon:.3g}, horizon={horizon_days:.1f}d:  {ok_count}/{total_count}  ({score*100:.1f}%)",
+                f"ε={epsilon:.3g}, horizon={horizon_seconds/86400.0:.1f}d:  {ok_count}/{total_count}  ({score*100:.1f}%)",
                 ha="left",
                 va="top",
                 transform=ax.transAxes,
@@ -646,18 +681,18 @@ class SamplePathConvergencePanel:
                 empirical_metrics.W_star,
                 metrics.times,
                 epsilon=chart_config.epsilon,
-                horizon_days=chart_config.horizon_days,
+                horizon_seconds=chart_config.horizon_seconds,
             )
 
         if np.isnan(score):
             print(
                 f"Sample Path Convergence: ε={chart_config.epsilon}, "
-                f"H={chart_config.horizon_days}d -> n/a (no valid points)\n"
+                f"H={chart_config.horizon_seconds/86400.0:.1f}d -> n/a (no valid points)\n"
             )
         else:
             print(
                 f"Sample Path Convergence: ε={chart_config.epsilon}, "
-                f"H={chart_config.horizon_days}d -> "
+                f"H={chart_config.horizon_seconds/86400.0:.1f}d -> "
                 f"{ok_count}/{total_count} ({score*100:.1f}%)\n"
             )
         return resolved_out_path
@@ -697,6 +732,7 @@ def plot_arrival_departure_equilibrium_stack(
         base_name="arrival_departure_equilibrium",
     ) as (_, axes, resolved_out_path):
         flat_axes = axes if not isinstance(axes, np.ndarray) else axes.ravel()
+        scale = _resolve_duration_scale(chart_config)
         CFDPanel(
             with_event_marks=chart_config.with_event_marks,
             show_derivations=chart_config.show_derivations,
@@ -721,7 +757,8 @@ def plot_arrival_departure_equilibrium_stack(
             departure_times=metrics.departure_times,
             lambda_pctl_upper=chart_config.lambda_pctl_upper,
             lambda_pctl_lower=chart_config.lambda_pctl_lower,
-            lambda_warmup_hours=chart_config.lambda_warmup_hours,
+            lambda_warmup_seconds=chart_config.lambda_warmup_seconds,
+            scale=scale,
         )
     return resolved_out_path
 
@@ -758,6 +795,7 @@ def plot_process_time_convergence_stack(
         base_name="process_time_convergence_stack",
     ) as (_, axes, resolved_out_path):
         flat_axes = axes if not isinstance(axes, np.ndarray) else axes.ravel()
+        scale = _resolve_duration_scale(chart_config)
         ProcessTimeConvergencePanel(
             with_event_marks=chart_config.with_event_marks,
             sampling_frequency=chart_config.sampling_frequency,
@@ -769,6 +807,7 @@ def plot_process_time_convergence_stack(
             empirical_metrics.W_star,
             arrival_times=metrics.arrival_times,
             departure_times=metrics.departure_times,
+            scale=scale,
         )
         SojournTimeScatterPanel(
             with_event_marks=chart_config.with_event_marks,
@@ -780,6 +819,7 @@ def plot_process_time_convergence_stack(
             metrics.w_prime,
             metrics.departure_times,
             empirical_metrics.sojourn_vals,
+            scale=scale,
         )
     return resolved_out_path
 

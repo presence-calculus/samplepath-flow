@@ -27,7 +27,7 @@ def test_compute_tracking_errors_perfect_match():
         times, w_vals, lam_vals, W_star, lam_star
     )
 
-    assert np.allclose(elapsed, [0.0, 1.0, 2.0, 3.0])
+    assert np.allclose(elapsed, [0.0, 3600.0, 7200.0, 10800.0])
     assert np.allclose(eW[np.isfinite(W_star) & (W_star > 0)], 0.0)
     assert np.allclose(eLam[np.isfinite(lam_star) & (lam_star > 0)], 0.0)
 
@@ -50,7 +50,7 @@ def test_compute_tracking_errors_constant_offset_on_lambda_only():
     assert np.allclose(eW, 0.0)
     expected_rel = np.abs(lam_vals - lam_star) / lam_star
     assert np.allclose(eLam, expected_rel, rtol=1e-9, atol=1e-12)
-    assert np.allclose(elapsed, [0.0, 1.0, 2.0, 3.0])
+    assert np.allclose(elapsed, [0.0, 3600.0, 7200.0, 10800.0])
 
 
 def test_compute_tracking_errors_with_nans_masked():
@@ -78,7 +78,7 @@ def test_compute_tracking_errors_with_nans_masked():
     assert np.isnan(eLam[2])
     assert np.isclose(eLam[3], np.abs(4.4 - 4.0) / 4.0)
 
-    assert np.allclose(elapsed, [0.0, 1.0, 2.0, 3.0])
+    assert np.allclose(elapsed, [0.0, 3600.0, 7200.0, 10800.0])
 
 
 def test_compute_coherence_score_basic_pass():
@@ -87,10 +87,10 @@ def test_compute_coherence_score_basic_pass():
     eLam = np.array([0.02, 0.05, 0.10, 0.02])
     elapsed = np.array([100.0, 100.0, 100.0, 50.0])
     epsilon = 0.20
-    horizon_hours = 80.0
+    horizon_seconds = 80.0
 
     score, coherent, total = compute_coherence_score(
-        eW, eLam, elapsed, epsilon, horizon_hours
+        eW, eLam, elapsed, epsilon, horizon_seconds
     )
     assert coherent == 3
     assert total == 3
@@ -102,10 +102,10 @@ def test_compute_coherence_score_mixed_and_edge_cases():
     eLam = np.array([0.05, np.nan, 0.10, 0.25, 0.05])
     elapsed = np.array([100.0, 100.0, 20.0, 120.0, 120.0])
     epsilon = 0.20
-    horizon_hours = 80.0
+    horizon_seconds = 80.0
 
     score, coherent, total = compute_coherence_score(
-        eW, eLam, elapsed, epsilon, horizon_hours
+        eW, eLam, elapsed, epsilon, horizon_seconds
     )
     # Eligible (elapsed >= horizon): indices 0,1,3,4; NaNs excluded
     assert coherent == 0
@@ -118,10 +118,10 @@ def test_compute_coherence_score_no_eligible_returns_nan_score():
     eLam = np.array([0.5, 0.6])
     elapsed = np.array([10.0, 20.0])  # both < horizon
     epsilon = 0.20
-    horizon_hours = 80.0
+    horizon_seconds = 80.0
 
     score, coherent, total = compute_coherence_score(
-        eW, eLam, elapsed, epsilon, horizon_hours
+        eW, eLam, elapsed, epsilon, horizon_seconds
     )
     assert total == 0
     assert coherent == 0

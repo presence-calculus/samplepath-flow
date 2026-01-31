@@ -134,7 +134,7 @@ def test_rB_is_zero_after_completion(df_one_item, times_three, H_vals, W_star_se
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# rho(T): elapsed_hours / W*(t)
+# rho(T): elapsed_seconds / W*(t)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 

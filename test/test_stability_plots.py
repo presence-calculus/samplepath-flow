@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from samplepath.plots import stability
+from samplepath.plots.chart_config import ChartConfig
 
 
 def test_plot_rate_stability_charts_calls_render_N_panel():
@@ -19,7 +20,7 @@ def test_plot_rate_stability_charts_calls_render_N_panel():
         w=np.array([0.5, 0.6]),
     )
     df = pd.DataFrame({"start_ts": times, "end_ts": times})
-    args = SimpleNamespace(lambda_pctl=None, lambda_lower_pctl=None, lambda_warmup=0.0)
+    chart_config = ChartConfig()
     filter_result = SimpleNamespace(title_prefix=None, display=None)
     fig1 = MagicMock()
     fig2 = MagicMock()
@@ -52,6 +53,6 @@ def test_plot_rate_stability_charts_calls_render_N_panel():
         patch("samplepath.plots.stability.NPanel.render") as mock_render,
     ):
         stability.plot_rate_stability_charts(
-            df, args, filter_result, metrics, out_dir="/tmp/out"
+            df, chart_config, filter_result, metrics, out_dir="/tmp/out"
         )
     assert mock_render.call_count == 1

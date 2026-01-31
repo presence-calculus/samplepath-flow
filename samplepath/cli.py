@@ -5,12 +5,12 @@ import argparse
 from pathlib import Path
 import sys
 
-from .file_utils import (
+from .sample_path_analysis import run_analysis
+from .utils.file_utils import (
     copy_input_csv_to_output,
     ensure_output_dirs,
     write_cli_args_to_file,
 )
-from .sample_path_analysis import run_analysis
 
 
 def _looks_like_path(token: str) -> bool:

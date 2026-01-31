@@ -15,7 +15,13 @@ from samplepath.metrics import (
     FlowMetricsResult,
     compute_elementwise_empirical_metrics,
 )
+from samplepath.plots.chart_config import ChartConfig
 from samplepath.plots.helpers import _clip_axis_to_percentile, format_date_axis
+from samplepath.utils.duration_scale import HOURS, DurationScale
+
+
+def _resolve_duration_scale(chart_config: ChartConfig) -> DurationScale:
+    return chart_config.duration_scale or HOURS
 
 
 def plot_llaw_manifold_3d(
@@ -171,15 +177,15 @@ def compute_end_effect_series(
         return rH, rB, rho
 
     df = df.copy()
-    df["duration_h"] = (df["end_ts"] - df["start_ts"]).dt.total_seconds() / 3600.0
+    df["duration_s"] = (df["end_ts"] - df["start_ts"]).dt.total_seconds()
     df_sorted_by_end = df.sort_values("end_ts")
     df_sorted_by_start = df.sort_values("start_ts")
 
     t0 = times[0]
 
     for i, t in enumerate(times):
-        elapsed_h = (t - t0).total_seconds() / 3600.0
-        if elapsed_h <= 0:
+        elapsed_s = (t - t0).total_seconds()
+        if elapsed_s <= 0:
             continue
 
         H_T = float(H_vals[i]) if i < len(H_vals) and np.isfinite(H_vals[i]) else np.nan
@@ -190,7 +196,7 @@ def compute_end_effect_series(
             df_sorted_by_end["end_ts"] <= t
         )
         H_full = (
-            float(df_sorted_by_end.loc[mask_full, "duration_h"].sum())
+            float(df_sorted_by_end.loc[mask_full, "duration_s"].sum())
             if mask_full.any()
             else 0.0
         )
@@ -208,7 +214,7 @@ def compute_end_effect_series(
 
         Wstar_t = float(W_star[i]) if i < len(W_star) else float("nan")
         rho[i] = (
-            (elapsed_h / Wstar_t) if np.isfinite(Wstar_t) and Wstar_t > 0 else np.nan
+            (elapsed_s / Wstar_t) if np.isfinite(Wstar_t) and Wstar_t > 0 else np.nan
         )
 
     return rH, rB, rho
@@ -225,9 +231,7 @@ def compute_tracking_errors(
     if n == 0:
         return np.array([]), np.array([]), np.array([])
     t0 = times[0]
-    elapsed_hours = np.array(
-        [(t - t0).total_seconds() / 3600.0 for t in times], dtype=float
-    )
+    elapsed_seconds = np.array([(t - t0).total_seconds() for t in times], dtype=float)
 
     eW = np.full(n, np.nan, dtype=float)
     eLam = np.full(n, np.nan, dtype=float)
@@ -238,17 +242,17 @@ def compute_tracking_errors(
     eW[valid_W] = np.abs(w_vals[valid_W] - W_star[valid_W]) / W_star[valid_W]
     eLam[valid_L] = np.abs(lam_vals[valid_L] - lam_star[valid_L]) / lam_star[valid_L]
 
-    return eW, eLam, elapsed_hours
+    return eW, eLam, elapsed_seconds
 
 
 def compute_coherence_score(
     eW: np.ndarray,
     eLam: np.ndarray,
-    elapsed_hours: np.ndarray,
+    elapsed_seconds: np.ndarray,
     epsilon: float,
-    horizon_hours: float,
+    horizon_seconds: float,
 ) -> Tuple[float, int, int]:
-    ok_idx = np.isfinite(eW) & np.isfinite(eLam) & (elapsed_hours >= horizon_hours)
+    ok_idx = np.isfinite(eW) & np.isfinite(eLam) & (elapsed_seconds >= horizon_seconds)
     total = int(np.sum(ok_idx))
     if total == 0:
         return float("nan"), 0, 0
@@ -269,28 +273,44 @@ def draw_dynamic_convergence_panel_with_errors(
     out_path: str,
     lambda_pctl_upper: Optional[float] = None,
     lambda_pctl_lower: Optional[float] = None,
-    lambda_warmup_hours: Optional[float] = None,
+    lambda_warmup_seconds: Optional[float] = None,
+    scale: Optional[DurationScale] = None,
 ) -> None:
     fig, axes = plt.subplots(3, 1, figsize=(12, 9.2), sharex=True)
+    duration_scale = scale or HOURS
+    w_scaled = np.asarray(w_vals, dtype=float) / duration_scale.divisor
+    W_star_scaled = np.asarray(W_star, dtype=float) / duration_scale.divisor
+    lam_scaled = np.asarray(lam_vals, dtype=float) * duration_scale.divisor
+    lam_star_scaled = np.asarray(lam_star, dtype=float) * duration_scale.divisor
 
-    axes[0].plot(times, w_vals, label="w(T) [hrs]")
-    axes[0].plot(times, W_star, linestyle="--", label="W*(t) [hrs] (completed ≤ t)")
+    axes[0].plot(times, w_scaled, label=f"w(T) [{duration_scale.label}]")
+    axes[0].plot(
+        times,
+        W_star_scaled,
+        linestyle="--",
+        label=f"W*(t) [{duration_scale.label}] (completed ≤ t)",
+    )
     axes[0].set_title("w(T) vs W*(t) — dynamic")
-    axes[0].set_ylabel("hours")
+    axes[0].set_ylabel(duration_scale.label)
     axes[0].legend()
 
-    axes[1].plot(times, lam_vals, label="Λ(T) [1/hr]")
-    axes[1].plot(times, lam_star, linestyle="--", label="λ*(t) [1/hr] (arrivals ≤ t)")
+    axes[1].plot(times, lam_scaled, label=f"Λ(T) [{duration_scale.rate_label}]")
+    axes[1].plot(
+        times,
+        lam_star_scaled,
+        linestyle="--",
+        label=f"λ*(t) [{duration_scale.rate_label}] (arrivals ≤ t)",
+    )
     axes[1].set_title("Λ(T) vs λ*(t) — dynamic")
-    axes[1].set_ylabel("1/hr")
+    axes[1].set_ylabel(duration_scale.rate_label)
     axes[1].legend()
     _clip_axis_to_percentile(
         axes[1],
         times,
-        lam_vals,
+        lam_scaled,
         upper_p=lambda_pctl_upper,
         lower_p=lambda_pctl_lower,
-        warmup_hours=lambda_warmup_hours,
+        warmup_seconds=lambda_warmup_seconds,
     )
 
     axes[2].plot(times, eW, label="rel. error e_W")
@@ -334,29 +354,45 @@ def draw_dynamic_convergence_panel_with_errors_and_endeffects(
     out_path: str,
     lambda_pctl_upper: Optional[float] = None,
     lambda_pctl_lower: Optional[float] = None,
-    lambda_warmup_hours: Optional[float] = None,
+    lambda_warmup_seconds: Optional[float] = None,
+    scale: Optional[DurationScale] = None,
 ) -> None:
     """Four-row dynamic convergence view with end-effect metrics."""
     fig, axes = plt.subplots(4, 1, figsize=(12, 12), sharex=True)
+    duration_scale = scale or HOURS
+    w_scaled = np.asarray(w_vals, dtype=float) / duration_scale.divisor
+    W_star_scaled = np.asarray(W_star, dtype=float) / duration_scale.divisor
+    lam_scaled = np.asarray(lam_vals, dtype=float) * duration_scale.divisor
+    lam_star_scaled = np.asarray(lam_star, dtype=float) * duration_scale.divisor
 
-    axes[0].plot(times, w_vals, label="w(T) [hrs]")
-    axes[0].plot(times, W_star, linestyle="--", label="W*(t) [hrs] (completed ≤ t)")
+    axes[0].plot(times, w_scaled, label=f"w(T) [{duration_scale.label}]")
+    axes[0].plot(
+        times,
+        W_star_scaled,
+        linestyle="--",
+        label=f"W*(t) [{duration_scale.label}] (completed ≤ t)",
+    )
     axes[0].set_title("w(T) vs W*(t) — dynamic")
-    axes[0].set_ylabel("hours")
+    axes[0].set_ylabel(duration_scale.label)
     axes[0].legend()
 
-    axes[1].plot(times, lam_vals, label="Λ(T) [1/hr]")
-    axes[1].plot(times, lam_star, linestyle="--", label="λ*(t) [1/hr] (arrivals ≤ t)")
+    axes[1].plot(times, lam_scaled, label=f"Λ(T) [{duration_scale.rate_label}]")
+    axes[1].plot(
+        times,
+        lam_star_scaled,
+        linestyle="--",
+        label=f"λ*(t) [{duration_scale.rate_label}] (arrivals ≤ t)",
+    )
     axes[1].set_title("Λ(T) vs λ*(t) — dynamic")
-    axes[1].set_ylabel("1/hr")
+    axes[1].set_ylabel(duration_scale.rate_label)
     axes[1].legend()
     _clip_axis_to_percentile(
         axes[1],
         times,
-        lam_vals,
+        lam_scaled,
         upper_p=lambda_pctl_upper,
         lower_p=lambda_pctl_lower,
-        warmup_hours=lambda_warmup_hours,
+        warmup_seconds=lambda_warmup_seconds,
     )
 
     axes[2].plot(times, eW, label="rel. error e_W")
@@ -398,6 +434,7 @@ def draw_dynamic_convergence_panel_with_errors_and_endeffects(
 def plot_residence_time_convergence_error_charts(
     df: pd.DataFrame,
     args,
+    chart_config: ChartConfig,
     filter_result: Optional[FilterResult],
     metrics: FlowMetricsResult,
     out_dir: str,
@@ -412,11 +449,12 @@ def plot_residence_time_convergence_error_charts(
     eW_ts, eLam_ts, _ = compute_tracking_errors(
         metrics.times, metrics.w, metrics.Lambda, W_star_ts, lam_star_ts
     )
-    epsilon = getattr(args, "epsilon", None)
+    epsilon = chart_config.epsilon
     mode_label = "complete" if not getattr(args, "incomplete", False) else "incomplete"
-    lambda_pctl_upper = getattr(args, "lambda_pctl", None)
-    lambda_pctl_lower = getattr(args, "lambda_lower_pctl", None)
-    lambda_warmup_hours = getattr(args, "lambda_warmup", None)
+    lambda_pctl_upper = chart_config.lambda_pctl_upper
+    lambda_pctl_lower = chart_config.lambda_pctl_lower
+    lambda_warmup_seconds = chart_config.lambda_warmup_seconds
+    scale = _resolve_duration_scale(chart_config)
 
     ts_conv_dyn3 = os.path.join(out_dir, "advanced/residence_convergence_errors.png")
     draw_dynamic_convergence_panel_with_errors(
@@ -432,7 +470,8 @@ def plot_residence_time_convergence_error_charts(
         ts_conv_dyn3,
         lambda_pctl_upper=lambda_pctl_upper,
         lambda_pctl_lower=lambda_pctl_lower,
-        lambda_warmup_hours=lambda_warmup_hours,
+        lambda_warmup_seconds=lambda_warmup_seconds,
+        scale=scale,
     )
     written.append(ts_conv_dyn3)
 
@@ -458,7 +497,8 @@ def plot_residence_time_convergence_error_charts(
         ts_conv_dyn4,
         lambda_pctl_upper=lambda_pctl_upper,
         lambda_pctl_lower=lambda_pctl_lower,
-        lambda_warmup_hours=lambda_warmup_hours,
+        lambda_warmup_seconds=lambda_warmup_seconds,
+        scale=scale,
     )
     written.append(ts_conv_dyn4)
     return written
@@ -467,6 +507,7 @@ def plot_residence_time_convergence_error_charts(
 def plot_advanced_charts(
     df: pd.DataFrame,
     args,
+    chart_config: ChartConfig,
     filter_result: Optional[FilterResult],
     metrics: FlowMetricsResult,
     out_dir: str,
@@ -474,6 +515,6 @@ def plot_advanced_charts(
     written = []
     written += plot_llaw_manifold_3d(df, metrics, out_dir)
     written += plot_residence_time_convergence_error_charts(
-        df, args, filter_result, metrics, out_dir
+        df, args, chart_config, filter_result, metrics, out_dir
     )
     return written
