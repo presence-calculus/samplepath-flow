@@ -436,48 +436,93 @@ Samplepath Analysis Toolkit</em></a></p></p>
         Analyze Command</a>
         <ul>
         <li><a href="#example" id="toc-example">Example</a></li>
-        <li><a href="#options" id="toc-options">Options</a>
-        <ul>
-        <li><a href="#csv-parsing" id="toc-csv-parsing">CSV
-        Parsing</a></li>
-        <li><a href="#data-filters" id="toc-data-filters">Data
-        Filters</a></li>
-        <li><a href="#outlier-trimming"
-        id="toc-outlier-trimming">Outlier Trimming</a></li>
-        <li><a href="#lambda-fine-tuning"
-        id="toc-lambda-fine-tuning">Lambda Fine Tuning</a></li>
-        <li><a href="#convergence-thresholds"
-        id="toc-convergence-thresholds">Convergence Thresholds</a></li>
-        <li><a href="#chart-configuration"
-        id="toc-chart-configuration">Chart Configuration</a></li>
-        <li><a href="#export-configuration"
-        id="toc-export-configuration">Export Configuration</a></li>
-        <li><a href="#output-configuration"
-        id="toc-output-configuration">Output Configuration</a></li>
         </ul></li>
+        <li><a href="#cli-options" id="toc-cli-options">4 CLI
+        Options</a>
+        <ul>
         <li><a href="#inputs-and-outputs"
-        id="toc-inputs-and-outputs">Inputs and Outputs</a>
+        id="toc-inputs-and-outputs">4.1 Inputs and Outputs</a>
         <ul>
         <li><a href="#input-format" id="toc-input-format">Input
         Format</a></li>
         <li><a href="#output-layout" id="toc-output-layout">Output
         Layout</a></li>
+        <li><a href="#output-configuration"
+        id="toc-output-configuration">Output Configuration</a></li>
         </ul></li>
+        <li><a href="#csv-parsing" id="toc-csv-parsing">4.2 CSV
+        Parsing</a></li>
+        <li><a href="#data-filters" id="toc-data-filters">4.3 Data
+        Filters</a>
+        <ul>
+        <li><a href="#row-filters" id="toc-row-filters">Row
+        filters</a></li>
+        <li><a href="#outlier-trimming"
+        id="toc-outlier-trimming">Outlier Trimming</a></li>
+        </ul></li>
+        </ul></li>
+        <li><a href="#analysis-mode" id="toc-analysis-mode">5 Analysis
+        Mode</a>
+        <ul>
+        <li><a href="#export-configuration"
+        id="toc-export-configuration">5.1 Export Configuration</a></li>
+        <li><a href="#chart-configuration"
+        id="toc-chart-configuration">5.2 Chart Configuration</a></li>
+        </ul></li>
+        <li><a href="#charts-and-exports" id="toc-charts-and-exports">6
+        Charts and Exports</a>
+        <ul>
+        <li><a href="#output-files" id="toc-output-files">6.1 Output
+        files</a></li>
+        <li><a href="#flow-metrics-csv" id="toc-flow-metrics-csv">6.2
+        Flow Metrics CSV</a>
+        <ul>
+        <li><a href="#event-mode-flow-metrics"
+        id="toc-event-mode-flow-metrics">Event mode flow
+        metrics</a></li>
+        <li><a href="#conventions"
+        id="toc-conventions">Conventions</a></li>
+        <li><a href="#calendar-mode-flow-metrics"
+        id="toc-calendar-mode-flow-metrics">Calendar mode flow
+        metrics</a></li>
+        <li><a href="#conventions-1"
+        id="toc-conventions-1">Conventions</a></li>
+        <li><a href="#leankanban-flow-metrics-mappings"
+        id="toc-leankanban-flow-metrics-mappings">Lean/Kanban Flow
+        Metrics Mappings</a></li>
+        </ul></li>
+        <li><a href="#element-csv-elements.csv"
+        id="toc-element-csv-elements.csv">6.3 Element CSV —
+        <code>elements.csv</code></a>
+        <ul>
+        <li><a href="#residence-time-definition"
+        id="toc-residence-time-definition">Residence time
+        definition</a></li>
+        </ul></li>
+        <li><a href="#charts" id="toc-charts">6.4 Charts</a></li>
+        </ul></li>
+        <li><a href="#esoteric-settings" id="toc-esoteric-settings">7
+        Esoteric settings</a>
+        <ul>
+        <li><a href="#lambda-fine-tuning"
+        id="toc-lambda-fine-tuning">7.1 Lambda Fine Tuning</a></li>
+        <li><a href="#convergence-thresholds"
+        id="toc-convergence-thresholds">7.2 Convergence
+        Thresholds</a></li>
         </ul></li>
         </ul>
       </nav>
             <h1 id="invocation">1 Invocation</h1>
-            <p>This tool contains command line utilities that perform
-            sample path analysis on data sets representing flow
-            processes provided in csv files and writes its output as
-            <code>png</code> files to the local filesystem.</p>
+            <p>This tool provides command line utilities for sample-path
+            analysis of flow-process datasets in CSV form and writes
+            outputs to the local filesystem.</p>
             <p>Invoke it on the command line with</p>
             <div class="sourceCode" id="cb1"><pre
             class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">flow</span> <span class="op">&lt;</span>command<span class="op">&gt;</span> <span class="op">&lt;</span>csv-file<span class="op">&gt;</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span></span></code></pre></div>
             <h1 id="commands">2 Commands</h1>
             <ul>
             <li><code>Analyze</code>: Generates finite-window Little’s
-            Law charts from an CSV file containing <code>id</code>,
+            Law charts from a CSV file containing <code>id</code>,
             <code>start_ts</code>, <code>end_ts</code>, and optionally a
             <code>class</code> column. It produces a full set of long
             run samplepath flow-metrics charts and writes them under an
@@ -491,9 +536,10 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <li>Copy input CSV under scenario</li>
             <li>Write CLI parameters into the scenario folder</li>
             <li>Run the sample-path analysis</li>
-            <li>Generate the charts and write to the output
-            directory.</li>
-            <li>Print paths to generated charts</li>
+            <li>Generate charts and/or export files and write them to
+            the output directory.</li>
+            <li>Print the paths to generated charts and/or export
+            files.</li>
             </ol>
             <h3 id="example">Example</h3>
             <div class="sourceCode" id="cb2"><pre
@@ -505,29 +551,92 @@ Samplepath Analysis Toolkit</em></a></p></p>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--scenario</span> weekly_report <span class="dt">\</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--clean</span></span></code></pre></div>
             <hr />
-            <h2 id="options">Options</h2>
-            <h3 id="csv-parsing">CSV Parsing</h3>
+            <h1 id="cli-options">4 CLI Options</h1>
+            <h2 id="inputs-and-outputs">4.1 Inputs and Outputs</h2>
+            <h3 id="input-format">Input Format</h3>
+            <p>The input format is simple. The CSV requires three
+            columns:</p>
+            <ul>
+            <li><em>id</em>: any string identifier to denote an
+            element/item</li>
+            <li><em>start_ts</em>: the start time of an event</li>
+            <li><em>end_ts</em>: the end time of an event</li>
+            </ul>
+            <p>Additionally, you may pass other columns. They are
+            ignored for computation (except a <em>class</em> column used
+            for filtering), but preserved in the elements export.</p>
+            <ul>
+            <li>If your CSV has different column names, you can map them
+            with <code>--start-column</code> and
+            <code>--end-column</code> options.</li>
+            <li>You might need to explicitly pass a date format for the
+            timestamps if you see date parsing errors. The
+            <code>--date-format</code> argument does this.</li>
+            </ul>
+            <p>Results and charts are saved to the output directory as
+            follows:</p>
+            <ul>
+            <li>The default output directory is “charts” in your current
+            directory.</li>
+            <li>You can override this with the <code>--output-dir</code>
+            argument.</li>
+            </ul>
+            <h3 id="output-layout">Output Layout</h3>
+            <p>For input <code>events.csv</code>, output is organized
+            as:</p>
+            <div class="sourceCode" id="cb3"><pre
+            class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>output-dir<span class="op">&gt;</span>/</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> events/</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="ex">└──</span> <span class="op">&lt;</span>scenario<span class="op">&gt;</span>/                 <span class="co"># e.g., latest</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> input/                  <span class="co"># input snapshots</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> exports/                <span class="co"># CSV exports (if enabled)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> core/                   <span class="co"># core metrics &amp; tables</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> convergence/            <span class="co"># limit estimates &amp; diagnostics</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> convergence/panels/     <span class="co"># multi-panel figures</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> stability/panels/       <span class="co"># stability/variance panels</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> advanced/               <span class="co"># optional deep-dive charts</span></span></code></pre></div>
+            <h3 id="output-configuration">Output Configuration</h3>
+            <ul>
+            <li><p><strong>–output-dir</strong> <em>(default:
+            <code>charts</code>)</em><br />
+            Root directory where outputs are written</p></li>
+            <li><p><strong>–scenario</strong> <em>(default:
+            <code>latest</code>)</em><br />
+            Subdirectory inside the output root</p></li>
+            <li><p><strong>–save-input</strong> <em>(default:
+            <code>True</code>)</em><br />
+            Copy the input CSV into the output directory</p></li>
+            <li><p><strong>–clean</strong> <em>(default:
+            <code>False</code>)</em><br />
+            Remove existing charts before writing new results</p></li>
+            </ul>
+            <h2 id="csv-parsing">4.2 CSV Parsing</h2>
             <ul>
             <li><p><strong>csv</strong> <em>(positional)</em><br />
             Path to the CSV. Should contain at least the columns
             (<code>id,start_ts,end_ts[, class]</code>)</p></li>
             <li><p><strong>–delimiter</strong> <em>(default:
-            <code>","</code>)</em><br />
-            Optional delimiter override</p></li>
+            <code>None</code>)</em><br />
+            Optional delimiter override (otherwise
+            auto-detected)</p></li>
             <li><p><strong>–start-column</strong> <em>(default:
             <code>start_ts</code>)</em><br />
-            Name of start timestamp column</p></li>
+            Name of the start timestamp column</p></li>
             <li><p><strong>–end-column</strong> <em>(default:
             <code>end_ts</code>)</em><br />
-            Name of end timestamp column</p></li>
+            Name of the end timestamp column</p></li>
             <li><p><strong>–date-format</strong> <em>(default:
             <code>None</code>)</em><br />
             Explicit datetime format string for parsing</p></li>
+            <li><p><strong>–day-first</strong> <em>(default:
+            <code>False</code>)</em><br />
+            Treat ambiguous dates as day-first (e.g., 03/04/2025 → April
+            3, 2025)</p></li>
             </ul>
-            <hr />
-            <h3 id="data-filters">Data Filters</h3>
+            <h2 id="data-filters">4.3 Data Filters</h2>
+            <h3 id="row-filters">Row filters</h3>
             <p>Drop rows from the CSV before running the analysis.
-            Useful for isolating subprocesses in the main file. Use with
+            Useful for isolating subprocesses in the main file; use with
             <code>--scenario</code> to save subprocess results.</p>
             <ul>
             <li><p><strong>–completed</strong> <em>(default:
@@ -540,10 +649,9 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <code>None</code>)</em><br />
             Comma-separated list of class tags to include</p></li>
             </ul>
-            <hr />
             <h3 id="outlier-trimming">Outlier Trimming</h3>
-            <p>Remove outliers to see whether the remaining process
-            converges.</p>
+            <p>Remove outliers to assess convergence on the remaining
+            process.</p>
             <ul>
             <li><p><strong>–outlier-hours</strong> <em>(default:
             <code>None</code>)</em><br />
@@ -563,8 +671,545 @@ Samplepath Analysis Toolkit</em></a></p></p>
             Also drop items below Q1 − K·IQR when combined with
             <code>--outlier-iqr</code></p></li>
             </ul>
-            <hr />
-            <h3 id="lambda-fine-tuning">Lambda Fine Tuning</h3>
+            <h1 id="analysis-mode">5 Analysis Mode</h1>
+            <p>This option selects between <strong>event mode</strong>
+            and <strong>calendar mode</strong> when producing charts and
+            exports.</p>
+            <p>In <strong>event mode</strong> (the default), metrics are
+            indexed by <em>events</em> and evaluated at exact event
+            timestamps. In <strong>calendar mode</strong>, metrics are
+            indexed by calendar boundaries.</p>
+            <p>Calendar mode metrics are <strong>always derived by
+            sub-sampling</strong>, not by aggregation. In principle,
+            this behaves as if all metrics are first computed in event
+            mode at the full timestamp resolution of the input data, and
+            calendar mode then selects exact pre-computed values at
+            calendar boundaries for reporting. In practice, values at
+            calendar boundaries are computed by taking definite
+            integrals of the finest-granularity data. In either case,
+            <em>no information is lost in this process</em>.</p>
+            <p>Both modes present identical metric values at shared
+            timestamps; calendar mode simply reports fewer points. This
+            is fundamentally different from the way flow metrics are
+            computed by metrics tools today.</p>
+            <p>See the metrics definition section under <em>Exports</em>
+            for details.</p>
+            <p><strong><code>--sampling-frequency</code></strong>
+            <em>(default: <code>None</code>)</em><br />
+            Enables calendar mode analysis when set. Charts and exported
+            data are indexed to calendar boundaries rather than raw
+            event timestamps.<br />
+            Accepted values: <code>day</code>, <code>week</code>,
+            <code>month</code>, <code>quarter</code>, <code>year</code>,
+            or pandas aliases like <code>D</code>, <code>W-MON</code>,
+            <code>MS</code>, <code>QS-JAN</code>,
+            <code>YS-JAN</code>.</p>
+            <p>In calendar mode:</p>
+            <ul>
+            <li>Charts display markers at sampled data points.</li>
+            <li>X-axis ticks align to calendar boundaries.</li>
+            <li>Event overlays are rendered as rug plots at
+            <code>y = 0</code>.</li>
+            </ul>
+            <p><strong><code>--anchor</code></strong> <em>(default:
+            <code>None</code>)</em><br />
+            Specifies the anchor for calendar frequency boundaries.</p>
+            <ul>
+            <li>For <code>week</code>: a day name
+            (e.g. <code>MON</code>, <code>WED</code>,
+            <code>SUN</code>)</li>
+            <li>For <code>quarter</code> or <code>year</code>: a month
+            name (e.g. <code>JAN</code>, <code>APR</code>)</li>
+            <li>Ignored for <code>day</code> and <code>month</code></li>
+            </ul>
+            <p>Only meaningful when <code>--sampling-frequency</code> is
+            set.</p>
+            <h2 id="export-configuration">5.1 Export Configuration</h2>
+            <ul>
+            <li><p><strong>–export-data</strong> <em>(default:
+            <code>True</code>)</em><br />
+            Export flow metrics and element data to CSV files alongside
+            charts. Creates two files under
+            <code>&lt;scenario&gt;/exports/</code>: a flow metrics CSV
+            and an element-level CSV.</p></li>
+            <li><p><strong>–export-only</strong> <em>(default:
+            <code>False</code>)</em><br />
+            Export flow metrics and element data to CSV files without
+            generating charts. Mutually exclusive with
+            <code>--no-export-data</code>.</p></li>
+            </ul>
+            <h2 id="chart-configuration">5.2 Chart Configuration</h2>
+            <ul>
+            <li><p><strong>–with-event-marks</strong> <em>(default:
+            <code>False</code>)</em><br />
+            Show point process event markers on sample path charts. In
+            event mode, arrivals are shown as purple dots and departures
+            as green dots with drop lines to the event timestamps. In
+            calendar mode, events are shown as rug plots at y =
+            0.</p></li>
+            <li><p><strong>–show-derivations</strong> <em>(default:
+            <code>False</code>)</em><br />
+            Show formulas for key metrics in titles/legends of charts
+            (e.g., N(t) = A(T) - D(T)).</p></li>
+            <li><p><strong>–chart-format</strong> <em>(default:
+            <code>png</code>)</em><br />
+            Chart output format. Use <code>svg</code> for scalable
+            vector output.</p></li>
+            <li><p><strong>–chart-dpi</strong> <em>(default:
+            <code>150</code>)</em><br />
+            DPI for PNG output. Ignored for SVG.</p></li>
+            </ul>
+            <h1 id="charts-and-exports">6 Charts and Exports</h1>
+            <p>This package produces two outputs: <code>CSV</code> files
+            containing flow analysis data and charts visualizing key
+            metrics, exported as <code>png</code> or <code>svg</code>
+            images.</p>
+            <p>The CSV dataset is the normative output of the package;
+            all charts are derived views and introduce no additional
+            semantics. Treat this dataset as the primary analytical
+            artifact and data contract, and explore it using other
+            tools.</p>
+            <h2 id="output-files">6.1 Output files</h2>
+            <p>When exports are enabled, two CSV files are written under
+            <code>&lt;scenario&gt;/exports/</code>.</p>
+            <ul>
+            <li>Flow Metrics CSV: A time series CSV with core flow
+            metrics ordered by events or calendar indices depending on
+            analysis mode.</li>
+            <li>Elements CSV: An element-wise CSV ordered by start
+            timestamp.</li>
+            </ul>
+            <p>The two output files and the metrics they export are
+            described below.</p>
+            <h2 id="flow-metrics-csv">6.2 Flow Metrics CSV</h2>
+            <p>The output filename depends on the analysis mode (see
+            above):</p>
+            <ul>
+            <li><strong>Event mode</strong> (no
+            <code>--sampling-frequency</code> is provided):
+            <code>event_indexed_metrics.csv</code></li>
+            <li><strong>Calendar mode</strong>
+            (<code>--sampling-frequency</code> is provided):
+            <code>&lt;frequency&gt;_indexed_metrics.csv</code><br />
+            (e.g. <code>week_indexed_metrics.csv</code> if
+            <code>--sampling-frequency week</code> is provided)</li>
+            </ul>
+            <h3 id="event-mode-flow-metrics">Event mode flow
+            metrics</h3>
+            <p>Each metric is indexed to one or more events occurring at
+            a single timestamp (mathematically, a <em>point
+            process</em>) and represents the cumulative effect of those
+            events on the evolution of flow over the observation window.
+            A key measure of flow accumulation is <em>cumulative
+            presence mass</em> (defined below).</p>
+            <p>Flow metrics are meaningful for reasoning about flow
+            dynamics only when computed in exact event order and
+            accumulated via integration of presence mass.</p>
+            <blockquote>
+            <p><strong>Note:</strong> This is the <strong>only</strong>
+            correct definition of flow metrics for an arrival–departure
+            process when the objective is to reason rigorously about
+            flow dynamics.</p>
+            </blockquote>
+            <h3 id="conventions">Conventions</h3>
+            <ul>
+            <li>Rows are indexed by event timestamps within a finite
+            observation interval <span class="math inline">\((t_0,
+            t_N]\)</span>.</li>
+            <li>By convention, set <span class="math inline">\(t_0 =
+            0\)</span>, and for any event timestamp <span
+            class="math inline">\(t\)</span>, define <span
+            class="math display">\[
+            T = t - t_0
+            \]</span> Thus the interval <span class="math inline">\([0,
+            T]\)</span> is shorthand for <span
+            class="math inline">\((t_0, t]\)</span>, representing the
+            observation window up to the current event; the
+            <em>duration</em> of the interval is <span
+            class="math inline">\(T\)</span>.</li>
+            <li>Rows are ordered by ascending timestamp.</li>
+            <li>Each row corresponds to one or more events (arrival,
+            departure, or both) occurring at the same timestamp.</li>
+            <li>Multiple events at the same timestamp are aggregated
+            into a single row, reflecting their cumulative effect on all
+            metrics.</li>
+            <li>Metrics indexed by lowercase <span
+            class="math inline">\(t\)</span> are <em>instantaneous</em>.
+            <span class="math inline">\(N(t)\)</span> is the only
+            instantaneous metric.</li>
+            <li>Metrics indexed by uppercase <span
+            class="math inline">\(T\)</span> are <em>cumulative</em>,
+            computed over the interval <span class="math inline">\([0,
+            T]\)</span>.</li>
+            </ul>
+            <blockquote>
+            <p>All metrics except <span
+            class="math inline">\(N(t)\)</span> are cumulative. Whether
+            a definition depends on the instantaneous time <span
+            class="math inline">\(t\)</span> or the interval length
+            <span class="math inline">\(T\)</span> is intentional and
+            significant.</p>
+            </blockquote>
+            <table>
+            <colgroup>
+            <col style="width: 8%" />
+            <col style="width: 91%" />
+            </colgroup>
+            <thead>
+            <tr>
+            <th>Column</th>
+            <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+            <td><code>timestamp</code></td>
+            <td>Event timestamp <span
+            class="math inline">\(t\)</span></td>
+            </tr>
+            <tr>
+            <td><code>element_id</code></td>
+            <td>Element ID: single ID if unique,<br/>A text string with
+            format A:id;id|D:id;id when multiple elements share the
+            timestamp,<br/>or empty if unresolvable</td>
+            </tr>
+            <tr>
+            <td><code>event_type</code></td>
+            <td><code>A</code> (arrival), <code>D</code> (departure),
+            <code>A/D</code> (both), or <code>-</code> (none)</td>
+            </tr>
+            <tr>
+            <td><code>A(T)</code></td>
+            <td>Cumulative arrivals up to and including the current
+            timestamp t</td>
+            </tr>
+            <tr>
+            <td><code>D(T)</code></td>
+            <td>Cumulative departures up to and including the current
+            timestamp t</td>
+            </tr>
+            <tr>
+            <td><code>N(t)</code></td>
+            <td>Net number in process at this timestamp: <span
+            class="math display">\[N(t) = A(T) - D(T)\]</span></td>
+            </tr>
+            <tr>
+            <td><code>H(T)</code></td>
+            <td>Cumulative presence mass, the area under N(t): <span
+            class="math display">\[H(T) = \int_0^T
+            N(t)\,dt\]</span></td>
+            </tr>
+            <tr>
+            <td><code>L(T)</code></td>
+            <td>Time-average of presence mass: <span
+            class="math display">\[L(T) = \frac{H(T)}{T}\]</span></td>
+            </tr>
+            <tr>
+            <td><code>Lambda(T)</code></td>
+            <td>Arrival rate: <span class="math display">\[\Lambda(T) =
+            \frac{A(T)}{T}\]</span></td>
+            </tr>
+            <tr>
+            <td><code>Theta(T)</code></td>
+            <td>Departure rate: <span class="math display">\[\Theta(T) =
+            \frac{D(T)}{T}\]</span></td>
+            </tr>
+            <tr>
+            <td><code>w(T)</code></td>
+            <td>Residence time per arrival: <span
+            class="math display">\[w(T) =
+            \frac{H(T)}{A(T)}\]</span></td>
+            </tr>
+            <tr>
+            <td><code>w'(T)</code></td>
+            <td>Residence time per departure: <span
+            class="math display">\[w&#39;(T) =
+            \frac{H(T)}{D(T)}\]</span></td>
+            </tr>
+            <tr>
+            <td><code>W*(T)</code></td>
+            <td>Element-wise empirical mean sojourn time for completed
+            items: <span class="math display">\[W^*(T) = \text{Avg}(d_i
+            - a_i), \quad d_i \in (0, T]\]</span></td>
+            </tr>
+            </tbody>
+            </table>
+            <h3 id="calendar-mode-flow-metrics">Calendar mode flow
+            metrics</h3>
+            <p>Calendar mode reports the <em>same metrics</em> as event
+            mode, evaluated at fixed calendar boundaries rather than at
+            individual events.</p>
+            <h3 id="conventions-1">Conventions</h3>
+            <ul>
+            <li>Rows correspond to calendar boundary timestamps
+            determined by <code>--sampling-frequency</code> (and
+            <code>--anchor</code>, if specified).</li>
+            <li>For each boundary timestamp <span
+            class="math inline">\(t\)</span>, define <span
+            class="math inline">\(T = t - t_0\)</span> exactly as in
+            event mode.</li>
+            <li>All metrics have the same mathematical definitions as in
+            event mode and are evaluated over the interval <span
+            class="math inline">\([0, T]\)</span>.</li>
+            <li>Calendar mode omits <code>element_id</code> and
+            <code>event_type</code>.</li>
+            </ul>
+            <table>
+            <colgroup>
+            <col style="width: 13%" />
+            <col style="width: 86%" />
+            </colgroup>
+            <thead>
+            <tr>
+            <th>Column</th>
+            <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+            <td><code>&lt;frequency&gt;</code></td>
+            <td>Calendar boundary timestamp <span
+            class="math inline">\(t\)</span></td>
+            </tr>
+            <tr>
+            <td><code>A(T)</code></td>
+            <td>Cumulative arrivals: <span
+            class="math inline">\(A(T)\)</span></td>
+            </tr>
+            <tr>
+            <td><code>D(T)</code></td>
+            <td>Cumulative departures: <span
+            class="math inline">\(D(T)\)</span></td>
+            </tr>
+            <tr>
+            <td><code>N(T)</code></td>
+            <td>Work in process at the boundary: <span
+            class="math display">\[N(T) = N(t)\]</span></td>
+            </tr>
+            <tr>
+            <td><code>H(T)</code></td>
+            <td>Cumulative presence mass: <span
+            class="math display">\[H(T) = \int_0^T
+            N(t)\,dt\]</span></td>
+            </tr>
+            <tr>
+            <td><code>L(T)</code></td>
+            <td>Time-average WIP: <span class="math display">\[L(T) =
+            \frac{H(T)}{T}\]</span></td>
+            </tr>
+            <tr>
+            <td><code>Lambda(T)</code></td>
+            <td>Arrival rate: <span class="math display">\[\Lambda(T) =
+            \frac{A(T)}{T}\]</span></td>
+            </tr>
+            <tr>
+            <td><code>Theta(T)</code></td>
+            <td>Departure rate: <span class="math display">\[\Theta(T) =
+            \frac{D(T)}{T}\]</span></td>
+            </tr>
+            <tr>
+            <td><code>w(T)</code></td>
+            <td>Residence time per arrival: <span
+            class="math display">\[w(T) =
+            \frac{H(T)}{A(T)}\]</span></td>
+            </tr>
+            <tr>
+            <td><code>w'(T)</code></td>
+            <td>Residence time per departure (completed items only):
+            <span class="math display">\[w&#39;(T) =
+            \frac{H(T)}{D(T)}\]</span></td>
+            </tr>
+            <tr>
+            <td><code>W*(T)</code></td>
+            <td>Element-wise empirical mean sojourn time: <span
+            class="math display">\[W^*(T) = \text{Avg}(d_i - a_i), \quad
+            d_i \in (0, T]\]</span></td>
+            </tr>
+            </tbody>
+            </table>
+            <h3 id="leankanban-flow-metrics-mappings">Lean/Kanban Flow
+            Metrics Mappings</h3>
+            <p>The following table defines the normative mapping between
+            sample path flow metrics and common industry terminology
+            used in Lean/Kanban practice and commercial tooling.</p>
+            <blockquote>
+            <p><strong>Normative statement</strong></p>
+            <p>Sample path flow metrics, as defined above, are the
+            canonical and mathematically correct definitions of flow
+            metrics. They are the only definitions that allow rigorous
+            reasoning about flow using Little’s Law in both stable and
+            unstable processes, consistently.</p>
+            <p>Industry-standard definitions and Lean/Kanban tools
+            commonly diverge from these definitions in the following
+            ways:</p>
+            <ul>
+            <li>Metrics are defined over calendar buckets (days, weeks,
+            etc.) rather than event timestamps.</li>
+            <li>Instantaneous WIP and time-average WIP are conflated
+            when averaging instantaneous WIP over calendar buckets
+            <em>before</em> computing the initial cumulative flow
+            diagrams. At this point any causal reasoning is impossible
+            because the connection between events and their impact on
+            flow has already been discarded.</li>
+            <li>While CFDs are computed over the long run (as they
+            should be), flow metrics like cycle time and throughput are
+            computed over short operational windows rather than
+            cumulatively over the same long observation horizon that
+            CFDs are constructed over. Consistency of observation
+            windows is required to reason rigorously about flow dynamics
+            such as stability and convergence, and why the industry
+            standard flow metrics are not helpful in this regard.</li>
+            </ul>
+            <p>Any flow metric that does not preserve event ordering,
+            cumulative integration of presence mass, and long-run
+            convergence properties should be treated as a point-in-time
+            reporting snapshot of unrelated flow statistics over a
+            process, not as a metric suitable for rigorous reasoning
+            about flow dynamics.</p>
+            </blockquote>
+            <p>The mappings in the table below should be interpreted as
+            <em>terminological correspondences only</em> and do not
+            imply equivalence of computation or mathematical
+            meaning.</p>
+            <table>
+            <colgroup>
+            <col style="width: 7%" />
+            <col style="width: 17%" />
+            <col style="width: 75%" />
+            </colgroup>
+            <thead>
+            <tr>
+            <th>Metric</th>
+            <th>Vernacular name</th>
+            <th>Rough Lean / Kanban mapping</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+            <td><code>A(T)</code></td>
+            <td>Cumulative arrivals</td>
+            <td>Top line in cumulative flow diagram (lossy)</td>
+            </tr>
+            <tr>
+            <td><code>D(T)</code></td>
+            <td>Cumulative departures</td>
+            <td>Bottom line in cumulative flow diagram (lossy)</td>
+            </tr>
+            <tr>
+            <td><code>N(t)</code></td>
+            <td>Instantaneous Work in process</td>
+            <td>WIP: the length of the line between two lines at the
+            same calendar bucket in the CFD</td>
+            </tr>
+            <tr>
+            <td><code>H(T)</code></td>
+            <td>Cumulative presence mass</td>
+            <td>Not measured - informally recognized, visually, as the
+            area in between the two lines in the CFD</td>
+            </tr>
+            <tr>
+            <td><code>L(T)</code></td>
+            <td>Time Average of WIP</td>
+            <td>Average WIP at fixed calendar buckets (lossy)</td>
+            </tr>
+            <tr>
+            <td><code>Lambda(T)</code></td>
+            <td>Cumulative arrival rate</td>
+            <td>Arrival rate (within a short operational window)</td>
+            </tr>
+            <tr>
+            <td><code>Theta(T)</code></td>
+            <td>Cumulative departure rate</td>
+            <td>Throughput (within a short operational window)</td>
+            </tr>
+            <tr>
+            <td><code>w(T)</code></td>
+            <td>Average residence time per arrival</td>
+            <td>No equivalent</td>
+            </tr>
+            <tr>
+            <td><code>w'(T)</code></td>
+            <td>Average residence time per departure</td>
+            <td>No equivalent</td>
+            </tr>
+            <tr>
+            <td><code>W*(T)</code></td>
+            <td>Empirical average sojourn time</td>
+            <td>Lead Time/Cycle Time etc. depending on the
+            arrival/departure event semantics. Usually measured over a
+            different window compared to Throughput/Arrival
+            rate/WIP</td>
+            </tr>
+            </tbody>
+            </table>
+            <h2 id="element-csv-elements.csv">6.3 Element CSV —
+            <code>elements.csv</code></h2>
+            <p>One row per element, sorted by <code>start_ts</code>
+            ascending.</p>
+            <table>
+            <colgroup>
+            <col style="width: 24%" />
+            <col style="width: 76%" />
+            </colgroup>
+            <thead>
+            <tr>
+            <th>Column</th>
+            <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+            <td><code>element_id</code></td>
+            <td>Element identifier (renamed from input
+            <code>id</code>)</td>
+            </tr>
+            <tr>
+            <td><code>start_ts</code></td>
+            <td>Start timestamp <span
+            class="math inline">\(a_i\)</span></td>
+            </tr>
+            <tr>
+            <td><code>end_ts</code></td>
+            <td>End timestamp <span class="math inline">\(d_i\)</span>
+            (empty for incomplete items)</td>
+            </tr>
+            <tr>
+            <td><em>input columns</em></td>
+            <td>All remaining columns from the input CSV</td>
+            </tr>
+            <tr>
+            <td><code>sojourn_time</code></td>
+            <td>Element sojourn time: <span class="math display">\[d_i -
+            a_i\]</span> (NaN if incomplete)</td>
+            </tr>
+            <tr>
+            <td><code>residence_time</code></td>
+            <td>Element residence time within the observation
+            window</td>
+            </tr>
+            </tbody>
+            </table>
+            <h3 id="residence-time-definition">Residence time
+            definition</h3>
+            <p>Let the observation window be <span
+            class="math inline">\((t_0, t_n]\)</span>.</p>
+            <ul>
+            <li>For completed items: <span class="math display">\[
+            \text{residence\_time} = d_i - a_i
+            \]</span></li>
+            <li>For incomplete items: <span class="math display">\[
+            \text{residence\_time} = t_n - \max(a_i, t_0)
+            \]</span></li>
+            </ul>
+            <h2 id="charts">6.4 Charts</h2>
+            <p>A complete reference to the charts produced can be found
+            in <a href="../../articles/chart-reference">The Chart
+            Reference</a>.</p>
+            <h1 id="esoteric-settings">7 Esoteric settings</h1>
+            <p>These settings are useful for configuring the
+            visualizations and parameters of specific charts and
+            analyses.</p>
+            <h2 id="lambda-fine-tuning">7.1 Lambda Fine Tuning</h2>
             <p>Sometimes it helps to drop early points in the λ(T) chart
             so the remainder displays on a more meaningful scale.</p>
             <ul>
@@ -580,8 +1225,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
             Ignore the first H hours when computing Λ(T)
             percentiles</p></li>
             </ul>
-            <hr />
-            <h3 id="convergence-thresholds">Convergence Thresholds</h3>
+            <h2 id="convergence-thresholds">7.2 Convergence
+            Thresholds</h2>
             <ul>
             <li><p><strong>–epsilon</strong> <em>(default:
             <code>0.05</code>)</em><br />
@@ -591,126 +1236,6 @@ Samplepath Analysis Toolkit</em></a></p></p>
             Ignore this many initial days when assessing
             convergence</p></li>
             </ul>
-            <hr />
-            <h3 id="chart-configuration">Chart Configuration</h3>
-            <ul>
-            <li><p><strong>–with-event-marks</strong> <em>(default:
-            <code>False</code>)</em><br />
-            Show point process event markers on sample path charts. When
-            enabled, for example, arrivals are shown as purple dots and
-            departures as green dots with drop lines to the event
-            timestamps.</p></li>
-            <li><p><strong>–show-derivations</strong> <em>(default:
-            <code>False</code>)</em><br />
-            Show formulas for key metrics in titles/legends of charts.
-            eg. N(t) = A(T) - D(T) see chart reference for more
-            details</p></li>
-            <li><p><strong>–chart-format</strong> <em>(default:
-            <code>png</code>)</em><br />
-            Chart output format. Use <code>svg</code> for scalable
-            vector output.</p></li>
-            <li><p><strong>–chart-dpi</strong> <em>(default:
-            <code>150</code>)</em><br />
-            DPI for PNG output. Ignored for SVG.</p></li>
-            <li><p><strong>–sampling-frequency</strong> <em>(default:
-            <code>None</code>)</em><br />
-            Snap observation times to calendar boundaries instead of
-            using raw event timestamps. Accepts names (<code>day</code>,
-            <code>week</code>, <code>month</code>, <code>quarter</code>,
-            <code>year</code>). When set, charts show markers on data
-            points, x-axis ticks align to calendar boundaries, and event
-            overlays render as rug plots at y=0.</p></li>
-            <li><p><strong>–anchor</strong> <em>(default:
-            <code>None</code>)</em><br />
-            Anchor for calendar frequency boundaries. For
-            <code>week</code>: a day name (e.g., <code>MON</code>,
-            <code>WED</code>, <code>SUN</code>). For
-            <code>quarter</code> or <code>year</code>: a month name
-            (e.g., <code>JAN</code>, <code>APR</code>). Ignored for
-            <code>day</code> and <code>month</code>. Only meaningful
-            when <code>--sampling-frequency</code> is set.</p></li>
-            </ul>
-            <hr />
-            <h3 id="export-configuration">Export Configuration</h3>
-            <ul>
-            <li><p><strong>–export-data</strong> <em>(default:
-            <code>False</code>)</em><br />
-            Export flow metrics and element data to CSV files alongside
-            charts. Creates two files under
-            <code>&lt;scenario&gt;/exports/</code>: a flow metrics CSV
-            and an element-level CSV.</p></li>
-            <li><p><strong>–export-only</strong> <em>(default:
-            <code>False</code>)</em><br />
-            Export flow metrics and element data to CSV files without
-            generating charts. Mutually exclusive with
-            <code>--export-data</code>.</p></li>
-            </ul>
-            <hr />
-            <h3 id="output-configuration">Output Configuration</h3>
-            <ul>
-            <li><p><strong>–output-dir</strong> <em>(default:
-            <code>charts</code>)</em><br />
-            Root directory where charts will be written</p></li>
-            <li><p><strong>–scenario</strong> <em>(default:
-            <code>latest</code>)</em><br />
-            Subdirectory inside the output root</p></li>
-            <li><p><strong>–save-input</strong> <em>(default:
-            <code>True</code>)</em><br />
-            Copy the input CSV into the output directory</p></li>
-            <li><p><strong>–clean</strong> <em>(default:
-            <code>False</code>)</em><br />
-            Remove existing charts before writing new results</p></li>
-            </ul>
-            <hr />
-            <h2 id="inputs-and-outputs">Inputs and Outputs</h2>
-            <h3 id="input-format">Input Format</h3>
-            <p>The input format is simple.</p>
-            <p>The csv requires three columns</p>
-            <ul>
-            <li><em>id</em>: any string identifier to denote an
-            element/item</li>
-            <li><em>start_ts</em>: the start time of an event</li>
-            <li><em>end_ts</em>: the end time of an event</li>
-            </ul>
-            <p>Additionally you may pass any other columns. They are all
-            ignored for now, except for a column called <em>class</em>
-            which you can use to filter results by event/item type.</p>
-            <ul>
-            <li>If your csv has different column names, you can map them
-            with <code>--start-column</code> and
-            <code>--end-column</code> options.</li>
-            <li>You might need to explicitly pass a date format for the
-            time stamps if you see date parsing errors. The
-            <code>--date-format</code> argument does this.</li>
-            </ul>
-            <p>Results and charts are saved to the output directory as
-            follows:</p>
-            <ul>
-            <li>The default output directory is “charts” in your current
-            directory.</li>
-            <li>You can override this with the –output-dir
-            argument.</li>
-            </ul>
-            <p>See the <a href="docs/src/cli.html">CLI Documentation</a>
-            for the full list of command line options.</p>
-            <h3 id="output-layout">Output Layout</h3>
-            <p>For input <code>events.csv</code>, output is organized
-            as:</p>
-            <div class="sourceCode" id="cb3"><pre
-            class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>output-dir<span class="op">&gt;</span>/</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> events/</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="ex">└──</span> <span class="op">&lt;</span>scenario<span class="op">&gt;</span>/                 <span class="co"># e.g., latest</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> input/                  <span class="co"># input snapshots</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> exports/                <span class="co"># CSV exports (if enabled)</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> core/                   <span class="co"># core metrics &amp; tables</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> convergence/            <span class="co"># limit estimates &amp; diagnostics</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> convergence/panels/     <span class="co"># multi-panel figures</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> stability/panels/       <span class="co"># stability/variance panels</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> advanced/               <span class="co"># optional deep-dive charts</span></span></code></pre></div>
-            <p>--</p>
-            <p>A complete reference to the charts produced can be found
-            in <a href="../../articles/chart-reference">The Chart
-            Reference</a>.</p>
             <footer id="presence-link" role="contentinfo">
         <a href="https://samplepath.pcalc.org" target="_blank" rel="noreferrer">The Sample Path Analysis Toolkit</a>
         <div style="margin-top: 0.35rem; font-size: 0.85rem; color: #555;">

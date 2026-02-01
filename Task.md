@@ -195,4 +195,28 @@ Findings (ordered by severity)
 - All tests pass ✅
 - Pre-commit checks pass ✅
 
-##
+## Follow up enhancements
+
+1. Add residence_time as the last column for the elements.csv file. this is sojourn time for any element with an end date. If ed_date is null residence_time is the t_n - max(t_s, t_0) where t_0 and t_n are the start and end of the observation window over which metrics are measured. In the current implementation, t_0 is always the earliest timestamp in the data set and t_n is the latest time stamp in the data set, but this may not be true in general, and we will be changing that later.
+2. Add element_id as the second column in the event_indexed_metrics.csv: the value may be null in general, if we are unable to resolve elements from the data set (this is always possible given the current input csv requirements, but is not necessaary in general to calculate any metric other than sojourn time).
+
+Follow up enhancements review:
+
+Findings (ordered by severity)
+
+  - ✅ FIXED: _derive_element_ids() treats an element with start_ts == end_ts as two events (arrival + departure) and returns None because events_at_time has length 2. For zero‑duration elements, the element_id is actually
+    resolvable, but will be blank in event_indexed_metrics.csv.
+    - **Resolution**: Added deduplication by element ID using `drop_duplicates()` before checking length. Now zero-duration elements correctly resolve to their element_id.
+    - **Test**: Added `test_derive_element_ids_zero_duration_element()` to verify fix.
+
+  - ✅ FIXED: residence_time uses t_n - max(start_ts, t_0) without guarding against start_ts being NaT, which will yield NaN. If start_ts is ever missing, the output will be blank instead of a clear error.
+    - **Resolution**: Added nested `np.where()` to check `start_ts.notna()` before calculation, returning NaN for missing start_ts.
+    - **Test**: Added `test_residence_time_with_missing_start_ts()` to verify NaN handling.
+
+**Test Summary:**
+- Total tests: 521 (added 8 new tests total for enhancements)
+- data_export.py coverage: 94.92%
+- All tests pass ✅
+- Pre-commit checks pass ✅
+
+3. When multiple elements share the same observation timestamp, report all element IDs in the format `A:id;id;id|D:id;id;id` (arrivals before departures) instead of None. Single-element timestamps continue to report the plain element ID. Timestamps with no matching elements remain None.

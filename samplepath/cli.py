@@ -47,9 +47,10 @@ def validate_args(args):
         )
         error = True
 
-    if getattr(args, "export_data", False) and getattr(args, "export_only", False):
+    # Prevent --no-export-data with --export-only (contradictory)
+    if not getattr(args, "export_data", True) and getattr(args, "export_only", False):
         print(
-            "Error: --export-data and --export-only cannot be used together",
+            "Error: --no-export-data and --export-only cannot be used together",
             file=sys.stderr,
         )
         error = True
@@ -265,9 +266,9 @@ def build_parser() -> tuple[argparse.ArgumentParser, set[str]]:
     export_config = analyze.add_argument_group("Export Configuration")
     export_config.add_argument(
         "--export-data",
-        action="store_true",
-        default=False,
-        help="Export flow metrics and element data to CSV files alongside charts",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Export flow metrics and element data to CSV files alongside charts (default: enabled)",
     )
     export_config.add_argument(
         "--export-only",
