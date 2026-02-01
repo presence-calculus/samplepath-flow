@@ -450,6 +450,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
         id="toc-convergence-thresholds">Convergence Thresholds</a></li>
         <li><a href="#chart-configuration"
         id="toc-chart-configuration">Chart Configuration</a></li>
+        <li><a href="#export-configuration"
+        id="toc-export-configuration">Export Configuration</a></li>
         <li><a href="#output-configuration"
         id="toc-output-configuration">Output Configuration</a></li>
         </ul></li>
@@ -629,6 +631,21 @@ Samplepath Analysis Toolkit</em></a></p></p>
             when <code>--sampling-frequency</code> is set.</p></li>
             </ul>
             <hr />
+            <h3 id="export-configuration">Export Configuration</h3>
+            <ul>
+            <li><p><strong>–export-data</strong> <em>(default:
+            <code>False</code>)</em><br />
+            Export flow metrics and element data to CSV files alongside
+            charts. Creates two files under
+            <code>&lt;scenario&gt;/exports/</code>: a flow metrics CSV
+            and an element-level CSV.</p></li>
+            <li><p><strong>–export-only</strong> <em>(default:
+            <code>False</code>)</em><br />
+            Export flow metrics and element data to CSV files without
+            generating charts. Mutually exclusive with
+            <code>--export-data</code>.</p></li>
+            </ul>
+            <hr />
             <h3 id="output-configuration">Output Configuration</h3>
             <ul>
             <li><p><strong>–output-dir</strong> <em>(default:
@@ -684,11 +701,12 @@ Samplepath Analysis Toolkit</em></a></p></p>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> events/</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="ex">└──</span> <span class="op">&lt;</span>scenario<span class="op">&gt;</span>/                 <span class="co"># e.g., latest</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> input/                  <span class="co"># input snapshots</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> core/                   <span class="co"># core metrics &amp; tables</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> convergence/            <span class="co"># limit estimates &amp; diagnostics</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> convergence/panels/     <span class="co"># multi-panel figures</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> stability/panels/       <span class="co"># stability/variance panels</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> advanced/               <span class="co"># optional deep-dive charts</span></span></code></pre></div>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> exports/                <span class="co"># CSV exports (if enabled)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> core/                   <span class="co"># core metrics &amp; tables</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> convergence/            <span class="co"># limit estimates &amp; diagnostics</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> convergence/panels/     <span class="co"># multi-panel figures</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> stability/panels/       <span class="co"># stability/variance panels</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> advanced/               <span class="co"># optional deep-dive charts</span></span></code></pre></div>
             <p>--</p>
             <p>A complete reference to the charts produced can be found
             in <a href="../../articles/chart-reference">The Chart

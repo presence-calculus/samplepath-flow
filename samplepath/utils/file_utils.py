@@ -156,3 +156,22 @@ def copy_input_csv_to_output(input_path: str | Path, output_dir: str | Path) -> 
 
     print(f"[INFO] Copied input CSV to {dest_path.resolve()}")
     return dest_path
+
+
+def ensure_export_dir(out_dir: str) -> str:
+    """
+    Create the exports subdirectory under the output directory.
+
+    Parameters
+    ----------
+    out_dir : str
+        The output directory path.
+
+    Returns
+    -------
+    str
+        Path to the exports directory.
+    """
+    export_dir = os.path.join(out_dir, "exports")
+    os.makedirs(export_dir, exist_ok=True)
+    return export_dir

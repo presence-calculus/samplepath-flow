@@ -108,6 +108,8 @@ B. Command line tools that wrap these calculations:
 - Simple workflows that take CSV files as input to run sample path analysis with a rich
   set of parameters and options.
 - Generate publication-ready **charts and panel visualizations** as static png files.
+- **Export flow metrics and element data** to CSV files for further analysis or integration
+  with other tools.
 - The ability to save different parametrized analyses from a single CSV file as named
   scenarios.
 

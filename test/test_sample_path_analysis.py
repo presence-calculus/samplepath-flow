@@ -168,3 +168,207 @@ def test_run_analysis_passes_anchor_to_metrics():
 
 def test_plots_export_uses_core_driver():
     assert plot_core_flow_metrics_charts is core.plot_core_flow_metrics_charts
+
+
+def test_run_analysis_calls_export_when_export_data_is_set():
+    args = SimpleNamespace(
+        sampling_frequency=None,
+        anchor=None,
+        delimiter=None,
+        start_column="start_ts",
+        end_column="end_ts",
+        date_format=None,
+        day_first=False,
+        completed=False,
+        incomplete=False,
+        classes=None,
+        outlier_hours=None,
+        outlier_pctl=None,
+        outlier_iqr=None,
+        outlier_iqr_two_sided=False,
+        export_data=True,
+        export_only=False,
+    )
+    import pandas as pd
+
+    fake_df = pd.DataFrame(
+        {
+            "id": [1],
+            "start_ts": [pd.Timestamp("2024-01-01")],
+            "end_ts": [pd.Timestamp("2024-01-02")],
+        }
+    )
+    fake_filter = SimpleNamespace(df=fake_df, display="", label="")
+    fake_metrics = SimpleNamespace(times=[], w=[0.0])
+    fake_empirical = SimpleNamespace()
+
+    with (
+        patch("samplepath.sample_path_analysis.csv_to_dataframe", return_value=fake_df),
+        patch(
+            "samplepath.sample_path_analysis.apply_filters", return_value=fake_filter
+        ),
+        patch(
+            "samplepath.sample_path_analysis.to_arrival_departure_process",
+            return_value=[],
+        ),
+        patch(
+            "samplepath.sample_path_analysis.compute_finite_window_flow_metrics",
+            return_value=fake_metrics,
+        ),
+        patch(
+            "samplepath.sample_path_analysis.compute_elementwise_empirical_metrics",
+            return_value=fake_empirical,
+        ),
+        patch("samplepath.sample_path_analysis.write_limits"),
+        patch(
+            "samplepath.sample_path_analysis.produce_all_charts",
+            return_value=["chart.png"],
+        ),
+        patch(
+            "samplepath.sample_path_analysis.ensure_export_dir",
+            return_value="/tmp/exports",
+        ),
+        patch(
+            "samplepath.sample_path_analysis.export_data",
+            return_value=["export1.csv", "export2.csv"],
+        ) as mock_export,
+    ):
+        paths = sample_path_analysis.run_analysis("dummy.csv", args, "/tmp/out")
+
+    assert mock_export.call_count == 1
+    assert "export1.csv" in paths
+    assert "export2.csv" in paths
+    assert "chart.png" in paths
+
+
+def test_run_analysis_calls_export_when_export_only_is_set():
+    args = SimpleNamespace(
+        sampling_frequency=None,
+        anchor=None,
+        delimiter=None,
+        start_column="start_ts",
+        end_column="end_ts",
+        date_format=None,
+        day_first=False,
+        completed=False,
+        incomplete=False,
+        classes=None,
+        outlier_hours=None,
+        outlier_pctl=None,
+        outlier_iqr=None,
+        outlier_iqr_two_sided=False,
+        export_data=False,
+        export_only=True,
+    )
+    import pandas as pd
+
+    fake_df = pd.DataFrame(
+        {
+            "id": [1],
+            "start_ts": [pd.Timestamp("2024-01-01")],
+            "end_ts": [pd.Timestamp("2024-01-02")],
+        }
+    )
+    fake_filter = SimpleNamespace(df=fake_df, display="", label="")
+    fake_metrics = SimpleNamespace(times=[], w=[0.0])
+    fake_empirical = SimpleNamespace()
+
+    with (
+        patch("samplepath.sample_path_analysis.csv_to_dataframe", return_value=fake_df),
+        patch(
+            "samplepath.sample_path_analysis.apply_filters", return_value=fake_filter
+        ),
+        patch(
+            "samplepath.sample_path_analysis.to_arrival_departure_process",
+            return_value=[],
+        ),
+        patch(
+            "samplepath.sample_path_analysis.compute_finite_window_flow_metrics",
+            return_value=fake_metrics,
+        ),
+        patch(
+            "samplepath.sample_path_analysis.compute_elementwise_empirical_metrics",
+            return_value=fake_empirical,
+        ),
+        patch("samplepath.sample_path_analysis.write_limits"),
+        patch(
+            "samplepath.sample_path_analysis.produce_all_charts",
+            return_value=["chart.png"],
+        ) as mock_charts,
+        patch(
+            "samplepath.sample_path_analysis.ensure_export_dir",
+            return_value="/tmp/exports",
+        ),
+        patch(
+            "samplepath.sample_path_analysis.export_data",
+            return_value=["export1.csv", "export2.csv"],
+        ) as mock_export,
+    ):
+        paths = sample_path_analysis.run_analysis("dummy.csv", args, "/tmp/out")
+
+    # Charts should NOT be called when export_only is True
+    assert mock_charts.call_count == 0
+    # Export should be called
+    assert mock_export.call_count == 1
+    # Only export paths should be returned
+    assert paths == ["export1.csv", "export2.csv"]
+
+
+def test_run_analysis_does_not_call_export_by_default():
+    args = SimpleNamespace(
+        sampling_frequency=None,
+        anchor=None,
+        delimiter=None,
+        start_column="start_ts",
+        end_column="end_ts",
+        date_format=None,
+        day_first=False,
+        completed=False,
+        incomplete=False,
+        classes=None,
+        outlier_hours=None,
+        outlier_pctl=None,
+        outlier_iqr=None,
+        outlier_iqr_two_sided=False,
+    )
+    import pandas as pd
+
+    fake_df = pd.DataFrame(
+        {
+            "id": [1],
+            "start_ts": [pd.Timestamp("2024-01-01")],
+            "end_ts": [pd.Timestamp("2024-01-02")],
+        }
+    )
+    fake_filter = SimpleNamespace(df=fake_df, display="", label="")
+    fake_metrics = SimpleNamespace(times=[], w=[0.0])
+    fake_empirical = SimpleNamespace()
+
+    with (
+        patch("samplepath.sample_path_analysis.csv_to_dataframe", return_value=fake_df),
+        patch(
+            "samplepath.sample_path_analysis.apply_filters", return_value=fake_filter
+        ),
+        patch(
+            "samplepath.sample_path_analysis.to_arrival_departure_process",
+            return_value=[],
+        ),
+        patch(
+            "samplepath.sample_path_analysis.compute_finite_window_flow_metrics",
+            return_value=fake_metrics,
+        ),
+        patch(
+            "samplepath.sample_path_analysis.compute_elementwise_empirical_metrics",
+            return_value=fake_empirical,
+        ),
+        patch("samplepath.sample_path_analysis.write_limits"),
+        patch(
+            "samplepath.sample_path_analysis.produce_all_charts",
+            return_value=["chart.png"],
+        ),
+        patch("samplepath.sample_path_analysis.export_data") as mock_export,
+    ):
+        sample_path_analysis.run_analysis("dummy.csv", args, "/tmp/out")
+
+    # Export should NOT be called by default
+    assert mock_export.call_count == 0

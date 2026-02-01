@@ -47,6 +47,13 @@ def validate_args(args):
         )
         error = True
 
+    if getattr(args, "export_data", False) and getattr(args, "export_only", False):
+        print(
+            "Error: --export-data and --export-only cannot be used together",
+            file=sys.stderr,
+        )
+        error = True
+
     if error:
         sys.exit(1)
 
@@ -255,6 +262,20 @@ def build_parser() -> tuple[argparse.ArgumentParser, set[str]]:
         "Ignored for day/month.",
     )
 
+    export_config = analyze.add_argument_group("Export Configuration")
+    export_config.add_argument(
+        "--export-data",
+        action="store_true",
+        default=False,
+        help="Export flow metrics and element data to CSV files alongside charts",
+    )
+    export_config.add_argument(
+        "--export-only",
+        action="store_true",
+        default=False,
+        help="Export flow metrics and element data to CSV files without generating charts",
+    )
+
     subcommand_names = set(subparsers.choices.keys())
     return parser, subcommand_names
 
@@ -303,7 +324,10 @@ def main():
 
         write_cli_args_to_file(parser, args, out_dir)
         paths = run_analysis(args.csv, args, out_dir)
-        print("Wrote charts:\n" + "\n".join(paths))
+        if getattr(args, "export_only", False):
+            print("Wrote exports:\n" + "\n".join(paths))
+        else:
+            print("Wrote charts:\n" + "\n".join(paths))
     except SystemExit:
         raise
     except Exception as e:

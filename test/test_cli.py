@@ -187,3 +187,34 @@ def test_main_reports_error(monkeypatch, capsys):
 
     assert excinfo.value.code == 1
     assert "Error: boom" in capsys.readouterr().err
+
+
+def test_export_data_defaults_to_false():
+    _, args = cli.parse_args(["flow", "events.csv"])
+
+    assert args.export_data is False
+
+
+def test_export_only_defaults_to_false():
+    _, args = cli.parse_args(["flow", "events.csv"])
+
+    assert args.export_only is False
+
+
+def test_export_data_flag_can_be_enabled():
+    _, args = cli.parse_args(["flow", "events.csv", "--export-data"])
+
+    assert args.export_data is True
+
+
+def test_export_only_flag_can_be_enabled():
+    _, args = cli.parse_args(["flow", "events.csv", "--export-only"])
+
+    assert args.export_only is True
+
+
+def test_export_data_and_export_only_are_mutually_exclusive():
+    with pytest.raises(SystemExit) as excinfo:
+        cli.parse_args(["flow", "events.csv", "--export-data", "--export-only"])
+
+    assert excinfo.value.code == 1

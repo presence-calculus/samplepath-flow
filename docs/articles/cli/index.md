@@ -173,6 +173,18 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Export Configuration
+
+- **--export-data** *(default: `False`)*\
+  Export flow metrics and element data to CSV files alongside charts. Creates two files
+  under `<scenario>/exports/`: a flow metrics CSV and an element-level CSV.
+
+- **--export-only** *(default: `False`)*\
+  Export flow metrics and element data to CSV files without generating charts. Mutually
+  exclusive with `--export-data`.
+
+______________________________________________________________________
+
 ### Output Configuration
 
 - **--output-dir** *(default: `charts`)*\
@@ -225,6 +237,7 @@ For input `events.csv`, output is organized as:
 └── events/
     └── <scenario>/                 # e.g., latest
         ├── input/                  # input snapshots
+        ├── exports/                # CSV exports (if enabled)
         ├── core/                   # core metrics & tables
         ├── convergence/            # limit estimates & diagnostics
         ├── convergence/panels/     # multi-panel figures

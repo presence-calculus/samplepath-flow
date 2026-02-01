@@ -14,6 +14,7 @@ from typing import List, Tuple
 import pandas as pd
 
 from .csv_loader import csv_to_dataframe
+from .data_export import export_data
 from .filter import FilterResult, apply_filters
 from .limits import write_limits
 from .metrics import (
@@ -31,6 +32,7 @@ from .plots import (
 from .plots.chart_config import ChartConfig
 from .point_process import to_arrival_departure_process
 from .utils.duration_scale import infer_duration_scale
+from .utils.file_utils import ensure_export_dir
 
 
 def produce_all_charts(df, args, filter_result, metrics, empirical_metrics, out_dir):
@@ -84,6 +86,25 @@ def run_analysis(csv_path: str, args: Namespace, out_dir: str) -> List[str]:
     )
 
     write_limits(metrics, empirical_metrics, out_dir)
-    return produce_all_charts(
-        df, args, filter_result, metrics, empirical_metrics, out_dir
-    )
+
+    # Handle data export
+    written: List[str] = []
+    export_data_flag = getattr(args, "export_data", False)
+    export_only_flag = getattr(args, "export_only", False)
+
+    if export_data_flag or export_only_flag:
+        export_dir = ensure_export_dir(out_dir)
+        sampling_frequency = getattr(args, "sampling_frequency", None)
+        export_paths = export_data(
+            df, metrics, empirical_metrics, export_dir, sampling_frequency
+        )
+        written.extend(export_paths)
+
+    # Generate charts unless export_only is set
+    if not export_only_flag:
+        chart_paths = produce_all_charts(
+            df, args, filter_result, metrics, empirical_metrics, out_dir
+        )
+        written.extend(chart_paths)
+
+    return written
