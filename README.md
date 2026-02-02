@@ -15,7 +15,7 @@ ______________________________________________________________________
 You measure throughput, cycle time, WIP. Measure again a bit later and everything has
 changed, but you can't explain *why*.
 
-You might think this is simply the nature of software development. Rhat the tools are
+You might think this is simply the nature of software development. That the tools are
 faithfully reflecting the highly variable, uncertain nature of the work. But you would
 be wrong. This is not a problem with the domain. It's because the metrics are defined
 and measured the wrong way, _given_ the nature of the domain.
