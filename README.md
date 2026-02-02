@@ -1,6 +1,7 @@
 # The Sample Path Analysis Toolkit
+> A Presence Calculus Product
 
-> Deterministic flow analytics for non-deterministic software processes.
+Deterministic flow analytics for non-deterministic software processes.
 
 [![PyPI](https://img.shields.io/pypi/v/samplepath.svg)](https://pypi.org/project/samplepath/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
