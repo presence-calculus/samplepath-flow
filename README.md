@@ -29,7 +29,7 @@ and discard the causal connection between arrival/departure events and their imp
 These are category errors, not implementation details. They explain why you end up chasing some
 mythical state called stability where supposedly, these metrics finally behave the
 way theory says they should. In practice, we measure flow metrics, periodically review operational dashboards and
-have "conversations" about flow.
+"start conversations."
 
 It doesn't have to be this way.
 
@@ -51,8 +51,8 @@ when he provided the first deterministic proof of Little's Law in 1974 -- but th
 not been turned into practical measurement techniques until now.
 
 The technique works with a single observed trajectory of a flow process as it evolves over
-time. It uses the finite-window formulation of Little's Law and establishes deterministic
-cause and effect relationships between input and output metrics.
+time. It uses the finite-window formulation of Little's Law and establishes _deterministic
+cause and effect relationships_ between input and output metrics.
 
 Three properties make it especially suited to processes in the volatile, uncertain, complex and
 ambiguous operating environments of real world software development.
