@@ -1,423 +1,302 @@
-# The Sample Path Analysis Library and Toolkit
-> A Presence Calculus Product
+# The Sample Path Analysis Toolkit
 
-
-A reference implementation of sample-path flow metrics, convergence analysis, and
-stability diagnostics for flow processes using the finite
-window formulation of **[Little's Law](https://docs.pcalc.org/articles/littles-law)**.
-
-See documentation [here](https://samplepath.pcalc.org).
+> Deterministic flow analytics for non-deterministic software processes.
 
 [![PyPI](https://img.shields.io/pypi/v/samplepath.svg)](https://pypi.org/project/samplepath/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Docs](https://img.shields.io/badge/docs-online-blue.svg)](https://py.pcalc.org)
+[![Docs](https://img.shields.io/badge/docs-online-blue.svg)](https://samplepath.pcalc.org)
 
 ![Sample Path Flow Metrics](docs/assets/sample_path_N.png)
 
 ______________________________________________________________________
 
-# 1. Overview
+## The Problem with Flow Metrics Today
 
-**samplepath** is a Python library for analyzing _macro dynamics_ of flow processes.
-It provides deterministic tools to precisely describe the _long-run_ behavior of
-non-deterministic flow processes including stochastic processes and processes that
-naturally arise in complex, real-world business processes:
+You measure throughput, cycle time, WIP. Measure again a bit later and everything has
+changed, but you can't explain *why*.
 
-- Arrival/departure equilibrium
-- Process time coherence, and
-- Process stability
+You might think this is simply the nature of software development. Rhat the tools are
+faithfully reflecting the highly variable, uncertain nature of the work. But you would
+be wrong. This is not a problem with the domain. It's because the metrics are defined
+and measured the wrong way, _given_ the nature of the domain.
 
-using the finite-window formulation of
-[**Little’s Law**](https://docs.pcalc.org/articles/littles-law).
+Current flow metrics tools treat throughput, WIP, and cycle time as independent
+statistics measured over a business-facing operational window; say the last 30 days.
+The metrics themselves rely on imprecise definitions: they conflate instantaneous WIP with
+time-averaged WIP, measure throughput and cycle time over windows different from WIP,
+and discard the causal connection between arrival/departure events and their impact on flow.
 
-The focus of the analysis is a single _sample path_ of a process: a _continuous_
-real-valued function that describes a particular process behavior when observed over a
-long, but finite period of time.
+These are category errors, not implementation details. They explain why you end up chasing some
+mythical state called stability where supposedly, these metrics finally behave the
+way theory says they should. In practice, we measure flow metrics, periodically review operational dashboards and
+have "conversations" about flow.
 
-A key aspect of this technique is that it is _distribution-free_. It does not require
-well-defined statistical or probability distributions to reason rigorously about
-process dynamics. Please see
-[sample path analysis is not a statistical method](https://samplepath.pcalc.org/articles/not-statistics)
-for more details.
+It doesn't have to be this way.
 
-As a result, this technique allows us to extend key deterministic theorems from
-stochastic process theory to a much more general class of non-deterministic processes.
+The theory behind Little's Law tells us that flow metrics provide precise, actionable operational insights when all the key
+metrics, arrival/departure rates, time-average WIP, and process time, are measured correctly over consistent
+observation windows. Applied to software processes that theory implies we
+must measure different quantities and in different ways than the manufacturing-inspired techniques we use today.
 
-This has huge practical significance since most real-world operational processes are in
-this class.
-
-- Statistical distributions of key operational parameters vary continuously over time (non-stationarity)
-- The future of the process is dependent on its past history.
-- Initial conditions have significant impact on the observed behavior.
-- Length of observation and the behavior over short and long time-scales carry information of significant operational relevance.
-
-All these conditions make traditional statistical and probabilistic methods difficult to
-apply rigorously in these environments. These are precisely the conditions under which
-sample path analysis thrives.
-
-A key mathematical theorem we use in this context is Little's Law. It makes it possible
-to construct powerful, context-specific measurement models of a process that establish
-deterministic cause and effect relationships between how key parameters of the process
-behave. Contrary to popular belief, the class of processes for which we can do this is
-surprisingly general.
-
-If you are new to Little's Law or are only familiar with the traditional idea of
-Little's Law from manufacturing applications, please see our overview article on
-[**Little’s Law**](https://docs.pcalc.org/articles/littles-law).
-
-In this repository we focus on providing lightweight tools to apply these concepts to
-your own operational data and showing how samplepath techniques relate to current
-statistical and probabilistic measurement techniques.
-
-The best way to learn and understand these concepts is to apply them to your own
-operational data and see what they reveal. We aim to make that as easy as possible,
-providing theory, tools, and examples to help you explore this technique on your own.
-
-[More background and history is here ...](https://samplepath.pcalc.org/articles/package-overview)
+In short, we need a fundamentally different approach to measuring flow in software processes: sample path analysis.
 
 ______________________________________________________________________
 
-# 2. Data Requirements and Key Metrics
+## What This Toolkit Does
 
-The data requirements for the sample path analysis of a flow process are minimal: a CSV
-file that represents the observed timeline of a binary flow process with element ID,
-start, and end date columns.
+**samplepath** implements *sample path analysis*: a technique from stochastic process
+theory for analyzing flow in processes that may or may not be stable.
+The core ideas are nearly 50 years old -- Dr. Shaler Stidham discovered the technique
+when he provided the first deterministic proof of Little's Law in 1974 -- but they have
+not been turned into practical measurement techniques until now.
 
-- The start and end dates may be empty, but for a meaningful analysis, we require at
-  least some of these dates be non-empty. Empty end dates denote elements that have
-  started but not ended. Empty start dates denote items whose start date is unknown.
-  Both are considered elements currently present in the boundary.
-- The system boundary is optional (the name of the CSV file becomes the default name of
-  the boundary). Boundaries become useful when we start to model the dynamics of
-  interconnected flow processes.
+The technique works with a single observed trajectory of a flow process as it evolves over
+time. It uses the finite-window formulation of Little's Law and establishes deterministic
+cause and effect relationships between input and output metrics.
 
-Given this input, this library implements:
+Three properties make it especially suited to processes in the volatile, uncertain, complex and
+ambiguous operating environments of real world software development.
 
-A. Core Python modules that implement the computations for sample path construction and
-analysis:
+- **Distribution-free.** No assumptions about underlying statistical distributions.
+  Works even when distributions are non-stationary, poorly defined, or don't exist.
+- **Finite-window.** Applies at all times over any finite observation window, without
+  requiring steady-state conditions.
+- **Deterministic.** Yields deterministic measurements over processes that are inherently
+  non-deterministic.
 
-- Time-averaged flow metrics governed by the finite version of Little's Law `N(t)`,
-  `L(T)`, `Λ(T)`, `w(T)`, `λ*(T)`, `W*(T)`
-- Performing *equilibrium* and **coherence** calculations (e.g., verifying
-  `L(T) ≈ λ*(T)·W*(T)`)
-- Estimating empirical **limits** with uncertainty and **tail** checks to verify
-  stability (alpha)
+Given a sample path, the measurements are exact quantities not statistical measures.
+  Further, _changes_ in the measurements are explainable deterministically in terms of changes in the _inputs_ to the measurements.
 
-B. Command line tools that wrap these calculations:
+This means you can reason rigorously about flow dynamics in processes that operate far
+from equilibrium -- exactly the conditions where traditional flow metrics break
+down.
 
-- Simple workflows that take CSV files as input to run sample path analysis with a rich
-  set of parameters and options.
-- Generate publication-ready **charts and panel visualizations** as static png files.
-- **Export flow metrics and element data** to CSV files for further analysis or integration
-  with other tools.
-- The ability to save different parametrized analyses from a single CSV file as named
-  scenarios.
-
-## Sample Path Flow Metrics
-
-Deterministic, finite-window analogues of Little’s Law:
-
-| Quantity | Meaning                                               |
-| -------- | ----------------------------------------------------- |
-| `L(T)`   | Average work-in-process over window `T`               |
-| `Λ(T)`   | Cumulative arrivals per unit time up to `T`           |
-| `w(T)`   | Average residence time over window `T`                |
-| `λ*(T)`  | Empirical arrival rate up to `T`                      |
-| `W*(T)`  | Empirical mean sojourn time of items completed by `T` |
-
-These quantities enable rigorous study of **equilibrium** (arrival/departure rate
-convergence), **coherence** (residence time/sojourn time convergence), and **stability**
-(convergence of process measures to limits) even when processes operate far from steady
-state.
-
-Please see
-[Sample Path Construction](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-construction-for-l%CE%BBw)
-for background on what these metrics mean.
-
-Please see
-[Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive)
-for a worked example on how to apply the concepts.
-
-## Computations and Charts
-
-For a detailed reference of the computations, charts and visualizations produced by
-sample path analysis, please see the
-[Chart Reference](http://samplepath.pcalc.org/articles/chart-reference).
-
-For complete documentation, see our [documentation site](http://samplepath.pcalc.org).
+[Sample path analysis is not statistics](https://samplepath.pcalc.org/articles/not-statistics)
+| [Package overview and history](https://samplepath.pcalc.org/articles/package-overview)
 
 ______________________________________________________________________
 
-# 3. Package Scope
+## What You Get
 
-This package is part of [The Presence Calculus Project](https://docs.pcalc.org): an
-open-source computational toolkit that is intended to make sample path methods and
-concepts more accessible to practitioners working on operations management problems in
-the software industry including engineering/product/sales/marketing operations and
-related disciplines: value stream management, developer experience and platforms, and
-lean continuous process improvement.
+### Sample Path Flow Metrics
 
-This library and toolkit are intended to be used by practitioners to understand the
-theory and _develop their intuition about the dynamics of flow processes_ using data from their
-own environments. Understanding the context behind the data greatly helps make the
-abstract ideas concrete, and there is no substitute for getting your hands dirty and
-trying things out directly. This toolkit is designed for that.
+The table below shows these metrics and maps them to the
+Lean/Kanban terminology you might be familiar with.
 
-It is neither ready nor intended to support production-quality operations management
-tooling.
+| Metric      | What it measures                     | Lean / Kanban mapping                        |
+|-------------|--------------------------------------|----------------------------------------------|
+| `A(T)`      | Cumulative arrivals                  | Top line in cumulative flow diagram          |
+| `D(T)`      | Cumulative departures                | Bottom line in cumulative flow diagram       |
+| `N(t)`      | Instantaneous work in process        | WIP (snapshot)                               |
+| `H(T)`      | Cumulative presence mass             | No equivalent                                |
+| `L(T)`      | Time-average WIP                     | Average WIP (lossy in current tools)         |
+| `Lambda(T)` | Cumulative arrival rate              | Arrival rate (short window in current tools) |
+| `Theta(T)`  | Cumulative departure rate            | Throughput (short window in current tools)   |
+| `w(T)`      | Average residence time per arrival   | No equivalent                                |
+| `w'(T)`     | Average residence time per departure | No equivalent                                |
+| `W*(T)`     | Empirical average sojourn time       | Lead Time / Cycle Time (different window)    |
 
-[See more..](https://samplepath.pcalc.org/package-overview/goals.html)
+
+These metrics enable rigorous study of **equilibrium** (arrival/departure rate
+convergence), **coherence** (residence time/sojourn time convergence), and
+**stability** (convergence of process measures to limits) -- even when the process
+has never reached steady state.
+
+For a detailed description of these metrics and their derivations see the [definitions](https://samplepath.pcalc.org/articles/cli/#flow-metrics-csv) in our command
+line interface document.
+
+### Charts and Exports
+
+The toolkit generates publication-ready charts and CSV data exports organized into:
+
+- **Core metrics** -- sample path, time-average WIP, arrival rates, residence times,
+  Little's Law invariant
+- **Convergence diagnostics** -- arrival/departure equilibrium, residence/sojourn
+  coherence, multi-panel convergence figures
+- **Stability panels** -- WIP growth rate, total age growth rate
+- **Advanced** -- invariant manifold, convergence error analysis
+
+[Chart Reference](https://samplepath.pcalc.org/articles/chart-reference)
 
 ______________________________________________________________________
 
-# 4. Installation (End Users)
+## Quick Start
 
-## Quick Start with uv (Recommended)
-
-**uv** is a fast, modern Python package manager that handles your setup.
-
-### 1. Install uv
-
-- **macOS / Linux:**
-
-  ```bash
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-  ```
-
-- **Windows:**
-
-  ```bash
-  powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-  ```
-
-### 2. Install the samplepath CLI globally
+### Install
 
 ```bash
 uv tool install samplepath
 ```
 
-This will install Python automatically if needed and make a command line tool `flow`
-available globally. This is the first set of sample path analysis tools available under
-this package. More will be added as we expand this suite of tools.
+This installs the `flow` command globally. (See
+[Installation Alternatives](#installation-alternatives) if you use pip or pipx.)
 
-
-### 3. Verify installation
-
-```bash
-flow --help
-```
-
-If this prints the help message, you're ready to go.
-
-**Note** On some machines the very first time you run this command it might take 8 to
-10 seconds to complete due to the plotting library downloading fonts. Subsequent calls
-should be fine.
-
-
-### Alternative: Run without installation
-
-You can also run samplepath directly without installing it globally using `uvx`. This
-installs the package and its dependencies directly from PyPI into an isolated local
-environment and runs the command there. It is useful for automated workflows.
+### Run
+Assuming `events.csv` in your current directory (see input format below), run
 
 ```bash
-uvx samplepath events.csv --help
+flow analyze events.csv --completed
 ```
-**Note**: `uvx` dispatches commands by package name so you have to invoke the command as `samplepath`. Internally this calls `flow` by default, so the command surface is currently identical. This behavior will evolve as additional tools are introduced under this package.
 
-### Alternative: Use pip and pipx
+### Output
 
-If you already have a Python 3.11+ environment and don't want to switch package
-managers, the standard installs via pip and pipx will also work.
+Results are saved to the output directory (default: `charts/`):
 
-Using pip
+```
+charts/
+└── events/
+    └── latest/
+        ├── input/              # input snapshots
+        ├── exports/            # CSV exports of flow metrics and element data
+        ├── core/               # core metric charts
+        │   └── panels/         # multi-panel core figures
+        ├── convergence/        # limit estimates and diagnostics
+        │   └── panels/         # multi-panel convergence figures
+        ├── stability/
+        │   └── panels/         # stability and variance panels
+        └── advanced/           # deep-dive charts
+```
+
+______________________________________________________________________
+
+## Input Format
+
+A CSV with three columns:
+
+| Column     | Description                              |
+|------------|------------------------------------------|
+| `id`       | Any string identifier for an element     |
+| `start_ts` | Start timestamp of the event (required)  |
+| `end_ts`   | End timestamp (empty if still in process)|
+
+An optional `class` column lets you filter by element type (e.g., story, defect).
+
+If your columns have different names, map them with `--start-column` and
+`--end-column`. For non-US date formats, use `--day-first` or `--date-format`.
+
+See the [CLI Documentation](https://samplepath.pcalc.org/articles/cli) for the
+complete set of options.
+
+______________________________________________________________________
+
+## Examples
+
+The repository includes example datasets and pre-generated analysis output from
+the [Polaris](https://www.polaris-flow-dispatch.com) case study:
+
+```bash
+# Run the included example
+flow analyze examples/polaris/csv/work_tracking.csv --completed --output-dir polaris-analysis
+
+# Filter by item class
+flow analyze examples/polaris/csv/work_tracking.csv --classes story --completed
+
+# Remove sojourn time outliers before analysis
+flow analyze examples/polaris/csv/work_tracking.csv --outlier-iqr 1.5 --completed
+```
+
+Pre-generated output is in `examples/polaris/flow-of-work/`.
+
+______________________________________________________________________
+
+## Learn More
+
+**Articles**
+
+- [Little's Law](https://docs.pcalc.org/articles/littles-law) -- comprehensive
+  background on the mathematical foundations
+- [Sample Path Analysis is Not Statistics](https://samplepath.pcalc.org/articles/not-statistics) --
+  why this technique works where statistical methods struggle
+- [Package Overview](https://samplepath.pcalc.org/articles/package-overview) --
+  history, significance, and key concepts
+- [Chart Reference](https://samplepath.pcalc.org/articles/chart-reference) --
+  detailed reference for all computations and charts
+
+**Worked examples**
+
+- [Sample Path Construction](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-construction-for-l%CE%BBw)
+- [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive)
+- [The Many Faces of Little's Law](https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law)
+
+**Newsletter**
+
+Subscribe to [The Polaris Flow Dispatch](https://www.polaris-flow-dispatch.com) for
+ongoing developments and applications.
+
+______________________________________________________________________
+
+## Installation Alternatives
+
+The recommended install uses [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv tool install samplepath
+```
+
+**Run without installing** (useful for CI/automation):
+
+```bash
+uvx samplepath events.csv --completed
+```
+
+**pip** (requires Python 3.11+):
 
 ```bash
 pip install samplepath
 samplepath --help
 ```
 
-Using pipx (for end users/global CLI usage)
+**pipx** (global CLI install):
 
 ```bash
 pipx install samplepath
 flow --help
 ```
 
-To upgrade later
-
-```bash
-pipx upgrade samplepath
-```
-
 ______________________________________________________________________
 
-# 5. Usage
+## Development Setup
 
-The command line invocation is
-```bash
-flow <command> <input-csv> [options]
-```
-
-Currently the only command supported is `analyze`; if omitted, it is assumed by default.
-The complete CLI documentation is [here](https://samplepath.pcalc.org/articles/cli).
-
-Here are a few examples:
+For contributors working on the library:
 
 ```bash
-# Analyze completed items, save analysis to the output-dir under the scenario name shipped. Clean existing output directories
-flow analyze events.csv --output-dir spath-analysis --scenario shipped --completed --clean
-
-# If date formats in your locale have days before month  (EU, LATAM, Africa, Commonwealth etc.)  pass the --dayFirst option so dates can be parsed without too much hassle.
-
-flow analyze events.csv --dayFirst
-
-# If that fails pass an explicit date format (example below shows the typical case for non-US date formats).
-# We use standard Python date formats: https://docs.python.org/3/library/datetime.html#format-codes
-
-flow analyze events.csv --date-format "%d/%m/%Y" --output-dir spath-analysis --scenario shipped --completed --clean
-
-# Limit analysis to elements with class story
-flow analyze events.csv --class story
-
-# Apply Tukey filter to remove items with outlier sojourn times before analysis of completed items
-flow analyze events.csv --outlier-iqr 1.5 --completed
-```
-
-## 📂 Input Format
-
-The input format is simple.
-
-The CSV requires three columns:
-
-- _id_: any string identifier to denote an element/item
-- _start_ts_: the start time of an event
-- _end_ts_: the end time of an event
-
-Additionally you may pass any other columns. They are all ignored for now except for a
-column called _class_, which you can use to filter results by event/item type.
-
-- If your CSV has different column names than the standard names expected, you can map them with `--start-column` and `--end-column` options.
-- If your dates start with day before month pass the `--day-first` option
-- If that fails you might need to explicitly pass a date format for the time stamps if you see date
-  parsing errors. The `--date-format` argument does this. See the CLI documentation for how to specify this.
-
-Results and charts are saved to the output directory as follows:
-
-- The default output directory is "charts" in your current directory.
-- You can override this with the --output-dir argument.
-
-See the [CLI Documentation](https://samplepath.pcalc.org/articles/cli) for the full list
-of command line options.
-
-## 📂 Output Layout
-
-For input `events.csv`, output is organized as:
-
-```bash
-<output-dir>/
-└── events/
-    └── <scenario>/                 # e.g., latest
-        ├── input/                  # input snapshots
-        ├── core/                   # core metrics & tables
-        ├── convergence/            # limit estimates & diagnostics
-        ├── convergence/panels/     # multi-panel figures
-        ├── stability/panels/       # stability/variance panels
-        ├── advanced/               # optional deep-dive charts
-```
-
-\--
-
-A complete reference for the computations involved and charts produced can be found
-[here](https://samplepath.pcalc.org/articles/chart-reference).
-
-______________________________________________________________________
-
-# 6. Development Setup (for Contributors)
-
-Developers working on **samplepath** use [uv](https://docs.astral.sh/uv/) for dependency
-and build management.
-
-### Prerequisites
-
-Install uv following the [Quick Start](#quick-start-with-uv-recommended) section above.
-
-### 1. Clone and enter the repository
-
-```bash
-git clone https://github.com/krishnaku/samplepath-flow.git
+git clone https://github.com/presence-calculus/samplepath-flow.git
 cd samplepath-flow
+uv sync --all-extras          # install all dependencies
+uv run pytest                 # run tests
+uv run flow analyze examples/polaris/csv/work_tracking.csv --help  # run CLI from source
 ```
 
-### 2. Sync development dependencies
+______________________________________________________________________
 
-```bash
-uv sync --all-extras
+## Package Layout
+
 ```
-
-This creates a virtual environment and installs all dependencies (including dev
-dependencies) based on `uv.lock`.
-
-### 3. Run tests
-
-```bash
-uv run pytest
-```
-
-### 4. Code quality checks
-
-```bash
-uv run black samplepath/      # Format Python code
-uv run isort samplepath/      # Sort imports
-uv run mypy samplepath/       # Type checking
-uv run mdformat .             # Format markdown files
-```
-
-### 5. Run the CLI from source
-
-During development, run samplepath directly from the source code:
-
-```bash
-uv run flow analyze examples/polaris/csv/work_tracking.csv --help
-```
-
-### 6. Build and publish (maintainers)
-
-To build the distributable wheel and sdist:
-
-```bash
-uv build
-```
-
-To upload to PyPI (maintainers only):
-
-```bash
-uv publish
-```
-
-## 📦 Package Layout
-
-```bash
 samplepath/
-├── cli.py               # Command-line interface
-├── csv_loader.py        # CSV import utilities
-├── metrics.py           # Empirical flow metric calculations
-├── limits.py            # Convergence and limit estimators
-├── plots.py             # Chart and panel generation
-└── tests/               # Pytest suite
+├── cli.py                    # Command-line interface
+├── csv_loader.py             # CSV import and parsing
+├── data_export.py            # CSV export of flow metrics and element data
+├── filter.py                 # Row filtering and outlier trimming
+├── metrics.py                # Flow metric calculations
+├── limits.py                 # Convergence and limit estimators
+├── sample_path_analysis.py   # Top-level analysis orchestration
+├── point_process.py          # Point process construction
+├── plots/                    # Chart and panel generation
+│   ├── core.py               #   Core metric charts
+│   ├── convergence.py        #   Convergence diagnostics
+│   ├── stability.py          #   Stability panels
+│   └── advanced.py           #   Deep-dive charts
+└── utils/                    # Shared utilities
+test/                         # Pytest suite
 ```
 
 ______________________________________________________________________
 
-# 7. Documentation
-
-Please see our [documentation site](https://samplepath.pcalc.org).
-
-______________________________________________________________________
-
-# 8. License
+## License
 
 Licensed under the **MIT License**.\
 See `LICENSE` for details.
 
-Copyright (c) 2025 Krishna Kumar
+Copyright (c) 2025 Dr. Krishna Kumar
+
+Part of [The Presence Calculus Project](https://docs.pcalc.org).
