@@ -208,6 +208,54 @@ def test_figure_context_saves_and_closes(mock_plt, mock_add_caption, tmp_path):
     fig.tight_layout.assert_called_once()
 
 
+@pytest.mark.parametrize(
+    ("enabled", "expected_calls"),
+    [
+        (True, 2),
+        (False, 0),
+    ],
+)
+@patch("samplepath.plots.figure_context.plt")
+def test_figure_context_grid_lines_toggle(mock_plt, enabled, expected_calls, tmp_path):
+    fig = MagicMock()
+    ax = MagicMock()
+    mock_plt.subplots.return_value = (fig, ax)
+
+    out_path = tmp_path / "chart.png"
+    with figure_context(
+        str(out_path),
+        unit="timestamp",
+        chart_config=ChartConfig(grid_lines=enabled),
+    ):
+        pass
+
+    assert ax.grid.call_count == expected_calls
+
+
+@pytest.mark.parametrize(
+    ("enabled", "expected_calls"),
+    [
+        (True, 1),
+        (False, 0),
+    ],
+)
+@patch("samplepath.plots.figure_context.plt")
+def test_figure_context_minor_ticks_toggle(mock_plt, enabled, expected_calls, tmp_path):
+    fig = MagicMock()
+    ax = MagicMock()
+    mock_plt.subplots.return_value = (fig, ax)
+
+    out_path = tmp_path / "chart.png"
+    with figure_context(
+        str(out_path),
+        unit="timestamp",
+        chart_config=ChartConfig(grid_lines=enabled),
+    ):
+        pass
+
+    assert ax.minorticks_on.call_count == expected_calls
+
+
 @patch("samplepath.plots.figure_context.plt")
 def test_figure_context_always_closes_on_error(mock_plt, tmp_path):
     fig = MagicMock()

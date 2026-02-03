@@ -25,6 +25,7 @@ class ChartConfig:
     chart_format: str = "png"
     chart_dpi: Optional[int] = 150
     sampling_frequency: Optional[str] = None
+    grid_lines: bool = True
 
     @classmethod
     def init_from_args(cls, args: Optional[object]) -> "ChartConfig":
@@ -43,6 +44,7 @@ class ChartConfig:
             chart_format=getattr(args, "chart_format", "png"),
             chart_dpi=getattr(args, "chart_dpi", 150),
             sampling_frequency=getattr(args, "sampling_frequency", None),
+            grid_lines=getattr(args, "grid_lines", True),
         )
 
     def with_duration_scale(self, scale: DurationScale) -> "ChartConfig":

@@ -246,6 +246,12 @@ def build_parser() -> tuple[argparse.ArgumentParser, set[str]]:
         help="DPI for PNG output (ignored for SVG)",
     )
     chart_config.add_argument(
+        "--grid-lines",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Show grid lines and minor ticks on charts",
+    )
+    chart_config.add_argument(
         "--sampling-frequency",
         type=str,
         default=None,

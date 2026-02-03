@@ -64,6 +64,7 @@ def test_parse_args_defaults_and_types():
     assert args.show_derivations is False
     assert args.chart_format == "png"
     assert args.chart_dpi == 150
+    assert args.grid_lines is True
 
 
 def test_with_event_marks_flag_can_be_enabled():
@@ -88,6 +89,20 @@ def test_chart_dpi_flag_can_be_enabled():
     _, args = cli.parse_args(["flow", "events.csv", "--chart-dpi", "150"])
 
     assert args.chart_dpi == 150
+
+
+@pytest.mark.parametrize(
+    ("flags", "expected"),
+    [
+        ([], True),
+        (["--no-grid-lines"], False),
+        (["--grid-lines"], True),
+    ],
+)
+def test_grid_lines_flag_can_be_toggled(flags, expected):
+    _, args = cli.parse_args(["flow", "events.csv", *flags])
+
+    assert args.grid_lines is expected
 
 
 def test_sampling_frequency_defaults_to_none():

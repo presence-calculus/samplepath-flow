@@ -1977,7 +1977,6 @@ def test_LLWPanel_renders_invariant_chart():
         )
     ax.plot.assert_called_once()
     ax.set_aspect.assert_called_once_with("equal", adjustable="box")
-    ax.grid.assert_not_called()
     ax.set_xlabel.assert_called_once_with("L(T)")
     ax.set_ylabel.assert_called_once_with("Λ(T)·w(T)")
     ax.set_title.assert_called_once_with("L(T) vs Λ(T).w(T)")
@@ -2908,6 +2907,17 @@ def test_chart_config_init_from_args_reads_sampling_frequency():
     args = SimpleNamespace(sampling_frequency="week")
     config = ChartConfig.init_from_args(args)
     assert config.sampling_frequency == "week"
+
+
+def test_chart_config_grid_lines_defaults_to_true():
+    config = ChartConfig()
+    assert config.grid_lines is True
+
+
+def test_chart_config_init_from_args_reads_grid_lines():
+    args = SimpleNamespace(grid_lines=False)
+    config = ChartConfig.init_from_args(args)
+    assert config.grid_lines is False
 
 
 def test_LPanel_passes_sampling_frequency_to_render_line_chart():

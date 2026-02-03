@@ -16,7 +16,11 @@ from samplepath.metrics import (
     compute_elementwise_empirical_metrics,
 )
 from samplepath.plots.chart_config import ChartConfig
-from samplepath.plots.helpers import _clip_axis_to_percentile, format_date_axis
+from samplepath.plots.helpers import (
+    _clip_axis_to_percentile,
+    apply_gridlines,
+    format_date_axis,
+)
 from samplepath.utils.duration_scale import HOURS, DurationScale
 
 
@@ -275,6 +279,7 @@ def draw_dynamic_convergence_panel_with_errors(
     lambda_pctl_lower: Optional[float] = None,
     lambda_warmup_seconds: Optional[float] = None,
     scale: Optional[DurationScale] = None,
+    grid_lines: bool = True,
 ) -> None:
     fig, axes = plt.subplots(3, 1, figsize=(12, 9.2), sharex=True)
     duration_scale = scale or HOURS
@@ -331,6 +336,7 @@ def draw_dynamic_convergence_panel_with_errors(
 
     for ax in axes:
         format_date_axis(ax)
+        apply_gridlines(ax, enabled=grid_lines)
 
     fig.suptitle(title)
     plt.tight_layout(rect=(0, 0, 1, 0.96))
@@ -356,6 +362,7 @@ def draw_dynamic_convergence_panel_with_errors_and_endeffects(
     lambda_pctl_lower: Optional[float] = None,
     lambda_warmup_seconds: Optional[float] = None,
     scale: Optional[DurationScale] = None,
+    grid_lines: bool = True,
 ) -> None:
     """Four-row dynamic convergence view with end-effect metrics."""
     fig, axes = plt.subplots(4, 1, figsize=(12, 12), sharex=True)
@@ -424,6 +431,7 @@ def draw_dynamic_convergence_panel_with_errors_and_endeffects(
 
     for ax in axes:
         format_date_axis(ax)
+        apply_gridlines(ax, enabled=grid_lines)
 
     fig.suptitle(title)
     plt.tight_layout(rect=(0, 0, 1, 0.96))
@@ -472,6 +480,7 @@ def plot_residence_time_convergence_error_charts(
         lambda_pctl_lower=lambda_pctl_lower,
         lambda_warmup_seconds=lambda_warmup_seconds,
         scale=scale,
+        grid_lines=chart_config.grid_lines,
     )
     written.append(ts_conv_dyn3)
 
@@ -499,6 +508,7 @@ def plot_residence_time_convergence_error_charts(
         lambda_pctl_lower=lambda_pctl_lower,
         lambda_warmup_seconds=lambda_warmup_seconds,
         scale=scale,
+        grid_lines=chart_config.grid_lines,
     )
     written.append(ts_conv_dyn4)
     return written

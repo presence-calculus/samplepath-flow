@@ -145,12 +145,40 @@ def format_date_axis(ax: Axes, unit: str = "timestamp") -> None:
         pass
 
 
-def format_axis(ax: Axes, title: str, unit: str, ylabel: str) -> None:
+def apply_gridlines(ax: Axes, enabled: bool = True) -> None:
+    """Enable minor ticks and gridlines on an axis when requested."""
+    if not enabled:
+        return
+    if not hasattr(ax, "minorticks_on") or not hasattr(ax, "grid"):
+        return
+    ax.minorticks_on()
+    ax.grid(
+        True,
+        which="major",
+        axis="both",
+        linestyle="--",
+        linewidth=0.6,
+        alpha=0.4,
+    )
+    ax.grid(
+        True,
+        which="minor",
+        axis="both",
+        linestyle=":",
+        linewidth=0.4,
+        alpha=0.25,
+    )
+
+
+def format_axis(
+    ax: Axes, title: str, unit: str, ylabel: str, grid_lines: bool = True
+) -> None:
     """Set axis labels, title, and legend with date formatting."""
     ax.set_title(title)
     ax.set_ylabel(ylabel)
     ax.legend()
     format_date_axis(ax, unit=unit)
+    apply_gridlines(ax, enabled=grid_lines)
 
 
 def format_fig(caption: Optional[str], fig: Figure) -> None:
@@ -168,9 +196,10 @@ def format_and_save(
     unit: str,
     caption: Optional[str],
     out_path: str,
+    grid_lines: bool = True,
 ) -> None:
     """Format the axis, add optional caption, save the figure, and close it."""
-    format_axis(ax, title, unit, ylabel)
+    format_axis(ax, title, unit, ylabel, grid_lines=grid_lines)
     format_fig(caption, fig)
     fig.savefig(out_path)
     plt.close(fig)

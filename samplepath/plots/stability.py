@@ -17,6 +17,7 @@ from samplepath.plots.core import NPanel
 from samplepath.plots.helpers import (
     _clip_axis_to_percentile,
     add_caption,
+    apply_gridlines,
     format_date_axis,
 )
 from samplepath.utils.duration_scale import HOURS, DurationScale
@@ -164,6 +165,7 @@ def plot_rate_stability_charts(
     ax_top = axes[0]
     NPanel().render(ax_top, times, N_raw)
     format_date_axis(ax_top)
+    apply_gridlines(ax_top, enabled=chart_config.grid_lines)
 
     # Bottom: WIP Growth Rate N(T)/T
     ax = axes[1]
@@ -171,6 +173,7 @@ def plot_rate_stability_charts(
     ax.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
     ax.axhline(1.0, linewidth=1.0, alpha=1.0, linestyle=":", zorder=1)
     format_date_axis(ax)
+    apply_gridlines(ax, enabled=chart_config.grid_lines)
     ax.set_xlabel("time")
     ax.set_ylabel("rate")
     ax.set_title(
@@ -208,6 +211,7 @@ def plot_rate_stability_charts(
     ax_top.set_title("R(t) — Total age of WIP")
     ax_top.legend(loc="best")
     format_date_axis(ax_top)
+    apply_gridlines(ax_top, enabled=chart_config.grid_lines)
 
     # Bottom: Total Age Growth Rate R(T)/T
     ax = axes[1]
@@ -218,6 +222,7 @@ def plot_rate_stability_charts(
     )  # reference guide
 
     format_date_axis(ax)
+    apply_gridlines(ax, enabled=chart_config.grid_lines)
     ax.set_xlabel("time")
     ax.set_ylabel("rate")
     ax.set_title(
@@ -248,6 +253,7 @@ def plot_rate_stability_charts(
     axN.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
     axN.axhline(1.0, linewidth=1.0, alpha=1.0, linestyle=":", zorder=1)
     format_date_axis(axN)
+    apply_gridlines(axN, enabled=chart_config.grid_lines)
     axN.set_ylabel("rate")
     axN.set_title("WIP Growth Rate: N(T)/T")
     axN.legend(loc="best")
@@ -262,6 +268,7 @@ def plot_rate_stability_charts(
     axR.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
     axR.axhline(1.0, linewidth=1.0, alpha=1.0, linestyle=":", zorder=1)
     format_date_axis(axR)
+    apply_gridlines(axR, enabled=chart_config.grid_lines)
     axR.set_ylabel("rate")
     axR.set_title("Total Age Growth Rate: R(T)/T")
     axR.legend(loc="best")
@@ -281,6 +288,7 @@ def plot_rate_stability_charts(
     )
     axLam.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
     format_date_axis(axLam)
+    apply_gridlines(axLam, enabled=chart_config.grid_lines)
     axLam.set_ylabel(f"[{duration_scale.rate_label}]")
     axLam.set_title("λ*(T) — running arrival rate")
     axLam.legend(loc="best")
@@ -316,6 +324,7 @@ def plot_rate_stability_charts(
     )
     axW.axhline(0.0, linewidth=0.8, alpha=0.6, zorder=1)
     format_date_axis(axW)
+    apply_gridlines(axW, enabled=chart_config.grid_lines)
     axW.set_xlabel("time")
     axW.set_ylabel(duration_scale.label)
     axW.set_title("w(T) vs W*(T) — coherence")

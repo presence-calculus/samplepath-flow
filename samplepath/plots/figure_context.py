@@ -13,14 +13,14 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 import logging
 import os
-from typing import Callable, Iterator, Literal, Optional, Tuple, Union
+from typing import Callable, Iterator, Literal, Optional, Sequence, Tuple, Union
 
 from matplotlib import pyplot as plt
 import numpy as np
 from pandas.tseries.frequencies import to_offset
 
 from samplepath.plots.chart_config import ChartConfig
-from samplepath.plots.helpers import add_caption, apply_calendar_ticks
+from samplepath.plots.helpers import add_caption, apply_calendar_ticks, apply_gridlines
 
 _freq_label = ChartConfig.freq_display_label
 
@@ -138,12 +138,29 @@ class FigureDecorSpec:
     tight_layout_rect: Optional[Tuple[float, float, float, float]] = None
 
 
-def _flatten_axes(axes: Union[plt.Axes, np.ndarray]) -> np.ndarray:
+def _flatten_axes(axes: Union[plt.Axes, np.ndarray]) -> Sequence[plt.Axes]:
     if isinstance(axes, np.ndarray):
         return axes.ravel()
     if isinstance(axes, (list, tuple)):
-        return np.array(axes, dtype=object).ravel()
-    return np.array([axes], dtype=object).ravel()
+        flattened: list[plt.Axes] = []
+        for item in axes:
+            if isinstance(item, np.ndarray):
+                flattened.extend(list(item.ravel()))
+            elif isinstance(item, (list, tuple)):
+                flattened.extend(list(item))
+            else:
+                flattened.append(item)
+        return flattened
+    return [axes]
+
+
+def _apply_gridlines(
+    axes: Union[plt.Axes, np.ndarray], *, enabled: bool = True
+) -> None:
+    if not enabled:
+        return
+    for ax in _flatten_axes(axes):
+        apply_gridlines(ax, enabled=True)
 
 
 def _format_targets(
@@ -217,6 +234,9 @@ def layout_context(
         targets = _format_targets(axes, policy=format_targets)
         for ax in targets:
             format_axis_fn(ax, unit=unit)
+
+        grid_lines = chart_config.grid_lines if chart_config else True
+        _apply_gridlines(axes, enabled=grid_lines)
 
         if decor:
             if decor.suptitle:
