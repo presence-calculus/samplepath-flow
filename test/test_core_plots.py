@@ -42,6 +42,7 @@ def test_render_N_passes_overlays_with_default_color():
     mock_render.assert_called_once()
     _, kwargs = mock_render.call_args
     assert kwargs["fill"] is True
+    assert kwargs["fill_color"] == "grey"
     assert kwargs["overlays"] == overlays
     ax.set_title.assert_called_once()
     ax.set_ylabel.assert_called_once_with("N(t)")

@@ -13,7 +13,7 @@ tree under `test/`.
 Agent must not modify any file outside the scope of the task being executed.
 ----------
 ## Coding and architectural guidance
-See decisions/codiing_style_guidelines.md for additional rules.
+See coding_style_guide.md for additional rules.
 
 ______________________________________________________________________
 

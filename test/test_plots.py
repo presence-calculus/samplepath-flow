@@ -175,7 +175,8 @@ def test_draw_step_chart_overlay_drop_lines_calls_vlines(mock_plt, tmp_path):
 
     draw_step_chart(times, values, "Title", "Y", out_path, overlays=overlays)
 
-    mock_ax.vlines.assert_called_once()
+    _, kwargs = mock_ax.vlines.call_args
+    assert kwargs["alpha"] == 0.7
 
 
 @patch("samplepath.plots.helpers.plt")
@@ -563,18 +564,18 @@ def test_render_line_chart_no_markers_when_sampling_frequency_none():
     assert "marker" not in kwargs
 
 
-def test_render_step_chart_grey_when_overlays_and_no_sampling_frequency():
+def test_render_step_chart_lowers_alpha_when_overlays_and_no_sampling_frequency():
     ax = MagicMock()
     times = [_t("2024-01-01")]
     values = np.array([1.0])
     overlays = [
-        ScatterOverlay(x=[times[0]], y=[1.0], color="purple", label="evt"),
+        ScatterOverlay(x=[times[0]], y=[1.0], color="green", label="evt"),
     ]
 
     render_step_chart(ax, times, values, label="N(t)", overlays=overlays)
 
     _, kwargs = ax.step.call_args
-    assert kwargs["color"] == "grey"
+    assert kwargs["alpha"] == 0.4
 
 
 def test_render_step_chart_keeps_color_when_overlays_and_sampling_frequency():
@@ -590,7 +591,7 @@ def test_render_step_chart_keeps_color_when_overlays_and_sampling_frequency():
     )
 
     _, kwargs = ax.step.call_args
-    assert kwargs["color"] == "tab:blue"
+    assert kwargs["alpha"] == 1.0
 
 
 def test_render_step_chart_custom_color_kept_with_sampling_frequency():
@@ -612,7 +613,7 @@ def test_render_step_chart_custom_color_kept_with_sampling_frequency():
     )
 
     _, kwargs = ax.step.call_args
-    assert kwargs["color"] == "purple"
+    assert kwargs["alpha"] == 1.0
 
 
 def test_render_step_chart_default_color_when_no_overlays():
@@ -623,10 +624,10 @@ def test_render_step_chart_default_color_when_no_overlays():
     render_step_chart(ax, times, values, label="N(t)", color="cyan")
 
     _, kwargs = ax.step.call_args
-    assert kwargs["color"] == "cyan"
+    assert kwargs["alpha"] == 1.0
 
 
-def test_render_step_chart_fill_uses_effective_color():
+def test_render_step_chart_fill_lowers_alpha_when_overlays():
     ax = MagicMock()
     times = [_t("2024-01-01")]
     values = np.array([1.0])
@@ -637,10 +638,10 @@ def test_render_step_chart_fill_uses_effective_color():
     render_step_chart(ax, times, values, label="N(t)", fill=True, overlays=overlays)
 
     _, kwargs = ax.fill_between.call_args
-    assert kwargs["color"] == "grey"
+    assert kwargs["alpha"] == 0.15
 
 
-def test_render_line_chart_grey_when_overlays_and_no_sampling_frequency():
+def test_render_line_chart_lowers_alpha_when_overlays_and_no_sampling_frequency():
     ax = MagicMock()
     times = [_t("2024-01-01")]
     values = np.array([1.0])
@@ -651,7 +652,7 @@ def test_render_line_chart_grey_when_overlays_and_no_sampling_frequency():
     render_line_chart(ax, times, values, label="L(T)", overlays=overlays)
 
     _, kwargs = ax.plot.call_args
-    assert kwargs["color"] == "grey"
+    assert kwargs["alpha"] == 0.4
 
 
 def test_render_line_chart_keeps_color_when_overlays_and_sampling_frequency():
@@ -667,7 +668,7 @@ def test_render_line_chart_keeps_color_when_overlays_and_sampling_frequency():
     )
 
     _, kwargs = ax.plot.call_args
-    assert kwargs["color"] == "tab:blue"
+    assert kwargs["alpha"] == 1.0
 
 
 def test_render_line_chart_default_color_when_no_overlays():
@@ -678,7 +679,7 @@ def test_render_line_chart_default_color_when_no_overlays():
     render_line_chart(ax, times, values, label="L(T)", color="cyan")
 
     _, kwargs = ax.plot.call_args
-    assert kwargs["color"] == "cyan"
+    assert kwargs["alpha"] == 1.0
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

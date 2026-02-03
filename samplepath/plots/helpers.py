@@ -268,6 +268,7 @@ def render_step_chart(
     label: str = "N(t)",
     color: str = "tab:blue",
     fill: bool = False,
+    fill_color: Optional[str] = None,
     linewidth: float = 1.0,
     overlays: Optional[List[ScatterOverlay]] = None,
     sampling_frequency: Optional[str] = None,
@@ -296,7 +297,8 @@ def render_step_chart(
         When set, keep the original color even with overlays present
         (rug-plot mode — overlays sit at y=0, so de-emphasis is unnecessary).
     """
-    effective_color = "grey" if overlays and sampling_frequency is None else color
+    effective_color = color
+    fill_alpha = 0.15 if overlays and sampling_frequency is None else 0.3
     ax.step(
         times,
         values,
@@ -304,13 +306,23 @@ def render_step_chart(
         label=label,
         color=effective_color,
         linewidth=linewidth,
+        alpha=0.4 if overlays and sampling_frequency is None else 1.0,
     )
     if fill:
-        ax.fill_between(times, values, step="post", alpha=0.3, color=effective_color)
+        resolved_fill_color = fill_color or effective_color
+        ax.fill_between(
+            times,
+            values,
+            step="post",
+            alpha=fill_alpha,
+            color=resolved_fill_color,
+        )
     if overlays:
         for i, overlay in enumerate(overlays):
             if not overlay.x:
                 continue
+            overlay_scatter_alpha = 1.0 if overlay.color == "green" else 1.0
+            overlay_vline_alpha = 0.7 if overlay.color == "green" else 0.5
             if overlay.drop_lines:
                 ax.vlines(
                     overlay.x,
@@ -318,7 +330,7 @@ def render_step_chart(
                     overlay.y,
                     colors=overlay.color,
                     linewidths=0.5,
-                    alpha=0.5,
+                    alpha=overlay_vline_alpha,
                     zorder=4 + i,
                 )
             ax.scatter(
@@ -326,6 +338,7 @@ def render_step_chart(
                 overlay.y,
                 color=overlay.color,
                 s=2,
+                alpha=overlay_scatter_alpha,
                 zorder=5 + i,
                 label=overlay.label,
             )
@@ -363,9 +376,12 @@ def render_line_chart(
     sampling_frequency : optional str
         When set, add markers to make individual data points visible.
     """
-    effective_color = "grey" if overlays and sampling_frequency is None else color
+    effective_color = color
     plot_kwargs: dict[str, Any] = dict(
-        label=label, color=effective_color, linewidth=linewidth
+        label=label,
+        color=effective_color,
+        linewidth=linewidth,
+        alpha=0.4 if overlays and sampling_frequency is None else 1.0,
     )
     if sampling_frequency is not None:
         plot_kwargs["marker"] = "o"
@@ -375,6 +391,8 @@ def render_line_chart(
         for i, overlay in enumerate(overlays):
             if not overlay.x:
                 continue
+            overlay_scatter_alpha = 1.0 if overlay.color == "green" else 1.0
+            overlay_vline_alpha = 0.7 if overlay.color == "green" else 0.5
             if overlay.drop_lines:
                 ax.vlines(
                     overlay.x,
@@ -382,7 +400,7 @@ def render_line_chart(
                     overlay.y,
                     colors=overlay.color,
                     linewidths=0.5,
-                    alpha=0.5,
+                    alpha=overlay_vline_alpha,
                     zorder=4 + i,
                 )
             ax.scatter(
@@ -390,6 +408,7 @@ def render_line_chart(
                 overlay.y,
                 color=overlay.color,
                 s=2,
+                alpha=overlay_scatter_alpha,
                 zorder=5 + i,
                 label=overlay.label,
             )

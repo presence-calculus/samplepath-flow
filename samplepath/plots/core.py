@@ -103,6 +103,7 @@ class NPanel:
             N_vals,
             label="N(t)",
             fill=True,
+            fill_color="grey",
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
         )
