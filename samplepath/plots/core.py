@@ -150,7 +150,7 @@ class NPanel:
 @dataclass
 class LPanel:
     show_title: bool = True
-    title: str = "L(T) — Time-Average of Presence"
+    title: str = "L(T) — Presence per Time Unit"
     show_derivations: bool = False
     with_event_marks: bool = False
     sampling_frequency: Optional[str] = None
