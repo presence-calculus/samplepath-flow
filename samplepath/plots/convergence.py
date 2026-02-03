@@ -222,7 +222,7 @@ class SojournTimeScatterPanel:
             departures,
             sojourn_scaled,
             label="Sojourn time (departures)",
-            color="tab:purple",
+            color="tab:green",
         )
         render_line_chart(
             ax,
