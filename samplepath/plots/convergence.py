@@ -171,7 +171,7 @@ class ProcessTimeConvergencePanel:
 
 
 @dataclass
-class SojournTimeScatterPanel:
+class SojournVsResidenceTimeScatterPanel:
     show_title: bool = True
     title: str = "Sojourn Time vs Residence Times"
     with_event_marks: bool = False
@@ -809,7 +809,7 @@ def plot_process_time_convergence_stack(
             departure_times=metrics.departure_times,
             scale=scale,
         )
-        SojournTimeScatterPanel(
+        SojournVsResidenceTimeScatterPanel(
             with_event_marks=chart_config.with_event_marks,
             sampling_frequency=chart_config.sampling_frequency,
         ).render(
@@ -850,7 +850,7 @@ def plot_convergence_charts(
         sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, empirical_metrics, filter_result, chart_config, out_dir)
 
-    path_sojourn_scatter = SojournTimeScatterPanel(
+    path_sojourn_scatter = SojournVsResidenceTimeScatterPanel(
         with_event_marks=chart_config.with_event_marks,
         sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, empirical_metrics, filter_result, chart_config, out_dir)

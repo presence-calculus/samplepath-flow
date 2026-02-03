@@ -14,7 +14,7 @@ from samplepath.plots.convergence import (
     ArrivalDepartureRateConvergencePanel,
     ProcessTimeConvergencePanel,
     SamplePathConvergencePanel,
-    SojournTimeScatterPanel,
+    SojournVsResidenceTimeScatterPanel,
     plot_arrival_departure_equilibrium_stack,
     plot_convergence_charts,
     plot_process_time_convergence_stack,
@@ -80,7 +80,7 @@ def _call_plot_convergence_charts_with_rate_panels():
             return_value="process.png",
         ),
         patch(
-            "samplepath.plots.convergence.SojournTimeScatterPanel.plot",
+            "samplepath.plots.convergence.SojournVsResidenceTimeScatterPanel.plot",
             return_value="scatter.png",
         ),
         patch(
@@ -306,7 +306,7 @@ def test_sojourn_time_scatter_panel_overlays_drop_lines():
         patch("samplepath.plots.convergence.render_line_chart"),
         patch("samplepath.plots.convergence.render_scatter_chart"),
     ):
-        SojournTimeScatterPanel(with_event_marks=True).render(
+        SojournVsResidenceTimeScatterPanel(with_event_marks=True).render(
             ax,
             times,
             w_vals,
@@ -386,10 +386,10 @@ def test_sojourn_time_scatter_panel_plot_calls_renderer():
     with (
         patch("samplepath.plots.convergence.figure_context", side_effect=fake_context),
         patch(
-            "samplepath.plots.convergence.SojournTimeScatterPanel.render"
+            "samplepath.plots.convergence.SojournVsResidenceTimeScatterPanel.render"
         ) as mock_render,
     ):
-        written = SojournTimeScatterPanel().plot(
+        written = SojournVsResidenceTimeScatterPanel().plot(
             metrics, empirical_metrics, filter_result, chart_config, "/tmp/out"
         )
     assert written == "out.png"
@@ -428,7 +428,7 @@ def test_process_time_convergence_stack_calls_panel_renderers():
             "samplepath.plots.convergence.ProcessTimeConvergencePanel.render"
         ) as mock_top,
         patch(
-            "samplepath.plots.convergence.SojournTimeScatterPanel.render"
+            "samplepath.plots.convergence.SojournVsResidenceTimeScatterPanel.render"
         ) as mock_bottom,
     ):
         written = plot_process_time_convergence_stack(
@@ -472,7 +472,7 @@ def _call_plot_convergence_charts_with_process_panel():
             return_value="arrival_stack.png",
         ),
         patch(
-            "samplepath.plots.convergence.SojournTimeScatterPanel.plot",
+            "samplepath.plots.convergence.SojournVsResidenceTimeScatterPanel.plot",
             return_value="scatter.png",
         ),
         patch(
