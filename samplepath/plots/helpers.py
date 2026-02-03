@@ -12,6 +12,8 @@ import numpy as np
 import pandas as pd
 from pandas.tseries.frequencies import to_offset
 
+from samplepath.plots.chart_config import ChartConfig, ColorConfig
+
 
 @dataclass
 class ScatterOverlay:
@@ -135,8 +137,6 @@ def apply_calendar_ticks(ax: Axes, unit: Optional[str]) -> None:
 
 def format_date_axis(ax: Axes, unit: str = "timestamp") -> None:
     """Format the x-axis for dates if possible."""
-    from samplepath.plots.chart_config import ChartConfig
-
     apply_calendar_ticks(ax, unit)
     ax.set_xlabel(ChartConfig.freq_display_label(unit))
     try:
@@ -321,8 +321,12 @@ def render_step_chart(
         for i, overlay in enumerate(overlays):
             if not overlay.x:
                 continue
-            overlay_scatter_alpha = 1.0 if overlay.color == "green" else 1.0
-            overlay_vline_alpha = 0.7 if overlay.color == "green" else 0.5
+            overlay_scatter_alpha = (
+                1.0 if overlay.color == ColorConfig.departure_color else 1.0
+            )
+            overlay_vline_alpha = (
+                0.7 if overlay.color == ColorConfig.departure_color else 0.5
+            )
             if overlay.drop_lines:
                 ax.vlines(
                     overlay.x,
@@ -391,8 +395,12 @@ def render_line_chart(
         for i, overlay in enumerate(overlays):
             if not overlay.x:
                 continue
-            overlay_scatter_alpha = 1.0 if overlay.color == "green" else 1.0
-            overlay_vline_alpha = 0.7 if overlay.color == "green" else 0.5
+            overlay_scatter_alpha = (
+                1.0 if overlay.color == ColorConfig.departure_color else 1.0
+            )
+            overlay_vline_alpha = (
+                0.7 if overlay.color == ColorConfig.departure_color else 0.5
+            )
             if overlay.drop_lines:
                 ax.vlines(
                     overlay.x,
@@ -614,14 +622,14 @@ def build_event_overlays(
         ScatterOverlay(
             x=arrival_x,
             y=arrival_y,
-            color="purple",
+            color=ColorConfig.arrival_color,
             label="Arrival",
             drop_lines=drop_lines_for_arrivals,
         ),
         ScatterOverlay(
             x=departure_x,
             y=departure_y,
-            color="green",
+            color=ColorConfig.departure_color,
             label="Departure",
             drop_lines=drop_lines_for_departures,
         ),

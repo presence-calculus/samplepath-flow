@@ -14,7 +14,7 @@ from samplepath.metrics import (
     FlowMetricsResult,
     MetricDerivations,
 )
-from samplepath.plots.chart_config import ChartConfig
+from samplepath.plots.chart_config import ChartConfig, ColorConfig
 from samplepath.plots.core import CFDPanel
 from samplepath.plots.figure_context import (
     FigureDecorSpec,
@@ -122,7 +122,7 @@ class ProcessTimeConvergencePanel:
             times,
             w_star_scaled,
             label=f"W*(t) [{duration_scale.label}]",
-            color="tab:green",
+            color=ColorConfig.departure_color,
             overlays=w_star_overlays,
             sampling_frequency=self.sampling_frequency,
         )
@@ -222,7 +222,7 @@ class SojournVsResidenceTimeScatterPanel:
             departures,
             sojourn_scaled,
             label="Sojourn time (departures)",
-            color="tab:green",
+            color=ColorConfig.departure_color,
         )
         render_line_chart(
             ax,

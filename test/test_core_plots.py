@@ -13,7 +13,7 @@ import pandas as pd
 
 from samplepath.metrics import ElementWiseEmpiricalMetrics
 from samplepath.plots import core
-from samplepath.plots.chart_config import ChartConfig
+from samplepath.plots.chart_config import ChartConfig, ColorConfig
 from samplepath.plots.core import ClipOptions
 from samplepath.plots.figure_context import resolve_chart_path
 from samplepath.utils.duration_scale import MINUTES
@@ -500,7 +500,7 @@ def test_render_sojourn_scatter_uses_departure_color():
         core.SojournTimeScatterPanel(with_event_marks=True).render(
             ax, departures, sojourn_vals
         )
-    assert mock_scatter.call_args.kwargs["color"] == "green"
+    assert mock_scatter.call_args.kwargs["color"] == ColorConfig.departure_color
 
 
 def test_render_sojourn_scatter_drop_lines_when_event_marks():
@@ -523,7 +523,7 @@ def test_render_residence_scatter_open_uses_arrival_color():
         core.ResidenceTimeScatterPanel(with_event_marks=True).render(
             ax, arrivals, vals, completed
         )
-    assert mock_scatter.call_args.kwargs["color"] == "purple"
+    assert mock_scatter.call_args.kwargs["color"] == ColorConfig.arrival_color
 
 
 def test_render_residence_scatter_completed_uses_departure_color():
@@ -535,7 +535,7 @@ def test_render_residence_scatter_completed_uses_departure_color():
         core.ResidenceTimeScatterPanel(with_event_marks=True).render(
             ax, arrivals, vals, completed
         )
-    assert mock_scatter.call_args.kwargs["color"] == "green"
+    assert mock_scatter.call_args.kwargs["color"] == ColorConfig.departure_color
 
 
 def test_render_residence_scatter_drop_line_color_arrival():
@@ -547,7 +547,7 @@ def test_render_residence_scatter_drop_line_color_arrival():
         core.ResidenceTimeScatterPanel(with_event_marks=True).render(
             ax, arrivals, vals, completed
         )
-    assert mock_scatter.call_args.kwargs["drop_line_color"] == "purple"
+    assert mock_scatter.call_args.kwargs["drop_line_color"] == ColorConfig.arrival_color
 
 
 def test_render_Lambda_arrival_overlays_when_enabled():
@@ -563,7 +563,7 @@ def test_render_Lambda_arrival_overlays_when_enabled():
             arrival_times=arrivals,
         )
     overlays = mock_line.call_args.kwargs["overlays"]
-    assert overlays[0].color == "purple"
+    assert overlays[0].color == ColorConfig.arrival_color
 
 
 def test_render_w_overlays_when_enabled():
@@ -581,7 +581,7 @@ def test_render_w_overlays_when_enabled():
             departure_times=departures,
         )
     overlays = mock_line.call_args.kwargs["overlays"]
-    assert overlays[0].color == "purple"
+    assert overlays[0].color == ColorConfig.arrival_color
 
 
 def test_render_w_overlays_include_departures():
@@ -599,7 +599,7 @@ def test_render_w_overlays_include_departures():
             departure_times=departures,
         )
     overlays = mock_line.call_args.kwargs["overlays"]
-    assert overlays[1].color == "green"
+    assert overlays[1].color == ColorConfig.departure_color
 
 
 def test_render_w_overlays_departures_no_drop_lines():
@@ -659,7 +659,7 @@ def test_render_CFD_arrivals_label():
 
 def test_render_CFD_arrivals_color():
     _, mock_step = _render_cfd_with_mocks()
-    assert mock_step.call_args_list[0].kwargs["color"] == "purple"
+    assert mock_step.call_args_list[0].kwargs["color"] == ColorConfig.arrival_color
 
 
 def test_render_CFD_arrivals_fill_false():
@@ -704,7 +704,7 @@ def test_render_CFD_appends_derivations_to_labels_when_enabled():
 
 def test_render_CFD_departures_color():
     _, mock_step = _render_cfd_with_mocks()
-    assert mock_step.call_args_list[1].kwargs["color"] == "green"
+    assert mock_step.call_args_list[1].kwargs["color"] == ColorConfig.departure_color
 
 
 def test_render_CFD_departures_fill_false():
@@ -2092,7 +2092,7 @@ def test_LLWPanel_event_marks_colors_arrivals_purple():
             metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.scatter.call_args.kwargs["color"]
-    assert colors[0][:3] == mcolors.to_rgba("purple")[:3]
+    assert colors[0][:3] == mcolors.to_rgba(ColorConfig.arrival_color)[:3]
 
 
 def test_LLWPanel_event_marks_colors_departures_green():
@@ -2116,7 +2116,7 @@ def test_LLWPanel_event_marks_colors_departures_green():
             metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.scatter.call_args.kwargs["color"]
-    assert colors[1][:3] == mcolors.to_rgba("green")[:3]
+    assert colors[1][:3] == mcolors.to_rgba(ColorConfig.departure_color)[:3]
 
 
 def test_LLWPanel_event_marks_alpha_increases():
@@ -2164,7 +2164,10 @@ def test_LLWPanel_event_marks_drop_lines_arrival_color():
             metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.vlines.call_args.kwargs["colors"]
-    assert np.allclose(colors[0], mcolors.to_rgba("purple", alpha=0.25))
+    assert np.allclose(
+        colors[0],
+        mcolors.to_rgba(ColorConfig.arrival_color, alpha=0.25),
+    )
 
 
 def test_LLWPanel_event_marks_drop_lines_departure_color():
@@ -2188,7 +2191,10 @@ def test_LLWPanel_event_marks_drop_lines_departure_color():
             metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.vlines.call_args.kwargs["colors"]
-    assert np.allclose(colors, [mcolors.to_rgba("purple", alpha=0.25)])
+    assert np.allclose(
+        colors,
+        [mcolors.to_rgba(ColorConfig.arrival_color, alpha=0.25)],
+    )
 
 
 def test_LLWPanel_event_marks_drop_lines_only_for_arrivals():
@@ -2236,7 +2242,10 @@ def test_LLWPanel_event_marks_hlines_arrival_color():
             metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.hlines.call_args.kwargs["colors"]
-    assert np.allclose(colors[0], mcolors.to_rgba("purple", alpha=0.25))
+    assert np.allclose(
+        colors[0],
+        mcolors.to_rgba(ColorConfig.arrival_color, alpha=0.25),
+    )
 
 
 def test_LLWPanel_event_marks_hlines_departure_color():
@@ -2260,7 +2269,10 @@ def test_LLWPanel_event_marks_hlines_departure_color():
             metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.hlines.call_args.kwargs["colors"]
-    assert np.allclose(colors, [mcolors.to_rgba("purple", alpha=0.25)])
+    assert np.allclose(
+        colors,
+        [mcolors.to_rgba(ColorConfig.arrival_color, alpha=0.25)],
+    )
 
 
 def test_LLWPanel_event_marks_hlines_only_for_arrivals():
@@ -2422,7 +2434,7 @@ def test_LLWPanel_departure_overrides_arrival_color():
             metrics, filter_result, ChartConfig(), "/tmp/out"
         )
     colors = ax.scatter.call_args.kwargs["color"]
-    assert colors[0][:3] == mcolors.to_rgba("green")[:3]
+    assert colors[0][:3] == mcolors.to_rgba(ColorConfig.departure_color)[:3]
 
 
 def test_core_driver_calls_invariant_plot_under_core_dir():

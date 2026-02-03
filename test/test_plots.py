@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from samplepath.plots.chart_config import ColorConfig
 from samplepath.plots.helpers import (
     ScatterOverlay,
     _calendar_tick_config,
@@ -37,12 +38,12 @@ def test_scatter_overlay_creation():
     overlay = ScatterOverlay(
         x=[_t("2024-01-01 00:00")],
         y=[1.0],
-        color="purple",
+        color=ColorConfig.arrival_color,
         label="Test",
     )
     assert overlay.x == [_t("2024-01-01 00:00")]
     assert overlay.y == [1.0]
-    assert overlay.color == "purple"
+    assert overlay.color == ColorConfig.arrival_color
     assert overlay.label == "Test"
 
 
@@ -51,7 +52,7 @@ def test_scatter_overlay_drop_lines_default_false():
     overlay = ScatterOverlay(
         x=[_t("2024-01-01 00:00")],
         y=[1.0],
-        color="green",
+        color=ColorConfig.departure_color,
         label="Test",
     )
     assert overlay.drop_lines is False
@@ -62,7 +63,7 @@ def test_scatter_overlay_drop_lines_can_be_true():
     overlay = ScatterOverlay(
         x=[_t("2024-01-01 00:00")],
         y=[1.0],
-        color="green",
+        color=ColorConfig.departure_color,
         label="Test",
         drop_lines=True,
     )
@@ -108,13 +109,13 @@ def test_draw_step_chart_with_overlays_calls_scatter(
         ScatterOverlay(
             x=[_t("2024-01-01 00:00")],
             y=[1.0],
-            color="purple",
+            color=ColorConfig.arrival_color,
             label="Arrival",
         ),
         ScatterOverlay(
             x=[_t("2024-01-01 02:00")],
             y=[0.0],
-            color="green",
+            color=ColorConfig.departure_color,
             label="Departure",
         ),
     ]
@@ -138,7 +139,7 @@ def test_draw_step_chart_overlay_uses_specified_color(mock_plt, tmp_path):
         ScatterOverlay(
             x=[_t("2024-01-01 00:00")],
             y=[1.0],
-            color="purple",
+            color=ColorConfig.arrival_color,
             label="Test",
         ),
     ]
@@ -150,7 +151,7 @@ def test_draw_step_chart_overlay_uses_specified_color(mock_plt, tmp_path):
     draw_step_chart(times, values, "Title", "Y", out_path, overlays=overlays)
 
     call_kwargs = mock_ax.scatter.call_args_list[0][1]
-    assert call_kwargs["color"] == "purple"
+    assert call_kwargs["color"] == ColorConfig.arrival_color
 
 
 @patch("samplepath.plots.helpers.plt")
@@ -163,7 +164,7 @@ def test_draw_step_chart_overlay_drop_lines_calls_vlines(mock_plt, tmp_path):
         ScatterOverlay(
             x=[_t("2024-01-01 00:00")],
             y=[1.0],
-            color="green",
+            color=ColorConfig.departure_color,
             label="Test",
             drop_lines=True,
         ),
@@ -189,7 +190,7 @@ def test_draw_step_chart_overlay_no_drop_lines_no_vlines(mock_plt, tmp_path):
         ScatterOverlay(
             x=[_t("2024-01-01 00:00")],
             y=[1.0],
-            color="green",
+            color=ColorConfig.departure_color,
             label="Test",
             drop_lines=False,
         ),
@@ -214,7 +215,7 @@ def test_draw_step_chart_empty_overlay_skipped(mock_plt, tmp_path):
         ScatterOverlay(
             x=[],
             y=[],
-            color="green",
+            color=ColorConfig.departure_color,
             label="Empty",
         ),
     ]
@@ -238,13 +239,13 @@ def test_draw_step_chart_multiple_overlays(mock_plt, tmp_path):
         ScatterOverlay(
             x=[_t("2024-01-01 00:00")],
             y=[1.0],
-            color="purple",
+            color=ColorConfig.arrival_color,
             label="First",
         ),
         ScatterOverlay(
             x=[_t("2024-01-01 01:00")],
             y=[2.0],
-            color="green",
+            color=ColorConfig.departure_color,
             label="Second",
         ),
         ScatterOverlay(
@@ -304,10 +305,10 @@ def test_build_event_overlays_sets_colors_labels_and_drop_lines():
     )
     assert overlays is not None
     arrival_overlay, departure_overlay = overlays
-    assert arrival_overlay.color == "purple"
+    assert arrival_overlay.color == ColorConfig.arrival_color
     assert arrival_overlay.label == "Arrival"
     assert arrival_overlay.drop_lines is True
-    assert departure_overlay.color == "green"
+    assert departure_overlay.color == ColorConfig.departure_color
     assert departure_overlay.label == "Departure"
     assert departure_overlay.drop_lines is True
 
@@ -464,7 +465,14 @@ def test_render_N_chart_with_event_marks_passes_overlays(
     ax = MagicMock()
     times = [_t("2024-01-01 00:00")]
     values = np.array([1.0])
-    overlays = [ScatterOverlay(x=[times[0]], y=[1.0], color="purple", label="Arrival")]
+    overlays = [
+        ScatterOverlay(
+            x=[times[0]],
+            y=[1.0],
+            color=ColorConfig.arrival_color,
+            label="Arrival",
+        )
+    ]
     mock_build_overlays.return_value = overlays
 
     render_N_chart(
@@ -504,7 +512,14 @@ def test_render_LT_chart_with_event_marks_uses_overlays(
     ax = MagicMock()
     times = [_t("2024-01-01 00:00")]
     values = np.array([2.0])
-    overlays = [ScatterOverlay(x=[times[0]], y=[2.0], color="purple", label="Arrival")]
+    overlays = [
+        ScatterOverlay(
+            x=[times[0]],
+            y=[2.0],
+            color=ColorConfig.arrival_color,
+            label="Arrival",
+        )
+    ]
     mock_build_overlays.return_value = overlays
 
     render_LT_chart(
@@ -569,7 +584,12 @@ def test_render_step_chart_lowers_alpha_when_overlays_and_no_sampling_frequency(
     times = [_t("2024-01-01")]
     values = np.array([1.0])
     overlays = [
-        ScatterOverlay(x=[times[0]], y=[1.0], color="green", label="evt"),
+        ScatterOverlay(
+            x=[times[0]],
+            y=[1.0],
+            color=ColorConfig.departure_color,
+            label="evt",
+        ),
     ]
 
     render_step_chart(ax, times, values, label="N(t)", overlays=overlays)
@@ -583,7 +603,12 @@ def test_render_step_chart_keeps_color_when_overlays_and_sampling_frequency():
     times = [_t("2024-01-01")]
     values = np.array([1.0])
     overlays = [
-        ScatterOverlay(x=[times[0]], y=[0.0], color="purple", label="evt"),
+        ScatterOverlay(
+            x=[times[0]],
+            y=[0.0],
+            color=ColorConfig.arrival_color,
+            label="evt",
+        ),
     ]
 
     render_step_chart(
@@ -599,7 +624,12 @@ def test_render_step_chart_custom_color_kept_with_sampling_frequency():
     times = [_t("2024-01-01")]
     values = np.array([1.0])
     overlays = [
-        ScatterOverlay(x=[times[0]], y=[0.0], color="purple", label="evt"),
+        ScatterOverlay(
+            x=[times[0]],
+            y=[0.0],
+            color=ColorConfig.arrival_color,
+            label="evt",
+        ),
     ]
 
     render_step_chart(
@@ -607,7 +637,7 @@ def test_render_step_chart_custom_color_kept_with_sampling_frequency():
         times,
         values,
         label="A(T)",
-        color="purple",
+        color=ColorConfig.arrival_color,
         overlays=overlays,
         sampling_frequency="MS",
     )
@@ -632,7 +662,12 @@ def test_render_step_chart_fill_lowers_alpha_when_overlays():
     times = [_t("2024-01-01")]
     values = np.array([1.0])
     overlays = [
-        ScatterOverlay(x=[times[0]], y=[1.0], color="purple", label="evt"),
+        ScatterOverlay(
+            x=[times[0]],
+            y=[1.0],
+            color=ColorConfig.arrival_color,
+            label="evt",
+        ),
     ]
 
     render_step_chart(ax, times, values, label="N(t)", fill=True, overlays=overlays)
@@ -646,7 +681,12 @@ def test_render_line_chart_lowers_alpha_when_overlays_and_no_sampling_frequency(
     times = [_t("2024-01-01")]
     values = np.array([1.0])
     overlays = [
-        ScatterOverlay(x=[times[0]], y=[1.0], color="purple", label="evt"),
+        ScatterOverlay(
+            x=[times[0]],
+            y=[1.0],
+            color=ColorConfig.arrival_color,
+            label="evt",
+        ),
     ]
 
     render_line_chart(ax, times, values, label="L(T)", overlays=overlays)
@@ -660,7 +700,12 @@ def test_render_line_chart_keeps_color_when_overlays_and_sampling_frequency():
     times = [_t("2024-01-01")]
     values = np.array([1.0])
     overlays = [
-        ScatterOverlay(x=[times[0]], y=[0.0], color="purple", label="evt"),
+        ScatterOverlay(
+            x=[times[0]],
+            y=[0.0],
+            color=ColorConfig.arrival_color,
+            label="evt",
+        ),
     ]
 
     render_line_chart(

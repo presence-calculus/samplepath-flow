@@ -24,7 +24,7 @@ from samplepath.metrics import (
     FlowMetricsResult,
     MetricDerivations,
 )
-from samplepath.plots.chart_config import ChartConfig
+from samplepath.plots.chart_config import ChartConfig, ColorConfig
 from samplepath.plots.figure_context import (
     FigureDecorSpec,
     LayoutSpec,
@@ -601,9 +601,9 @@ class SojournTimeScatterPanel:
             departure_times,
             sojourn_scaled,
             label="Sojourn time (departures)",
-            color="green",
+            color=ColorConfig.departure_color,
             drop_lines=drop_lines,
-            drop_line_color="green",
+            drop_line_color=ColorConfig.departure_color,
         )
         if self.show_title:
             ax.set_title(self.title)
@@ -675,9 +675,9 @@ class ResidenceTimeScatterPanel:
                 arrival_times_arr[completed_mask].tolist(),
                 residence_vals_arr[completed_mask],
                 label="Residence time (completed)",
-                color="green",
+                color=ColorConfig.departure_color,
                 drop_lines=drop_lines,
-                drop_line_color="purple",
+                drop_line_color=ColorConfig.arrival_color,
             )
         if open_mask.any():
             render_scatter_chart(
@@ -685,9 +685,9 @@ class ResidenceTimeScatterPanel:
                 arrival_times_arr[open_mask].tolist(),
                 residence_vals_arr[open_mask],
                 label="Residence time (open)",
-                color="purple",
+                color=ColorConfig.arrival_color,
                 drop_lines=drop_lines,
-                drop_line_color="purple",
+                drop_line_color=ColorConfig.arrival_color,
             )
         if self.show_title:
             ax.set_title(self.title)
@@ -929,7 +929,7 @@ class CFDPanel:
                     ScatterOverlay(
                         x=arrival_x,
                         y=arrival_y,
-                        color="purple",
+                        color=ColorConfig.arrival_color,
                         label="Arrival",
                         drop_lines=True,
                     )
@@ -944,7 +944,7 @@ class CFDPanel:
                     ScatterOverlay(
                         x=departure_x,
                         y=departure_y,
-                        color="green",
+                        color=ColorConfig.departure_color,
                         label="Departure",
                         drop_lines=True,
                     )
@@ -963,7 +963,7 @@ class CFDPanel:
             times,
             arrivals_cum,
             label=arrivals_label,
-            color="purple",
+            color=ColorConfig.arrival_color,
             fill=False,
             overlays=arrivals_overlay,
         )
@@ -972,7 +972,7 @@ class CFDPanel:
             times,
             departures_cum,
             label=departures_label,
-            color="green",
+            color=ColorConfig.departure_color,
             fill=False,
             overlays=departures_overlay,
         )
@@ -1050,7 +1050,7 @@ class EventIndicatorPanel:
                 ScatterOverlay(
                     x=arrival_times,
                     y=[1] * len(arrival_times),
-                    color="purple",
+                    color=ColorConfig.arrival_color,
                     label="Arrival",
                     drop_lines=True,
                 )
@@ -1060,7 +1060,7 @@ class EventIndicatorPanel:
                 ScatterOverlay(
                     x=departure_times,
                     y=[1] * len(departure_times),
-                    color="green",
+                    color=ColorConfig.departure_color,
                     label="Departure",
                     drop_lines=True,
                 )
@@ -1148,7 +1148,7 @@ class ArrivalsPanel:
             times,
             arrivals_cum,
             label=label,
-            color="purple",
+            color=ColorConfig.arrival_color,
             fill=False,
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
@@ -1228,7 +1228,7 @@ class DeparturesPanel:
             times,
             departures_cum,
             label=label,
-            color="green",
+            color=ColorConfig.departure_color,
             fill=False,
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
@@ -1306,9 +1306,9 @@ class LLWPanel:
                 base = "tab:blue"
                 if self.with_event_marks:
                     if time_val in departure_set:
-                        base = "green"
+                        base = ColorConfig.departure_color
                     elif time_val in arrival_set:
-                        base = "purple"
+                        base = ColorConfig.arrival_color
                 colors.append(mcolors.to_rgba(base, alpha=float(alphas[idx])))
                 drop_colors.append(mcolors.to_rgba(base, alpha=0.25))
             ax.scatter(
@@ -1345,7 +1345,7 @@ class LLWPanel:
                             [0],
                             [0],
                             marker="o",
-                            color="purple",
+                            color=ColorConfig.arrival_color,
                             linestyle="None",
                             label="Arrival",
                         ),
@@ -1353,7 +1353,7 @@ class LLWPanel:
                             [0],
                             [0],
                             marker="o",
-                            color="green",
+                            color=ColorConfig.departure_color,
                             linestyle="None",
                             label="Departure",
                         ),
@@ -1445,9 +1445,9 @@ class LThetaWPrimePanel:
                 base = "tab:blue"
                 if self.with_event_marks:
                     if time_val in departure_set:
-                        base = "green"
+                        base = ColorConfig.departure_color
                     elif time_val in arrival_set:
-                        base = "purple"
+                        base = ColorConfig.arrival_color
                 colors.append(mcolors.to_rgba(base, alpha=float(alphas[idx])))
                 drop_colors.append(mcolors.to_rgba(base, alpha=0.25))
             ax.scatter(
@@ -1484,7 +1484,7 @@ class LThetaWPrimePanel:
                             [0],
                             [0],
                             marker="o",
-                            color="purple",
+                            color=ColorConfig.arrival_color,
                             linestyle="None",
                             label="Arrival",
                         ),
@@ -1492,7 +1492,7 @@ class LThetaWPrimePanel:
                             [0],
                             [0],
                             marker="o",
-                            color="green",
+                            color=ColorConfig.departure_color,
                             linestyle="None",
                             label="Departure",
                         ),

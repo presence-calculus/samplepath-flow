@@ -11,6 +11,12 @@ from samplepath.utils.duration_scale import DurationScale
 
 
 @dataclass(frozen=True)
+class ColorConfig:
+    arrival_color: str = "rebeccapurple"
+    departure_color: str = "forestgreen"
+
+
+@dataclass(frozen=True)
 class ChartConfig:
     """Chart-focused configuration derived from CLI args."""
 
