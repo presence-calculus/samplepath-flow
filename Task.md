@@ -1,7 +1,8 @@
 ---
-ID: 30
-Task: Readme.md updates
-Branch: readme-updates
+ID: 31
+Task: Event indicator process chart should display events unconditionally
+Branch: main
 ---
 
-Spec: The current plan and spec are in ~/.claude/plans/vivid-splashing-meerkat.md
+Spec: The event indicator process chart currently toggles events on and off respecting --with-event-marks. This does not make
+sense. It should display the marks unconditionally since the marks *are* the process.

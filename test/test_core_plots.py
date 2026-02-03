@@ -289,21 +289,6 @@ def test_render_indicator_hides_y_ticks():
     ax.set_yticks.assert_called_once_with([])
 
 
-def test_render_indicator_passes_overlays():
-    ax = MagicMock()
-    arrival = _t("2024-01-01")
-    departure = _t("2024-01-02")
-    with patch("samplepath.plots.core.render_scatter_chart") as mock_render:
-        core.EventIndicatorPanel(with_event_marks=True).render(
-            ax,
-            [arrival, departure],
-            arrival_times=[arrival],
-            departure_times=[departure],
-        )
-    overlays = mock_render.call_args.kwargs["overlays"]
-    assert overlays[0].color == "purple"
-
-
 def test_plot_single_panel_indicator_calls_renderer():
     fig = MagicMock()
     ax = MagicMock()

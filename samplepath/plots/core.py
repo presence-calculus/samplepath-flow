@@ -72,7 +72,7 @@ def _resolve_duration_scale(chart_config: ChartConfig) -> DurationScale:
 @dataclass
 class NPanel:
     show_title: bool = True
-    title: str = "N(t) — Sample Path"
+    title: str = "N(t) - Process State"
     show_derivations: bool = False
     with_event_marks: bool = False
     sampling_frequency: Optional[str] = None
@@ -150,7 +150,7 @@ class NPanel:
 @dataclass
 class LPanel:
     show_title: bool = True
-    title: str = "L(T) — Time-Average of N(t)"
+    title: str = "L(T) — Time-Average of Presence"
     show_derivations: bool = False
     with_event_marks: bool = False
     sampling_frequency: Optional[str] = None
@@ -733,7 +733,7 @@ class ResidenceTimeScatterPanel:
 @dataclass
 class HPanel:
     show_title: bool = True
-    title: str = "H(T) — Cumulative Presence Mass"
+    title: str = "H(T) — Cumulative Presence"
     show_derivations: bool = False
     with_event_marks: bool = False
     sampling_frequency: Optional[str] = None
@@ -1033,8 +1033,7 @@ class CFDPanel:
 @dataclass
 class EventIndicatorPanel:
     show_title: bool = True
-    title: str = "Arrival/Departure Indicator Process"
-    with_event_marks: bool = False
+    title: str = "Sample Path: Arrival/Departure Indicator Process"
 
     def render(
         self,
@@ -1044,29 +1043,27 @@ class EventIndicatorPanel:
         arrival_times: Optional[List[pd.Timestamp]] = None,
         departure_times: Optional[List[pd.Timestamp]] = None,
     ) -> None:
-        overlays: Optional[List[ScatterOverlay]] = None
-        if self.with_event_marks:
-            overlays = []
-            if arrival_times:
-                overlays.append(
-                    ScatterOverlay(
-                        x=arrival_times,
-                        y=[1] * len(arrival_times),
-                        color="purple",
-                        label="Arrival",
-                        drop_lines=True,
-                    )
+        overlays: Optional[List[ScatterOverlay]] = []
+        if arrival_times:
+            overlays.append(
+                ScatterOverlay(
+                    x=arrival_times,
+                    y=[1] * len(arrival_times),
+                    color="purple",
+                    label="Arrival",
+                    drop_lines=True,
                 )
-            if departure_times:
-                overlays.append(
-                    ScatterOverlay(
-                        x=departure_times,
-                        y=[1] * len(departure_times),
-                        color="green",
-                        label="Departure",
-                        drop_lines=True,
-                    )
+            )
+        if departure_times:
+            overlays.append(
+                ScatterOverlay(
+                    x=departure_times,
+                    y=[1] * len(departure_times),
+                    color="green",
+                    label="Departure",
+                    drop_lines=True,
                 )
+            )
         render_scatter_chart(
             ax,
             [],
@@ -1850,9 +1847,9 @@ def plot_core_flow_metrics_charts(
         sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
-    path_indicator = EventIndicatorPanel(
-        with_event_marks=chart_config.with_event_marks,
-    ).plot(metrics, filter_result, chart_config, out_dir)
+    path_indicator = EventIndicatorPanel().plot(
+        metrics, filter_result, chart_config, out_dir
+    )
 
     path_A = ArrivalsPanel(
         with_event_marks=chart_config.with_event_marks,
