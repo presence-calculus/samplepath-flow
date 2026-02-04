@@ -751,7 +751,7 @@ class HPanel:
     ) -> None:
         duration_scale = scale or HOURS
         H_scaled = np.asarray(H_vals, dtype=float) / duration_scale.divisor
-        label = f"H(T) [{duration_scale.label}·items]"
+        label = f"H(T) [state-{duration_scale.label}]"
         overlays = (
             build_event_overlays(
                 times,
@@ -991,8 +991,9 @@ class CFDPanel:
                 interpolate=True,
                 zorder=1,
             )
-        if self.show_title:
-            ax.set_title(self.title)
+        ax.set_title(
+            construct_title(self.title, self.show_derivations, derivation_key="N")
+        )
         ax.set_ylabel("Count")
         ax.legend()
 
