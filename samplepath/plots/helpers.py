@@ -636,6 +636,98 @@ def build_event_overlays(
     ]
 
 
+def compute_flow_cloud_positions(
+    timestamps: List[pd.Timestamp],
+    window_fraction: float = 0.05,
+    vertical_range: Tuple[float, float] = (0.35, 0.65),
+) -> np.ndarray:
+    """Compute vertical positions for flow cloud visualization.
+
+    For each timestamp, count neighbors within time window. Assign vertical
+    offset based on local density + sequential pattern. Dense regions spread
+    vertically; sparse regions cluster near center.
+
+    Parameters
+    ----------
+    timestamps : List[pd.Timestamp]
+        Event timestamps in chronological order.
+    window_fraction : float
+        Sliding window size as fraction of total duration (default 0.05 = 5%).
+    vertical_range : Tuple[float, float]
+        Min and max vertical positions (default (0.35, 0.65)).
+
+    Returns
+    -------
+    np.ndarray
+        Vertical positions for each timestamp in range [min, max].
+    """
+    if not timestamps:
+        return np.array([])
+
+    if len(timestamps) == 1:
+        return np.array([0.5])
+
+    # Convert to numeric timestamps (nanoseconds since epoch)
+    ts_numeric = np.array([t.value for t in timestamps])
+
+    # Calculate window size
+    total_duration = ts_numeric[-1] - ts_numeric[0]
+    if total_duration == 0:
+        return np.full(len(timestamps), 0.5)
+
+    window_size = total_duration * window_fraction
+
+    # For each point, compute local density (neighbor count in window)
+    densities = np.zeros(len(timestamps))
+    for i, ts_val in enumerate(ts_numeric):
+        lower_bound = ts_val - window_size / 2
+        upper_bound = ts_val + window_size / 2
+        density = np.sum((ts_numeric >= lower_bound) & (ts_numeric <= upper_bound))
+        densities[i] = density
+
+    # Normalize densities to [0, 1]
+    max_density = densities.max()
+    if max_density > 0:
+        density_norm = densities / max_density
+    else:
+        density_norm = np.zeros(len(timestamps))
+
+    # Compute vertical positions with adaptive spreading based on density
+    positions = np.zeros(len(timestamps))
+
+    # Adaptive strategy: sparse regions cluster tight, dense regions spread wide
+    # Density threshold: points below this stay tight, above spread out
+    density_threshold = 0.4
+
+    y_min, y_max = vertical_range
+    y_center = (y_min + y_max) / 2
+    y_range = y_max - y_min
+
+    for i, dens in enumerate(density_norm):
+        # Use timestamp-based alternation (not index-based) for consistency
+        # across arrival and departure lists when they're close in time
+        ts_val = ts_numeric[i]
+        alternation = 1 if (ts_val // 1_000_000_000) % 2 == 0 else -1
+
+        if dens < density_threshold:
+            # Sparse: cluster tightly around center (smaller offset)
+            tight_amplitude = y_range * 0.25
+            offset = alternation * (dens / density_threshold) * tight_amplitude
+            positions[i] = y_center + offset
+        else:
+            # Dense: spread toward edges of the assigned range
+            density_fraction = (dens - density_threshold) / (1.0 - density_threshold)
+            # Spread increases as density increases
+            wide_amplitude = y_range * 0.4
+            offset = alternation * (density_fraction + 0.2) * wide_amplitude
+            positions[i] = y_center + offset
+
+        # Always clamp to assigned vertical range
+        positions[i] = np.clip(positions[i], y_min, y_max)
+
+    return positions
+
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Chart recipes (complete chart definitions with consistent styling)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

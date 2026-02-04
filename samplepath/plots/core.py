@@ -36,6 +36,7 @@ from samplepath.plots.helpers import (
     ScatterOverlay,
     _clip_axis_to_percentile,
     build_event_overlays,
+    compute_flow_cloud_positions,
     format_date_axis,
     render_line_chart,
     render_scatter_chart,
@@ -1115,6 +1116,112 @@ class EventIndicatorPanel:
 
 
 @dataclass
+class FlowCloudPanel:
+    show_title: bool = True
+    title: str = "Point Process Flow Cloud"
+
+    def render(
+        self,
+        ax,
+        *,
+        arrival_times: Optional[List[pd.Timestamp]] = None,
+        departure_times: Optional[List[pd.Timestamp]] = None,
+    ) -> None:
+        """Render flow cloud visualization with arrivals and departures."""
+        # Compute vertical positions with separate envelopes:
+        # Arrivals (inner envelope): tighter clustering around center
+        # Departures (outer envelope): wider spread to show relative thickness
+        arrival_y = (
+            compute_flow_cloud_positions(arrival_times, vertical_range=(0.4, 0.6))
+            if arrival_times
+            else []
+        )
+        departure_y = (
+            compute_flow_cloud_positions(departure_times, vertical_range=(0.2, 0.8))
+            if departure_times
+            else []
+        )
+
+        # Plot arrivals (purple circles)
+        if arrival_times:
+            ax.scatter(
+                arrival_times,
+                arrival_y,
+                color=ColorConfig.arrival_color,
+                s=25,
+                alpha=0.7,
+                label="Arrivals",
+                zorder=2,
+            )
+
+        # Plot departures (green circles)
+        if departure_times:
+            ax.scatter(
+                departure_times,
+                departure_y,
+                color=ColorConfig.departure_color,
+                s=25,
+                alpha=0.7,
+                label="Departures",
+                zorder=2,
+            )
+
+        # Format axes
+        ax.set_ylim(0, 1)
+        ax.set_yticks([])
+        ax.set_ylabel("")
+
+        # Format x-axis
+        if arrival_times or departure_times:
+            all_times = (list(arrival_times) if arrival_times else []) + (
+                list(departure_times) if departure_times else []
+            )
+            if all_times:
+                format_date_axis(ax, all_times)
+
+        if self.show_title:
+            ax.set_title(self.title)
+
+        # Add legend if we have data
+        if (arrival_times and len(arrival_times) > 0) or (
+            departure_times and len(departure_times) > 0
+        ):
+            ax.legend(loc="upper left")
+
+    def plot(
+        self,
+        metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        """Create standalone flow cloud plot."""
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
+        with figure_context(
+            chart_config=chart_config,
+            nrows=1,
+            ncols=1,
+            caption=caption,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core/panels",
+            base_name="flow_cloud",
+        ) as (
+            _,
+            axes,
+            resolved_out_path,
+        ):
+            ax = _first_axis(axes)
+            self.render(
+                ax,
+                arrival_times=metrics.arrival_times,
+                departure_times=metrics.departure_times,
+            )
+        return resolved_out_path
+
+
+@dataclass
 class ArrivalsPanel:
     show_title: bool = True
     title: str = "A(T) — Cumulative Arrivals"
@@ -1853,6 +1960,10 @@ def plot_core_flow_metrics_charts(
         metrics, filter_result, chart_config, out_dir
     )
 
+    path_flow_cloud = FlowCloudPanel().plot(
+        metrics, filter_result, chart_config, out_dir
+    )
+
     path_A = ArrivalsPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
@@ -1916,6 +2027,7 @@ def plot_core_flow_metrics_charts(
         path_Lam,
         path_Theta,
         path_indicator,
+        path_flow_cloud,
         path_A,
         path_D,
         path_w,

@@ -16,6 +16,7 @@ from samplepath.plots import core
 from samplepath.plots.chart_config import ChartConfig, ColorConfig
 from samplepath.plots.core import ClipOptions
 from samplepath.plots.figure_context import resolve_chart_path
+from samplepath.plots.helpers import compute_flow_cloud_positions
 from samplepath.utils.duration_scale import MINUTES
 
 
@@ -627,7 +628,7 @@ def test_render_H_sets_defaults():
     with patch("samplepath.plots.core.render_line_chart") as mock_line:
         core.HPanel().render(ax, times, values)
     mock_line.assert_called_once()
-    ax.set_ylabel.assert_called_once_with("H(T) [hrs·items]")
+    ax.set_ylabel.assert_called_once_with("H(T) [state-hrs]")
 
 
 def _render_cfd_with_mocks(with_event_marks: bool = False):
@@ -2941,3 +2942,150 @@ def test_LPanel_passes_sampling_frequency_to_render_line_chart():
         core.LPanel(sampling_frequency="week").render(ax, times, values)
     _, kwargs = mock_render.call_args
     assert kwargs["sampling_frequency"] == "week"
+
+
+def test_flow_cloud_panel_render_with_arrivals_and_departures():
+    ax = MagicMock()
+    arrival_times = [_t("2024-01-01"), _t("2024-01-02")]
+    departure_times = [_t("2024-01-01 12:00"), _t("2024-01-02 12:00")]
+    panel = core.FlowCloudPanel()
+    panel.render(ax, arrival_times=arrival_times, departure_times=departure_times)
+    # Verify scatter was called twice (once for arrivals, once for departures)
+    assert ax.scatter.call_count == 2
+    # Verify axis configuration
+    ax.set_ylim.assert_called_with(0, 1)
+    ax.set_yticks.assert_called_with([])
+    ax.legend.assert_called_once()
+
+
+def test_flow_cloud_panel_render_with_only_arrivals():
+    ax = MagicMock()
+    arrival_times = [_t("2024-01-01"), _t("2024-01-02")]
+    panel = core.FlowCloudPanel()
+    panel.render(ax, arrival_times=arrival_times)
+    # Verify scatter was called once
+    assert ax.scatter.call_count == 1
+
+
+def test_flow_cloud_panel_render_sets_title_when_enabled():
+    ax = MagicMock()
+    arrival_times = [_t("2024-01-01")]
+    panel = core.FlowCloudPanel(show_title=True, title="Custom Title")
+    panel.render(ax, arrival_times=arrival_times)
+    ax.set_title.assert_called_with("Custom Title")
+
+
+def test_flow_cloud_panel_render_no_title_when_suppressed():
+    ax = MagicMock()
+    arrival_times = [_t("2024-01-01")]
+    panel = core.FlowCloudPanel(show_title=False)
+    panel.render(ax, arrival_times=arrival_times)
+    ax.set_title.assert_not_called()
+
+
+def test_compute_flow_cloud_positions_empty_list():
+    """Empty list returns empty array."""
+    result = compute_flow_cloud_positions([])
+    assert len(result) == 0
+
+
+def test_compute_flow_cloud_positions_single_timestamp():
+    """Single timestamp returns [0.5]."""
+    result = compute_flow_cloud_positions([_t("2024-01-01")])
+    assert len(result) == 1
+    assert result[0] == 0.5
+
+
+def test_compute_flow_cloud_positions_returns_correct_length():
+    """Result array has same length as input."""
+    timestamps = [_t(f"2024-01-{i:02d}") for i in range(1, 11)]
+    result = compute_flow_cloud_positions(timestamps)
+    assert len(result) == len(timestamps)
+
+
+def test_compute_flow_cloud_positions_respects_vertical_range():
+    """All positions stay within specified vertical range."""
+    timestamps = [_t(f"2024-01-{i:02d}") for i in range(1, 21)]
+    v_range = (0.4, 0.6)
+    result = compute_flow_cloud_positions(timestamps, vertical_range=v_range)
+    assert np.all(result >= v_range[0])
+    assert np.all(result <= v_range[1])
+
+
+def test_compute_flow_cloud_positions_inner_envelope_tighter_than_outer():
+    """Inner envelope (0.4, 0.6) is tighter than outer (0.2, 0.8)."""
+    timestamps = [
+        _t(f"2024-01-{i:02d} {j:02d}:00") for i in range(1, 5) for j in range(0, 24)
+    ]
+
+    inner = compute_flow_cloud_positions(timestamps, vertical_range=(0.4, 0.6))
+    outer = compute_flow_cloud_positions(timestamps, vertical_range=(0.2, 0.8))
+
+    # Both should have the same length
+    assert len(inner) == len(outer)
+
+    # Inner should have smaller spread (range of values)
+    inner_spread = np.max(inner) - np.min(inner)
+    outer_spread = np.max(outer) - np.min(outer)
+    assert inner_spread < outer_spread
+
+
+def test_compute_flow_cloud_positions_sparse_points_cluster_near_center():
+    """Sparse points (low density) cluster near their range center."""
+    # Very sparse points spread across 28 days
+    timestamps = [
+        _t("2024-01-01"),
+        _t("2024-01-08"),
+        _t("2024-01-15"),
+        _t("2024-01-22"),
+        _t("2024-01-28"),
+    ]
+    result = compute_flow_cloud_positions(timestamps, vertical_range=(0.4, 0.6))
+
+    # All sparse points should be relatively close to center (0.5)
+    # within a small range since they're not dense
+    center = 0.5
+    max_deviation = 0.11  # Allowing some deviation for very sparse points
+    assert np.all(np.abs(result - center) < max_deviation)
+
+
+def test_compute_flow_cloud_positions_dense_vs_sparse():
+    """Mix of dense and sparse regions shows variation in positions."""
+    # Create timestamps with a dense cluster and sparse outliers
+    base = pd.Timestamp("2024-01-01")
+    # Dense cluster: many points on same day
+    dense_cluster = [base + pd.Timedelta(hours=i) for i in range(10)]
+    # Sparse outliers: spread far apart
+    sparse_outliers = [base + pd.Timedelta(days=i) for i in [0, 15, 30]]
+    timestamps = dense_cluster + sparse_outliers
+
+    result = compute_flow_cloud_positions(timestamps, vertical_range=(0.2, 0.8))
+
+    # Should have same length as input
+    assert len(result) == len(timestamps)
+
+
+def test_compute_flow_cloud_positions_within_clipping_range():
+    """All positions are within their specified clipping range."""
+    timestamps = [_t(f"2024-{m:02d}-01") for m in range(1, 13)]
+
+    # Test with default range
+    result_default = compute_flow_cloud_positions(timestamps)
+    assert np.all(result_default >= 0.35)
+    assert np.all(result_default <= 0.65)
+
+    # Test with wide range
+    result_wide = compute_flow_cloud_positions(timestamps, vertical_range=(0.1, 0.9))
+    assert np.all(result_wide >= 0.1)
+    assert np.all(result_wide <= 0.9)
+
+
+def test_compute_flow_cloud_positions_zero_duration():
+    """All timestamps at same time return centered positions."""
+    same_time = _t("2024-01-01 12:00:00")
+    timestamps = [same_time] * 5
+    result = compute_flow_cloud_positions(timestamps)
+
+    # All should be centered
+    assert len(result) == 5
+    assert np.allclose(result, 0.5)
