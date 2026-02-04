@@ -683,7 +683,8 @@ def test_render_CFD_appends_derivations_to_labels_when_enabled():
         return {
             "A": "A(T) = ∑ arrivals in [0, T]",
             "D": "D(T) = ∑ departures in [0, T]",
-        }[key]
+            "N": "N(T) = A(T) - D(T)",
+        }.get(key)
 
     with (
         patch("samplepath.plots.core.render_step_chart") as mock_step,
@@ -701,6 +702,7 @@ def test_render_CFD_appends_derivations_to_labels_when_enabled():
         mock_step.call_args_list[1].kwargs["label"]
         == "D(T) - Cumulative departures — D(T) = ∑ departures in [0, T]"
     )
+    assert ax.set_title.call_args[0][0] == "Cumulative Flow Diagram: N(T) = A(T) - D(T)"
 
 
 def test_render_CFD_departures_color():
@@ -1392,6 +1394,9 @@ def test_core_driver_returns_expected_paths():
             chart_config.chart_format,
         ),
         resolve_chart_path(
+            out_dir, "core/panels", "flow_cloud", chart_config.chart_format
+        ),
+        resolve_chart_path(
             out_dir,
             "core/panels",
             "cumulative_arrivals_A",
@@ -1485,28 +1490,30 @@ def test_core_driver_returns_expected_paths():
         patch("samplepath.plots.core.LLWPanel.plot") as mock_plot_llw,
         patch("samplepath.plots.core.LThetaWPrimePanel.plot") as mock_plot_ltheta,
         patch("samplepath.plots.core.EventIndicatorPanel.plot") as mock_plot_indicator,
+        patch("samplepath.plots.core.FlowCloudPanel.plot") as mock_plot_flow_cloud,
         patch("samplepath.plots.core.ArrivalsPanel.plot") as mock_plot_A,
         patch("samplepath.plots.core.DeparturesPanel.plot") as mock_plot_D,
     ):
-        mock_stack.return_value = expected[16]
-        mock_lt_stack.return_value = expected[17]
-        mock_departure_stack.return_value = expected[18]
+        mock_stack.return_value = expected[17]
+        mock_lt_stack.return_value = expected[18]
+        mock_departure_stack.return_value = expected[19]
         mock_plot_N.return_value = expected[0]
         mock_plot_L.return_value = expected[1]
         mock_plot_Lam.return_value = expected[2]
         mock_plot_Theta.return_value = expected[3]
         mock_plot_indicator.return_value = expected[4]
-        mock_plot_A.return_value = expected[5]
-        mock_plot_D.return_value = expected[6]
-        mock_plot_w.return_value = expected[7]
-        mock_plot_w_star.return_value = expected[8]
-        mock_plot_sojourn_scatter.return_value = expected[9]
-        mock_plot_residence_scatter.return_value = expected[10]
-        mock_plot_w_prime.return_value = expected[11]
-        mock_plot_H.return_value = expected[12]
-        mock_plot_CFD.return_value = expected[13]
-        mock_plot_llw.return_value = expected[14]
-        mock_plot_ltheta.return_value = expected[15]
+        mock_plot_flow_cloud.return_value = expected[5]
+        mock_plot_A.return_value = expected[6]
+        mock_plot_D.return_value = expected[7]
+        mock_plot_w.return_value = expected[8]
+        mock_plot_w_star.return_value = expected[9]
+        mock_plot_sojourn_scatter.return_value = expected[10]
+        mock_plot_residence_scatter.return_value = expected[11]
+        mock_plot_w_prime.return_value = expected[12]
+        mock_plot_H.return_value = expected[13]
+        mock_plot_CFD.return_value = expected[14]
+        mock_plot_llw.return_value = expected[15]
+        mock_plot_ltheta.return_value = expected[16]
         written = core.plot_core_flow_metrics_charts(
             metrics, empirical_metrics, filter_result, chart_config, out_dir
         )
@@ -1525,6 +1532,7 @@ def test_core_driver_returns_expected_paths():
     mock_plot_llw.assert_called_once()
     mock_plot_ltheta.assert_called_once()
     mock_plot_indicator.assert_called_once()
+    mock_plot_flow_cloud.assert_called_once()
     mock_plot_A.assert_called_once()
     mock_plot_D.assert_called_once()
     mock_lt_stack.assert_called_once()
@@ -1565,6 +1573,7 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
         patch("samplepath.plots.core.LLWPanel.plot"),
         patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
         patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+        patch("samplepath.plots.core.FlowCloudPanel.plot"),
         patch("samplepath.plots.core.ArrivalsPanel.plot"),
         patch("samplepath.plots.core.DeparturesPanel.plot"),
     ):
@@ -1608,6 +1617,7 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w():
         patch("samplepath.plots.core.LLWPanel"),
         patch("samplepath.plots.core.LThetaWPrimePanel"),
         patch("samplepath.plots.core.EventIndicatorPanel"),
+        patch("samplepath.plots.core.FlowCloudPanel"),
         patch("samplepath.plots.core.ArrivalsPanel"),
         patch("samplepath.plots.core.DeparturesPanel"),
         patch("samplepath.plots.core.LambdaPanel") as mock_lam_cls,
@@ -1671,6 +1681,7 @@ def test_core_driver_passes_show_derivations_to_CFD():
         patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
         patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
         patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+        patch("samplepath.plots.core.FlowCloudPanel.plot"),
         patch("samplepath.plots.core.ArrivalsPanel.plot"),
         patch("samplepath.plots.core.DeparturesPanel.plot"),
     ):
@@ -1715,6 +1726,7 @@ def test_core_driver_uses_metrics_freq_for_unit():
             patch("samplepath.plots.core.LLWPanel.plot"),
             patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
             patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+            patch("samplepath.plots.core.FlowCloudPanel.plot"),
             patch("samplepath.plots.core.ArrivalsPanel.plot"),
             patch("samplepath.plots.core.DeparturesPanel.plot"),
         ):
@@ -1821,6 +1833,7 @@ def test_core_driver_calls_plot_H_under_core_dir():
             patch("samplepath.plots.core.LLWPanel.plot"),
             patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
             patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+            patch("samplepath.plots.core.FlowCloudPanel.plot"),
             patch("samplepath.plots.core.ArrivalsPanel.plot"),
             patch("samplepath.plots.core.DeparturesPanel.plot"),
         ):
@@ -1867,6 +1880,7 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
         patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
         patch("samplepath.plots.core.CFDPanel.plot") as mock_plot,
         patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+        patch("samplepath.plots.core.FlowCloudPanel.plot"),
         patch("samplepath.plots.core.ArrivalsPanel.plot"),
         patch("samplepath.plots.core.DeparturesPanel.plot"),
     ):
@@ -1906,6 +1920,7 @@ def test_core_driver_passes_event_marks_to_CFD():
         patch("samplepath.plots.core.LThetaWPrimePanel"),
         patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
         patch("samplepath.plots.core.EventIndicatorPanel"),
+        patch("samplepath.plots.core.FlowCloudPanel"),
         patch("samplepath.plots.core.ArrivalsPanel"),
         patch("samplepath.plots.core.DeparturesPanel"),
     ):
@@ -1945,6 +1960,7 @@ def test_core_driver_passes_event_marks_to_departure_invariant():
         patch("samplepath.plots.core.LLWPanel.plot"),
         patch("samplepath.plots.core.LThetaWPrimePanel") as mock_panel,
         patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+        patch("samplepath.plots.core.FlowCloudPanel.plot"),
         patch("samplepath.plots.core.ArrivalsPanel.plot"),
         patch("samplepath.plots.core.DeparturesPanel.plot"),
     ):
@@ -2465,6 +2481,7 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
             patch("samplepath.plots.core.HPanel.plot"),
             patch("samplepath.plots.core.CFDPanel.plot"),
             patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+            patch("samplepath.plots.core.FlowCloudPanel.plot"),
             patch("samplepath.plots.core.ArrivalsPanel.plot"),
             patch("samplepath.plots.core.DeparturesPanel.plot"),
         ):
@@ -2509,6 +2526,7 @@ def test_core_driver_calls_departure_invariant_plot_under_core_dir():
             patch("samplepath.plots.core.HPanel.plot"),
             patch("samplepath.plots.core.CFDPanel.plot"),
             patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+            patch("samplepath.plots.core.FlowCloudPanel.plot"),
             patch("samplepath.plots.core.ArrivalsPanel.plot"),
             patch("samplepath.plots.core.DeparturesPanel.plot"),
         ):
@@ -2543,6 +2561,7 @@ def test_core_driver_omits_caption_when_label_empty():
         patch("samplepath.plots.core.LLWPanel.plot"),
         patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
         patch("samplepath.plots.core.EventIndicatorPanel.plot"),
+        patch("samplepath.plots.core.FlowCloudPanel.plot"),
         patch("samplepath.plots.core.ArrivalsPanel.plot"),
         patch("samplepath.plots.core.DeparturesPanel.plot"),
     ):
