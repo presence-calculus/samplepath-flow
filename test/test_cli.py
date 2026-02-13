@@ -57,7 +57,7 @@ def test_parse_args_defaults_and_types():
     assert args.output_dir == Path("charts").resolve()
     assert args.scenario == "latest"
     assert args.epsilon == 0.05
-    assert args.horizon_days == 28.0
+    assert args.horizon_days == 0.0
     assert args.lambda_warmup == 0.0
     assert args.save_input is True
     assert args.with_event_marks is False

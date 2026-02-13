@@ -187,8 +187,8 @@ def build_parser() -> tuple[argparse.ArgumentParser, set[str]]:
     convergence_thresholds.add_argument(
         "--horizon-days",
         type=float,
-        default=28.0,
-        help="Ignore this many initial days when assessing convergence - suppress the mixing period (default 28)",
+        default=0.0,
+        help="Ignore this many initial days when assessing convergence - suppress the mixing period (default 0)",
     )
 
     # output directory handling

@@ -5,7 +5,7 @@ from samplepath.metrics import MetricDerivations
 
 
 def test_metric_derivations_get_returns_expected_string():
-    assert MetricDerivations.get("N") == "N(t) = A(t) − D(t)"
+    assert MetricDerivations.get("N") == "N(t) = A(T) − D(T)"
 
 
 def test_metric_derivations_get_unknown_key_returns_none():

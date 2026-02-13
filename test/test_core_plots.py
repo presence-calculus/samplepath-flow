@@ -628,7 +628,7 @@ def test_render_H_sets_defaults():
     with patch("samplepath.plots.core.render_line_chart") as mock_line:
         core.HPanel().render(ax, times, values)
     mock_line.assert_called_once()
-    ax.set_ylabel.assert_called_once_with("H(T) [state-hrs]")
+    ax.set_ylabel.assert_called_once_with("H(T) [element-hrs]")
 
 
 def _render_cfd_with_mocks(with_event_marks: bool = False):
@@ -683,7 +683,6 @@ def test_render_CFD_appends_derivations_to_labels_when_enabled():
         return {
             "A": "A(T) = ∑ arrivals in [0, T]",
             "D": "D(T) = ∑ departures in [0, T]",
-            "N": "N(T) = A(T) - D(T)",
         }.get(key)
 
     with (
@@ -702,7 +701,7 @@ def test_render_CFD_appends_derivations_to_labels_when_enabled():
         mock_step.call_args_list[1].kwargs["label"]
         == "D(T) - Cumulative departures — D(T) = ∑ departures in [0, T]"
     )
-    assert ax.set_title.call_args[0][0] == "Cumulative Flow Diagram: N(T) = A(T) - D(T)"
+    assert ax.set_title.call_args[0][0] == "Cumulative Flow Diagram"
 
 
 def test_render_CFD_departures_color():

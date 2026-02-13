@@ -92,7 +92,7 @@ class MetricDerivations:
     DERIVATIONS: dict[str, str] = {
         "A": "A(T) = ∑ arrivals in [0, T]",
         "D": "D(T) = ∑ departures in [0, T]",
-        "N": "N(t) = A(t) − D(t)",
+        "N": "N(t) = A(T) − D(T)",
         "H": "H(T) = ∫₀ᵀ N(t) dt",
         "L": "L(T) = H(T) / T",
         "Lambda": "Λ(T) = A(T) / T",
