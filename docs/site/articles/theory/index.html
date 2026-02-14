@@ -450,20 +450,22 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <li><a href="#finite-window-littles-law"
             id="toc-finite-window-littles-law">3 Finite-Window Little’s
             Law</a></li>
+            <li><a href="#presence-invariant"
+            id="toc-presence-invariant">4 Presence Invariant</a></li>
             <li><a href="#interpreting-the-invariant"
-            id="toc-interpreting-the-invariant">4 Interpreting the
+            id="toc-interpreting-the-invariant">5 Interpreting the
             Invariant</a></li>
             <li><a href="#stability-convergence-and-coherence"
-            id="toc-stability-convergence-and-coherence">5 Stability,
+            id="toc-stability-convergence-and-coherence">6 Stability,
             Convergence, and Coherence</a></li>
             <li><a href="#event-indexed-vs-calendar-indexed-views"
-            id="toc-event-indexed-vs-calendar-indexed-views">6
+            id="toc-event-indexed-vs-calendar-indexed-views">7
             Event-Indexed vs Calendar-Indexed Views</a></li>
             <li><a href="#how-this-maps-to-the-docs"
-            id="toc-how-this-maps-to-the-docs">7 How This Maps to the
+            id="toc-how-this-maps-to-the-docs">8 How This Maps to the
             Docs</a></li>
             <li><a href="#presentation-backbone"
-            id="toc-presentation-backbone">8 Presentation
+            id="toc-presentation-backbone">9 Presentation
             Backbone</a></li>
             </ul>
           </nav>
@@ -548,7 +550,42 @@ Samplepath Analysis Toolkit</em></a></p></p>
           \]</span></p>
           <p>This identity is the <strong>presence invariant</strong>
           used throughout the toolkit.</p>
-          <h1 id="interpreting-the-invariant">4 Interpreting the
+          <h1 id="presence-invariant">4 Presence Invariant</h1>
+          <p>The Presence Invariant is the finite-horizon identity
+          underlying Little’s Law. It states that cumulative presence
+          mass <span class="math inline">\(H(T)\)</span> can be
+          expressed either as time-average state multiplied by time, or
+          as an event-rate multiplied by amortized presence mass per
+          event.</p>
+          <p>Formally,</p>
+          <p><span class="math display">\[
+          H(T) = L(T)\,T = A(T)\,w(T) = D(T)\,w&#39;(T)
+          \]</span></p>
+          <p>Dividing through by <span class="math inline">\(T\)</span>
+          gives the familiar finite-horizon Little form:</p>
+          <p><span class="math display">\[
+          L(T) = \Lambda(T)\,w(T) = \Theta(T)\,w&#39;(T)
+          \]</span></p>
+          <p>Conceptually:</p>
+          <ul>
+          <li><span class="math inline">\(H(T)\)</span> is the conserved
+          quantity (presence mass).</li>
+          <li><span class="math inline">\(L(T)\)</span> is the
+          time-average state (average WIP).</li>
+          <li><span class="math inline">\(\Lambda(T)/\Theta(T)\)</span>
+          are two different event rates over the observation
+          window.</li>
+          <li><span class="math inline">\(w(T)/w&#39;(T)\)</span> are
+          the corresponding amortized presence per event (also called
+          average residence time).</li>
+          </ul>
+          <p>All of these quantities are deterministic functionals of
+          the same realized sample path.</p>
+          <p>For the chart-by-chart construction paired with this
+          section, see <a
+          href="../../articles/chart-reference#the-presence-invariant-charts">Chart
+          Reference: The Presence Invariant Charts</a>.</p>
+          <h1 id="interpreting-the-invariant">5 Interpreting the
           Invariant</h1>
           <p><code>L(T)</code> is controlled by two levers:</p>
           <ul>
@@ -563,7 +600,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <code>w'(T)</code>.</p>
           <p>This gives a deterministic cause-effect frame for process
           diagnostics.</p>
-          <h1 id="stability-convergence-and-coherence">5 Stability,
+          <h1 id="stability-convergence-and-coherence">6 Stability,
           Convergence, and Coherence</h1>
           <p>Operationally, we monitor whether key time-varying
           functions approach stable behavior:</p>
@@ -579,7 +616,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           familiar steady-state expression <span
           class="math inline">\(L=\lambda W\)</span> is recovered as an
           asymptotic consequence.</p>
-          <h1 id="event-indexed-vs-calendar-indexed-views">6
+          <h1 id="event-indexed-vs-calendar-indexed-views">7
           Event-Indexed vs Calendar-Indexed Views</h1>
           <p>The toolkit supports two reporting views over the same
           underlying calculations:</p>
@@ -596,7 +633,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           and exact boundary effects. Use calendar indexing when
           reporting periodic snapshots while preserving metric
           meaning.</p>
-          <h1 id="how-this-maps-to-the-docs">7 How This Maps to the
+          <h1 id="how-this-maps-to-the-docs">8 How This Maps to the
           Docs</h1>
           <ul>
           <li>CLI semantics and option contracts: <a
@@ -604,7 +641,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <li>Chart-level interpretation and file-by-file outputs: <a
           href="../../articles/chart-reference">Chart Reference</a></li>
           </ul>
-          <h1 id="presentation-backbone">8 Presentation Backbone</h1>
+          <h1 id="presentation-backbone">9 Presentation Backbone</h1>
           <p>This article is based on the narrative arc from
           <code>docs/articles/chart-reference/Sample-Path-Analysis-Presentation (1).pdf</code>
           and is intended to be the shared conceptual foundation for

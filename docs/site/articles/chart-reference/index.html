@@ -425,99 +425,98 @@ Samplepath Analysis Toolkit</em></a></p></p>
 
               </header>
                   <div class="header-image">
-        <img src="../../assets/sample_path_flow_metrics.png" alt="Header image"/>
+        <img src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/arrival_departure_indicator_process.png" alt="Header image"/>
       </div>
             <div class="doc-layout has-toc">
                 <aside class="doc-toc" aria-label="Contents">
           <nav id="TOC" role="doc-toc">
             <h2 id="toc-title">Contents</h2>
             <ul>
-            <li><a href="#scope" id="toc-scope">1 Scope</a></li>
-            <li><a href="#navigation" id="toc-navigation">2
-            Navigation</a></li>
-            <li><a href="#canonical-sequence-tables"
-            id="toc-canonical-sequence-tables">3 Canonical Sequence
-            Tables</a>
+            <li><a href="#sample-path-flow-metrics"
+            id="toc-sample-path-flow-metrics">1 Sample Path Flow
+            Metrics</a></li>
+            <li><a href="#notational-conventions"
+            id="toc-notational-conventions">2 Notational Conventions</a>
             <ul>
-            <li><a href="#core-and-invariant-sequence-1-14"
-            id="toc-core-and-invariant-sequence-1-14">3.1 Core and
-            Invariant Sequence (1-14)</a></li>
-            <li><a href="#convergence-sequence-1-3"
-            id="toc-convergence-sequence-1-3">3.2 Convergence Sequence
-            (1-3)</a></li>
+            <li><a href="#instantaneous-vs-cumulative-values"
+            id="toc-instantaneous-vs-cumulative-values">2.1
+            Instantaneous vs cumulative values</a></li>
+            <li><a href="#timescales" id="toc-timescales">2.2
+            Timescales</a></li>
             </ul></li>
-            <li><a href="#core-and-invariant-details"
-            id="toc-core-and-invariant-details">4 Core and Invariant
-            Details</a>
+            <li><a href="#the-presence-invariant-charts"
+            id="toc-the-presence-invariant-charts">3 The Presence
+            Invariant Charts</a>
             <ul>
             <li><a href="#chart-01-point-process"
-            id="toc-chart-01-point-process">1. Point Process - Event
+            id="toc-chart-01-point-process">3.1 Point Process - Event
             Stream</a></li>
             <li><a href="#chart-02-arrivals-a"
-            id="toc-chart-02-arrivals-a">2. A(T) - Cumulative
+            id="toc-chart-02-arrivals-a">3.2 A(T) - Cumulative
             Arrivals</a></li>
             <li><a href="#chart-03-departures-d"
-            id="toc-chart-03-departures-d">3. D(T) - Cumulative
+            id="toc-chart-03-departures-d">3.3 D(T) - Cumulative
             Departures</a></li>
-            <li><a href="#chart-04-cfd" id="toc-chart-04-cfd">4. CFD -
+            <li><a href="#chart-04-cfd" id="toc-chart-04-cfd">3.4 CFD -
             Cumulative Flow Diagram</a></li>
             <li><a href="#chart-05-sample-path-n"
-            id="toc-chart-05-sample-path-n">5. N(t) - Process
+            id="toc-chart-05-sample-path-n">3.5 N(t) - Process
             State</a></li>
             <li><a href="#chart-06-presence-mass-h"
-            id="toc-chart-06-presence-mass-h">6. H(T) - Presence
+            id="toc-chart-06-presence-mass-h">3.6 H(T) - Presence
             Mass</a></li>
             <li><a href="#chart-07-time-average-l"
-            id="toc-chart-07-time-average-l">7. L(T) - Time-Average
+            id="toc-chart-07-time-average-l">3.7 L(T) - Time-Average
             Presence</a></li>
             <li><a href="#chart-08-arrival-rate-lambda"
-            id="toc-chart-08-arrival-rate-lambda">8. <span
+            id="toc-chart-08-arrival-rate-lambda">3.8 <span
             class="math inline">\(\Lambda(T)\)</span> - Arrival
             Rate</a></li>
             <li><a href="#chart-09-residence-w"
-            id="toc-chart-09-residence-w">9a. w(T) - Residence per
+            id="toc-chart-09-residence-w">3.9 w(T) - Residence per
             Arrival</a></li>
             <li><a href="#chart-10-arrival-invariant"
-            id="toc-chart-10-arrival-invariant">9b. <span
+            id="toc-chart-10-arrival-invariant">3.10 <span
             class="math inline">\(L(T)=\Lambda(T)\cdot w(T)\)</span>
             Invariant - Arrival Invariant</a></li>
             <li><a href="#chart-11-arrival-stack"
-            id="toc-chart-11-arrival-stack">10. Arrival Stack - Arrival
+            id="toc-chart-11-arrival-stack">3.11 Arrival Stack - Arrival
             Dashboard</a></li>
             <li><a href="#chart-12-departure-rate-theta"
-            id="toc-chart-12-departure-rate-theta">11. <span
+            id="toc-chart-12-departure-rate-theta">3.12 <span
             class="math inline">\(\Theta(T)\)</span> - Departure
             Rate</a></li>
             <li><a href="#chart-13-residence-w-prime"
-            id="toc-chart-13-residence-w-prime">12. w’(T) - Residence
+            id="toc-chart-13-residence-w-prime">3.13 w’(T) - Residence
             per Departure</a></li>
             <li><a href="#chart-14-departure-invariant"
-            id="toc-chart-14-departure-invariant">13. <span
+            id="toc-chart-14-departure-invariant">3.14 <span
             class="math inline">\(L(T)=\Theta(T)\cdot w&#39;(T)\)</span>
             Invariant - Departure Invariant</a></li>
             <li><a href="#chart-15-departure-stack"
-            id="toc-chart-15-departure-stack">14. Departure Focused
+            id="toc-chart-15-departure-stack">3.15 Departure Focused
             Stack - Departure Dashboard</a></li>
             <li><a href="#chart-18-residence-scatter"
-            id="toc-chart-18-residence-scatter">17. Residence Time
+            id="toc-chart-18-residence-scatter">3.16 Residence Time
             Scatter Plot - Residence Scatter</a></li>
             <li><a href="#chart-19-sojourn-scatter"
-            id="toc-chart-19-sojourn-scatter">18. Sojourn Time Scatter
+            id="toc-chart-19-sojourn-scatter">3.17 Sojourn Time Scatter
             Plot - Sojourn Scatter</a></li>
             </ul></li>
-            <li><a href="#convergence-details"
-            id="toc-convergence-details">5 Convergence Details</a>
+            <li><a href="#convergence-and-stability"
+            id="toc-convergence-and-stability">4 Convergence and
+            Stability</a>
             <ul>
             <li><a href="#chart-16-arrival-departure-rate-convergence"
-            id="toc-chart-16-arrival-departure-rate-convergence">15.
+            id="toc-chart-16-arrival-departure-rate-convergence">4.1
             <span class="math inline">\(\Lambda(T)\)</span>-<span
             class="math inline">\(\Theta(T)\)</span> Rate Convergence -
             Rate Convergence</a></li>
             <li><a href="#chart-17-process-time-convergence"
-            id="toc-chart-17-process-time-convergence">16. Process Time
+            id="toc-chart-17-process-time-convergence">4.2 Process Time
             Convergence - Time Convergence</a></li>
             <li><a href="#chart-20-sample-path-convergence"
-            id="toc-chart-20-sample-path-convergence">19. Top-Level
+            id="toc-chart-20-sample-path-convergence">4.3 Top-Level
             Convergence <span class="math inline">\(L(T)\)</span> vs
             <span class="math inline">\(\lambda^*(t)\cdot
             W^*(t)\)</span></a></li>
@@ -526,43 +525,110 @@ Samplepath Analysis Toolkit</em></a></p></p>
           </nav>
         </aside>
                 <div class="doc-content">
-          <h1 id="scope">1 Scope</h1>
-          <p>This document is a catalog of generated charts, ordered by
-          the canonical sample-path construction arc from the
-          presentation.</p>
-          <p>For theory and formal definitions, see <a
-          href="../../articles/theory">Sample Path Theory</a>. For CLI
-          options and output contracts, see <a
+          <h1 id="sample-path-flow-metrics">1 Sample Path Flow
+          Metrics</h1>
+          <p>This document is a catalog of charts generated by the
+          sample path analysis toolkit.</p>
+          <p>Given an input sample path (an arrival/departure point
+          process, as shown above), all computations are deterministic.
+          Every value depends only on event order and the elapsed time
+          between events on that path.</p>
+          <p>The charts are ordered by a canonical sample-path
+          construction arc: each metric is derived deterministically
+          from prior metrics or directly from the sample path
+          itself.</p>
+          <p>Each chart shows one or more metrics and their
+          relationships to each other and to the underlying events on
+          the sample path. At any point in time, each metric value can
+          be traced to the <em>specific event(s)</em> that produced it.
+          That is what enables reliable cause-and-effect analysis of
+          flow-metric changes.</p>
+          <p>None of these calculations are statistical summaries, and
+          none rely on probabilistic assumptions. To repeat: given the
+          input sample path, every value is fully determined.</p>
+          <p>Another key feature: canonical sample path flow metrics are
+          indexed by <em>events</em> on the sample path.
+          Calendar-indexed views are derived samples of the same
+          event-resolved calculations. For theory and formal definitions
+          behind why this matters, see <a
+          href="../../articles/theory">Sample Path Theory</a>.</p>
+          <p>For CLI options and output contracts, see <a
           href="../../articles/cli">Command Line Reference</a>.</p>
-          <h1 id="navigation">2 Navigation</h1>
-          <p>The catalog is organized so you can navigate in two
-          clicks:</p>
-          <ol type="1">
-          <li>Use the TOC to jump to a sequence table.</li>
-          <li>Click a chart link in the table to jump to that chart’s
-          detail section.</li>
-          </ol>
-          <p>Each detail section shows:</p>
+          <h1 id="notational-conventions">2 Notational Conventions</h1>
+          <h2 id="instantaneous-vs-cumulative-values">2.1 Instantaneous
+          vs cumulative values</h2>
           <ul>
-          <li><code>with-events</code> chart (visible by default),
-          and</li>
-          <li><code>no-events</code> chart inside a collapsed block
-          (hidden by default in HTML).</li>
+          <li><p>All charts are defined over a finite observation
+          horizon of length <span
+          class="math inline">\(T_{\max}\)</span>.</p></li>
+          <li><p>Lower-case <span class="math inline">\(t\)</span>
+          denotes <em>instantaneous</em> time.</p>
+          <p>Functions of <span class="math inline">\(t\)</span> (such
+          as <span class="math inline">\(N(t)\)</span>) denote sample
+          paths: values of a measurable process property at a specific
+          moment <span class="math inline">\(t \in
+          [0,\,T_{\max}]\)</span>.</p></li>
+          <li><p>Upper-case <span class="math inline">\(T\)</span> is a
+          <em>prefix parameter</em>: a scalar value that determines a
+          <em>finite observation window</em> from the start of
+          observation to the current prefix. Here we use <span
+          class="math inline">\([0,\,T]\)</span> as shorthand for that
+          prefix window.</p>
+          <p>Functions of <span class="math inline">\(T\)</span> are
+          deterministic pathwise functionals over that prefix window.
+          They represent <em>cumulative quantities</em> or normalized
+          quantities derived from them. Here <span
+          class="math inline">\(T\)</span> can range over any value in
+          the observation window <span
+          class="math inline">\((0,\,T_{\max}]\)</span>.</p>
+          <p>All of these are deterministic, pathwise calculations
+          (definite integrals, discrete sums, and finite-window
+          normalizations) and should not be confused with statistical
+          measures.</p></li>
           </ul>
-          <h1 id="canonical-sequence-tables">3 Canonical Sequence
-          Tables</h1>
-          <h2 id="core-and-invariant-sequence-1-14">3.1 Core and
-          Invariant Sequence (1-14)</h2>
+          <h2 id="timescales">2.2 Timescales</h2>
+          <p>All charts use continuous time on the x-axis.</p>
+          <ul>
+          <li>In event-indexed views, points are evaluated at exact
+          event timestamps from the input sample path.</li>
+          <li>In calendar-indexed views, points are evaluated at
+          calendar boundaries, but values are still computed from the
+          same underlying event-resolved pathwise calculations.</li>
+          </ul>
+          <p>Internally, durations are measured in seconds and then
+          converted automatically to a consistent scale suitable for
+          human-friendly display. Units are automatically scaled on the
+          <em>y-axis only</em>; the x-axis remains continuous time.</p>
+          <p>Calendar indexing is simply a coarser <em>sampling
+          grid</em> over <em>metrics</em> computed from the
+          event-resolved sample path at the input granularity. We do not
+          pre-aggregate events into calendar buckets and then compute
+          flow metrics from those aggregates, like most other flow
+          metrics tools do.</p>
+          <h1 id="the-presence-invariant-charts">3 The Presence
+          Invariant Charts</h1>
+          <p>The Presence Invariant is the finite-horizon form of
+          Little’s Law.</p>
+          <p><span class="math display">\[
+          \begin{aligned}
+          H(T) &amp;= L(T)\,T = A(T)\,w(T) = D(T)\,w&#39;(T) \\
+          L(T) &amp;= \Lambda(T)\,w(T) = \Theta(T)\,w&#39;(T)
+          \end{aligned}
+          \]</span></p>
+          <p>This document shows the step-by-step derivation of this law
+          and visualizes each component directly on the sample path.</p>
+          <p>For the full derivation context and interpretation, refer
+          to <a href="../../articles/theory#presence-invariant">Sample
+          Path Theory: Presence Invariant</a> while walking through the
+          charts.</p>
           <table>
           <colgroup>
-          <col style="width: 25%" />
-          <col style="width: 25%" />
-          <col style="width: 25%" />
-          <col style="width: 25%" />
+          <col style="width: 42%" />
+          <col style="width: 42%" />
+          <col style="width: 14%" />
           </colgroup>
           <thead>
           <tr>
-          <th>Step</th>
           <th>Chart</th>
           <th>Short Name</th>
           <th>Formula</th>
@@ -570,52 +636,44 @@ Samplepath Analysis Toolkit</em></a></p></p>
           </thead>
           <tbody>
           <tr>
-          <td>1</td>
           <td><a href="#chart-01-point-process">Point Process</a></td>
           <td>Event Stream</td>
           <td>Input event stream</td>
           </tr>
           <tr>
-          <td>2</td>
           <td><a href="#chart-02-arrivals-a">A(T)</a></td>
           <td>Cumulative Arrivals</td>
           <td><span class="math inline">\(A(T)=\sum \text{arrivals in
           }[0,T]\)</span></td>
           </tr>
           <tr>
-          <td>3</td>
           <td><a href="#chart-03-departures-d">D(T)</a></td>
           <td>Cumulative Departures</td>
           <td><span class="math inline">\(D(T)=\sum \text{departures in
           }[0,T]\)</span></td>
           </tr>
           <tr>
-          <td>4</td>
           <td><a href="#chart-04-cfd">CFD</a></td>
           <td>Cumulative Flow Diagram</td>
-          <td><span class="math inline">\(N(t)=A(T)-D(T)\)</span></td>
+          <td></td>
           </tr>
           <tr>
-          <td>5</td>
           <td><a href="#chart-05-sample-path-n">N(t)</a></td>
           <td>Process State</td>
           <td><span class="math inline">\(N(t)=A(T)-D(T)\)</span></td>
           </tr>
           <tr>
-          <td>6</td>
           <td><a href="#chart-06-presence-mass-h">H(T)</a></td>
           <td>Presence Mass</td>
           <td><span class="math inline">\(H(T)=\int_0^T
           N(t)\,dt\)</span></td>
           </tr>
           <tr>
-          <td>7</td>
           <td><a href="#chart-07-time-average-l">L(T)</a></td>
           <td>Time-Average Presence</td>
           <td><span class="math inline">\(L(T)=H(T)/T\)</span></td>
           </tr>
           <tr>
-          <td>8</td>
           <td><a href="#chart-08-arrival-rate-lambda"><span
           class="math inline">\(\Lambda(T)\)</span></a></td>
           <td>Arrival Rate</td>
@@ -623,13 +681,11 @@ Samplepath Analysis Toolkit</em></a></p></p>
           class="math inline">\(\Lambda(T)=A(T)/T\)</span></td>
           </tr>
           <tr>
-          <td>9a</td>
           <td><a href="#chart-09-residence-w">w(T)</a></td>
           <td>Residence per Arrival</td>
           <td><span class="math inline">\(w(T)=H(T)/A(T)\)</span></td>
           </tr>
           <tr>
-          <td>9b</td>
           <td><a href="#chart-10-arrival-invariant"><span
           class="math inline">\(L(T)=\Lambda(T)\cdot w(T)\)</span>
           Invariant</a></td>
@@ -638,28 +694,24 @@ Samplepath Analysis Toolkit</em></a></p></p>
           w(T)\)</span></td>
           </tr>
           <tr>
-          <td>10</td>
           <td><a href="#chart-11-arrival-stack">Arrival Stack</a></td>
           <td>Arrival Dashboard</td>
           <td><span class="math inline">\(L(T)=\Lambda(T)\cdot
           w(T)\)</span></td>
           </tr>
           <tr>
-          <td>11</td>
           <td><a href="#chart-12-departure-rate-theta"><span
           class="math inline">\(\Theta(T)\)</span></a></td>
           <td>Departure Rate</td>
           <td><span class="math inline">\(\Theta(T)=D(T)/T\)</span></td>
           </tr>
           <tr>
-          <td>12</td>
           <td><a href="#chart-13-residence-w-prime">w’(T)</a></td>
           <td>Residence per Departure</td>
           <td><span
           class="math inline">\(w&#39;(T)=H(T)/D(T)\)</span></td>
           </tr>
           <tr>
-          <td>13</td>
           <td><a href="#chart-14-departure-invariant">Departure Focused
           Invariant</a></td>
           <td>Departure Invariant</td>
@@ -667,7 +719,6 @@ Samplepath Analysis Toolkit</em></a></p></p>
           w&#39;(T)\)</span></td>
           </tr>
           <tr>
-          <td>14</td>
           <td><a href="#chart-15-departure-stack">Departure Focused
           Stack</a></td>
           <td>Departure Dashboard</td>
@@ -675,7 +726,6 @@ Samplepath Analysis Toolkit</em></a></p></p>
           w&#39;(T)\)</span></td>
           </tr>
           <tr>
-          <td>17</td>
           <td><a href="#chart-18-residence-scatter">Residence Time
           Scatter Plot</a></td>
           <td>Residence Scatter</td>
@@ -683,7 +733,6 @@ Samplepath Analysis Toolkit</em></a></p></p>
           residence samples</td>
           </tr>
           <tr>
-          <td>18</td>
           <td><a href="#chart-19-sojourn-scatter">Sojourn Time Scatter
           Plot</a></td>
           <td>Sojourn Scatter</td>
@@ -692,59 +741,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           </tr>
           </tbody>
           </table>
-          <h2 id="convergence-sequence-1-3">3.2 Convergence Sequence
-          (1-3)</h2>
-          <table>
-          <colgroup>
-          <col style="width: 25%" />
-          <col style="width: 25%" />
-          <col style="width: 25%" />
-          <col style="width: 25%" />
-          </colgroup>
-          <thead>
-          <tr>
-          <th>Step</th>
-          <th>Chart</th>
-          <th>Short Name</th>
-          <th>Formula</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr>
-          <td>1</td>
-          <td><a
-          href="#chart-16-arrival-departure-rate-convergence"><span
-          class="math inline">\(\Lambda(T)\)</span>-<span
-          class="math inline">\(\Theta(T)\)</span> Rate
-          Convergence</a></td>
-          <td>Rate Convergence</td>
-          <td><span class="math inline">\(\Lambda(T)=A(T)/T\)</span> vs
-          <span class="math inline">\(\Theta(T)=D(T)/T\)</span></td>
-          </tr>
-          <tr>
-          <td>2</td>
-          <td><a href="#chart-17-process-time-convergence">Process Time
-          Convergence</a></td>
-          <td>Time Convergence</td>
-          <td><span class="math inline">\(w(T)=H(T)/A(T)\)</span> vs
-          <span class="math inline">\(W^*(t)\)</span></td>
-          </tr>
-          <tr>
-          <td>3</td>
-          <td><a href="#chart-20-sample-path-convergence">Top-Level
-          Convergence <span class="math inline">\(L(T)\)</span> vs <span
-          class="math inline">\(\lambda^*(t)\cdot
-          W^*(t)\)</span></a></td>
-          <td>Top-Level Convergence</td>
-          <td><span class="math inline">\(L(T)\)</span> vs <span
-          class="math inline">\(\lambda^*(t)\cdot W^*(t)\)</span></td>
-          </tr>
-          </tbody>
-          </table>
-          <h1 id="core-and-invariant-details">4 Core and Invariant
-          Details</h1>
-          <h3 id="chart-01-point-process">1. Point Process - Event
-          Stream</h3>
+          <h2 id="chart-01-point-process">3.1 Point Process - Event
+          Stream</h2>
           <p><strong>Derivation:</strong> N/A (input event stream).</p>
           <p>Builds from the event log itself: this is the base
           marked-point-process view that all subsequent cumulative
@@ -771,8 +769,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-02-arrivals-a">2. A(T) - Cumulative
-          Arrivals</h3>
+          <h2 id="chart-02-arrivals-a">3.2 A(T) - Cumulative
+          Arrivals</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(A(T)=\sum \text{arrivals in
           }[0,T]\)</span>.</p>
@@ -800,8 +798,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-03-departures-d">3. D(T) - Cumulative
-          Departures</h3>
+          <h2 id="chart-03-departures-d">3.3 D(T) - Cumulative
+          Departures</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(D(T)=\sum \text{departures in
           }[0,T]\)</span>.</p>
@@ -829,7 +827,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-04-cfd">4. CFD - Cumulative Flow Diagram</h3>
+          <h2 id="chart-04-cfd">3.4 CFD - Cumulative Flow Diagram</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(N(t)=A(T)-D(T)\)</span>.</p>
           <p>Builds on Steps 2 and 3 by placing <span
@@ -857,7 +855,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <figcaption aria-hidden="true">CFD (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-05-sample-path-n">5. N(t) - Process State</h3>
+          <h2 id="chart-05-sample-path-n">3.5 N(t) - Process State</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(N(t)=A(T)-D(T)\)</span>.</p>
           <p>Builds on the CFD gap: <span
@@ -886,7 +884,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-06-presence-mass-h">6. H(T) - Presence Mass</h3>
+          <h2 id="chart-06-presence-mass-h">3.6 H(T) - Presence
+          Mass</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(H(T)=\int_0^T N(t)\,dt\)</span>.</p>
           <p>Builds on <span class="math inline">\(N(t)\)</span> by
@@ -914,8 +913,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-07-time-average-l">7. L(T) - Time-Average
-          Presence</h3>
+          <h2 id="chart-07-time-average-l">3.7 L(T) - Time-Average
+          Presence</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(L(T)=H(T)/T\)</span>.</p>
           <p>Builds on <span class="math inline">\(H(T)\)</span> by
@@ -943,8 +942,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-08-arrival-rate-lambda">8. <span
-          class="math inline">\(\Lambda(T)\)</span> - Arrival Rate</h3>
+          <h2 id="chart-08-arrival-rate-lambda">3.8 <span
+          class="math inline">\(\Lambda(T)\)</span> - Arrival Rate</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(\Lambda(T)=A(T)/T\)</span>.</p>
           <p>Builds on cumulative arrivals by converting counts to
@@ -971,8 +970,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-09-residence-w">9a. w(T) - Residence per
-          Arrival</h3>
+          <h2 id="chart-09-residence-w">3.9 w(T) - Residence per
+          Arrival</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(w(T)=H(T)/A(T)\)</span>.</p>
           <p>Builds on <span class="math inline">\(H(T)\)</span> and
@@ -1001,9 +1000,9 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-10-arrival-invariant">9b. <span
+          <h2 id="chart-10-arrival-invariant">3.10 <span
           class="math inline">\(L(T)=\Lambda(T)\cdot w(T)\)</span>
-          Invariant - Arrival Invariant</h3>
+          Invariant - Arrival Invariant</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(L(T)=\Lambda(T)\cdot w(T)\)</span>.</p>
           <p>Builds on Steps 7-9a by verifying the finite-window
@@ -1030,8 +1029,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-11-arrival-stack">10. Arrival Stack - Arrival
-          Dashboard</h3>
+          <h2 id="chart-11-arrival-stack">3.11 Arrival Stack - Arrival
+          Dashboard</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(L(T)=\Lambda(T)\cdot w(T)\)</span>.</p>
           <p>Builds on Steps 5, 7, 8, and 9a by presenting the
@@ -1059,8 +1058,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-12-departure-rate-theta">11. <span
-          class="math inline">\(\Theta(T)\)</span> - Departure Rate</h3>
+          <h2 id="chart-12-departure-rate-theta">3.12 <span
+          class="math inline">\(\Theta(T)\)</span> - Departure Rate</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(\Theta(T)=D(T)/T\)</span>.</p>
           <p>Builds from the departure count path by converting
@@ -1088,8 +1087,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-13-residence-w-prime">12. w’(T) - Residence per
-          Departure</h3>
+          <h2 id="chart-13-residence-w-prime">3.13 w’(T) - Residence per
+          Departure</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(w&#39;(T)=H(T)/D(T)\)</span>.</p>
           <p>Builds on <span class="math inline">\(H(T)\)</span> and
@@ -1117,9 +1116,9 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-14-departure-invariant">13. <span
+          <h2 id="chart-14-departure-invariant">3.14 <span
           class="math inline">\(L(T)=\Theta(T)\cdot w&#39;(T)\)</span>
-          Invariant - Departure Invariant</h3>
+          Invariant - Departure Invariant</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(L(T)=\Theta(T)\cdot
           w&#39;(T)\)</span>.</p>
@@ -1148,8 +1147,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-15-departure-stack">14. Departure Focused Stack
-          - Departure Dashboard</h3>
+          <h2 id="chart-15-departure-stack">3.15 Departure Focused Stack
+          - Departure Dashboard</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(L(T)=\Theta(T)\cdot
           w&#39;(T)\)</span>.</p>
@@ -1177,8 +1176,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-18-residence-scatter">17. Residence Time Scatter
-          Plot - Residence Scatter</h3>
+          <h2 id="chart-18-residence-scatter">3.16 Residence Time
+          Scatter Plot - Residence Scatter</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(w(T)=H(T)/A(T)\)</span> with residence
           samples.</p>
@@ -1206,8 +1205,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-19-sojourn-scatter">18. Sojourn Time Scatter
-          Plot - Sojourn Scatter</h3>
+          <h2 id="chart-19-sojourn-scatter">3.17 Sojourn Time Scatter
+          Plot - Sojourn Scatter</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(W^*(T)=\operatorname{AVG}(d_i-a_i)\)</span>.</p>
           <p>Builds on Step 17 by contrasting completed-item sojourn
@@ -1234,11 +1233,54 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h1 id="convergence-details">5 Convergence Details</h1>
-          <h3 id="chart-16-arrival-departure-rate-convergence">15. <span
+          <h1 id="convergence-and-stability">4 Convergence and
+          Stability</h1>
+          <table>
+          <colgroup>
+          <col style="width: 33%" />
+          <col style="width: 33%" />
+          <col style="width: 33%" />
+          </colgroup>
+          <thead>
+          <tr>
+          <th>Chart</th>
+          <th>Short Name</th>
+          <th>Formula</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+          <td><a
+          href="#chart-16-arrival-departure-rate-convergence"><span
+          class="math inline">\(\Lambda(T)\)</span>-<span
+          class="math inline">\(\Theta(T)\)</span> Rate
+          Convergence</a></td>
+          <td>Rate Convergence</td>
+          <td><span class="math inline">\(\Lambda(T)=A(T)/T\)</span> vs
+          <span class="math inline">\(\Theta(T)=D(T)/T\)</span></td>
+          </tr>
+          <tr>
+          <td><a href="#chart-17-process-time-convergence">Process Time
+          Convergence</a></td>
+          <td>Time Convergence</td>
+          <td><span class="math inline">\(w(T)=H(T)/A(T)\)</span> vs
+          <span class="math inline">\(W^*(t)\)</span></td>
+          </tr>
+          <tr>
+          <td><a href="#chart-20-sample-path-convergence">Top-Level
+          Convergence <span class="math inline">\(L(T)\)</span> vs <span
+          class="math inline">\(\lambda^*(t)\cdot
+          W^*(t)\)</span></a></td>
+          <td>Top-Level Convergence</td>
+          <td><span class="math inline">\(L(T)\)</span> vs <span
+          class="math inline">\(\lambda^*(t)\cdot W^*(t)\)</span></td>
+          </tr>
+          </tbody>
+          </table>
+          <h2 id="chart-16-arrival-departure-rate-convergence">4.1 <span
           class="math inline">\(\Lambda(T)\)</span>-<span
           class="math inline">\(\Theta(T)\)</span> Rate Convergence -
-          Rate Convergence</h3>
+          Rate Convergence</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(\Lambda(T)=A(T)/T\)</span> vs <span
           class="math inline">\(\Theta(T)=D(T)/T\)</span>.</p>
@@ -1266,8 +1308,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           convergence (with-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-17-process-time-convergence">16. Process Time
-          Convergence - Time Convergence</h3>
+          <h2 id="chart-17-process-time-convergence">4.2 Process Time
+          Convergence - Time Convergence</h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(w(T)=H(T)/A(T)\)</span> vs <span
           class="math inline">\(W^*(t)\)</span>.</p>
@@ -1295,9 +1337,9 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (with-events)</figcaption>
           </figure>
           </details>
-          <h3 id="chart-20-sample-path-convergence">19. Top-Level
+          <h2 id="chart-20-sample-path-convergence">4.3 Top-Level
           Convergence <span class="math inline">\(L(T)\)</span> vs <span
-          class="math inline">\(\lambda^*(t)\cdot W^*(t)\)</span></h3>
+          class="math inline">\(\lambda^*(t)\cdot W^*(t)\)</span></h2>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(L(T)\)</span> vs <span
           class="math inline">\(\lambda^*(t)\cdot W^*(t)\)</span>.</p>

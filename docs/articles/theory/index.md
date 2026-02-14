@@ -108,6 +108,34 @@ $$
 
 This identity is the **presence invariant** used throughout the toolkit.
 
+# Presence Invariant
+
+The Presence Invariant is the finite-horizon identity underlying Little’s Law. It states that cumulative presence mass $H(T)$ can be expressed either as time-average state multiplied by time, or as an event-rate multiplied by amortized presence mass per event.
+
+Formally,
+
+$$
+H(T) = L(T)\,T = A(T)\,w(T) = D(T)\,w'(T)
+$$
+
+Dividing through by $T$ gives the familiar finite-horizon Little form:
+
+$$
+L(T) = \Lambda(T)\,w(T) = \Theta(T)\,w'(T)
+$$
+
+Conceptually:
+
+- $H(T)$ is the conserved quantity (presence mass).
+- $L(T)$ is the time-average state (average WIP).
+- $\Lambda(T)/\Theta(T)$ are two different event rates over the observation window.
+- $w(T)/w'(T)$ are the corresponding amortized presence per event (also called average residence time).
+
+All of these quantities are deterministic functionals of the same realized sample path.
+
+For the chart-by-chart construction paired with this section, see
+[Chart Reference: The Presence Invariant Charts]($document-root/articles/chart-reference#the-presence-invariant-charts).
+
 # Interpreting the Invariant
 
 `L(T)` is controlled by two levers:
