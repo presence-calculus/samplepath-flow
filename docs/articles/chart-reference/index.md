@@ -55,21 +55,24 @@ For CLI options and output contracts, see [Command Line Reference]($document-roo
 
 - Lower-case $t$ denotes *instantaneous* time.
 
-  Functions of $t$ (such as $N(t)$) denote sample paths: values of a
-  measurable process property at a specific moment
-  $t \in [0,\,T_{\max}]$.
+  For a fixed horizon $T \in (0,\,T_{\max}]$, the within-window time variable
+  $t$ satisfies $0 \le t \le T$. Functions of $t$ (such as $N(t)$) denote
+  instantaneous sample-path values at time $t$.
 
-- Upper-case $T$ is a *prefix parameter*: a scalar value that determines a
-  _finite observation window_ from the start of observation to the current
-  prefix. Here we use $[0,\,T]$ as shorthand for that prefix window.
+- Upper-case $T$ denotes a *prefix horizon*.
 
-  Functions of $T$ are deterministic pathwise functionals over that prefix
-  window. They represent _cumulative quantities_ or normalized quantities derived from them.  Here
-  $T$ can range over any value in the observation window $(0,\,T_{\max}]$.
+  Functions of $T$ are deterministic pathwise functionals over the prefix
+  window. They represent _cumulative quantities_ or normalized quantities
+  derived from them.
 
-  All of these are deterministic, pathwise calculations (definite integrals,
-  discrete sums, and finite-window normalizations) and should not be confused
-  with statistical measures.
+  For each $T$, we consider the prefix window $[0,\,T]$. Endpoint quantities
+  such as $F(T)$ are values at $t=T$ for that window, and as $T$ varies over
+  $(0,\,T_{\max}]$, these endpoint values form the trajectory
+  $T \mapsto F(T)$.
+
+All of these are deterministic, pathwise calculations (definite integrals,
+discrete sums, and finite-window normalizations) and should not be confused
+with statistical measures.
 
 ## Timescales
 
@@ -80,13 +83,13 @@ All charts use continuous time on the x-axis.
 - In calendar-indexed views, points are evaluated at calendar boundaries, but values
   are still computed from the same underlying event-resolved pathwise calculations.
 
-Internally, durations are measured in seconds and then converted automatically
-to a consistent scale suitable for human-friendly display. Units are automatically scaled on the _y-axis only_;
+Internally, durations are measured in seconds and then durations and rates are converted automatically
+to a consistent scale suitable for human-friendly display. This automatic scaling of units happens _on the y-axis only_;
 the x-axis remains continuous time.
 
 Calendar indexing is simply a coarser *sampling grid* over _metrics_ computed from the
 event-resolved sample path at the input granularity. We do not pre-aggregate events into calendar buckets and then
-compute flow metrics from those aggregates, like most other flow metrics tools do.
+compute flow metrics from those aggregates, like other flow metrics tools (incorrectly) do.
 
 
 # The Presence Invariant Charts
@@ -95,45 +98,46 @@ The Presence Invariant is the finite-horizon form of Little’s Law.
 
 $$
 \begin{aligned}
-H(T) &= L(T)\,T = A(T)\,w(T) = D(T)\,w'(T) \\
 L(T) &= \Lambda(T)\,w(T) = \Theta(T)\,w'(T)
 \end{aligned}
 $$
 
-This document shows the step-by-step derivation of this law and visualizes each component directly on the sample path.
+For the full derivation context and interpretation, refer to [Sample Path Theory: Presence Invariant]($document-root/articles/theory#presence-invariant).
 
-For the full derivation context and interpretation, refer to [Sample Path Theory: Presence Invariant]($document-root/articles/theory#presence-invariant) while walking through the charts.
+The quantities in this law are the finite horizon equivalents of the quantities in the familiar steady state view of Little's Law,
+But unlike the steady state version the presence invariant _holds unconditionally at all times_.
+
+This document shows the step-by-step derivation of each quantity in the invariant and visualizes each component directly on the sample path. The charts are presented in a canonical order starting with the input sample path. Each chart depends on one more more metrics that we computed in an earlier chart. All calculations are deterministic.
+
+Review the theory doc and use it as a cross-reference when reviewing the charts below. The ideas here are relatively straightforward if you spend a little bit of time carefully reading, understanding and reviewing what each chart means and the sequence of derivations.
 
 
 
-
-
-
-| Chart | Short Name | Formula |
-| --- | --- | - |
-| [Point Process](#chart-01-point-process) | Event Stream | Input event stream |
-| [A(T)](#chart-02-arrivals-a) | Cumulative Arrivals | $A(T)=\sum \text{arrivals in }[0,T]$ |
-| [D(T)](#chart-03-departures-d) | Cumulative Departures | $D(T)=\sum \text{departures in }[0,T]$ |
-| [CFD](#chart-04-cfd) | Cumulative Flow Diagram |  |
-| [N(t)](#chart-05-sample-path-n) | Process State | $N(t)=A(T)-D(T)$ |
-| [H(T)](#chart-06-presence-mass-h) | Presence Mass | $H(T)=\int_0^T N(t)\,dt$ |
-| [L(T)](#chart-07-time-average-l) | Time-Average Presence | $L(T)=H(T)/T$ |
-| [$\Lambda(T)$](#chart-08-arrival-rate-lambda) | Arrival Rate | $\Lambda(T)=A(T)/T$ |
-| [w(T)](#chart-09-residence-w) | Residence per Arrival | $w(T)=H(T)/A(T)$ |
-| [$L(T)=\Lambda(T)\cdot w(T)$ Invariant](#chart-10-arrival-invariant) | Arrival Invariant | $L(T)=\Lambda(T)\cdot w(T)$ |
-| [Arrival Stack](#chart-11-arrival-stack) | Arrival Dashboard | $L(T)=\Lambda(T)\cdot w(T)$ |
-| [$\Theta(T)$](#chart-12-departure-rate-theta) | Departure Rate | $\Theta(T)=D(T)/T$ |
-| [w'(T)](#chart-13-residence-w-prime) | Residence per Departure | $w'(T)=H(T)/D(T)$ |
-| [Departure Focused Invariant](#chart-14-departure-invariant) | Departure Invariant | $L(T)=\Theta(T)\cdot w'(T)$ |
-| [Departure Focused Stack](#chart-15-departure-stack) | Departure Dashboard | $L(T)=\Theta(T)\cdot w'(T)$ |
-| [Residence Time Scatter Plot](#chart-18-residence-scatter) | Residence Scatter | $w(T)=H(T)/A(T)$ with residence samples |
-| [Sojourn Time Scatter Plot](#chart-19-sojourn-scatter) | Sojourn Scatter | $W^*(T)=\operatorname{AVG}(d_i-a_i)$ |
+| Chart                                              | Name                             | Formula                                | Units |
+|----------------------------------------------------|----------------------------------|----------------------------------------| --- |
+| [Point Process](#chart-01-point-process)           | Sample Path                      | Input event stream                     | N/A |
+| [A(T)](#chart-02-arrivals-a)                       | Cumulative Arrivals              | $A(T)=\sum \text{arrivals in }[0,T]$   | Elem |
+| [D(T)](#chart-03-departures-d)                     | Cumulative Departures            | $D(T)=\sum \text{departures in }[0,T]$ | Elem |
+| [CFD](#chart-04-cfd)                               | Cumulative Flow Diagram          |                                        | N/A |
+| [N(t)](#chart-05-sample-path-n)                    | Instantaneous Process State      | $N(t)=A(T)-D(T)$                       | Elem |
+| [H(T)](#chart-06-presence-mass-h)                  | Cumulative Presence Mass         | $H(T)=\int_0^T N(t)\,dt$               | Elem-Time |
+| [L(T)](#chart-07-time-average-l)                   | (Time) Average State             | $L(T)=H(T)/T$                          | Elem |
+| [$\Lambda(T)$](#chart-08-arrival-rate-lambda)      | Arrival Rate                     | $\Lambda(T)=A(T)/T$                    | Elem/Time |
+| [w(T)](#chart-09-residence-w)                      | Residence Time per Arrival       | $w(T)=H(T)/A(T)$                       | Time |
+| [Arrival Invariant](#chart-10-arrival-invariant)   | Arrivals Focused Invariant       | $L(T)=\Lambda(T)\cdot w(T)$            | Elem |
+| [Arrival Stack](#chart-11-arrival-stack)           | Arrival Focused Flow Dashboard   | $N(t), L(T), \Lambda(T), w(T)$         | N/A |
+| [$\Theta(T)$](#chart-12-departure-rate-theta)      | Departure Rate                   | $\Theta(T)=D(T)/T$                     | Elem/Time |
+| [w'(T)](#chart-13-residence-w-prime)               | Residence Time per Departure     | $w'(T)=H(T)/D(T)$                      | Time |
+| [Departure Invariant](#chart-14-departure-invariant) | Departures Focused Invariant     | $N(t), L(T), \Theta(T), w'(T)$         | Elem |
+| [Departure Stack](#chart-15-departure-stack)       | Departure Focused Flow Dashboard | $L(T)=\Theta(T)\cdot w'(T)$            | N/A |
 
 
 
 ## Point Process - Event Stream {#chart-01-point-process}
 
 **Derivation:** N/A (input event stream).
+
+**Unit:** N/A.
 
 Builds from the event log itself: this is the base marked-point-process view that all
 subsequent cumulative quantities depend on.
@@ -155,6 +159,8 @@ subsequent cumulative quantities depend on.
 
 **Derivation:** $A(T)=\sum \text{arrivals in }[0,T]$.
 
+**Unit:** Elements.
+
 Builds on Step 1 by accumulating arrival marks over time into cumulative arrivals.
 
 **Output file:** `core/panels/cumulative_arrivals_A.png`
@@ -173,6 +179,8 @@ Builds on Step 1 by accumulating arrival marks over time into cumulative arrival
 ## D(T) - Cumulative Departures {#chart-03-departures-d}
 
 **Derivation:** $D(T)=\sum \text{departures in }[0,T]$.
+
+**Unit:** Elements.
 
 Builds on Step 2 by accumulating departure marks, giving the second cumulative boundary
 needed for flow geometry.
@@ -194,6 +202,8 @@ needed for flow geometry.
 
 **Derivation:** $N(t)=A(T)-D(T)$.
 
+**Unit:** Elements.
+
 Builds on Steps 2 and 3 by placing $A(T)$ and $D(T)$ together; the vertical gap becomes
 instantaneous state and the enclosed area motivates presence mass.
 
@@ -213,6 +223,8 @@ instantaneous state and the enclosed area motivates presence mass.
 ## N(t) - Process State {#chart-05-sample-path-n}
 
 **Derivation:** $N(t)=A(T)-D(T)$.
+
+**Unit:** Elements.
 
 Builds on the CFD gap: $N(t)$ is the pointwise difference between cumulative arrivals and
 cumulative departures.
@@ -234,6 +246,8 @@ cumulative departures.
 
 **Derivation:** $H(T)=\int_0^T N(t)\,dt$.
 
+**Unit:** Elements-Time.
+
 Builds on $N(t)$ by integrating it over elapsed time, producing cumulative presence mass.
 
 **Output file:** `core/panels/cumulative_presence_mass_H.png`
@@ -253,6 +267,8 @@ Builds on $N(t)$ by integrating it over elapsed time, producing cumulative prese
 
 **Derivation:** $L(T)=H(T)/T$.
 
+**Unit:** Elements.
+
 Builds on $H(T)$ by normalizing by elapsed time, yielding time-average presence.
 
 **Output file:** `core/panels/time_average_N_L.png`
@@ -271,6 +287,8 @@ Builds on $H(T)$ by normalizing by elapsed time, yielding time-average presence.
 ## $\Lambda(T)$ - Arrival Rate {#chart-08-arrival-rate-lambda}
 
 **Derivation:** $\Lambda(T)=A(T)/T$.
+
+**Unit:** Elements/Time.
 
 Builds on cumulative arrivals by converting counts to elapsed-time-normalized arrival
 rate.
@@ -292,6 +310,8 @@ rate.
 
 **Derivation:** $w(T)=H(T)/A(T)$.
 
+**Unit:** Time.
+
 Builds on $H(T)$ and $A(T)$ by expressing accumulated presence per arrival as average
 residence per arrival.
 
@@ -311,6 +331,8 @@ residence per arrival.
 ## $L(T)=\Lambda(T)\cdot w(T)$ Invariant - Arrival Invariant {#chart-10-arrival-invariant}
 
 **Derivation:** $L(T)=\Lambda(T)\cdot w(T)$.
+
+**Unit:** Elements.
 
 Builds on Steps 7-9a by verifying the finite-window arrival-side invariant at each
 observation point.
@@ -332,6 +354,8 @@ observation point.
 
 **Derivation:** $L(T)=\Lambda(T)\cdot w(T)$.
 
+**Unit:** Mixed (Elements, Elements/Time, Time).
+
 Builds on Steps 5, 7, 8, and 9a by presenting the arrival-side state, average, rate, and
 residence components on one aligned dashboard.
 
@@ -351,6 +375,8 @@ residence components on one aligned dashboard.
 ## $\Theta(T)$ - Departure Rate {#chart-12-departure-rate-theta}
 
 **Derivation:** $\Theta(T)=D(T)/T$.
+
+**Unit:** Elements/Time.
 
 Builds from the departure count path by converting cumulative departures to
 elapsed-time-normalized departure rate.
@@ -372,6 +398,8 @@ elapsed-time-normalized departure rate.
 
 **Derivation:** $w'(T)=H(T)/D(T)$.
 
+**Unit:** Time.
+
 Builds on $H(T)$ and $D(T)$ by expressing accumulated presence per departure.
 
 **Output file:** `core/panels/average_residence_time_w_prime.png`
@@ -390,6 +418,8 @@ Builds on $H(T)$ and $D(T)$ by expressing accumulated presence per departure.
 ## $L(T)=\Theta(T)\cdot w'(T)$ Invariant - Departure Invariant {#chart-14-departure-invariant}
 
 **Derivation:** $L(T)=\Theta(T)\cdot w'(T)$.
+
+**Unit:** Elements.
 
 Builds on Steps 7, 11, and 12 by verifying $L(T)=\Theta(T)\cdot w'(T)$ pointwise.
 
@@ -410,6 +440,8 @@ Builds on Steps 7, 11, and 12 by verifying $L(T)=\Theta(T)\cdot w'(T)$ pointwise
 
 **Derivation:** $L(T)=\Theta(T)\cdot w'(T)$.
 
+**Unit:** Mixed (Elements, Elements/Time, Time).
+
 Builds on Steps 5, 7, 11, and 12 by presenting the departure-side dashboard in aligned
 panels.
 
@@ -426,53 +458,13 @@ panels.
 
 </details>
 
-## Residence Time Scatter Plot - Residence Scatter {#chart-18-residence-scatter}
-
-**Derivation:** $w(T)=H(T)/A(T)$ with residence samples.
-
-Builds on Step 9a by exposing the underlying residence-time distribution around the
-average trajectory.
-
-**Output file:** `core/panels/residence_time_scatter.png`
-
-`with-events`
-
-![Residence scatter (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/residence_time_scatter.png)
-
-<details>
-<summary>No-events version</summary>
-
-![Residence scatter (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/residence_time_scatter.png)
-
-</details>
-
-## Sojourn Time Scatter Plot - Sojourn Scatter {#chart-19-sojourn-scatter}
-
-**Derivation:** $W^*(T)=\operatorname{AVG}(d_i-a_i)$.
-
-Builds on Step 17 by contrasting completed-item sojourn dispersion with residence-time
-behavior.
-
-**Output file:** `core/panels/sojourn_time_scatter.png`
-
-`with-events`
-
-![Sojourn scatter (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/sojourn_time_scatter.png)
-
-<details>
-<summary>No-events version</summary>
-
-![Sojourn scatter (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/sojourn_time_scatter.png)
-
-</details>
-
 # Convergence and Stability
 
-| Chart | Short Name | Formula |
-| --- | --- | --- |
-| [$\Lambda(T)$-$\Theta(T)$ Rate Convergence](#chart-16-arrival-departure-rate-convergence) | Rate Convergence | $\Lambda(T)=A(T)/T$ vs $\Theta(T)=D(T)/T$ |
-| [Process Time Convergence](#chart-17-process-time-convergence) | Time Convergence | $w(T)=H(T)/A(T)$ vs $W^*(t)$ |
-| [Top-Level Convergence $L(T)$ vs $\lambda^*(t)\cdot W^*(t)$](#chart-20-sample-path-convergence) | Top-Level Convergence | $L(T)$ vs $\lambda^*(t)\cdot W^*(t)$ |
+| Chart | Short Name | Formula | Units |
+| --- | --- | --- | --- |
+| [$\Lambda(T)$-$\Theta(T)$ Rate Convergence](#chart-16-arrival-departure-rate-convergence) | Rate Convergence | $\Lambda(T)=A(T)/T$ vs $\Theta(T)=D(T)/T$ | Elem/Time |
+| [Process Time Convergence](#chart-17-process-time-convergence) | Time Convergence | $w(T)=H(T)/A(T)$ vs $W^*(t)$ | Time |
+| [Top-Level Convergence $L(T)$ vs $\lambda^*(t)\cdot W^*(t)$](#chart-20-sample-path-convergence) | Top-Level Convergence | $L(T)$ vs $\lambda^*(t)\cdot W^*(t)$ | Elem |
 
 
 
@@ -480,6 +472,8 @@ behavior.
 ## $\Lambda(T)$-$\Theta(T)$ Rate Convergence - Rate Convergence {#chart-16-arrival-departure-rate-convergence}
 
 **Derivation:** $\Lambda(T)=A(T)/T$ vs $\Theta(T)=D(T)/T$.
+
+**Unit:** Elements/Time.
 
 Builds from Steps 8 and 11 by directly comparing cumulative arrival and departure rate
 trajectories.
@@ -501,6 +495,8 @@ trajectories.
 
 **Derivation:** $w(T)=H(T)/A(T)$ vs $W^*(t)$.
 
+**Unit:** Time.
+
 Builds from Step 9a by comparing finite-window residence behavior to empirical
 process-time behavior.
 
@@ -520,6 +516,8 @@ process-time behavior.
 ## Top-Level Convergence $L(T)$ vs $\lambda^*(t)\cdot W^*(t)$ {#chart-20-sample-path-convergence}
 
 **Derivation:** $L(T)$ vs $\lambda^*(t)\cdot W^*(t)$.
+
+**Unit:** Elements.
 
 Builds on the full chain by giving a top-level convergence diagnostic for the
 finite-window Little's Law relation over the observation horizon.
