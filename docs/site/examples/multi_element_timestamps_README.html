@@ -266,7 +266,7 @@
     }
 
     #page {
-      max-width: 880px;
+      max-width: 1240px;
       width: 100%;
       padding: 2rem 1rem;
     }
@@ -318,12 +318,52 @@
       text-align: center;
     }
 
-    nav#TOC {
-      margin: 2rem 0;
+    .doc-layout {
+      display: block;
+      margin-top: 1rem;
+    }
+
+    .doc-content {
+      min-width: 0;
+    }
+
+    .doc-toc {
+      margin: 1rem 0 1.5rem;
+    }
+
+    .doc-toc nav#TOC {
+      margin: 0;
       padding: 1rem;
-      border: 1px solid #eee;
+      border: 1px solid #e5e7ea;
       background: #fafafa;
+      border-radius: 8px;
       overflow-x: auto;
+    }
+
+    nav#TOC h2 {
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+
+    nav#TOC ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      line-height: 1.45;
+    }
+
+    nav#TOC li {
+      margin: 0.22rem 0;
+    }
+
+    nav#TOC a {
+      color: #1f2937;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    nav#TOC a:hover {
+      text-decoration: underline;
     }
 
     figure {
@@ -404,6 +444,28 @@
       }
     }
 
+    @media screen and (min-width: 1120px) {
+      .doc-layout.has-toc {
+        display: grid;
+        grid-template-columns: minmax(240px, 290px) minmax(0, 1fr);
+        gap: 2rem;
+        align-items: start;
+      }
+
+      .doc-layout.has-toc .doc-toc {
+        position: sticky;
+        top: 1.25rem;
+        max-height: calc(100vh - 2.5rem);
+        overflow: auto;
+        margin: 0;
+        padding-right: 0.15rem;
+      }
+
+      .doc-layout.has-toc .doc-content {
+        min-width: 0;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -412,108 +474,85 @@
       <nav class="site-nav" aria-label="Primary">
         <a href="https://samplepath.pcalc.org/index.html">Home</a>
         <a href="https://samplepath.pcalc.org/articles/package-overview/index.html">Package Overview</a>
+        <a href="https://samplepath.pcalc.org/articles/theory/index.html">Theory</a>
         <a href="https://samplepath.pcalc.org/articles/cli/index.html">Command Line</a>
         <a href="https://samplepath.pcalc.org/articles/chart-reference/index.html">Chart Reference</a>
         <a href="https://samplepath.pcalc.org/examples/README.html">Examples</a>
       </nav>
-                              <h1
-                              id="multi-element-timestamps-test-dataset">Multi-Element
-                              Timestamps Test Dataset</h1>
-                              <p>This dataset demonstrates the
-                              multi-element timestamp feature in data
-                              export.</p>
-                              <h2 id="dataset-overview">Dataset
-                              Overview</h2>
-                              <ul>
-                              <li><strong>File:</strong>
-                              <code>multi_element_timestamps.csv</code></li>
-                              <li><strong>Records:</strong> 20 work
-                              items (tasks, bugs, features, spikes)</li>
-                              <li><strong>Time span:</strong> January
-                              1-15, 2024</li>
-                              <li><strong>Attributes:</strong> id,
-                              start_ts, end_ts, class, priority</li>
-                              </ul>
-                              <h2
-                              id="multi-element-timestamp-scenarios">Multi-Element
-                              Timestamp Scenarios</h2>
-                              <p>This dataset includes all scenarios for
-                              multi-element timestamps:</p>
-                              <h3
-                              id="multiple-arrivals-3-items-at-same-time">1.
-                              Multiple Arrivals (3 items at same
-                              time)</h3>
-                              <p><strong>2024-01-01 09:00:00</strong> -
-                              Items 101, 102, 103 all arrive -
-                              element_id: <code>A:101;102;103</code></p>
-                              <h3 id="multiple-arrivals-2-items">2.
-                              Multiple Arrivals (2 items)</h3>
-                              <p><strong>2024-01-02 10:30:00</strong> -
-                              Items 104, 105 arrive - element_id:
-                              <code>A:104;105</code></p>
-                              <h3 id="mixed-arrivals-and-departures">3.
-                              Mixed Arrivals and Departures</h3>
-                              <p><strong>2024-01-03 11:15:00</strong> -
-                              Items 106, 107, 108 arrive; Item 102
-                              departs - element_id:
-                              <code>A:106;107;108|D:102</code></p>
-                              <h3
-                              id="zero-duration-element-among-multiple">4.
-                              Zero-Duration Element Among Multiple</h3>
-                              <p><strong>2024-01-04 14:00:00</strong> -
-                              Items 109, 110 arrive; Item 110 also
-                              completes (spike) - element_id:
-                              <code>A:109;110|D:110</code> - Item 110
-                              has zero duration (arrives and departs at
-                              same time)</p>
-                              <h3 id="multiple-departures">5. Multiple
-                              Departures</h3>
-                              <p><strong>2024-01-13 11:00:00</strong> -
-                              Items 115, 116 depart together -
-                              element_id: <code>D:115;116</code></p>
-                              <h3 id="complex-mixed-events">6. Complex
-                              Mixed Events</h3>
-                              <p><strong>2024-01-08 10:00:00</strong> -
-                              Items 115, 116 arrive; Items 106, 107
-                              depart - element_id:
-                              <code>A:115;116|D:106;107</code></p>
-                              <h2 id="usage">Usage</h2>
-                              <div class="sourceCode" id="cb1"><pre
-                              class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Export event-indexed metrics with multi-element IDs</span></span>
+                        <div class="doc-layout">
+                <div class="doc-content">
+          <h1 id="multi-element-timestamps-test-dataset">Multi-Element
+          Timestamps Test Dataset</h1>
+          <p>This dataset demonstrates the multi-element timestamp
+          feature in data export.</p>
+          <h2 id="dataset-overview">Dataset Overview</h2>
+          <ul>
+          <li><strong>File:</strong>
+          <code>multi_element_timestamps.csv</code></li>
+          <li><strong>Records:</strong> 20 work items (tasks, bugs,
+          features, spikes)</li>
+          <li><strong>Time span:</strong> January 1-15, 2024</li>
+          <li><strong>Attributes:</strong> id, start_ts, end_ts, class,
+          priority</li>
+          </ul>
+          <h2 id="multi-element-timestamp-scenarios">Multi-Element
+          Timestamp Scenarios</h2>
+          <p>This dataset includes all scenarios for multi-element
+          timestamps:</p>
+          <h3 id="multiple-arrivals-3-items-at-same-time">1. Multiple
+          Arrivals (3 items at same time)</h3>
+          <p><strong>2024-01-01 09:00:00</strong> - Items 101, 102, 103
+          all arrive - element_id: <code>A:101;102;103</code></p>
+          <h3 id="multiple-arrivals-2-items">2. Multiple Arrivals (2
+          items)</h3>
+          <p><strong>2024-01-02 10:30:00</strong> - Items 104, 105
+          arrive - element_id: <code>A:104;105</code></p>
+          <h3 id="mixed-arrivals-and-departures">3. Mixed Arrivals and
+          Departures</h3>
+          <p><strong>2024-01-03 11:15:00</strong> - Items 106, 107, 108
+          arrive; Item 102 departs - element_id:
+          <code>A:106;107;108|D:102</code></p>
+          <h3 id="zero-duration-element-among-multiple">4. Zero-Duration
+          Element Among Multiple</h3>
+          <p><strong>2024-01-04 14:00:00</strong> - Items 109, 110
+          arrive; Item 110 also completes (spike) - element_id:
+          <code>A:109;110|D:110</code> - Item 110 has zero duration
+          (arrives and departs at same time)</p>
+          <h3 id="multiple-departures">5. Multiple Departures</h3>
+          <p><strong>2024-01-13 11:00:00</strong> - Items 115, 116
+          depart together - element_id: <code>D:115;116</code></p>
+          <h3 id="complex-mixed-events">6. Complex Mixed Events</h3>
+          <p><strong>2024-01-08 10:00:00</strong> - Items 115, 116
+          arrive; Items 106, 107 depart - element_id:
+          <code>A:115;116|D:106;107</code></p>
+          <h2 id="usage">Usage</h2>
+          <div class="sourceCode" id="cb1"><pre
+          class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Export event-indexed metrics with multi-element IDs</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run samplepath examples/multi_element_timestamps.csv <span class="at">--export-only</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># View the element_id column formatting</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run samplepath examples/multi_element_timestamps.csv <span class="at">--export-data</span></span></code></pre></div>
-                              <h2 id="expected-output-format">Expected
-                              Output Format</h2>
-                              <p>In
-                              <code>event_indexed_metrics.csv</code>,
-                              the <code>element_id</code> column will
-                              show:</p>
-                              <ul>
-                              <li>Single element: <code>"101"</code>
-                              (plain ID)</li>
-                              <li>Multiple arrivals:
-                              <code>"A:101;102;103"</code>
-                              (semicolon-separated)</li>
-                              <li>Multiple departures:
-                              <code>"D:115;116"</code></li>
-                              <li>Mixed:
-                              <code>"A:115;116|D:106;107"</code>
-                              (arrivals before departures,
-                              pipe-separated)</li>
-                              <li>No elements: empty/null</li>
-                              </ul>
-                              <h2 id="verification">Verification</h2>
-                              <p>Total events: 20 items with carefully
-                              orchestrated timestamps to create: - 3
-                              arrivals at 09:00 (items 101-103) - 2
-                              arrivals at 10:30 (items 104-105) - 3
-                              arrivals + 1 departure at 11:15 (items
-                              106-108 arrive, 102 departs) - 1
-                              zero-duration event at 14:00 (item 110) -
-                              Multiple other mixed scenarios throughout
-                              the timeline</p>
+          <h2 id="expected-output-format">Expected Output Format</h2>
+          <p>In <code>event_indexed_metrics.csv</code>, the
+          <code>element_id</code> column will show:</p>
+          <ul>
+          <li>Single element: <code>"101"</code> (plain ID)</li>
+          <li>Multiple arrivals: <code>"A:101;102;103"</code>
+          (semicolon-separated)</li>
+          <li>Multiple departures: <code>"D:115;116"</code></li>
+          <li>Mixed: <code>"A:115;116|D:106;107"</code> (arrivals before
+          departures, pipe-separated)</li>
+          <li>No elements: empty/null</li>
+          </ul>
+          <h2 id="verification">Verification</h2>
+          <p>Total events: 20 items with carefully orchestrated
+          timestamps to create: - 3 arrivals at 09:00 (items 101-103) -
+          2 arrivals at 10:30 (items 104-105) - 3 arrivals + 1 departure
+          at 11:15 (items 106-108 arrive, 102 departs) - 1 zero-duration
+          event at 14:00 (item 110) - Multiple other mixed scenarios
+          throughout the timeline</p>
+        </div>
+      </div>
             <footer id="presence-link" role="contentinfo">
         <a href="https://samplepath.pcalc.org" target="_blank" rel="noreferrer">The Sample Path Analysis Toolkit</a>
         <div style="margin-top: 0.35rem; font-size: 0.85rem; color: #555;">

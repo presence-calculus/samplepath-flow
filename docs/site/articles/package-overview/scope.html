@@ -201,7 +201,7 @@
     }
 
     #page {
-      max-width: 880px;
+      max-width: 1240px;
       width: 100%;
       padding: 2rem 1rem;
     }
@@ -253,12 +253,52 @@
       text-align: center;
     }
 
-    nav#TOC {
-      margin: 2rem 0;
+    .doc-layout {
+      display: block;
+      margin-top: 1rem;
+    }
+
+    .doc-content {
+      min-width: 0;
+    }
+
+    .doc-toc {
+      margin: 1rem 0 1.5rem;
+    }
+
+    .doc-toc nav#TOC {
+      margin: 0;
       padding: 1rem;
-      border: 1px solid #eee;
+      border: 1px solid #e5e7ea;
       background: #fafafa;
+      border-radius: 8px;
       overflow-x: auto;
+    }
+
+    nav#TOC h2 {
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+
+    nav#TOC ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      line-height: 1.45;
+    }
+
+    nav#TOC li {
+      margin: 0.22rem 0;
+    }
+
+    nav#TOC a {
+      color: #1f2937;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    nav#TOC a:hover {
+      text-decoration: underline;
     }
 
     figure {
@@ -339,6 +379,28 @@
       }
     }
 
+    @media screen and (min-width: 1120px) {
+      .doc-layout.has-toc {
+        display: grid;
+        grid-template-columns: minmax(240px, 290px) minmax(0, 1fr);
+        gap: 2rem;
+        align-items: start;
+      }
+
+      .doc-layout.has-toc .doc-toc {
+        position: sticky;
+        top: 1.25rem;
+        max-height: calc(100vh - 2.5rem);
+        overflow: auto;
+        margin: 0;
+        padding-right: 0.15rem;
+      }
+
+      .doc-layout.has-toc .doc-content {
+        min-width: 0;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -347,6 +409,7 @@
       <nav class="site-nav" aria-label="Primary">
         <a href="https://samplepath.pcalc.org/index.html">Home</a>
         <a href="https://samplepath.pcalc.org/articles/package-overview/index.html">Package Overview</a>
+        <a href="https://samplepath.pcalc.org/articles/theory/index.html">Theory</a>
         <a href="https://samplepath.pcalc.org/articles/cli/index.html">Command Line</a>
         <a href="https://samplepath.pcalc.org/articles/chart-reference/index.html">Chart Reference</a>
         <a href="https://samplepath.pcalc.org/examples/README.html">Examples</a>
@@ -357,84 +420,72 @@
 
 
               </header>
-                        <p>This package is a part of <a
-                        href="https://docs.pcalc.org">The Presence
-                        Calculus Project</a>: an open source
-                        computational toolkit that is intended to make
-                        sample path methods and concepts more accessible
-                        to practitioners working on operations
-                        management problems in the software industry
-                        including engineering/product/sales/marketing
-                        operations and related disciplines: value stream
-                        management, developer experience and platforms,
-                        and lean continuous process improvement.</p>
-                        <p>This library and toolkit is intended to be
-                        used by practitioners to understand the theory
-                        and <em>develop their intuition about the
-                        dynamics of flow processes</em>, using their own
-                        environments. Understanding the context behind
-                        the data greatly helps makes the abstract ideas
-                        here concrete and there in no substitute for
-                        getting your hands dirty and trying things out
-                        directly. This toolkit is designed for that.</p>
-                        <p>It is not ready nor intended to support
-                        production quality operations management
-                        tooling.</p>
-                        <h2 id="in-scope">In Scope</h2>
-                        <p>You will get the most benefits out of this
-                        library in the near term by using it to look
-                        closely and carefully, at how flow processes in
-                        your environment behave and evolve using the
-                        machinery of this package and learning how to
-                        model them.</p>
-                        <p>The toolkit is intentionally designed to be
-                        low-tech and force you think about how to model
-                        flow processes in a complex system more broadly
-                        before jumping to talking about metrics and
-                        building dashboards.</p>
-                        <p>You should be able to apply it anywhere you
-                        can extract a csv file with start and end dates
-                        for various operational processes using the
-                        native reporting tools built into the production
-                        tools you use today.</p>
-                        <p>Compare what you see here, with whatever your
-                        current operational dashboards show today and
-                        think about the differences. It will soon become
-                        apparent why sample path analysis represents a
-                        fundamentally different way of thinking about
-                        flow and operations management.</p>
-                        <p>We will continues to provide more examples
-                        and talking about applications in The Polaris
-                        Flow Dispatch so it becomes easier to imagine
-                        the possibilities. But the potential
-                        applications are really very large so we welcome
-                        contributions from others who have interesting
-                        examples to show once they grasp the ideas here
-                        and understand why they matter.</p>
-                        <p>The barrier to modeling and measuring a flow
-                        process using this toolkit are minimal. So
-                        please try it out and see what you find. I would
-                        love to publish your use cases. Please raise a
-                        PR to tell us if you have a novel use case and
-                        show us how you are using these techniques.</p>
-                        <p>We plan to extend this library to support the
-                        analysis of general flow processes, which allow
-                        arbitrary functions as marks, and are governed
-                        by the H=λG form of Little’s Law. This will
-                        allow us to directly model the economic impacts
-                        of flow processes.</p>
-                        <h2 id="out-of-scope">Out of scope</h2>
-                        <p>We do <em>not</em> plan to directly implement
-                        online analysis of real time flow processes in
-                        this package nor build web apps or UIs here in
-                        this package. It will remain an offline, command
-                        line toolkit for the foreseeable future.</p>
-                        <p>However, the underlying modules implement the
-                        low-level machinery and code required to build
-                        these more production ready and richer
-                        applications, and our licensing permits you to
-                        build those applications using the concepts in
-                        this package if you so desire.</p>
+                  <div class="doc-layout">
+                <div class="doc-content">
+          <p>This package is a part of <a
+          href="https://docs.pcalc.org">The Presence Calculus
+          Project</a>: an open source computational toolkit that is
+          intended to make sample path methods and concepts more
+          accessible to practitioners working on operations management
+          problems in the software industry including
+          engineering/product/sales/marketing operations and related
+          disciplines: value stream management, developer experience and
+          platforms, and lean continuous process improvement.</p>
+          <p>This library and toolkit is intended to be used by
+          practitioners to understand the theory and <em>develop their
+          intuition about the dynamics of flow processes</em>, using
+          their own environments. Understanding the context behind the
+          data greatly helps makes the abstract ideas here concrete and
+          there in no substitute for getting your hands dirty and trying
+          things out directly. This toolkit is designed for that.</p>
+          <p>It is not ready nor intended to support production quality
+          operations management tooling.</p>
+          <h2 id="in-scope">In Scope</h2>
+          <p>You will get the most benefits out of this library in the
+          near term by using it to look closely and carefully, at how
+          flow processes in your environment behave and evolve using the
+          machinery of this package and learning how to model them.</p>
+          <p>The toolkit is intentionally designed to be low-tech and
+          force you think about how to model flow processes in a complex
+          system more broadly before jumping to talking about metrics
+          and building dashboards.</p>
+          <p>You should be able to apply it anywhere you can extract a
+          csv file with start and end dates for various operational
+          processes using the native reporting tools built into the
+          production tools you use today.</p>
+          <p>Compare what you see here, with whatever your current
+          operational dashboards show today and think about the
+          differences. It will soon become apparent why sample path
+          analysis represents a fundamentally different way of thinking
+          about flow and operations management.</p>
+          <p>We will continues to provide more examples and talking
+          about applications in The Polaris Flow Dispatch so it becomes
+          easier to imagine the possibilities. But the potential
+          applications are really very large so we welcome contributions
+          from others who have interesting examples to show once they
+          grasp the ideas here and understand why they matter.</p>
+          <p>The barrier to modeling and measuring a flow process using
+          this toolkit are minimal. So please try it out and see what
+          you find. I would love to publish your use cases. Please raise
+          a PR to tell us if you have a novel use case and show us how
+          you are using these techniques.</p>
+          <p>We plan to extend this library to support the analysis of
+          general flow processes, which allow arbitrary functions as
+          marks, and are governed by the H=λG form of Little’s Law. This
+          will allow us to directly model the economic impacts of flow
+          processes.</p>
+          <h2 id="out-of-scope">Out of scope</h2>
+          <p>We do <em>not</em> plan to directly implement online
+          analysis of real time flow processes in this package nor build
+          web apps or UIs here in this package. It will remain an
+          offline, command line toolkit for the foreseeable future.</p>
+          <p>However, the underlying modules implement the low-level
+          machinery and code required to build these more production
+          ready and richer applications, and our licensing permits you
+          to build those applications using the concepts in this package
+          if you so desire.</p>
+        </div>
+      </div>
             <footer id="presence-link" role="contentinfo">
         <a href="https://samplepath.pcalc.org" target="_blank" rel="noreferrer">The Sample Path Analysis Toolkit</a>
         <div style="margin-top: 0.35rem; font-size: 0.85rem; color: #555;">

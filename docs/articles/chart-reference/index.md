@@ -19,474 +19,453 @@ figPrefix: Figure
 citations: false
 ---
 
-> > **Note: _This document is a work in progress. This note will be removed when all the charts
-> > produced by the analysis are documented_**.
+# Scope
 
-# What is Sample Path Analysis?
+This document is a catalog of generated charts, ordered by the canonical sample-path
+construction arc from the presentation.
 
-Sample path analysis is a _deterministic_ analysis that can be run on any observed flow
-process history. It lets us reason about the dynamics and stability of flow processes over the long run, and in real-time.
+For theory and formal definitions, see [Sample Path Theory]($document-root/articles/theory).
+For CLI options and output contracts, see [Command Line Reference]($document-root/articles/cli).
 
-We use sample path analysis to determine whether a process is stable, and if not what
-the causes of instability are, and what needs to be done to move the process towards
-operationally acceptable range of stability.
+# Navigation
 
-**Please see our technical note**:
-[Sample path analysis is not a statistical technique.]($document-root/articles/not-statistics)
+The catalog is organized so you can navigate in two clicks:
 
-## The charts.
+1. Use the TOC to jump to a sequence table.
+2. Click a chart link in the table to jump to that chart's detail section.
 
-The results of the analysis are a collection of charts that are written to an output
-directory.
+Each detail section shows:
 
-For input `events.csv`, output is organized as follows:
+- `with-events` chart (visible by default), and
+- `no-events` chart inside a collapsed block (hidden by default in HTML).
 
-```bash
-<output-dir>/
-└── events/
-    └── <scenario>/                 # e.g., latest
-        ├── input/                  # a snapshot  of the input csv data
-        ├── core/                   # core flow metrics & tables
-        │   └── panels/             # single-panel charts
-        ├── convergence/            # convergence vs divergence
-        │   └── panels/             # single-panel charts
-        ├── stability/              # boundedness and existence of limits
-        │   └── panels/             # single-panel charts
-        ├── advanced/               # optional deep-dive charts
-```
+# Canonical Sequence Tables
 
-This reference describes every chart produced by the `samplepath` CLI, grouped by chart
-type.
+## Core and Invariant Sequence (1-14)
 
-# A Worked Example
+| Step | Chart | Short Name | Formula |
+| --- | --- | --- | --- |
+| 1 | [Point Process](#chart-01-point-process) | Event Stream | Input event stream |
+| 2 | [A(T)](#chart-02-arrivals-a) | Cumulative Arrivals | $A(T)=\sum \text{arrivals in }[0,T]$ |
+| 3 | [D(T)](#chart-03-departures-d) | Cumulative Departures | $D(T)=\sum \text{departures in }[0,T]$ |
+| 4 | [CFD](#chart-04-cfd) | Cumulative Flow Diagram | $N(t)=A(T)-D(T)$ |
+| 5 | [N(t)](#chart-05-sample-path-n) | Process State | $N(t)=A(T)-D(T)$ |
+| 6 | [H(T)](#chart-06-presence-mass-h) | Presence Mass | $H(T)=\int_0^T N(t)\,dt$ |
+| 7 | [L(T)](#chart-07-time-average-l) | Time-Average Presence | $L(T)=H(T)/T$ |
+| 8 | [$\Lambda(T)$](#chart-08-arrival-rate-lambda) | Arrival Rate | $\Lambda(T)=A(T)/T$ |
+| 9a | [w(T)](#chart-09-residence-w) | Residence per Arrival | $w(T)=H(T)/A(T)$ |
+| 9b | [$L(T)=\Lambda(T)\cdot w(T)$ Invariant](#chart-10-arrival-invariant) | Arrival Invariant | $L(T)=\Lambda(T)\cdot w(T)$ |
+| 10 | [Arrival Stack](#chart-11-arrival-stack) | Arrival Dashboard | $L(T)=\Lambda(T)\cdot w(T)$ |
+| 11 | [$\Theta(T)$](#chart-12-departure-rate-theta) | Departure Rate | $\Theta(T)=D(T)/T$ |
+| 12 | [w'(T)](#chart-13-residence-w-prime) | Residence per Departure | $w'(T)=H(T)/D(T)$ |
+| 13 | [Departure Focused Invariant](#chart-14-departure-invariant) | Departure Invariant | $L(T)=\Theta(T)\cdot w'(T)$ |
+| 14 | [Departure Focused Stack](#chart-15-departure-stack) | Departure Dashboard | $L(T)=\Theta(T)\cdot w'(T)$ |
+| 17 | [Residence Time Scatter Plot](#chart-18-residence-scatter) | Residence Scatter | $w(T)=H(T)/A(T)$ with residence samples |
+| 18 | [Sojourn Time Scatter Plot](#chart-19-sojourn-scatter) | Sojourn Scatter | $W^*(T)=\operatorname{AVG}(d_i-a_i)$ |
 
-The example charts in this reference and the underlying narrative are
-discussed in our post [Little's Law in a Complex Adaptive System](https://www.polaris-flow-dispatch.com/i/172332418/sample-path-analysis-a-worked-example)
+## Convergence Sequence (1-3)
 
-The example charts in each section below are drawn from the Polaris scenario
-[completed-stories-outliers-removed](https://github.com/presence-calculus/samplepath/tree/main/examples/polaris/flow-of-work/complete-stories-outliers-removed).
+| Step | Chart | Short Name | Formula |
+| --- | --- | --- | --- |
+| 1 | [$\Lambda(T)$-$\Theta(T)$ Rate Convergence](#chart-16-arrival-departure-rate-convergence) | Rate Convergence | $\Lambda(T)=A(T)/T$ vs $\Theta(T)=D(T)/T$ |
+| 2 | [Process Time Convergence](#chart-17-process-time-convergence) | Time Convergence | $w(T)=H(T)/A(T)$ vs $W^*(t)$ |
+| 3 | [Top-Level Convergence $L(T)$ vs $\lambda^*(t)\cdot W^*(t)$](#chart-20-sample-path-convergence) | Top-Level Convergence | $L(T)$ vs $\lambda^*(t)\cdot W^*(t)$ |
 
-Note: All calculations are done in *continuous time* and all charts report time
-accumulations in hours.
+# Core and Invariant Details
 
-# Sample Path Flow Metrics
+### 1. Point Process - Event Stream {#chart-01-point-process}
 
-Time series charts showing the core functions that govern the long run dynamics of a [flow
-process](https://www.polaris-flow-dispatch.com/i/172332418/flow-processes).
+**Derivation:** N/A (input event stream).
 
-> To keep things grounded
-> think of the csv file that you are providing as input to the analysis as the flow process under analysis.
->
-> The current version of the library only analyzes binary flow processes - where start and end dates represent arrivals/departures events, the effect we are measuring is the presence or absence of items in the process, and the sample path represents the **counting process**: the number of items present in the process at any moment in time (aka the WIP).
->
-> As we will note along the way, **every concept** in this document generalizes even for the much more general forms of flow processes once you plug in a different sample path. In particular, the set of outputs produced by sample path analysis are **identical** even after generalization!
->
-> This is why this set of charts is the **foundation** of flow process dynamics.
+Builds from the event log itself: this is the base marked-point-process view that all
+subsequent cumulative quantities depend on.
 
-**Conventions**
+**Output file:** `core/panels/arrival_departure_indicator_process.png`
 
-- All charts are defined over a finite observation horizon of length $T_{\max}$.
+`with-events`
 
-- Lower-case $t$ is a parameter denoting *instantaneous* time.
+![Point Process (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/arrival_departure_indicator_process.png)
 
-  Functions of $t$ (such as $N(t)$) denote sample paths: the values of some measurable property of a process at a specific moment $t \in [0,\,T_{\max}]$.
+<details>
+<summary>No-events version</summary>
 
-- Upper-case $T$ is a *prefix parameter*: a scalar value that determines a _time interval_ $[0,\,T]$.
+![Point Process (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/arrival_departure_indicator_process.png)
 
-  Functions of $T$ (such as $L(T)$, $\Lambda(T)$, and $w(T)$ below) are *functionals*: functions that take a sample path as input and compute a scalar value from the behavior of that function over that interval $[0,T]$. Here $T$ can range over any value in the observation window $(0,\,T_{\max}]$.
+</details>
 
-  These functionals are purely deterministic, pathwise calculations (definite integrals in our case) and should not be confused with statistical aggregates.
+### 2. A(T) - Cumulative Arrivals {#chart-02-arrivals-a}
 
-## The Core Calculations for Little's Law
+**Derivation:** $A(T)=\sum \text{arrivals in }[0,T]$.
 
-The input to the analysis is a sample path $N(t)$.
+Builds on Step 1 by accumulating arrival marks over time into cumulative arrivals.
 
-There are six core functionals:
+**Output file:** `core/panels/cumulative_arrivals_A.png`
 
-- $H(T)$: the cumulative presence mass under the sample path over $[0,T]$.
-- $L(T)$: the time average of $N(t)$, defined as $L(T)=\frac{H(T)}{T}$.
-- $\Lambda(T)$: the cumulative arrival rate, defined as $\Lambda(T)=\frac{A(T)}{T}$.
-- $w(T)$: the average residence time per arrival, defined as $w(T)=\frac{H(T)}{A(T)}$.
-- $\Theta(T)$: the cumulative departure rate, defined as $\Theta(T)=\frac{D(T)}{T}$.
-- $w'(T)$: the average residence time per departure, defined as $w'(T)=\frac{H(T)}{D(T)}$.
+`with-events`
 
-We may write L(T) as
+![A(T) cumulative arrivals (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/cumulative_arrivals_A.png)
 
-$$
-L(T) = \frac{H(T)}{T}
-     = \frac{A(T)}{T}.\frac{H(T)}{A(T)}.
-$$
+<details>
+<summary>No-events version</summary>
 
-Which we may write as,
+![A(T) cumulative arrivals (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/cumulative_arrivals_A.png)
 
-$$
-L(T) = \Lambda(T).w(T).
-$$
+</details>
 
-This is a finite version of Little’s Law, which we call the _Presence Invariant for arrivals_.
+### 3. D(T) - Cumulative Departures {#chart-03-departures-d}
 
->It is a deterministic accounting identity that expresses the relationship between the time average
-of cumulative presence mass and same cumulative presence mass averaged across arrivals when viewed over
-a consistent observation winodw.
+**Derivation:** $D(T)=\sum \text{departures in }[0,T]$.
 
-Interestingly we can repeat these calculations with departures instead of arrivals.
+Builds on Step 2 by accumulating departure marks, giving the second cumulative boundary
+needed for flow geometry.
 
-$$
-L(T) = \frac{H(T)}{T}
-     = \frac{D(T)}{T}.\frac{H(T)}{D(T)}.
-$$
+**Output file:** `core/panels/cumulative_departures_D.png`
 
-which we may write as
+`with-events`
 
-$$
-L(T) = \Theta(T).w'(T).
-$$
+![D(T) cumulative departures (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/cumulative_departures_D.png)
 
-Thus we have the *Presence Invariant for departures*:
+<details>
+<summary>No-events version</summary>
 
-$$
-\Lambda(T).w(T) = L(T) = \Theta(T).w'(T)
-$$
+![D(T) cumulative departures (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/cumulative_departures_D.png)
 
-and this holds _for all time points over all finite observation windows_.
+</details>
 
->The Presence Invariant defined above are _deterministic identities_ that hold *simultaneously *for every point in time in every finite observation window $[0,T]$ with $0 < T < \infty$ and $A(T) > 0$.
+### 4. CFD - Cumulative Flow Diagram {#chart-04-cfd}
 
-This implies that the three component functions in each invariant _always_ evolve in a way that preserves the identity, *even when the arrival and departure focused
-arrival/departure rates, and residence times are not equal*.
+**Derivation:** $N(t)=A(T)-D(T)$.
 
-These invariants are thus _deterministic constraints_ that governs the global dynamics of _any_ flow process, even those that are not operating in steady state. It is the foundation for adapting Little's Law for use in processes that operate far
-from steady state equilibrium like most software processes are.
+Builds on Steps 2 and 3 by placing $A(T)$ and $D(T)$ together; the vertical gap becomes
+instantaneous state and the enclosed area motivates presence mass.
 
+**Output file:** `core/panels/cumulative_flow_diagram.png`
 
-## Summary chart
+`with-events`
 
-This chart can be found at the top level under `<scenario>/`
+![CFD (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/cumulative_flow_diagram.png)
 
-| File                           | What it shows                                                                      | What it means                                                                                                |
-| ------------------------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `sample_path_flow_metrics.png` | Four-panel vertical stack: `N(t)`, `L(T)`, `Λ(T)`, `w(T)` over the same time axis. | One-glance view of the core finite-window Little’s Law metrics and how they co-evolve along the sample path. |
+<details>
+<summary>No-events version</summary>
 
-![Fig 1. Sample Path Flow Metrics](images/sample_path_flow_metrics.png)
+![CFD (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/cumulative_flow_diagram.png)
 
-In this chart the main thing to pay attention to are the _relationships_ between the
-_changes_ in each of these component charts over time.
+</details>
 
-- At any point in time review whether $L(T)$ the time average of $N(t)$ is changing or
-  flat.
-- If it is changing then the finite version of Little's Law tells us that this must be
-  because at least one of $\Lambda(T)$ or $w(T)$ changed.
+### 5. N(t) - Process State {#chart-05-sample-path-n}
 
-It means that these are the _only_ possible explanations:
+**Derivation:** $N(t)=A(T)-D(T)$.
 
-- $\Lambda(T)$ changed: more or fewer things are arriving.
-- $w(T)$ changed: things are taking more or less time to finish.
-- A combination of the two.
+Builds on the CFD gap: $N(t)$ is the pointwise difference between cumulative arrivals and
+cumulative departures.
 
-In the last case there are two possibilities.
+**Output file:** `core/panels/sample_path_N.png`
 
-Since $L(T)$ is the product of $\Lambda(T)$ and $w(T)$:
+`with-events`
 
-- If they move in the same direction they lead to proportionally large changes in L(T)
-- If they move in opposite directions, the changes cancel each other and $L(T)$ tends to
-  flatten.
+![N(t) sample path (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/sample_path_N.png)
 
-The last situation happens often when there is an internal feedback loop at play in the
-process.
+<details>
+<summary>No-events version</summary>
 
-All these different types of dynamics can be at play at different points in the
-evolution of the process. This chart is the place where all those long run dynamics will
-show most directly and clearly.
+![N(t) sample path (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/sample_path_N.png)
 
-It helps us answer "how did the process evolve to produce the flow metrics we are seeing
-at any given moment in time?" These causal relationships allows us to monitor changes in
-L(T) and then immediately investigate the cause of that change.
+</details>
 
-See our post
-[The Causal Arrow in Little's Law](https://www.polaris-flow-dispatch.com/i/171471652/the-causal-mechanism)
-for more discussion on what this means.
+### 6. H(T) - Presence Mass {#chart-06-presence-mass-h}
 
-______________________________________________________________________
+**Derivation:** $H(T)=\int_0^T N(t)\,dt$.
 
-## Component metrics
+Builds on $N(t)$ by integrating it over elapsed time, producing cumulative presence mass.
 
-Stacks (multi-panel composite charts) are written at the root of `core/`:
+**Output file:** `core/panels/cumulative_presence_mass_H.png`
 
-| File                            | What it shows                                                                      |
-| ------------------------------- | ---------------------------------------------------------------------------------- |
-| `core/sample_path_flow_metrics.png` | Four-panel stack: `N(t)`, `L(T)`, `Λ(T)`, `w(T)` over the same time axis.      |
-| `core/lt_derivation_stack.png`      | Four-panel stack: CFD, `N(t)`, `H(T)`, `L(T)` showing how L(T) is derived.     |
-| `core/departure_flow_metrics.png`   | Four-panel stack: `N(T)`, `L(T)`, `Θ(T)`, `w'(T)` over the same time axis.      |
+`with-events`
 
-Individual panels are written under `core/panels/`:
+![H(T) presence mass (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/cumulative_presence_mass_H.png)
 
-| File                                             | What it shows                                                                                                         | What it means                                                                                                                  |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |--------------------------------------------------------------------------------------------------------------------------------|
-| `core/panels/sample_path_N.png`                  | Step chart of `N(t)` (count of elements present in the boundary) vs time.                                             | Raw sample path of WIP/presence: queues, surges, and droughts show up directly.                                                |
-| `core/panels/time_average_N_L.png`               | Line chart of `L(T)` = time-average of `N(t)` over `[0, T]`.                                                          | Tracks how average WIP over the observation window converges (or doesn't). This is the "L" in Little's Law, measured pathwise. |
-| `core/panels/cumulative_arrival_rate_Lambda.png` | Line chart of `Λ(T)` (cumulative arrival rate `A(T)/(T−t₀)`), with optional percentile clipping and warmup exclusion. | Empirical arrival rate over time, with tools to ignore early transients and outliers.                                          |
-| `core/panels/average_residence_time_w.png`       | Line chart of `w(T)` (average residence time per arrival over the window, in hours).                                  | Shows how the time items spend in the boundary evolves; long/fat tails and slow drainage show up as increasing `w(T)`.         |
-| `core/panels/cumulative_departure_rate_Theta.png` | Line chart of `Θ(T)` (cumulative departure rate `D(T)/(T−t₀)`).                                                       | Tracks how average departures per unit time evolve along the observation window.                                               |
-| `core/panels/average_residence_time_w_prime.png`  | Line chart of `w'(T)` (average residence time per departure, in hours).                                                | Shows how average residence time per departure evolves; divergence signals increasing drag on departures.                      |
-| `core/panels/cumulative_presence_mass_H.png`     | Line chart of `H(T)` (cumulative presence mass over the window, in item-hours).                                       | Total presence mass accumulated by items in the system, used in `L(T)` and `w(T)` definitions.                                 |
-| `core/panels/littles_law_invariant.png`          | Scatter of `L(T)` (x-axis) vs `Λ(T)·w(T)` (y-axis) with `y=x` reference line, equal aspect ratio.                     | Pure Little's Law invariant check: all finite points should lie on `y=x` if the metric calculations are consistent.            |
-| `core/panels/departure_littles_law_invariant.png` | Scatter of `L(T)` (x-axis) vs `Θ(T)·w'(T)` (y-axis) with `y=x` reference line, equal aspect ratio.                    | Departure-focused invariant check: all finite points should lie on `y=x` if the metric calculations are consistent.            |
+<details>
+<summary>No-events version</summary>
 
-Their detail descriptions follow.
+![H(T) presence mass (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/cumulative_presence_mass_H.png)
 
-### The sample path $N(t)$
+</details>
 
-`sample_path_N.png`
+### 7. L(T) - Time-Average Presence {#chart-07-time-average-l}
 
-Since we measure in continuous time, this chart is a *step chart*.
+**Derivation:** $L(T)=H(T)/T$.
 
-- The line will go up with each arrival and go down with each departure.
-- The line will stay steady if departures and arrivals balance each other at a given
-  instant.
-- In between arrivals and departures, the line will stay flat.
+Builds on $H(T)$ by normalizing by elapsed time, yielding time-average presence.
 
-This is a real time chart that reveals current congestion, bursts, and idle periods.
+**Output file:** `core/panels/time_average_N_L.png`
 
-> If you are familiar with Cumulative Flow Diagrams, $N(t)$ represents the distance between the cumulative arrival line and the cumulative departure line in the diagram.
+`with-events`
 
-![Sample Path](images/core/sample_path_N.png)
+![L(T) time average (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/time_average_N_L.png)
 
-### The cumulative presence mass
+<details>
+<summary>No-events version</summary>
 
-A key quantity in sample path analysis is the *cumulative presence mass*. This is
-calculated as the definite integral of the sample path curve over [0,T]
+![L(T) time average (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/time_average_N_L.png)
 
-$$
-H(T) = \int_0^T N(t) dt
-$$
+</details>
 
-Since the mass is a product of the number of items present over time, the units of H(T)
-are in item-time. In the language of the Presence Calculus, $H(T)$ is _cumulative presence_ function
-over the sample path $N(t)$.
+### 8. $\Lambda(T)$ - Arrival Rate {#chart-08-arrival-rate-lambda}
 
-The functions that drive flow-process dynamics are the time and item averages
-of H(T): L(T) and w(T). These continuous functions of time are the key quantities in the
-_finite version of Little’s Law_.
+**Derivation:** $\Lambda(T)=A(T)/T$.
 
-### $L(T)$: Time average of $N(t)$
+Builds on cumulative arrivals by converting counts to elapsed-time-normalized arrival
+rate.
 
-`time_average_N_L.png`
+**Output file:** `core/panels/cumulative_arrival_rate_Lambda.png`
 
-Time-average WIP:
+`with-events`
 
-`L(T)` is the time average of the cumulative presence mass. May also be viewed as the
-rate at which the area H(T) grows.
+![Lambda(T) arrival rate (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/cumulative_arrival_rate_Lambda.png)
 
-Its units are in items.
+<details>
+<summary>No-events version</summary>
 
-```
-L(T) = (1/T) H(T)
-```
+![Lambda(T) arrival rate (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/cumulative_arrival_rate_Lambda.png)
 
-Reveals whether long run average WIP diverges or converges. This is the key top level
-indicator of process stability. A flat line here indicates a stable process.
+</details>
 
-Please note once again that this is _not a statistical average_.
+### 9a. w(T) - Residence per Arrival {#chart-09-residence-w}
 
-![Time Average of WIP](images/core/time_average_N_L.png)
+**Derivation:** $w(T)=H(T)/A(T)$.
 
-### $\Lambda(T)$: Cumulative arrival rate
+Builds on $H(T)$ and $A(T)$ by expressing accumulated presence per arrival as average
+residence per arrival.
 
-`cumulative_arrival_rate_Lambda.png`
+**Output file:** `core/panels/average_residence_time_w.png`
 
-`Λ(T)` is the arrival rate of items that have arrived up to T (may include items that
-started before the window):
+`with-events`
 
-```
-Λ(T) = A(T) / T
-```
+![w(T) residence per arrival (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/average_residence_time_w.png)
 
-It's units are items/time
+<details>
+<summary>No-events version</summary>
 
-If WIP was zero at the beginning of the observation window, then this is the same as the
-arrival rate, otherwise this over-counts the arrival rate at the start, but as we
-observe the process for longer periods, those initial end-effects get averaged out.
+![w(T) residence per arrival (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/average_residence_time_w.png)
 
-![Cumulative Arrival Rate](images/core/time_average_N_L.png)
+</details>
 
-### $w(T)$: Average residence time per arrival
+### 9b. $L(T)=\Lambda(T)\cdot w(T)$ Invariant - Arrival Invariant {#chart-10-arrival-invariant}
 
-`average_residence_time_w.png`
+**Derivation:** $L(T)=\Lambda(T)\cdot w(T)$.
 
-Average time items are observed as spending in the observation window up to time T
-(clips the time that is spent outside the window and thus not observed).
+Builds on Steps 7-9a by verifying the finite-window arrival-side invariant at each
+observation point.
 
-```
-w(T) =  H(T)/A(T)
-```
+**Output file:** `core/panels/littles_law_invariant.png`
 
-Tracks how “observed time in system” evolves over the sample path. Its units are time.
+`with-events`
 
-Please see our posts
-[What is Residence Time](https://www.polaris-flow-dispatch.com/p/what-is-residence-time)
-and
-[How long does it take](https://www.polaris-flow-dispatch.com/p/how-long-does-it-take)
-for an explanation of what this metric means.
+![Arrival invariant (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/littles_law_invariant.png)
 
-_Understanding the difference and relationship between residence time and familiar
-metrics like Lead Time, Cycle Time and Work Item Age is crucial for understanding why
-sample path analysis works and these posts explain this._
+<details>
+<summary>No-events version</summary>
 
-![Average Residence Time per Arrival](images/core/average_residence_time_w.png)
+![Arrival invariant (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/littles_law_invariant.png)
 
-## The finite version of Little's Law
+</details>
 
-`littles_law_invariant.png`
+### 10. Arrival Stack - Arrival Dashboard {#chart-11-arrival-stack}
 
-This plot visualizes the
-[finite version of Little's Law](https://www.polaris-flow-dispatch.com/i/172332418/the-finite-version-of-littles-law)
-at work.
+**Derivation:** $L(T)=\Lambda(T)\cdot w(T)$.
 
-It states that for all T, `L(T)=Λ(T)·w(T)`.
+Builds on Steps 5, 7, 8, and 9a by presenting the arrival-side state, average, rate, and
+residence components on one aligned dashboard.
 
-We verify this by showing that when we plot `L(T)` vs `Λ(T)·w(T)` on a scatter plot, all
-the points will lie on the with `y = x`.
+**Output file:** `sample_path_flow_metrics.png`
 
-![Little's Law Invariant](images/core/littles_law_invariant.png)
+`with-events`
 
-Notice how points cluster around certain values of L(T). These are significant operating
-modes for the process as it moves towards stable states.
+![Arrival stack (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/sample_path_flow_metrics.png)
 
-______________________________________________________________________
+<details>
+<summary>No-events version</summary>
 
-<!--
-# Convergence - Equilibrium & coherence
+![Arrival stack (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/sample_path_flow_metrics.png)
 
-| File                          | What it shows                                                                                                                   | What it means                                                                                                                                         |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample_path_convergence.png` | Scatter of `L(T)` (x-axis) vs `λ*(t)·W*(t)` (y-axis) with `y=x` and an ε-band; annotated with a coherence score over a horizon. | Direct visual and quantitative test of whether the finite-window sample path obeys Little’s Law asymptotically (sample-path convergence / coherence). |
+</details>
 
-![Sample Path Convergence](images/sample_path_convergence.png)
+### 11. $\Theta(T)$ - Departure Rate {#chart-12-departure-rate-theta}
 
-| File                                                         | What it shows                                                                                                                                                      | What it means                                                                                                                               |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `convergence/arrival_departure_equilibrium.png`              | Two-row stack: (1) cumulative arrivals `A(t)` vs cumulative departures `D(t)`; (2) `Λ(T)` vs throughput rate `θ(T)=D(T)/(T−t₀)` with masking after last departure. | Tests arrival/departure equilibrium: whether `A(t)` and `D(t)` grow together and arrival/throughput rates converge.                         |
-| `convergence/panels/arrival_rate_convergence.png`            | Single panel: `Λ(T)` and `λ*(t)` (empirical arrival rate) over time, with optional warmup and percentile-based y-limits.                                           | Compares window-averaged arrival rate to the element-wise empirical rate; checks consistency of the two ways of measuring “arrival rate”.   |
-| `convergence/panels/residence_time_convergence.png`          | Single panel: `w(T)` vs `W*(t)` (empirical mean sojourn time of completed items) over time.                                                                        | Coherence between residence-time and sojourn-time views: if the process is coherent, these two series should converge together.             |
-| `convergence/residence_sojourn_coherence.png`                | Two-row stack: (1) `w(T)` vs `W*(t)` overlay; (2) scatter of individual sojourn times against time, with `w(T)` as a reference line.                               | Ties the averaged quantities back to individual element sojourn times; helps see whether outliers or subpopulations are driving divergence. |
-| `convergence/panels/residence_time_sojourn_time_scatter.png` | Line of `w(T)` over time with overlaid scatter of element *age* (if `--incomplete`) or sojourn time (if `--completed` / default).                                  | Visualizes how individual element ages/sojourn times relate to the evolving average residence time, and whether a stable band emerges.      |
+**Derivation:** $\Theta(T)=D(T)/T$.
 
-## `convergence/`
+Builds from the departure count path by converting cumulative departures to
+elapsed-time-normalized departure rate.
 
-```
-<scenario>/convergence/
-<scenario>/convergence/panels/
-```
+**Output file:** `core/panels/cumulative_departure_rate_Theta.png`
 
-______________________________________________________________________
+`with-events`
 
-## `convergence/arrival_departure_equilibrium.png`
+![Theta(T) departure rate (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/cumulative_departure_rate_Theta.png)
 
-Cumulative arrivals vs departures, plus arrival/throughput rate comparison.\
-Tests for equilibrium.
+<details>
+<summary>No-events version</summary>
 
-## `convergence/panels/arrival_rate_convergence.png`
+![Theta(T) departure rate (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/cumulative_departure_rate_Theta.png)
 
-`Λ(T)` (window-average) and `λ*(t)` (empirical).\
-Checks rate consistency.
+</details>
 
-## `convergence/panels/residence_time_convergence.png`
+### 12. w'(T) - Residence per Departure {#chart-13-residence-w-prime}
 
-`w(T)` vs `W*(t)`.\
-Coherence between window-average residence and empirical sojourn time.
+**Derivation:** $w'(T)=H(T)/D(T)$.
 
-## `convergence/residence_sojourn_coherence.png`
+Builds on $H(T)$ and $D(T)$ by expressing accumulated presence per departure.
 
-Two-row comparison of averages + individual sojourn scatter.
+**Output file:** `core/panels/average_residence_time_w_prime.png`
 
-## `convergence/panels/residence_time_sojourn_time_scatter.png`
+`with-events`
 
-`w(T)` overlaid with individual ages or sojourns.
+![w'(T) residence per departure (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/average_residence_time_w_prime.png)
 
-## `sample_path_convergence.png`
+<details>
+<summary>No-events version</summary>
 
-Scatter of `L(T)` vs `λ*(t)·W*(t)` with tolerance band.\
-Highest-level convergence and coherence view.
+![w'(T) residence per departure (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/average_residence_time_w_prime.png)
 
-Controlled by **Convergence Options**:\
-`--convergence`, `--coherence-eps`, `--completed`, `--incomplete`, `--warmup`.
+</details>
 
-______________________________________________________________________
+### 13. $L(T)=\Theta(T)\cdot w'(T)$ Invariant - Departure Invariant {#chart-14-departure-invariant}
 
-# Stability Charts
+**Derivation:** $L(T)=\Theta(T)\cdot w'(T)$.
 
-## `stability/` and `stability/panels/` — Rate stability
+Builds on Steps 7, 11, and 12 by verifying $L(T)=\Theta(T)\cdot w'(T)$ pointwise.
 
-| File                                         | What it shows                                                                                                          | What it means                                                                                                                                                     |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `stability/panels/wip_growth_rate.png`       | Two-row stack: (1) `N(t)` step chart; (2) WIP growth rate `N(T)/T` with reference lines at 0 and 1.                    | Tests whether WIP grows linearly (instability) or sublinearly/flat (bounded or stabilizing), using a rate perspective.                                            |
-| `stability/panels/total_age_growth_rate.png` | Two-row stack: (1) total active age `R(t)` in hours; (2) age growth rate `R(T)/T` with reference lines at 0 and 1.     | Looks at growth of total age of WIP: sustained growth points to accumulating, aging work and potential instability.                                               |
-| `stability/rate_stability.png`               | Four-row stack: (1) `N(T)/T`; (2) `R(T)/T`; (3) `λ*(T)`; (4) `w(T)` vs `W*(t)`. Captioned “Equilibrium and Coherence”. | Integrated stability view: WIP and age growth rates, empirical arrival rate, and residence/sojourn coherence all on one canvas to assess long-run rate stability. |
+**Output file:** `core/panels/departure_littles_law_invariant.png`
 
-Written under:
+`with-events`
 
-```
-<scenario>/stability/
-<scenario>/stability/panels/
-```
+![Departure invariant (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/departure_littles_law_invariant.png)
 
-Controlled by **Stability Options**: `--stability`.
+<details>
+<summary>No-events version</summary>
 
-## `stability/panels/wip_growth_rate.png`
+![Departure invariant (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/departure_littles_law_invariant.png)
 
-`N(t)` and its growth rate `N(T)/T`.\
-Detects sublinear vs linear growth.
+</details>
 
-## `stability/panels/total_age_growth_rate.png`
+### 14. Departure Focused Stack - Departure Dashboard {#chart-15-departure-stack}
 
-Total age `R(t)` and its growth rate.\
-Identifies aging accumulation.
+**Derivation:** $L(T)=\Theta(T)\cdot w'(T)$.
 
-## `stability/rate_stability.png`
+Builds on Steps 5, 7, 11, and 12 by presenting the departure-side dashboard in aligned
+panels.
 
-Four-panel stability synthesis:
+**Output file:** `core/departure_flow_metrics.png`
 
-- `N(T)/T`
-- `R(T)/T`
-- `λ*(T)`
-- `w(T)` vs `W*(t)`
+`with-events`
 
-______________________________________________________________________
+![Departure stack (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/departure_flow_metrics.png)
 
-______________________________________________________________________
+<details>
+<summary>No-events version</summary>
 
-# Advanced Charts
+![Departure stack (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/departure_flow_metrics.png)
 
-## `advanced/` — Error terms, end-effects, and manifold view
+</details>
 
-| File                                                        | What it shows                                                                                                                                            | What it means                                                                                                                                                                         |
-| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `advanced/residence_convergence_errors.png`                 | Three-row stack: (1) `w(T)` vs `W*(t)` (dynamic); (2) `Λ(T)` vs `λ*(t)` (dynamic); (3) error magnitudes `e_W(T)` and `e_Λ(T)` with optional ε threshold. | Tracks *how* coherence is approached or violated, with explicit error terms for residence time and arrival rate over time.                                                            |
-| `advanced/residence_time_convergence_errors_endeffects.png` | Four-row stack: same as above plus an end-effects panel with `r_H(T)` (mass share), `r_B(T)` (boundary share), and `ρ(T)=T/W*(t)`.                       | Decomposes residual errors into end-effect contributions and time-scaling, making it clear when divergence is driven by boundary conditions vs ongoing dynamics.                      |
-| `advanced/invariant_manifold3D_log.png`                     | 3D log–log–log manifold plot: `x = log Λ(T)`, `y = log w(T)`, `z = log L(T)`, plotting the sample-path trajectory on the plane `z = x + y`.              | Geometric view of Little’s Law as an invariant plane; lets you see whether the observed trajectory sticks to the manifold and how it moves across regimes in (rate, time, WIP) space. |
+### 17. Residence Time Scatter Plot - Residence Scatter {#chart-18-residence-scatter}
 
-Written under:
+**Derivation:** $w(T)=H(T)/A(T)$ with residence samples.
 
-```
-<scenario>/advanced/
-```
+Builds on Step 9a by exposing the underlying residence-time distribution around the
+average trajectory.
 
-Controlled by **Advanced Options**: `--advanced`.
+**Output file:** `core/panels/residence_time_scatter.png`
 
-## `advanced/residence_convergence_errors.png`
+`with-events`
 
-`w(T)` vs `W*(t)`;\
-`Λ(T)` vs `λ*(t)`;\
-error magnitudes.
+![Residence scatter (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/residence_time_scatter.png)
 
-## `advanced/residence_time_convergence_errors_endeffects.png`
+<details>
+<summary>No-events version</summary>
 
-Adds end-effects: `r_H(T)`, `r_B(T)`, `ρ(T)`.
+![Residence scatter (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/residence_time_scatter.png)
 
-## `advanced/invariant_manifold3D_log.png`
+</details>
 
-3D log–log–log manifold:\
-`(log Λ(T), log w(T), log L(T))` on the plane `z = x + y`.
+### 18. Sojourn Time Scatter Plot - Sojourn Scatter {#chart-19-sojourn-scatter}
 
-______________________________________________________________________
--->
+**Derivation:** $W^*(T)=\operatorname{AVG}(d_i-a_i)$.
+
+Builds on Step 17 by contrasting completed-item sojourn dispersion with residence-time
+behavior.
+
+**Output file:** `core/panels/sojourn_time_scatter.png`
+
+`with-events`
+
+![Sojourn scatter (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/sojourn_time_scatter.png)
+
+<details>
+<summary>No-events version</summary>
+
+![Sojourn scatter (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/panels/sojourn_time_scatter.png)
+
+</details>
+
+# Convergence Details
+
+### 15. $\Lambda(T)$-$\Theta(T)$ Rate Convergence - Rate Convergence {#chart-16-arrival-departure-rate-convergence}
+
+**Derivation:** $\Lambda(T)=A(T)/T$ vs $\Theta(T)=D(T)/T$.
+
+Builds from Steps 8 and 11 by directly comparing cumulative arrival and departure rate
+trajectories.
+
+**Output file:** `convergence/panels/arrival_departure_rate_convergence.png`
+
+`no-events`
+
+![Arrival-departure rate convergence (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/convergence/panels/arrival_departure_rate_convergence.png)
+
+<details>
+<summary>With-events version</summary>
+
+![Arrival-departure rate convergence (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/convergence/panels/arrival_departure_rate_convergence.png)
+
+</details>
+
+### 16. Process Time Convergence - Time Convergence {#chart-17-process-time-convergence}
+
+**Derivation:** $w(T)=H(T)/A(T)$ vs $W^*(t)$.
+
+Builds from Step 9a by comparing finite-window residence behavior to empirical
+process-time behavior.
+
+**Output file:** `convergence/panels/process_time_convergence.png`
+
+`no-events`
+
+![Process time convergence (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/convergence/panels/process_time_convergence.png)
+
+<details>
+<summary>With-events version</summary>
+
+![Process time convergence (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/convergence/panels/process_time_convergence.png)
+
+</details>
+
+### 19. Top-Level Convergence $L(T)$ vs $\lambda^*(t)\cdot W^*(t)$ {#chart-20-sample-path-convergence}
+
+**Derivation:** $L(T)$ vs $\lambda^*(t)\cdot W^*(t)$.
+
+Builds on the full chain by giving a top-level convergence diagnostic for the
+finite-window Little's Law relation over the observation horizon.
+
+**Output file:** `sample_path_convergence.png`
+
+`no-events`
+
+![Sample path convergence (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/sample_path_convergence.png)
+
+<details>
+<summary>With-events version</summary>
+
+![Sample path convergence (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/sample_path_convergence.png)
+
+</details>
