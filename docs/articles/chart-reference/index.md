@@ -74,7 +74,7 @@ All of these are deterministic, pathwise calculations (definite integrals,
 discrete sums, and finite-window normalizations) and should not be confused
 with statistical measures.
 
-## Timescales
+## Timescales and Indexes
 
 All charts use continuous time on the x-axis.
 
@@ -90,6 +90,15 @@ the x-axis remains continuous time.
 Calendar indexing is simply a coarser *sampling grid* over _metrics_ computed from the
 event-resolved sample path at the input granularity. We do not pre-aggregate events into calendar buckets and then
 compute flow metrics from those aggregates, like other flow metrics tools (incorrectly) do.
+
+All the core charts shown in this document should be assumed to be event-indexed by default, unless explicitly specified otherwise.
+
+
+## Event display
+
+Event indexing is a key differentiator of sample path analysis, so charts are shown with event-resolved overlays by default: each plotted point is tied to an arrival or departure event. This makes the event-level impact on each flow-metric trajectory explicit. Arrival points are colored purple, departure points green, and each point includes a drop line to its x-axis timestamp. This detail is essential for deterministic cause-and-effect analysis.
+
+Each chart also has a `--no-events` version with overlays removed. These views are useful for higher-level gestalt analysis of trajectories across views, especially in dashboards. When reviewing these charts, I recommend you take a look at both views to build intuition.
 
 
 # The Presence Invariant Charts
@@ -135,15 +144,6 @@ Review the theory doc and use it as a cross-reference when reviewing the charts 
 
 ## Point Process - Event Stream {#chart-01-point-process}
 
-**Derivation:** N/A (input event stream).
-
-**Unit:** N/A.
-
-Builds from the event log itself: this is the base marked-point-process view that all
-subsequent cumulative quantities depend on.
-
-**Output file:** `core/panels/arrival_departure_indicator_process.png`
-
 `with-events`
 
 ![Point Process (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/arrival_departure_indicator_process.png)
@@ -155,15 +155,25 @@ subsequent cumulative quantities depend on.
 
 </details>
 
+This is the sample path, the input to sample path analysis. It is the observed behavior of some operational process modeled as a sequence of arrival and departure events on a timeline.
+
+The sample path is represented as a timestamped event sequence with an indicator (a mark) at each timestamp. Here the mark indicates whether an event is an arrival or a departure. For core Presence Invariant calculations, this is sufficient.
+
+The sample path encodes _non-deterministic process behavior_ along two dimensions: the discrete sequence of event types (including the ordering of arrivals and departures), and the continuous inter-event durations.
+
+A useful mental model is a simple coin-flip process in which each flip determines whether the next event is an arrival or a departure. In addition to the outcome itself, we also care about the elapsed time between outcomes, which is the second dimension.
+
+For this reason, this type of process is also called a _binary_ flow process. The same machinery extends naturally to a broader class of non-deterministic marked point processes, but this library currently implements only the binary case.
+
+Note: An `id` mark that pairs arrivals with departures is _optional_ for the core invariant metrics, but _required_ for item-level sojourn-time measurements. This only becomes relevant when discussing convergence, stability and the familiar steady steady version of Little's Law.
+
+**Derivation:** N/A (input event stream).
+
+**Unit:** N/A.
+
+**Output file:** `core/panels/arrival_departure_indicator_process.png`
+
 ## A(T) - Cumulative Arrivals {#chart-02-arrivals-a}
-
-**Derivation:** $A(T)=\sum \text{arrivals in }[0,T]$.
-
-**Unit:** Elements.
-
-Builds on Step 1 by accumulating arrival marks over time into cumulative arrivals.
-
-**Output file:** `core/panels/cumulative_arrivals_A.png`
 
 `with-events`
 
@@ -176,16 +186,16 @@ Builds on Step 1 by accumulating arrival marks over time into cumulative arrival
 
 </details>
 
-## D(T) - Cumulative Departures {#chart-03-departures-d}
+Builds on Step 1 by accumulating arrival marks over time into cumulative arrivals.
 
-**Derivation:** $D(T)=\sum \text{departures in }[0,T]$.
+**Derivation:** $A(T)=\sum \text{arrivals in }[0,T]$.
 
 **Unit:** Elements.
 
-Builds on Step 2 by accumulating departure marks, giving the second cumulative boundary
-needed for flow geometry.
+**Output file:** `core/panels/cumulative_arrivals_A.png`
 
-**Output file:** `core/panels/cumulative_departures_D.png`
+
+## D(T) - Cumulative Departures {#chart-03-departures-d}
 
 `with-events`
 
@@ -198,16 +208,17 @@ needed for flow geometry.
 
 </details>
 
-## CFD - Cumulative Flow Diagram {#chart-04-cfd}
+Builds on Step 2 by accumulating departure marks, giving the second cumulative boundary
+needed for flow geometry.
 
-**Derivation:** $N(t)=A(T)-D(T)$.
+**Derivation:** $D(T)=\sum \text{departures in }[0,T]$.
 
 **Unit:** Elements.
 
-Builds on Steps 2 and 3 by placing $A(T)$ and $D(T)$ together; the vertical gap becomes
-instantaneous state and the enclosed area motivates presence mass.
+**Output file:** `core/panels/cumulative_departures_D.png`
 
-**Output file:** `core/panels/cumulative_flow_diagram.png`
+
+## CFD - Cumulative Flow Diagram {#chart-04-cfd}
 
 `with-events`
 
@@ -220,16 +231,17 @@ instantaneous state and the enclosed area motivates presence mass.
 
 </details>
 
-## N(t) - Process State {#chart-05-sample-path-n}
+Builds on Steps 2 and 3 by placing $A(T)$ and $D(T)$ together; the vertical gap becomes
+instantaneous state and the enclosed area motivates presence mass.
 
 **Derivation:** $N(t)=A(T)-D(T)$.
 
 **Unit:** Elements.
 
-Builds on the CFD gap: $N(t)$ is the pointwise difference between cumulative arrivals and
-cumulative departures.
+**Output file:** `core/panels/cumulative_flow_diagram.png`
 
-**Output file:** `core/panels/sample_path_N.png`
+
+## N(t) - Process State {#chart-05-sample-path-n}
 
 `with-events`
 
@@ -242,15 +254,17 @@ cumulative departures.
 
 </details>
 
+Builds on the CFD gap: $N(t)$ is the pointwise difference between cumulative arrivals and
+cumulative departures.
+
+**Derivation:** $N(t)=A(T)-D(T)$.
+
+**Unit:** Elements.
+
+**Output file:** `core/panels/sample_path_N.png`
+
+
 ## H(T) - Presence Mass {#chart-06-presence-mass-h}
-
-**Derivation:** $H(T)=\int_0^T N(t)\,dt$.
-
-**Unit:** Elements-Time.
-
-Builds on $N(t)$ by integrating it over elapsed time, producing cumulative presence mass.
-
-**Output file:** `core/panels/cumulative_presence_mass_H.png`
 
 `with-events`
 
@@ -263,15 +277,16 @@ Builds on $N(t)$ by integrating it over elapsed time, producing cumulative prese
 
 </details>
 
+Builds on $N(t)$ by integrating it over elapsed time, producing cumulative presence mass.
+
+**Derivation:** $H(T)=\int_0^T N(t)\,dt$.
+
+**Unit:** Elements-Time.
+
+**Output file:** `core/panels/cumulative_presence_mass_H.png`
+
+
 ## L(T) - Time-Average Presence {#chart-07-time-average-l}
-
-**Derivation:** $L(T)=H(T)/T$.
-
-**Unit:** Elements.
-
-Builds on $H(T)$ by normalizing by elapsed time, yielding time-average presence.
-
-**Output file:** `core/panels/time_average_N_L.png`
 
 `with-events`
 
@@ -284,16 +299,16 @@ Builds on $H(T)$ by normalizing by elapsed time, yielding time-average presence.
 
 </details>
 
+Builds on $H(T)$ by normalizing by elapsed time, yielding time-average presence.
+
+**Derivation:** $L(T)=H(T)/T$.
+
+**Unit:** Elements.
+
+**Output file:** `core/panels/time_average_N_L.png`
+
+
 ## $\Lambda(T)$ - Arrival Rate {#chart-08-arrival-rate-lambda}
-
-**Derivation:** $\Lambda(T)=A(T)/T$.
-
-**Unit:** Elements/Time.
-
-Builds on cumulative arrivals by converting counts to elapsed-time-normalized arrival
-rate.
-
-**Output file:** `core/panels/cumulative_arrival_rate_Lambda.png`
 
 `with-events`
 
@@ -306,16 +321,17 @@ rate.
 
 </details>
 
+Builds on cumulative arrivals by converting counts to elapsed-time-normalized arrival
+rate.
+
+**Derivation:** $\Lambda(T)=A(T)/T$.
+
+**Unit:** Elements/Time.
+
+**Output file:** `core/panels/cumulative_arrival_rate_Lambda.png`
+
+
 ## w(T) - Residence per Arrival {#chart-09-residence-w}
-
-**Derivation:** $w(T)=H(T)/A(T)$.
-
-**Unit:** Time.
-
-Builds on $H(T)$ and $A(T)$ by expressing accumulated presence per arrival as average
-residence per arrival.
-
-**Output file:** `core/panels/average_residence_time_w.png`
 
 `with-events`
 
@@ -328,16 +344,17 @@ residence per arrival.
 
 </details>
 
+Builds on $H(T)$ and $A(T)$ by expressing accumulated presence per arrival as average
+residence per arrival.
+
+**Derivation:** $w(T)=H(T)/A(T)$.
+
+**Unit:** Time.
+
+**Output file:** `core/panels/average_residence_time_w.png`
+
+
 ## $L(T)=\Lambda(T)\cdot w(T)$ Invariant - Arrival Invariant {#chart-10-arrival-invariant}
-
-**Derivation:** $L(T)=\Lambda(T)\cdot w(T)$.
-
-**Unit:** Elements.
-
-Builds on Steps 7-9a by verifying the finite-window arrival-side invariant at each
-observation point.
-
-**Output file:** `core/panels/littles_law_invariant.png`
 
 `with-events`
 
@@ -350,16 +367,17 @@ observation point.
 
 </details>
 
-## Arrival Stack - Arrival Dashboard {#chart-11-arrival-stack}
+Builds on Steps 7-9a by verifying the finite-window arrival-side invariant at each
+observation point.
 
 **Derivation:** $L(T)=\Lambda(T)\cdot w(T)$.
 
-**Unit:** Mixed (Elements, Elements/Time, Time).
+**Unit:** Elements.
 
-Builds on Steps 5, 7, 8, and 9a by presenting the arrival-side state, average, rate, and
-residence components on one aligned dashboard.
+**Output file:** `core/panels/littles_law_invariant.png`
 
-**Output file:** `sample_path_flow_metrics.png`
+
+## Arrival Stack - Arrival Dashboard {#chart-11-arrival-stack}
 
 `with-events`
 
@@ -372,16 +390,17 @@ residence components on one aligned dashboard.
 
 </details>
 
+Builds on Steps 5, 7, 8, and 9a by presenting the arrival-side state, average, rate, and
+residence components on one aligned dashboard.
+
+**Derivation:** $L(T)=\Lambda(T)\cdot w(T)$.
+
+**Unit:** Mixed (Elements, Elements/Time, Time).
+
+**Output file:** `sample_path_flow_metrics.png`
+
+
 ## $\Theta(T)$ - Departure Rate {#chart-12-departure-rate-theta}
-
-**Derivation:** $\Theta(T)=D(T)/T$.
-
-**Unit:** Elements/Time.
-
-Builds from the departure count path by converting cumulative departures to
-elapsed-time-normalized departure rate.
-
-**Output file:** `core/panels/cumulative_departure_rate_Theta.png`
 
 `with-events`
 
@@ -394,15 +413,17 @@ elapsed-time-normalized departure rate.
 
 </details>
 
+Builds from the departure count path by converting cumulative departures to
+elapsed-time-normalized departure rate.
+
+**Derivation:** $\Theta(T)=D(T)/T$.
+
+**Unit:** Elements/Time.
+
+**Output file:** `core/panels/cumulative_departure_rate_Theta.png`
+
+
 ## w'(T) - Residence per Departure {#chart-13-residence-w-prime}
-
-**Derivation:** $w'(T)=H(T)/D(T)$.
-
-**Unit:** Time.
-
-Builds on $H(T)$ and $D(T)$ by expressing accumulated presence per departure.
-
-**Output file:** `core/panels/average_residence_time_w_prime.png`
 
 `with-events`
 
@@ -415,15 +436,16 @@ Builds on $H(T)$ and $D(T)$ by expressing accumulated presence per departure.
 
 </details>
 
+Builds on $H(T)$ and $D(T)$ by expressing accumulated presence per departure.
+
+**Derivation:** $w'(T)=H(T)/D(T)$.
+
+**Unit:** Time.
+
+**Output file:** `core/panels/average_residence_time_w_prime.png`
+
+
 ## $L(T)=\Theta(T)\cdot w'(T)$ Invariant - Departure Invariant {#chart-14-departure-invariant}
-
-**Derivation:** $L(T)=\Theta(T)\cdot w'(T)$.
-
-**Unit:** Elements.
-
-Builds on Steps 7, 11, and 12 by verifying $L(T)=\Theta(T)\cdot w'(T)$ pointwise.
-
-**Output file:** `core/panels/departure_littles_law_invariant.png`
 
 `with-events`
 
@@ -436,16 +458,16 @@ Builds on Steps 7, 11, and 12 by verifying $L(T)=\Theta(T)\cdot w'(T)$ pointwise
 
 </details>
 
-## Departure Focused Stack - Departure Dashboard {#chart-15-departure-stack}
+Builds on Steps 7, 11, and 12 by verifying $L(T)=\Theta(T)\cdot w'(T)$ pointwise.
 
 **Derivation:** $L(T)=\Theta(T)\cdot w'(T)$.
 
-**Unit:** Mixed (Elements, Elements/Time, Time).
+**Unit:** Elements.
 
-Builds on Steps 5, 7, 11, and 12 by presenting the departure-side dashboard in aligned
-panels.
+**Output file:** `core/panels/departure_littles_law_invariant.png`
 
-**Output file:** `core/departure_flow_metrics.png`
+
+## Departure Focused Stack - Departure Dashboard {#chart-15-departure-stack}
 
 `with-events`
 
@@ -457,6 +479,16 @@ panels.
 ![Departure stack (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/core/departure_flow_metrics.png)
 
 </details>
+
+Builds on Steps 5, 7, 11, and 12 by presenting the departure-side dashboard in aligned
+panels.
+
+**Derivation:** $L(T)=\Theta(T)\cdot w'(T)$.
+
+**Unit:** Mixed (Elements, Elements/Time, Time).
+
+**Output file:** `core/departure_flow_metrics.png`
+
 
 # Convergence and Stability
 
@@ -471,15 +503,6 @@ panels.
 
 ## $\Lambda(T)$-$\Theta(T)$ Rate Convergence - Rate Convergence {#chart-16-arrival-departure-rate-convergence}
 
-**Derivation:** $\Lambda(T)=A(T)/T$ vs $\Theta(T)=D(T)/T$.
-
-**Unit:** Elements/Time.
-
-Builds from Steps 8 and 11 by directly comparing cumulative arrival and departure rate
-trajectories.
-
-**Output file:** `convergence/panels/arrival_departure_rate_convergence.png`
-
 `no-events`
 
 ![Arrival-departure rate convergence (no-events)]($document-root/articles/chart-reference/chart_reference_small/no-events/convergence/panels/arrival_departure_rate_convergence.png)
@@ -491,16 +514,17 @@ trajectories.
 
 </details>
 
+Builds from Steps 8 and 11 by directly comparing cumulative arrival and departure rate
+trajectories.
+
+**Derivation:** $\Lambda(T)=A(T)/T$ vs $\Theta(T)=D(T)/T$.
+
+**Unit:** Elements/Time.
+
+**Output file:** `convergence/panels/arrival_departure_rate_convergence.png`
+
+
 ## Process Time Convergence - Time Convergence {#chart-17-process-time-convergence}
-
-**Derivation:** $w(T)=H(T)/A(T)$ vs $W^*(t)$.
-
-**Unit:** Time.
-
-Builds from Step 9a by comparing finite-window residence behavior to empirical
-process-time behavior.
-
-**Output file:** `convergence/panels/process_time_convergence.png`
 
 `no-events`
 
@@ -513,16 +537,17 @@ process-time behavior.
 
 </details>
 
+Builds from Step 9a by comparing finite-window residence behavior to empirical
+process-time behavior.
+
+**Derivation:** $w(T)=H(T)/A(T)$ vs $W^*(t)$.
+
+**Unit:** Time.
+
+**Output file:** `convergence/panels/process_time_convergence.png`
+
+
 ## Top-Level Convergence $L(T)$ vs $\lambda^*(t)\cdot W^*(t)$ {#chart-20-sample-path-convergence}
-
-**Derivation:** $L(T)$ vs $\lambda^*(t)\cdot W^*(t)$.
-
-**Unit:** Elements.
-
-Builds on the full chain by giving a top-level convergence diagnostic for the
-finite-window Little's Law relation over the observation horizon.
-
-**Output file:** `sample_path_convergence.png`
 
 `no-events`
 
@@ -534,3 +559,12 @@ finite-window Little's Law relation over the observation horizon.
 ![Sample path convergence (with-events)]($document-root/articles/chart-reference/chart_reference_small/with-events/sample_path_convergence.png)
 
 </details>
+
+Builds on the full chain by giving a top-level convergence diagnostic for the
+finite-window Little's Law relation over the observation horizon.
+
+**Derivation:** $L(T)$ vs $\lambda^*(t)\cdot W^*(t)$.
+
+**Unit:** Elements.
+
+**Output file:** `sample_path_convergence.png`

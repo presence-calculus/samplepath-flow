@@ -441,8 +441,11 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <li><a href="#instantaneous-vs-cumulative-values"
             id="toc-instantaneous-vs-cumulative-values">2.1
             Instantaneous vs cumulative values</a></li>
-            <li><a href="#timescales" id="toc-timescales">2.2
-            Timescales</a></li>
+            <li><a href="#timescales-and-indexes"
+            id="toc-timescales-and-indexes">2.2 Timescales and
+            Indexes</a></li>
+            <li><a href="#event-display" id="toc-event-display">2.3
+            Event display</a></li>
             </ul></li>
             <li><a href="#the-presence-invariant-charts"
             id="toc-the-presence-invariant-charts">3 The Presence
@@ -585,7 +588,8 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (definite integrals, discrete sums, and finite-window
           normalizations) and should not be confused with statistical
           measures.</p>
-          <h2 id="timescales">2.2 Timescales</h2>
+          <h2 id="timescales-and-indexes">2.2 Timescales and
+          Indexes</h2>
           <p>All charts use continuous time on the x-axis.</p>
           <ul>
           <li>In event-indexed views, points are evaluated at exact
@@ -605,6 +609,23 @@ Samplepath Analysis Toolkit</em></a></p></p>
           pre-aggregate events into calendar buckets and then compute
           flow metrics from those aggregates, like other flow metrics
           tools (incorrectly) do.</p>
+          <p>All the core charts shown in this document should be
+          assumed to be event-indexed by default, unless explicitly
+          specified otherwise.</p>
+          <h2 id="event-display">2.3 Event display</h2>
+          <p>Event indexing is a key differentiator of sample path
+          analysis, so charts are shown with event-resolved overlays by
+          default: each plotted point is tied to an arrival or departure
+          event. This makes the event-level impact on each flow-metric
+          trajectory explicit. Arrival points are colored purple,
+          departure points green, and each point includes a drop line to
+          its x-axis timestamp. This detail is essential for
+          deterministic cause-and-effect analysis.</p>
+          <p>Each chart also has a <code>--no-events</code> version with
+          overlays removed. These views are useful for higher-level
+          gestalt analysis of trajectories across views, especially in
+          dashboards. When reviewing these charts, I recommend you take
+          a look at both views to build intuition.</p>
           <h1 id="the-presence-invariant-charts">3 The Presence
           Invariant Charts</h1>
           <p>The Presence Invariant is the finite-horizon form of
@@ -757,13 +778,6 @@ Samplepath Analysis Toolkit</em></a></p></p>
           </table>
           <h2 id="chart-01-point-process">3.1 Point Process - Event
           Stream</h2>
-          <p><strong>Derivation:</strong> N/A (input event stream).</p>
-          <p><strong>Unit:</strong> N/A.</p>
-          <p>Builds from the event log itself: this is the base
-          marked-point-process view that all subsequent cumulative
-          quantities depend on.</p>
-          <p><strong>Output file:</strong>
-          <code>core/panels/arrival_departure_indicator_process.png</code></p>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -784,16 +798,41 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
+          <p>This is the sample path, the input to sample path analysis.
+          It is the observed behavior of some operational process
+          modeled as a sequence of arrival and departure events on a
+          timeline.</p>
+          <p>The sample path is represented as a timestamped event
+          sequence with an indicator (a mark) at each timestamp. Here
+          the mark indicates whether an event is an arrival or a
+          departure. For core Presence Invariant calculations, this is
+          sufficient.</p>
+          <p>The sample path encodes <em>non-deterministic process
+          behavior</em> along two dimensions: the discrete sequence of
+          event types (including the ordering of arrivals and
+          departures), and the continuous inter-event durations.</p>
+          <p>A useful mental model is a simple coin-flip process in
+          which each flip determines whether the next event is an
+          arrival or a departure. In addition to the outcome itself, we
+          also care about the elapsed time between outcomes, which is
+          the second dimension.</p>
+          <p>For this reason, this type of process is also called a
+          <em>binary</em> flow process. The same machinery extends
+          naturally to a broader class of non-deterministic marked point
+          processes, but this library currently implements only the
+          binary case.</p>
+          <p>Note: An <code>id</code> mark that pairs arrivals with
+          departures is <em>optional</em> for the core invariant
+          metrics, but <em>required</em> for item-level sojourn-time
+          measurements. This only becomes relevant when discussing
+          convergence, stability and the familiar steady steady version
+          of Little’s Law.</p>
+          <p><strong>Derivation:</strong> N/A (input event stream).</p>
+          <p><strong>Unit:</strong> N/A.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/arrival_departure_indicator_process.png</code></p>
           <h2 id="chart-02-arrivals-a">3.2 A(T) - Cumulative
           Arrivals</h2>
-          <p><strong>Derivation:</strong> <span
-          class="math inline">\(A(T)=\sum \text{arrivals in
-          }[0,T]\)</span>.</p>
-          <p><strong>Unit:</strong> Elements.</p>
-          <p>Builds on Step 1 by accumulating arrival marks over time
-          into cumulative arrivals.</p>
-          <p><strong>Output file:</strong>
-          <code>core/panels/cumulative_arrivals_A.png</code></p>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -814,16 +853,16 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h2 id="chart-03-departures-d">3.3 D(T) - Cumulative
-          Departures</h2>
+          <p>Builds on Step 1 by accumulating arrival marks over time
+          into cumulative arrivals.</p>
           <p><strong>Derivation:</strong> <span
-          class="math inline">\(D(T)=\sum \text{departures in
+          class="math inline">\(A(T)=\sum \text{arrivals in
           }[0,T]\)</span>.</p>
           <p><strong>Unit:</strong> Elements.</p>
-          <p>Builds on Step 2 by accumulating departure marks, giving
-          the second cumulative boundary needed for flow geometry.</p>
           <p><strong>Output file:</strong>
-          <code>core/panels/cumulative_departures_D.png</code></p>
+          <code>core/panels/cumulative_arrivals_A.png</code></p>
+          <h2 id="chart-03-departures-d">3.3 D(T) - Cumulative
+          Departures</h2>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -844,17 +883,15 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h2 id="chart-04-cfd">3.4 CFD - Cumulative Flow Diagram</h2>
+          <p>Builds on Step 2 by accumulating departure marks, giving
+          the second cumulative boundary needed for flow geometry.</p>
           <p><strong>Derivation:</strong> <span
-          class="math inline">\(N(t)=A(T)-D(T)\)</span>.</p>
+          class="math inline">\(D(T)=\sum \text{departures in
+          }[0,T]\)</span>.</p>
           <p><strong>Unit:</strong> Elements.</p>
-          <p>Builds on Steps 2 and 3 by placing <span
-          class="math inline">\(A(T)\)</span> and <span
-          class="math inline">\(D(T)\)</span> together; the vertical gap
-          becomes instantaneous state and the enclosed area motivates
-          presence mass.</p>
           <p><strong>Output file:</strong>
-          <code>core/panels/cumulative_flow_diagram.png</code></p>
+          <code>core/panels/cumulative_departures_D.png</code></p>
+          <h2 id="chart-04-cfd">3.4 CFD - Cumulative Flow Diagram</h2>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -873,16 +910,17 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <figcaption aria-hidden="true">CFD (no-events)</figcaption>
           </figure>
           </details>
-          <h2 id="chart-05-sample-path-n">3.5 N(t) - Process State</h2>
+          <p>Builds on Steps 2 and 3 by placing <span
+          class="math inline">\(A(T)\)</span> and <span
+          class="math inline">\(D(T)\)</span> together; the vertical gap
+          becomes instantaneous state and the enclosed area motivates
+          presence mass.</p>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(N(t)=A(T)-D(T)\)</span>.</p>
           <p><strong>Unit:</strong> Elements.</p>
-          <p>Builds on the CFD gap: <span
-          class="math inline">\(N(t)\)</span> is the pointwise
-          difference between cumulative arrivals and cumulative
-          departures.</p>
           <p><strong>Output file:</strong>
-          <code>core/panels/sample_path_N.png</code></p>
+          <code>core/panels/cumulative_flow_diagram.png</code></p>
+          <h2 id="chart-05-sample-path-n">3.5 N(t) - Process State</h2>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -903,16 +941,17 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
+          <p>Builds on the CFD gap: <span
+          class="math inline">\(N(t)\)</span> is the pointwise
+          difference between cumulative arrivals and cumulative
+          departures.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(N(t)=A(T)-D(T)\)</span>.</p>
+          <p><strong>Unit:</strong> Elements.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/sample_path_N.png</code></p>
           <h2 id="chart-06-presence-mass-h">3.6 H(T) - Presence
           Mass</h2>
-          <p><strong>Derivation:</strong> <span
-          class="math inline">\(H(T)=\int_0^T N(t)\,dt\)</span>.</p>
-          <p><strong>Unit:</strong> Elements-Time.</p>
-          <p>Builds on <span class="math inline">\(N(t)\)</span> by
-          integrating it over elapsed time, producing cumulative
-          presence mass.</p>
-          <p><strong>Output file:</strong>
-          <code>core/panels/cumulative_presence_mass_H.png</code></p>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -933,16 +972,16 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
+          <p>Builds on <span class="math inline">\(N(t)\)</span> by
+          integrating it over elapsed time, producing cumulative
+          presence mass.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(H(T)=\int_0^T N(t)\,dt\)</span>.</p>
+          <p><strong>Unit:</strong> Elements-Time.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/cumulative_presence_mass_H.png</code></p>
           <h2 id="chart-07-time-average-l">3.7 L(T) - Time-Average
           Presence</h2>
-          <p><strong>Derivation:</strong> <span
-          class="math inline">\(L(T)=H(T)/T\)</span>.</p>
-          <p><strong>Unit:</strong> Elements.</p>
-          <p>Builds on <span class="math inline">\(H(T)\)</span> by
-          normalizing by elapsed time, yielding time-average
-          presence.</p>
-          <p><strong>Output file:</strong>
-          <code>core/panels/time_average_N_L.png</code></p>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -963,15 +1002,16 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
+          <p>Builds on <span class="math inline">\(H(T)\)</span> by
+          normalizing by elapsed time, yielding time-average
+          presence.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(L(T)=H(T)/T\)</span>.</p>
+          <p><strong>Unit:</strong> Elements.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/time_average_N_L.png</code></p>
           <h2 id="chart-08-arrival-rate-lambda">3.8 <span
           class="math inline">\(\Lambda(T)\)</span> - Arrival Rate</h2>
-          <p><strong>Derivation:</strong> <span
-          class="math inline">\(\Lambda(T)=A(T)/T\)</span>.</p>
-          <p><strong>Unit:</strong> Elements/Time.</p>
-          <p>Builds on cumulative arrivals by converting counts to
-          elapsed-time-normalized arrival rate.</p>
-          <p><strong>Output file:</strong>
-          <code>core/panels/cumulative_arrival_rate_Lambda.png</code></p>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -992,17 +1032,15 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
+          <p>Builds on cumulative arrivals by converting counts to
+          elapsed-time-normalized arrival rate.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(\Lambda(T)=A(T)/T\)</span>.</p>
+          <p><strong>Unit:</strong> Elements/Time.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/cumulative_arrival_rate_Lambda.png</code></p>
           <h2 id="chart-09-residence-w">3.9 w(T) - Residence per
           Arrival</h2>
-          <p><strong>Derivation:</strong> <span
-          class="math inline">\(w(T)=H(T)/A(T)\)</span>.</p>
-          <p><strong>Unit:</strong> Time.</p>
-          <p>Builds on <span class="math inline">\(H(T)\)</span> and
-          <span class="math inline">\(A(T)\)</span> by expressing
-          accumulated presence per arrival as average residence per
-          arrival.</p>
-          <p><strong>Output file:</strong>
-          <code>core/panels/average_residence_time_w.png</code></p>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -1023,16 +1061,18 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
+          <p>Builds on <span class="math inline">\(H(T)\)</span> and
+          <span class="math inline">\(A(T)\)</span> by expressing
+          accumulated presence per arrival as average residence per
+          arrival.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(w(T)=H(T)/A(T)\)</span>.</p>
+          <p><strong>Unit:</strong> Time.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/average_residence_time_w.png</code></p>
           <h2 id="chart-10-arrival-invariant">3.10 <span
           class="math inline">\(L(T)=\Lambda(T)\cdot w(T)\)</span>
           Invariant - Arrival Invariant</h2>
-          <p><strong>Derivation:</strong> <span
-          class="math inline">\(L(T)=\Lambda(T)\cdot w(T)\)</span>.</p>
-          <p><strong>Unit:</strong> Elements.</p>
-          <p>Builds on Steps 7-9a by verifying the finite-window
-          arrival-side invariant at each observation point.</p>
-          <p><strong>Output file:</strong>
-          <code>core/panels/littles_law_invariant.png</code></p>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -1053,17 +1093,15 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h2 id="chart-11-arrival-stack">3.11 Arrival Stack - Arrival
-          Dashboard</h2>
+          <p>Builds on Steps 7-9a by verifying the finite-window
+          arrival-side invariant at each observation point.</p>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(L(T)=\Lambda(T)\cdot w(T)\)</span>.</p>
-          <p><strong>Unit:</strong> Mixed (Elements, Elements/Time,
-          Time).</p>
-          <p>Builds on Steps 5, 7, 8, and 9a by presenting the
-          arrival-side state, average, rate, and residence components on
-          one aligned dashboard.</p>
+          <p><strong>Unit:</strong> Elements.</p>
           <p><strong>Output file:</strong>
-          <code>sample_path_flow_metrics.png</code></p>
+          <code>core/panels/littles_law_invariant.png</code></p>
+          <h2 id="chart-11-arrival-stack">3.11 Arrival Stack - Arrival
+          Dashboard</h2>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -1084,16 +1122,17 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
+          <p>Builds on Steps 5, 7, 8, and 9a by presenting the
+          arrival-side state, average, rate, and residence components on
+          one aligned dashboard.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(L(T)=\Lambda(T)\cdot w(T)\)</span>.</p>
+          <p><strong>Unit:</strong> Mixed (Elements, Elements/Time,
+          Time).</p>
+          <p><strong>Output file:</strong>
+          <code>sample_path_flow_metrics.png</code></p>
           <h2 id="chart-12-departure-rate-theta">3.12 <span
           class="math inline">\(\Theta(T)\)</span> - Departure Rate</h2>
-          <p><strong>Derivation:</strong> <span
-          class="math inline">\(\Theta(T)=D(T)/T\)</span>.</p>
-          <p><strong>Unit:</strong> Elements/Time.</p>
-          <p>Builds from the departure count path by converting
-          cumulative departures to elapsed-time-normalized departure
-          rate.</p>
-          <p><strong>Output file:</strong>
-          <code>core/panels/cumulative_departure_rate_Theta.png</code></p>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -1114,16 +1153,16 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
+          <p>Builds from the departure count path by converting
+          cumulative departures to elapsed-time-normalized departure
+          rate.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(\Theta(T)=D(T)/T\)</span>.</p>
+          <p><strong>Unit:</strong> Elements/Time.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/cumulative_departure_rate_Theta.png</code></p>
           <h2 id="chart-13-residence-w-prime">3.13 w’(T) - Residence per
           Departure</h2>
-          <p><strong>Derivation:</strong> <span
-          class="math inline">\(w&#39;(T)=H(T)/D(T)\)</span>.</p>
-          <p><strong>Unit:</strong> Time.</p>
-          <p>Builds on <span class="math inline">\(H(T)\)</span> and
-          <span class="math inline">\(D(T)\)</span> by expressing
-          accumulated presence per departure.</p>
-          <p><strong>Output file:</strong>
-          <code>core/panels/average_residence_time_w_prime.png</code></p>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -1144,18 +1183,17 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
+          <p>Builds on <span class="math inline">\(H(T)\)</span> and
+          <span class="math inline">\(D(T)\)</span> by expressing
+          accumulated presence per departure.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(w&#39;(T)=H(T)/D(T)\)</span>.</p>
+          <p><strong>Unit:</strong> Time.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/average_residence_time_w_prime.png</code></p>
           <h2 id="chart-14-departure-invariant">3.14 <span
           class="math inline">\(L(T)=\Theta(T)\cdot w&#39;(T)\)</span>
           Invariant - Departure Invariant</h2>
-          <p><strong>Derivation:</strong> <span
-          class="math inline">\(L(T)=\Theta(T)\cdot
-          w&#39;(T)\)</span>.</p>
-          <p><strong>Unit:</strong> Elements.</p>
-          <p>Builds on Steps 7, 11, and 12 by verifying <span
-          class="math inline">\(L(T)=\Theta(T)\cdot w&#39;(T)\)</span>
-          pointwise.</p>
-          <p><strong>Output file:</strong>
-          <code>core/panels/departure_littles_law_invariant.png</code></p>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -1176,17 +1214,17 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <h2 id="chart-15-departure-stack">3.15 Departure Focused Stack
-          - Departure Dashboard</h2>
+          <p>Builds on Steps 7, 11, and 12 by verifying <span
+          class="math inline">\(L(T)=\Theta(T)\cdot w&#39;(T)\)</span>
+          pointwise.</p>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(L(T)=\Theta(T)\cdot
           w&#39;(T)\)</span>.</p>
-          <p><strong>Unit:</strong> Mixed (Elements, Elements/Time,
-          Time).</p>
-          <p>Builds on Steps 5, 7, 11, and 12 by presenting the
-          departure-side dashboard in aligned panels.</p>
+          <p><strong>Unit:</strong> Elements.</p>
           <p><strong>Output file:</strong>
-          <code>core/departure_flow_metrics.png</code></p>
+          <code>core/panels/departure_littles_law_invariant.png</code></p>
+          <h2 id="chart-15-departure-stack">3.15 Departure Focused Stack
+          - Departure Dashboard</h2>
           <p><code>with-events</code></p>
           <figure>
           <img
@@ -1207,6 +1245,15 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
+          <p>Builds on Steps 5, 7, 11, and 12 by presenting the
+          departure-side dashboard in aligned panels.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(L(T)=\Theta(T)\cdot
+          w&#39;(T)\)</span>.</p>
+          <p><strong>Unit:</strong> Mixed (Elements, Elements/Time,
+          Time).</p>
+          <p><strong>Output file:</strong>
+          <code>core/departure_flow_metrics.png</code></p>
           <h1 id="convergence-and-stability">4 Convergence and
           Stability</h1>
           <table>
@@ -1260,14 +1307,6 @@ Samplepath Analysis Toolkit</em></a></p></p>
           class="math inline">\(\Lambda(T)\)</span>-<span
           class="math inline">\(\Theta(T)\)</span> Rate Convergence -
           Rate Convergence</h2>
-          <p><strong>Derivation:</strong> <span
-          class="math inline">\(\Lambda(T)=A(T)/T\)</span> vs <span
-          class="math inline">\(\Theta(T)=D(T)/T\)</span>.</p>
-          <p><strong>Unit:</strong> Elements/Time.</p>
-          <p>Builds from Steps 8 and 11 by directly comparing cumulative
-          arrival and departure rate trajectories.</p>
-          <p><strong>Output file:</strong>
-          <code>convergence/panels/arrival_departure_rate_convergence.png</code></p>
           <p><code>no-events</code></p>
           <figure>
           <img
@@ -1288,16 +1327,16 @@ Samplepath Analysis Toolkit</em></a></p></p>
           convergence (with-events)</figcaption>
           </figure>
           </details>
+          <p>Builds from Steps 8 and 11 by directly comparing cumulative
+          arrival and departure rate trajectories.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(\Lambda(T)=A(T)/T\)</span> vs <span
+          class="math inline">\(\Theta(T)=D(T)/T\)</span>.</p>
+          <p><strong>Unit:</strong> Elements/Time.</p>
+          <p><strong>Output file:</strong>
+          <code>convergence/panels/arrival_departure_rate_convergence.png</code></p>
           <h2 id="chart-17-process-time-convergence">4.2 Process Time
           Convergence - Time Convergence</h2>
-          <p><strong>Derivation:</strong> <span
-          class="math inline">\(w(T)=H(T)/A(T)\)</span> vs <span
-          class="math inline">\(W^*(t)\)</span>.</p>
-          <p><strong>Unit:</strong> Time.</p>
-          <p>Builds from Step 9a by comparing finite-window residence
-          behavior to empirical process-time behavior.</p>
-          <p><strong>Output file:</strong>
-          <code>convergence/panels/process_time_convergence.png</code></p>
           <p><code>no-events</code></p>
           <figure>
           <img
@@ -1318,18 +1357,17 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (with-events)</figcaption>
           </figure>
           </details>
+          <p>Builds from Step 9a by comparing finite-window residence
+          behavior to empirical process-time behavior.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(w(T)=H(T)/A(T)\)</span> vs <span
+          class="math inline">\(W^*(t)\)</span>.</p>
+          <p><strong>Unit:</strong> Time.</p>
+          <p><strong>Output file:</strong>
+          <code>convergence/panels/process_time_convergence.png</code></p>
           <h2 id="chart-20-sample-path-convergence">4.3 Top-Level
           Convergence <span class="math inline">\(L(T)\)</span> vs <span
           class="math inline">\(\lambda^*(t)\cdot W^*(t)\)</span></h2>
-          <p><strong>Derivation:</strong> <span
-          class="math inline">\(L(T)\)</span> vs <span
-          class="math inline">\(\lambda^*(t)\cdot W^*(t)\)</span>.</p>
-          <p><strong>Unit:</strong> Elements.</p>
-          <p>Builds on the full chain by giving a top-level convergence
-          diagnostic for the finite-window Little’s Law relation over
-          the observation horizon.</p>
-          <p><strong>Output file:</strong>
-          <code>sample_path_convergence.png</code></p>
           <p><code>no-events</code></p>
           <figure>
           <img
@@ -1350,6 +1388,15 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (with-events)</figcaption>
           </figure>
           </details>
+          <p>Builds on the full chain by giving a top-level convergence
+          diagnostic for the finite-window Little’s Law relation over
+          the observation horizon.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(L(T)\)</span> vs <span
+          class="math inline">\(\lambda^*(t)\cdot W^*(t)\)</span>.</p>
+          <p><strong>Unit:</strong> Elements.</p>
+          <p><strong>Output file:</strong>
+          <code>sample_path_convergence.png</code></p>
         </div>
       </div>
             <footer id="presence-link" role="contentinfo">
