@@ -550,6 +550,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             Indexes</a></li>
             <li><a href="#event-display" id="toc-event-display">2.4
             Event display</a></li>
+            <li><a href="#note" id="toc-note">2.5 Note:</a></li>
             </ul></li>
             <li><a href="#the-presence-invariant-charts"
             id="toc-the-presence-invariant-charts">3 The Presence
@@ -738,9 +739,14 @@ Samplepath Analysis Toolkit</em></a></p></p>
           pre-aggregate events into calendar buckets and then compute
           flow metrics from those aggregates, like other flow metrics
           tools (incorrectly) do.</p>
-          <p>All the core charts shown in this document should be
-          assumed to be event-indexed by default, unless explicitly
-          specified otherwise.</p>
+          <p>All core charts shown in this document should be assumed to
+          be event-indexed by default, unless explicitly specified
+          otherwise.</p>
+          <p>Although calendar dates may appear on the time axis as
+          reference labels, the underlying x-axis values correspond to
+          exact event timestamps. These timestamps are not constrained
+          to fall on calendar reporting boundaries and may occur at
+          arbitrary points in continuous time.</p>
           <h2 id="event-display">2.4 Event display</h2>
           <p>Event indexing is a key differentiator of sample path
           analysis, so charts are shown with event-resolved overlays by
@@ -755,6 +761,13 @@ Samplepath Analysis Toolkit</em></a></p></p>
           gestalt analysis of trajectories across views, especially in
           dashboards. When reviewing these charts, I recommend you take
           a look at both views to build intuition.</p>
+          <h2 id="note">2.5 Note:</h2>
+          <p>Please see the article <a
+          href="../../articles/a-methodological-contrast">Sample Path
+          Analysis vs Statistics</a> about the deeper methodological
+          contrasts between sample path analysis and current techniques
+          for measuring flow metrics, and why these matter in accurate
+          reasoning about flow.</p>
           <h1 id="the-presence-invariant-charts">3 The Presence
           Invariant Charts</h1>
           <p>The Presence Invariant is the finite-horizon form of

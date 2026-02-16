@@ -93,8 +93,9 @@ Calendar indexing is simply a coarser *sampling grid* over _metrics_ computed fr
 event-resolved sample path at the input granularity. We do not pre-aggregate events into calendar buckets and then
 compute flow metrics from those aggregates, like other flow metrics tools (incorrectly) do.
 
-All the core charts shown in this document should be assumed to be event-indexed by default, unless explicitly specified otherwise.
+All core charts shown in this document should be assumed to be event-indexed by default, unless explicitly specified otherwise.
 
+Although calendar dates may appear on the time axis as reference labels, the underlying x-axis values correspond to exact event timestamps. These timestamps are not constrained to fall on calendar reporting boundaries and may occur at arbitrary points in continuous time.
 
 ## Event display
 
@@ -102,6 +103,9 @@ Event indexing is a key differentiator of sample path analysis, so charts are sh
 
 Each chart also has a `--no-events` version with overlays removed. These views are useful for higher-level gestalt analysis of trajectories across views, especially in dashboards. When reviewing these charts, I recommend you take a look at both views to build intuition.
 
+## Note:
+Please see the article [Sample Path Analysis vs Statistics]($document-root/articles/a-methodological-contrast) about the deeper methodological contrasts between sample path analysis and current techniques for measuring flow metrics, and why these matter
+in accurate reasoning about flow.
 
 # The Presence Invariant Charts
 
