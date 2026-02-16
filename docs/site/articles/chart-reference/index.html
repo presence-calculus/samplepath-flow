@@ -168,7 +168,27 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-
+    /* CSS for citations */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+      margin-bottom: 0em;
+    }
+    .hanging-indent div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }
     html {
       box-sizing: border-box;
       font-size: 100%;
@@ -438,13 +458,14 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <li><a href="#notational-conventions"
             id="toc-notational-conventions">2 Notational Conventions</a>
             <ul>
-            <li><a href="#instantaneous-vs-cumulative-values"
-            id="toc-instantaneous-vs-cumulative-values">2.1
-            Instantaneous vs cumulative values</a></li>
+            <li><a href="#measurements" id="toc-measurements">2.1
+            Measurements</a></li>
+            <li><a href="#notation" id="toc-notation">2.2
+            Notation</a></li>
             <li><a href="#timescales-and-indexes"
-            id="toc-timescales-and-indexes">2.2 Timescales and
+            id="toc-timescales-and-indexes">2.3 Timescales and
             Indexes</a></li>
-            <li><a href="#event-display" id="toc-event-display">2.3
+            <li><a href="#event-display" id="toc-event-display">2.4
             Event display</a></li>
             </ul></li>
             <li><a href="#the-presence-invariant-charts"
@@ -530,10 +551,6 @@ Samplepath Analysis Toolkit</em></a></p></p>
           process, as shown above), all computations are deterministic.
           Every value depends only on event order and the elapsed time
           between events on that path.</p>
-          <p>The charts are ordered by a canonical sample-path
-          construction arc: each metric is derived deterministically
-          from prior metrics or directly from the sample path
-          itself.</p>
           <p>Each chart shows one or more metrics and their
           relationships to each other and to the underlying events on
           the sample path. At any point in time, each metric value can
@@ -552,43 +569,72 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <p>For CLI options and output contracts, see <a
           href="../../articles/cli">Command Line Reference</a>.</p>
           <h1 id="notational-conventions">2 Notational Conventions</h1>
-          <h2 id="instantaneous-vs-cumulative-values">2.1 Instantaneous
-          vs cumulative values</h2>
+          <p>The charts are introduced in a canonical derivation arc
+          starting with the sample path: each metric is derived
+          deterministically from prior metrics or directly from the
+          sample path itself. The reader is strongly encouraged to read
+          these entries in order, as earlier entries introduce
+          theoretical concepts and terminology in context, and they are
+          assumed in later ones.</p>
+          <h2 id="measurements">2.1 Measurements</h2>
+          <p>All measurements are defined over an observation window
+          with a <em>fixed</em> starting point that we will denote as
+          <span class="math inline">\(0\)</span>. The underlying process
+          may evolve stochastically or non-deterministically. At any
+          moment, however, we work with the realized prefix of its
+          sample path observed up to a finite horizon <span
+          class="math inline">\(T_{\max}\)</span>. It is important to
+          note that <span class="math inline">\(T_{\max}\)</span>
+          denotes the <em>elapsed time</em> since the fixed origin <span
+          class="math inline">\(0\)</span>, not an absolute
+          timestamp.</p>
+          <p>As more events are observed, additional portions of the
+          sample path are revealed, the observable horizon extends, and
+          the associated measurements are recomputed on the extended
+          prefix.</p>
+          <p>Given a realized sample path up to a fixed finite horizon,
+          all measurements made over that prefix are deterministic. Even
+          when the underlying process is non-deterministic, the
+          measurements applied to the observed prefix are not.</p>
+          <h2 id="notation">2.2 Notation</h2>
           <ul>
-          <li><p>All charts are defined over a finite observation
-          horizon of length <span
-          class="math inline">\(T_{\max}\)</span>.</p></li>
           <li><p>Lower-case <span class="math inline">\(t\)</span>
-          denotes <em>instantaneous</em> time.</p>
-          <p>For a fixed horizon <span class="math inline">\(T \in
-          (0,\,T_{\max}]\)</span>, the within-window time variable <span
-          class="math inline">\(t\)</span> satisfies <span
-          class="math inline">\(0 \le t \le T\)</span>. Functions of
-          <span class="math inline">\(t\)</span> (such as <span
-          class="math inline">\(N(t)\)</span>) denote instantaneous
-          sample-path values at time <span
-          class="math inline">\(t\)</span>.</p></li>
+          denotes <em>instantaneous</em> time.<br />
+          </p></li>
           <li><p>Upper-case <span class="math inline">\(T\)</span>
-          denotes a <em>prefix horizon</em>.</p>
-          <p>Functions of <span class="math inline">\(T\)</span> are
-          deterministic pathwise functionals over the prefix window.
-          They represent <em>cumulative quantities</em> or normalized
-          quantities derived from them.</p>
+          denotes a <em>prefix horizon</em> of the observation interval,
+          i.e. an interval <span class="math inline">\([0, T)\)</span>
+          with <span class="math inline">\(0 &lt; T \le
+          T_{\max}\)</span>.</p></li>
+          <li><p>For a fixed horizon <span
+          class="math inline">\(T\)</span>, the within-window time
+          variable <span class="math inline">\(t\)</span> satisfies
+          <span class="math inline">\(0 \le t &lt; T\)</span>.</p></li>
+          <li><p>Functions of <span class="math inline">\(t\)</span>
+          (such as <span class="math inline">\(N(t)\)</span>) denote
+          instantaneous sample-path values at time <span
+          class="math inline">\(t\)</span>.</p></li>
+          <li><p>Functions of <span class="math inline">\(T\)</span>
+          represent <em>cumulative quantities</em> or normalized
+          quantities derived from them, computed over the interval <span
+          class="math inline">\([0, T)\)</span>.</p>
           <p>For each <span class="math inline">\(T\)</span>, we
-          consider the prefix window <span
-          class="math inline">\([0,\,T]\)</span>. Endpoint quantities
-          such as <span class="math inline">\(F(T)\)</span> are values
-          at <span class="math inline">\(t=T\)</span> for that window,
+          consider the prefix window <span class="math inline">\([0,
+          T)\)</span>. Endpoint quantities such as <span
+          class="math inline">\(F(T)\)</span> are values determined by
+          the prefix up to time <span class="math inline">\(T\)</span>,
           and as <span class="math inline">\(T\)</span> varies over
-          <span class="math inline">\((0,\,T_{\max}]\)</span>, these
+          <span class="math inline">\((0, T_{\max}]\)</span>, these
           endpoint values form the trajectory <span
-          class="math inline">\(T \mapsto F(T)\)</span>.</p></li>
+          class="math inline">\(T \mapsto F(T)\)</span> which is what we
+          display on all the charts by default.</p></li>
           </ul>
-          <p>All of these are deterministic, pathwise calculations
-          (definite integrals, discrete sums, and finite-window
-          normalizations) and should not be confused with statistical
-          measures.</p>
-          <h2 id="timescales-and-indexes">2.2 Timescales and
+          <p>All cumulative functions are deterministic, pathwise
+          calculations (definite integrals, discrete sums, and
+          finite-window normalizations) applied to the realized prefix
+          and should not be confused with statistical measures or
+          ensemble aggregates.</p>
+          <h2 id="timescales-and-indexes">2.3 Timescales and
           Indexes</h2>
           <p>All charts use continuous time on the x-axis.</p>
           <ul>
@@ -612,7 +658,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <p>All the core charts shown in this document should be
           assumed to be event-indexed by default, unless explicitly
           specified otherwise.</p>
-          <h2 id="event-display">2.3 Event display</h2>
+          <h2 id="event-display">2.4 Event display</h2>
           <p>Event indexing is a key differentiator of sample path
           analysis, so charts are shown with event-resolved overlays by
           default: each plotted point is tied to an arrival or departure
@@ -644,11 +690,12 @@ Samplepath Analysis Toolkit</em></a></p></p>
           presence invariant <em>holds unconditionally at all
           times</em>.</p>
           <p>This document shows the step-by-step derivation of each
-          quantity in the invariant and visualizes each component
-          directly on the sample path. The charts are presented in a
-          canonical order starting with the input sample path. Each
-          chart depends on one more more metrics that we computed in an
-          earlier chart. All calculations are deterministic.</p>
+          quantity in the invariant and visualizes how the values of
+          each metric at evry point in time are derived from the sample
+          path. The charts are presented in a canonical order starting
+          with the input sample path. Each chart depends on one more
+          more metrics in an earlier chart. All calculations are
+          deterministic.</p>
           <p>Review the theory doc and use it as a cross-reference when
           reviewing the charts below. The ideas here are relatively
           straightforward if you spend a little bit of time carefully
@@ -798,7 +845,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <p>This is the sample path, the input to sample path analysis.
+          <p>This is the sample path: the input to sample path analysis.
           It is the observed behavior of some operational process
           modeled as a sequence of arrival and departure events on a
           timeline.</p>
@@ -827,8 +874,6 @@ Samplepath Analysis Toolkit</em></a></p></p>
           measurements. This only becomes relevant when discussing
           convergence, stability and the familiar steady steady version
           of Little’s Law.</p>
-          <p><strong>Derivation:</strong> N/A (input event stream).</p>
-          <p><strong>Unit:</strong> N/A.</p>
           <p><strong>Output file:</strong>
           <code>core/panels/arrival_departure_indicator_process.png</code></p>
           <h2 id="chart-02-arrivals-a">3.2 A(T) - Cumulative
@@ -853,12 +898,99 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <p>Builds on Step 1 by accumulating arrival marks over time
-          into cumulative arrivals.</p>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(A(T)=\sum \text{arrivals in
           }[0,T]\)</span>.</p>
           <p><strong>Unit:</strong> Elements.</p>
+          <p>The simplest measurement on the sample path is a
+          <em>cumulative count</em>. In particular, for a moment <span
+          class="math inline">\(T\)</span> in the observation window
+          <span class="math inline">\([0, T_{\max})\)</span>, we count
+          the arrivals observed in the prefix interval <span
+          class="math inline">\([0, T)\)</span>.</p>
+          <p>Formally, following our convention, we define</p>
+          <p><span class="math display">\[
+          A(T)=\#\{\,i:\ a_i &lt; T\,\}
+          \]</span></p>
+          <p>where <span class="math inline">\(a_i\)</span> is an
+          arrival timestamp and <span class="math inline">\(\#\)</span>
+          denotes set cardinality. In most contexts however, we will use
+          the more informal but less precise notation shown in the
+          derivation above.</p>
+          <p>While this appears to be a simple metric, several important
+          structural properties are worth highlighting, and they
+          motivate conceptual distinctions that fundamentally separate
+          sample path analysis from traditional statistical approaches
+          to measuring flow.</p>
+          <h3 id="events-drive-functions">Events drive functions</h3>
+          <p>The key observation is that the trajectory of <span
+          class="math inline">\(A(T)\)</span> is completely determined
+          by discrete arrival events.</p>
+          <ul>
+          <li><span class="math inline">\(A(T)\)</span> is defined for
+          all <span class="math inline">\(T \in [0, T_{\max})\)</span>,
+          so it is a function of time.</li>
+          <li>It is a right-continuous step function that <em>increases
+          by one at each arrival timestamp</em> and <em>is constant
+          between arrival events</em>.</li>
+          <li>Given the ordered arrival timestamps, the entire function
+          is uniquely determined for all <span
+          class="math inline">\(T\)</span>.</li>
+          </ul>
+          <p>The reader is urged to verify that these properties hold
+          for the examples we have shown.</p>
+          <h3 id="the-concept-of-state">The concept of state</h3>
+          <p>This stepwise structure naturally leads to the notion of
+          process <em>state</em>.</p>
+          <p>The value of <span class="math inline">\(A(T)\)</span> at a
+          given time <span class="math inline">\(T\)</span> can be
+          viewed as the state of the counting process at that moment. As
+          <span class="math inline">\(T\)</span> increases, this state
+          evolves over time. State transitions occur only at arrival
+          timestamps, where <span class="math inline">\(A(T)\)</span>
+          increases by one; between arrivals, the state remains
+          constant.</p>
+          <p><span class="math inline">\(A(T)\)</span> itself models a
+          single dimensional state - a cumulative count of arrivals. As
+          we will soon see, all flow metrics can be viewed as processes,
+          that model higher dimensional states arising from the
+          interactions of these lower dimensional states.</p>
+          <h3 id="the-concept-of-process">The concept of process</h3>
+          <p>In stochastic process theory, a <em>process</em> is defined
+          as a mapping from an index set to a state space. The counting
+          process <span class="math inline">\(A(T)\)</span> is a simple
+          example: it maps continuous time <span
+          class="math inline">\(T\)</span> to the state space <span
+          class="math inline">\(\mathbb{N}\)</span>.</p>
+          <p>The same arrival structure can also be indexed by event
+          order, yielding the embedded discrete-time sequence <span
+          class="math inline">\(\{A(a_i)\}\)</span> evaluated at arrival
+          times. These two parameterizations — time-indexed and
+          event-indexed — describe the same underlying arrival
+          process.</p>
+          <blockquote>
+          <p>In El-Taha and Stidham <span class="citation"
+          data-cites="eltaha1999">[1]</span>, such processes are called
+          <em>processes with an embedded point process</em>. We will use
+          the more informal term <em>event-indexed</em> process
+          throughout this document, with the assumption that such
+          processes can be parametrized by event time stamps or
+          continuous time.</p>
+          </blockquote>
+          <p>Another crucial observation is that these processes are
+          deterministic <em>functionals</em> of the realized sample
+          path. Each metric is obtained by applying a well-defined
+          mapping to the underlying event sequence. This allows us to
+          reason <em>deterministically</em> about how a change in the
+          underlying events propagates through all derived processes
+          over time, and to connect every quantity back to the original
+          events via the event index.</p>
+          <p>Similar properties hold for <em>every</em> metric we
+          compute. Our charts and exports emphasize the
+          <em>event-indexed</em> nature of these functions over the
+          sample path. This stands in stark contrast to statistical
+          measures, where we typically speak only of correlations
+          between aggregates rather than deterministic dependence.</p>
           <p><strong>Output file:</strong>
           <code>core/panels/cumulative_arrivals_A.png</code></p>
           <h2 id="chart-03-departures-d">3.3 D(T) - Cumulative
@@ -883,8 +1015,9 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <p>Builds on Step 2 by accumulating departure marks, giving
-          the second cumulative boundary needed for flow geometry.</p>
+          <p>This is the identical construction as <span
+          class="math inline">\(A(T)\)</span> but for departure
+          marks.</p>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(D(T)=\sum \text{departures in
           }[0,T]\)</span>.</p>
@@ -910,14 +1043,28 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <figcaption aria-hidden="true">CFD (no-events)</figcaption>
           </figure>
           </details>
-          <p>Builds on Steps 2 and 3 by placing <span
+          <p>The cumulative flow diagram is the central construction for
+          modeling and measuring a flow process. It is not itself a
+          metric, but a visualization that exposes the key variables
+          governing flow.</p>
+          <p>Mechanically, it is simply <span
           class="math inline">\(A(T)\)</span> and <span
-          class="math inline">\(D(T)\)</span> together; the vertical gap
-          becomes instantaneous state and the enclosed area motivates
-          presence mass.</p>
-          <p><strong>Derivation:</strong> <span
-          class="math inline">\(N(t)=A(T)-D(T)\)</span>.</p>
-          <p><strong>Unit:</strong> Elements.</p>
+          class="math inline">\(D(T)\)</span> plotted together over the
+          same sample path. However, the superposition of these two
+          counting processes reveals geometric relationships that impose
+          binding constraints on the behavior of the flow process over
+          time. In particular, the area between the two curves is a
+          measurable quantity, <span
+          class="math inline">\(H(T)\)</span>, which, together with
+          <span class="math inline">\(A(T)\)</span> and <span
+          class="math inline">\(D(T)\)</span>, determines <em>all</em>
+          quantities required to analyze the behavior of a flow
+          process.</p>
+          <p>Before introducing <span
+          class="math inline">\(H(T)\)</span> formally, we begin with an
+          even simpler quantity: the process state.</p>
+          <p><strong>Derivation:</strong> N/A</p>
+          <p><strong>Unit:</strong> N/A</p>
           <p><strong>Output file:</strong>
           <code>core/panels/cumulative_flow_diagram.png</code></p>
           <h2 id="chart-05-sample-path-n">3.5 N(t) - Process State</h2>
@@ -1397,6 +1544,17 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <p><strong>Unit:</strong> Elements.</p>
           <p><strong>Output file:</strong>
           <code>sample_path_convergence.png</code></p>
+          <div id="refs" class="references csl-bib-body"
+          data-entry-spacing="0" role="list">
+          <div id="ref-eltaha1999" class="csl-entry" role="listitem">
+          <div class="csl-left-margin">[1] </div><div
+          class="csl-right-inline">M. El-Taha and S. Stidham,
+          <em>Sample-path analysis of queueing systems</em>, vol. 11. in
+          International series in operations research &amp; management
+          science, vol. 11. Boston, MA: Springer Science &amp; Business
+          Media, 1999, p. 295.</div>
+          </div>
+          </div>
         </div>
       </div>
             <footer id="presence-link" role="contentinfo">
