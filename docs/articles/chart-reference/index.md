@@ -196,7 +196,7 @@ $$
 A(T)=\#\{\,i:\ a_i < T\,\}
 $$
 
-where $a_i$ is an arrival timestamp and $\#$ denotes set cardinality. In most contexts however, we will use the more informal but less precise notation shown in the derivation above.
+where $a_i$ is an arrival timestamp and $\#$ denotes set cardinality. In most contexts however, we will use the simpler but less precise notation shown in the derivation above.
 
 While this appears to be a simple metric, several important structural properties are worth highlighting, and they motivate conceptual distinctions that fundamentally separate sample path analysis from traditional statistical approaches to measuring flow.
 
@@ -222,7 +222,7 @@ of these lower dimensional states.
 
 ### The concept of process
 
-In stochastic process theory, a _process_ is defined as a mapping from an index set to a state space. The counting process $A(T)$ is a simple example: it maps continuous time $T$ to the state space $\mathbb{N}$.
+In stochastic process theory, a _process_ is defined as a mapping from an index set to a state space. The counting process $A(T)$ is a simple example: it maps continuous time $T$ to the state space $\mathbb{N}$ of natural numbers.
 
 The same arrival structure can also be indexed by event order, yielding the embedded discrete-time sequence $\{A(a_i)\}$ evaluated at arrival times. These two parameterizations — time-indexed and event-indexed — describe the same underlying arrival process.
 
@@ -230,7 +230,7 @@ The same arrival structure can also be indexed by event order, yielding the embe
 
 
 
-Another crucial observation is that these processes are deterministic _functionals_ of the realized sample path. Each metric is obtained by applying a well-defined mapping to the underlying event sequence. This allows us to reason _deterministically_ about how a change in the underlying events propagates through all derived processes over time, and to connect every quantity back to the original events via the event index.
+Another crucial observation is that these processes are deterministic _functionals_ of the realized sample path. Each metric is obtained by applying a well-defined mapping, or a sequence of mappings, to the underlying sample path. This allows us to reason _deterministically_ about how a change in the underlying events propagates through all derived processes over time, and to connect every quantity back to the original events via the event index.
 
 Similar properties hold for _every_ metric we compute. Our charts and exports emphasize the _event-indexed_ nature of these functions over the sample path. This stands in stark contrast to statistical measures, where we typically speak only of correlations between aggregates rather than deterministic dependence.
 

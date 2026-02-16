@@ -313,6 +313,89 @@
       margin: 2rem auto;
     }
 
+    .doc-content img.lightboxable {
+      cursor: zoom-in;
+      border-radius: 6px;
+      box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.08);
+      transition: transform 140ms ease, box-shadow 140ms ease;
+    }
+
+    .doc-content img.lightboxable:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(17, 24, 39, 0.18);
+    }
+
+    .doc-content img.lightboxable:focus-visible {
+      outline: 3px solid #6b7280;
+      outline-offset: 2px;
+    }
+
+    .doc-content figure {
+      position: relative;
+    }
+
+    .doc-content figure.has-lightbox::after {
+      content: "";
+      position: absolute;
+      right: 0.75rem;
+      top: 0.75rem;
+      width: 2rem;
+      height: 2rem;
+      background-color: rgba(255, 255, 255, 0.92);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='15 3 21 3 21 9'/%3E%3Cpolyline points='9 21 3 21 3 15'/%3E%3Cline x1='21' y1='3' x2='14' y2='10'/%3E%3Cline x1='3' y1='21' x2='10' y2='14'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 1.1rem 1.1rem;
+      border: 1px solid rgba(17, 24, 39, 0.2);
+      border-radius: 999px;
+      pointer-events: none;
+    }
+
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 10, 10, 0.88);
+      padding: 2.5rem 1rem 1rem;
+    }
+
+    .lightbox-overlay.is-open {
+      display: flex;
+    }
+
+    .lightbox-overlay img {
+      max-width: min(96vw, 1800px);
+      max-height: 88vh;
+      width: auto;
+      height: auto;
+      margin: 0;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 0.8rem;
+      right: 0.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      background: rgba(17, 24, 39, 0.82);
+      color: #fff;
+      border-radius: 999px;
+      width: 2.2rem;
+      height: 2.2rem;
+      font-size: 1.2rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .lightbox-close:hover {
+      background: rgba(17, 24, 39, 0.95);
+    }
+
     figcaption {
       font-size: 0.9em;
       color: #555;
@@ -774,5 +857,73 @@ Best regards! Thorsten</code></pre>
       </footer>
     </div>
   </div>
+  <div class="lightbox-overlay" id="image-lightbox" aria-hidden="true">
+    <button class="lightbox-close" id="lightbox-close" aria-label="Close image overlay" type="button">×</button>
+    <img id="lightbox-image" alt="Expanded chart image" />
+  </div>
+  <script>
+    (function () {
+      var container = document.querySelector(".doc-content");
+      if (!container) return;
+
+      var overlay = document.getElementById("image-lightbox");
+      var overlayImage = document.getElementById("lightbox-image");
+      var closeBtn = document.getElementById("lightbox-close");
+      if (!overlay || !overlayImage || !closeBtn) return;
+
+      var lastFocused = null;
+
+      function openLightbox(img) {
+        var src = img.getAttribute("src");
+        if (!src) return;
+        lastFocused = document.activeElement;
+        overlayImage.setAttribute("src", src);
+        overlayImage.setAttribute("alt", img.getAttribute("alt") || "Expanded chart image");
+        overlay.classList.add("is-open");
+        overlay.setAttribute("aria-hidden", "false");
+        closeBtn.focus();
+      }
+
+      function closeLightbox() {
+        overlay.classList.remove("is-open");
+        overlay.setAttribute("aria-hidden", "true");
+        overlayImage.setAttribute("src", "");
+        if (lastFocused && typeof lastFocused.focus === "function") {
+          lastFocused.focus();
+        }
+      }
+
+      var images = container.querySelectorAll("img");
+      images.forEach(function (img) {
+        if (img.closest(".header-image")) return;
+        img.classList.add("lightboxable");
+        img.setAttribute("tabindex", "0");
+        img.setAttribute("role", "button");
+        img.setAttribute("aria-label", (img.getAttribute("alt") || "Image") + ". Click to expand.");
+
+        var fig = img.closest("figure");
+        if (fig) fig.classList.add("has-lightbox");
+
+        img.addEventListener("click", function () { openLightbox(img); });
+        img.addEventListener("keydown", function (ev) {
+          if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            openLightbox(img);
+          }
+        });
+      });
+
+      closeBtn.addEventListener("click", closeLightbox);
+      overlay.addEventListener("click", function (ev) {
+        if (ev.target === overlay) closeLightbox();
+      });
+
+      document.addEventListener("keydown", function (ev) {
+        if (ev.key === "Escape" && overlay.classList.contains("is-open")) {
+          closeLightbox();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
