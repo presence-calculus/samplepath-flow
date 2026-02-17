@@ -125,7 +125,7 @@ For the full derivation context and interpretation, refer to [Sample Path Theory
 The quantities in this law are the finite horizon equivalents of the quantities in the familiar steady state view of Little's Law,
 But unlike the steady state version the presence invariant _holds unconditionally at all times_.
 
-This section shows the step-by-step derivation of each quantity in the invariant and visualizes how the values of each metric at evry point in time are derived from the sample path. The charts are presented in a canonical order starting with the input sample path. Each chart depends on one more more metrics in an earlier chart. All calculations are deterministic.
+This section shows the step-by-step derivation of each quantity in the invariant and visualizes how the values of each metric at every point in time are derived from the sample path. The charts are presented in a canonical order starting with the input sample path. Each chart depends on one or more metrics in an earlier chart. All calculations are deterministic.
 
 Review the theory doc and use it as a cross-reference when reviewing the charts below. The ideas here are relatively straightforward if you spend a little bit of time carefully reading, understanding and reviewing what each chart means and the sequence of derivations.
 
