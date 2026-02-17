@@ -189,7 +189,7 @@ Note: An `id` mark that pairs arrivals with departures is _optional_ for the cor
 
 </details>
 
-**Derivation:** $A(T)=\sum \text{arrivals in }[0,T]$.
+**Derivation:** $A(T)=\sum \text{arrivals in }[0,T)$.
 
 **Unit:** Elements.
 
@@ -205,7 +205,7 @@ where $a_i$ is an arrival timestamp and $\#$ denotes set cardinality. In most co
 
 While this appears to be a simple metric, several important structural properties are worth highlighting, and they motivate conceptual distinctions that fundamentally separate sample path analysis from traditional statistical approaches to measuring flow.
 
-### Events drive functions
+### Events define measurements
 
 The key observation is that the trajectory of $A(T)$ is completely determined by discrete arrival events.
 
@@ -215,7 +215,7 @@ The key observation is that the trajectory of $A(T)$ is completely determined by
 
 The reader is urged to verify that these properties hold for the examples we have shown.
 
-### The concept of state
+### Measurements map to state
 
 This stepwise structure naturally leads to the notion of process _state_.
 
@@ -225,7 +225,7 @@ $A(T)$ itself models a single dimensional state - a cumulative count of arrivals
 of these lower dimensional states.
 
 
-### The concept of process
+### State and time define processes
 
 In stochastic process theory, a _process_ is defined as a mapping from an index set to a state space. The counting process $A(T)$ is a simple example: it maps continuous time $T$ to the state space $\mathbb{N}$ of natural numbers.
 
