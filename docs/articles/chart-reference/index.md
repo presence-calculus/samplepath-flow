@@ -260,7 +260,7 @@ Similar properties hold for _every_ metric we compute. Our charts and exports em
 
 This is the identical construction as $A(T)$ but for departure marks. Like $A(T)$, $D(T)$ is a right-continuous step function that increases by one at each departure timestamp and is constant between departures.
 
-The resulting process determines a new stateful process - the departure process. The overall state of the arrival-departure process can be captured in terms of the states of the arrival and departure processes.
+The resulting process determines a new stateful process - the departure process.
 
 **Derivation:** $D(T)=\sum \text{departures in }[0,T]$.
 
@@ -282,16 +282,26 @@ The resulting process determines a new stateful process - the departure process.
 
 </details>
 
-The cumulative flow diagram is the central construction for modeling and measuring a flow process. It is not itself a metric, but a visualization that exposes the key variables governing flow.
+The Cumulative Flow Diagram (CFD) is the central construction for modeling and measuring an arrival-departure process. It is not itself a metric, but a visualization that exposes the key variables governing flow.
 
-Mechanically, it is simply $A(T)$ and $D(T)$ plotted together over the same sample path. However, the superposition of these two counting processes reveals geometric relationships that impose binding constraints on the behavior of the flow process over time. In particular, the area between the two curves is a measurable quantity, $H(T)$, which, together with $A(T)$ and $D(T)$, determines _all_ quantities required to analyze the behavior of a flow process.
+Mechanically, it consists of the two counting processes $A(T)$ and $D(T)$ plotted together over the same sample path. However, the superposition of these processes reveals geometric relationships that impose structural constraints on the behavior of the arrival–departure process over time.
 
-Before introducing $H(T)$ formally, we begin with an even simpler quantity: the process state.
+Before turning to the formal derivation, consider the intuition. If the arrival and departure curves are viewed as the bounding cumulative curves of the process, the shaded region between them represents a measurable quantity that accumulates over time. Since the horizontal axis is indexed by time, this region corresponds to a time-accumulated quantity that can be computed and reasoned about concretely. The accumulated area up to time $T$ therefore defines another process with its own state.
 
+We call this quantity *Presence Mass* (or simply *Presence*). Formally, it is the area between the arrival and departure curves over the interval $[0,T)$. Intuitively, it measures both:
 
-**Derivation:** N/A
+- how many elements are present in the process (the vertical separation between the curves), and  
+- for how long those elements remain present (the horizontal extent over time).
 
-**Unit:** N/A
+Larger areas correspond to greater presence mass in the system; smaller areas correspond to less.
+
+The interpretation of presence mass is entirely context-dependent. If arrivals represent new customers, greater presence mass may be desirable. If arrivals represent defects, smaller presence mass is preferable. Sample path flow analysis does not assign meaning to the quantities; it measures and characterizes the structure of flow through presence mass in a systematic and mathematically consistent way.
+
+Presence mass — the area between the bounding curves — is a measurable quantity, $H(T)$, representing accumulated presence over the interval $[0,T)$. Together, the counting processes $A(\cdot)$ and $D(\cdot)$ — and equivalently the derived quantity $H(T)$ — form a sufficient state description for the classical arrival–departure flow model.
+
+All standard flow metrics — including time averages, throughput rates, and finite-window variants of Little’s Law — can be expressed as deterministic functionals of the counting processes $A(\cdot)$ and $D(\cdot)$.
+
+Before introducing $H(T)$ formally, we begin with an even simpler quantity: the instantaneous state of the arrival–departure process.
 
 **Output file:** `core/panels/cumulative_flow_diagram.png`
 
