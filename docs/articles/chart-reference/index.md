@@ -76,7 +76,7 @@ Given a realized sample path up to a fixed finite horizon, all measurements made
 
   For each $T$, we consider the prefix window $(0, T]$. Endpoint quantities such as $F(T)$ are values determined by the prefix up to and including time $T$, and as $T$ varies over $(0, T_{\max}]$, these endpoint values form the trajectory $T \mapsto F(T)$ which is what we display on all the charts by default.
 
-  > This uses the standard càdlàg convention for counting/jump processes: sample paths are right-continuous with left limits.
+  > This uses the standard [càdlàg](https://en.wikipedia.org/wiki/C%C3%A0dl%C3%A0g) convention for counting/jump processes: sample paths are right-continuous with left limits.
 
 All cumulative functions are deterministic, pathwise calculations (definite integrals, discrete sums, and finite-window normalizations) applied to the realized prefix and should not be confused with statistical measures or ensemble aggregates.
 
