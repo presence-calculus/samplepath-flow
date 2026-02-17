@@ -66,15 +66,17 @@ Given a realized sample path up to a fixed finite horizon, all measurements made
 ## Notation
 
 - Lower-case $t$ denotes *instantaneous* time.  
-- Upper-case $T$ denotes a *prefix horizon* of the observation interval, i.e. an interval $[0, T)$ with $0 < T \le T_{\max}$.
+- Upper-case $T$ denotes a *prefix horizon* of the observation interval, i.e. an interval $(0, T]$ with $0 < T \le T_{\max}$.
 
-- For a fixed horizon $T$, the within-window time variable $t$ satisfies $0 \le t < T$.
+- For a fixed horizon $T$, the within-window time variable $t$ satisfies $0 < t \le T$.
 
 - Functions of $t$ (such as $N(t)$) denote instantaneous sample-path values at time $t$.
 
-- Functions of $T$ represent *cumulative quantities* or normalized quantities derived from them, computed over the interval $[0, T)$.
+- Functions of $T$ represent *cumulative quantities* or normalized quantities derived from them, computed over the interval $(0, T]$.
 
-  For each $T$, we consider the prefix window $[0, T)$. Endpoint quantities such as $F(T)$ are values determined by the prefix up to time $T$, and as $T$ varies over $(0, T_{\max}]$, these endpoint values form the trajectory $T \mapsto F(T)$ which is what we display on all the charts by default.
+  For each $T$, we consider the prefix window $(0, T]$. Endpoint quantities such as $F(T)$ are values determined by the prefix up to and including time $T$, and as $T$ varies over $(0, T_{\max}]$, these endpoint values form the trajectory $T \mapsto F(T)$ which is what we display on all the charts by default.
+
+  > This uses the standard càdlàg convention for counting/jump processes: sample paths are right-continuous with left limits.
 
 All cumulative functions are deterministic, pathwise calculations (definite integrals, discrete sums, and finite-window normalizations) applied to the realized prefix and should not be confused with statistical measures or ensemble aggregates.
 
@@ -132,8 +134,8 @@ Review the theory doc and use it as a cross-reference when reviewing the charts 
 | Chart                                              | Name                             | Formula                                | Units |
 |----------------------------------------------------|----------------------------------|----------------------------------------| --- |
 | [Point Process](#chart-01-point-process)           | Sample Path                      | Input event stream                     | N/A |
-| [A(T)](#chart-02-arrivals-a)                       | Cumulative Arrivals              | $A(T)=\sum \text{arrivals in }[0,T]$   | Elem |
-| [D(T)](#chart-03-departures-d)                     | Cumulative Departures            | $D(T)=\sum \text{departures in }[0,T]$ | Elem |
+| [A(T)](#chart-02-arrivals-a)                       | Cumulative Arrivals              | $A(T)=\sum \text{arrivals in }(0,T]$   | Elem |
+| [D(T)](#chart-03-departures-d)                     | Cumulative Departures            | $D(T)=\sum \text{departures in }(0,T]$ | Elem |
 | [CFD](#chart-04-cfd)                               | Cumulative Flow Diagram          |                                        | N/A |
 | [N(t)](#chart-05-sample-path-n)                    | Instantaneous Process State      | $N(t)=A(T)-D(T)$                       | Elem |
 | [H(T)](#chart-06-presence-mass-h)                  | Cumulative Presence Mass         | $H(T)=\int_0^T N(t)\,dt$               | Elem-Time |
@@ -189,16 +191,16 @@ Note: An `id` mark that pairs arrivals with departures is _optional_ for the cor
 
 </details>
 
-**Derivation:** $A(T)=\sum \text{arrivals in }[0,T)$.
+**Derivation:** $A(T)=\sum \text{arrivals in }(0,T]$.
 
 **Unit:** Elements.
 
-The simplest measurement on the sample path is a _cumulative count_. In particular, for a moment $T$ in the observation window $[0, T_{\max})$, we count the arrivals observed in the prefix interval $[0, T)$.
+The simplest measurement on the sample path is a _cumulative count_. In particular, for a moment $T$ in the observation window $(0, T_{\max}]$, we count the arrivals observed in the prefix interval $(0, T]$.
 
 Formally, following our convention, we define
 
 $$
-A(T)=\#\{\,i:\ a_i < T\,\}
+A(T)=\#\{\,i:\ 0 < a_i \le T\,\}
 $$
 
 where $a_i$ is an arrival timestamp and $\#$ denotes set cardinality. In most contexts however, we will use the simpler but less precise notation shown in the derivation above.
@@ -209,7 +211,7 @@ While this appears to be a simple metric, several important structural propertie
 
 The key observation is that the trajectory of $A(T)$ is completely determined by discrete arrival events.
 
-- $A(T)$ is defined for all $T \in [0, T_{\max})$, so it is a function of time.
+- $A(T)$ is defined for all $T \in (0, T_{\max}]$, so it is a function of time.
 - It is a right-continuous step function that _increases by one at each arrival timestamp_ and _is constant between arrival events_.
 - Given the ordered arrival timestamps, the entire function is uniquely determined for all $T$.
 
@@ -262,7 +264,7 @@ This is the identical construction as $A(T)$ but for departure marks. Like $A(T)
 
 The resulting process determines a new stateful process - the departure process.
 
-**Derivation:** $D(T)=\sum \text{departures in }[0,T]$.
+**Derivation:** $D(T)=\sum \text{departures in }(0,T]$.
 
 **Unit:** Elements.
 
@@ -288,7 +290,7 @@ Mechanically, it consists of the two counting processes $A(T)$ and $D(T)$ plotte
 
 Before turning to the formal derivation, consider the intuition. If the arrival and departure curves are viewed as the bounding cumulative curves of the process, the shaded region between them represents a measurable quantity that accumulates over time. Since the horizontal axis is indexed by time, this region corresponds to a time-accumulated quantity that can be computed and reasoned about concretely. The accumulated area up to time $T$ therefore defines another process with its own state.
 
-We call this quantity *Presence Mass* (or simply *Presence*). Formally, it is the area between the arrival and departure curves over the interval $[0,T)$. Intuitively, it measures both:
+We call this quantity *Presence Mass* (or simply *Presence*). Formally, it is the area between the arrival and departure curves over the interval $(0,T]$. Intuitively, it measures both:
 
 - how many elements are present in the process (the vertical separation between the curves), and  
 - for how long those elements remain present (the horizontal extent over time).
@@ -297,7 +299,7 @@ Larger areas correspond to greater presence mass in the system; smaller areas co
 
 The interpretation of presence mass is entirely context-dependent. If arrivals represent new customers, greater presence mass may be desirable. If arrivals represent defects, smaller presence mass is preferable. Sample path flow analysis does not assign meaning to the quantities; it measures and characterizes the structure of flow through presence mass in a systematic and mathematically consistent way.
 
-Presence mass — the area between the bounding curves — is a measurable quantity, $H(T)$, representing accumulated presence over the interval $[0,T)$. Together, the counting processes $A(\cdot)$ and $D(\cdot)$ — and equivalently the derived quantity $H(T)$ — form a sufficient state description for the classical arrival–departure flow model.
+Presence mass — the area between the bounding curves — is a measurable quantity, $H(T)$, representing accumulated presence over the interval $(0,T]$. Together, the counting processes $A(\cdot)$ and $D(\cdot)$ — and equivalently the derived quantity $H(T)$ — form a sufficient state description for the classical arrival–departure flow model.
 
 All standard flow metrics — including time averages, throughput rates, and finite-window variants of Little’s Law — can be expressed as deterministic functionals of the counting processes $A(\cdot)$ and $D(\cdot)$.
 

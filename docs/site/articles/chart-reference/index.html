@@ -696,13 +696,13 @@ Samplepath Analysis Toolkit</em></a></p></p>
           </p></li>
           <li><p>Upper-case <span class="math inline">\(T\)</span>
           denotes a <em>prefix horizon</em> of the observation interval,
-          i.e. an interval <span class="math inline">\([0, T)\)</span>
+          i.e. an interval <span class="math inline">\((0, T]\)</span>
           with <span class="math inline">\(0 &lt; T \le
           T_{\max}\)</span>.</p></li>
           <li><p>For a fixed horizon <span
           class="math inline">\(T\)</span>, the within-window time
           variable <span class="math inline">\(t\)</span> satisfies
-          <span class="math inline">\(0 \le t &lt; T\)</span>.</p></li>
+          <span class="math inline">\(0 &lt; t \le T\)</span>.</p></li>
           <li><p>Functions of <span class="math inline">\(t\)</span>
           (such as <span class="math inline">\(N(t)\)</span>) denote
           instantaneous sample-path values at time <span
@@ -710,17 +710,23 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <li><p>Functions of <span class="math inline">\(T\)</span>
           represent <em>cumulative quantities</em> or normalized
           quantities derived from them, computed over the interval <span
-          class="math inline">\([0, T)\)</span>.</p>
+          class="math inline">\((0, T]\)</span>.</p>
           <p>For each <span class="math inline">\(T\)</span>, we
-          consider the prefix window <span class="math inline">\([0,
-          T)\)</span>. Endpoint quantities such as <span
+          consider the prefix window <span class="math inline">\((0,
+          T]\)</span>. Endpoint quantities such as <span
           class="math inline">\(F(T)\)</span> are values determined by
-          the prefix up to time <span class="math inline">\(T\)</span>,
-          and as <span class="math inline">\(T\)</span> varies over
-          <span class="math inline">\((0, T_{\max}]\)</span>, these
-          endpoint values form the trajectory <span
-          class="math inline">\(T \mapsto F(T)\)</span> which is what we
-          display on all the charts by default.</p></li>
+          the prefix up to and including time <span
+          class="math inline">\(T\)</span>, and as <span
+          class="math inline">\(T\)</span> varies over <span
+          class="math inline">\((0, T_{\max}]\)</span>, these endpoint
+          values form the trajectory <span class="math inline">\(T
+          \mapsto F(T)\)</span> which is what we display on all the
+          charts by default.</p>
+          <blockquote>
+          <p>This uses the standard càdlàg convention for counting/jump
+          processes: sample paths are right-continuous with left
+          limits.</p>
+          </blockquote></li>
           </ul>
           <p>All cumulative functions are deterministic, pathwise
           calculations (definite integrals, discrete sums, and
@@ -824,14 +830,14 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <td><a href="#chart-02-arrivals-a">A(T)</a></td>
           <td>Cumulative Arrivals</td>
           <td><span class="math inline">\(A(T)=\sum \text{arrivals in
-          }[0,T]\)</span></td>
+          }(0,T]\)</span></td>
           <td>Elem</td>
           </tr>
           <tr>
           <td><a href="#chart-03-departures-d">D(T)</a></td>
           <td>Cumulative Departures</td>
           <td><span class="math inline">\(D(T)=\sum \text{departures in
-          }[0,T]\)</span></td>
+          }(0,T]\)</span></td>
           <td>Elem</td>
           </tr>
           <tr>
@@ -996,17 +1002,17 @@ Samplepath Analysis Toolkit</em></a></p></p>
           </details>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(A(T)=\sum \text{arrivals in
-          }[0,T)\)</span>.</p>
+          }(0,T]\)</span>.</p>
           <p><strong>Unit:</strong> Elements.</p>
           <p>The simplest measurement on the sample path is a
           <em>cumulative count</em>. In particular, for a moment <span
           class="math inline">\(T\)</span> in the observation window
-          <span class="math inline">\([0, T_{\max})\)</span>, we count
+          <span class="math inline">\((0, T_{\max}]\)</span>, we count
           the arrivals observed in the prefix interval <span
-          class="math inline">\([0, T)\)</span>.</p>
+          class="math inline">\((0, T]\)</span>.</p>
           <p>Formally, following our convention, we define</p>
           <p><span class="math display">\[
-          A(T)=\#\{\,i:\ a_i &lt; T\,\}
+          A(T)=\#\{\,i:\ 0 &lt; a_i \le T\,\}
           \]</span></p>
           <p>where <span class="math inline">\(a_i\)</span> is an
           arrival timestamp and <span class="math inline">\(\#\)</span>
@@ -1025,7 +1031,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           by discrete arrival events.</p>
           <ul>
           <li><span class="math inline">\(A(T)\)</span> is defined for
-          all <span class="math inline">\(T \in [0, T_{\max})\)</span>,
+          all <span class="math inline">\(T \in (0, T_{\max}]\)</span>,
           so it is a function of time.</li>
           <li>It is a right-continuous step function that <em>increases
           by one at each arrival timestamp</em> and <em>is constant
@@ -1132,7 +1138,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           the departure process.</p>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(D(T)=\sum \text{departures in
-          }[0,T]\)</span>.</p>
+          }(0,T]\)</span>.</p>
           <p><strong>Unit:</strong> Elements.</p>
           <p><strong>Output file:</strong>
           <code>core/panels/cumulative_departures_D.png</code></p>
@@ -1179,7 +1185,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <p>We call this quantity <em>Presence Mass</em> (or simply
           <em>Presence</em>). Formally, it is the area between the
           arrival and departure curves over the interval <span
-          class="math inline">\([0,T)\)</span>. Intuitively, it measures
+          class="math inline">\((0,T]\)</span>. Intuitively, it measures
           both:</p>
           <ul>
           <li>how many elements are present in the process (the vertical
@@ -1202,7 +1208,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           measurable quantity, <span
           class="math inline">\(H(T)\)</span>, representing accumulated
           presence over the interval <span
-          class="math inline">\([0,T)\)</span>. Together, the counting
+          class="math inline">\((0,T]\)</span>. Together, the counting
           processes <span class="math inline">\(A(\cdot)\)</span> and
           <span class="math inline">\(D(\cdot)\)</span> — and
           equivalently the derived quantity <span

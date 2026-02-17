@@ -681,8 +681,8 @@ def test_render_CFD_appends_derivations_to_labels_when_enabled():
 
     def _derivation_for_key(key: str):
         return {
-            "A": "A(T) = ∑ arrivals in [0, T]",
-            "D": "D(T) = ∑ departures in [0, T]",
+            "A": "A(T) = ∑ arrivals in (t0, T]",
+            "D": "D(T) = ∑ departures in (t0, T]",
         }.get(key)
 
     with (
@@ -695,11 +695,11 @@ def test_render_CFD_appends_derivations_to_labels_when_enabled():
         core.CFDPanel(show_derivations=True).render(ax, times, arrivals, departures)
     assert (
         mock_step.call_args_list[0].kwargs["label"]
-        == "A(T) - Cumulative arrivals — A(T) = ∑ arrivals in [0, T]"
+        == "A(T) - Cumulative arrivals — A(T) = ∑ arrivals in (t0, T]"
     )
     assert (
         mock_step.call_args_list[1].kwargs["label"]
-        == "D(T) - Cumulative departures — D(T) = ∑ departures in [0, T]"
+        == "D(T) - Cumulative departures — D(T) = ∑ departures in (t0, T]"
     )
     assert ax.set_title.call_args[0][0] == "Cumulative Flow Diagram"
 
