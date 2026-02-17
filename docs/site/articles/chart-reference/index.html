@@ -960,21 +960,23 @@ Samplepath Analysis Toolkit</em></a></p></p>
           behavior</em> along two dimensions: the discrete sequence of
           event types (including the ordering of arrivals and
           departures), and the continuous inter-event durations.</p>
-          <p>A useful mental model is a simple coin-flip process in
-          which each flip determines whether the next event is an
-          arrival or a departure. In addition to the outcome itself, we
-          also care about the elapsed time between outcomes, which is
-          the second dimension.</p>
-          <p>For this reason, this type of process is also called a
-          <em>binary</em> flow process. The same machinery extends
-          naturally to a broader class of non-deterministic marked point
-          processes, but this library currently implements only the
-          binary case.</p>
+          <p>A useful mental model for the observable behavior of the
+          underlying process is a simple coin flip observed over time.
+          Each flip determines whether the next event is an arrival or a
+          departure. In an arrival-departure process, however, we care
+          about both dimensions of what is observed: the event outcome
+          and the <em>elapsed time</em> to the next event.</p>
+          <p>We call this class of non-deterministic models <em>flow
+          processes</em>. The specific case where event type is binary
+          (arrival or departure) is a <em>binary</em> flow process. The
+          same machinery extends naturally to a broader class of
+          non-deterministic marked point processes, but this library
+          currently implements only the binary case.</p>
           <p>Note: An <code>id</code> mark that pairs arrivals with
           departures is <em>optional</em> for the core invariant
           metrics, but <em>required</em> for item-level sojourn-time
           measurements. This only becomes relevant when discussing
-          convergence, stability and the familiar steady steady version
+          convergence, stability and the familiar steady-state version
           of Little’s Law.</p>
           <p><strong>Output file:</strong>
           <code>core/panels/arrival_departure_indicator_process.png</code></p>

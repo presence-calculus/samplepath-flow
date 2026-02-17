@@ -170,11 +170,11 @@ It is represented as a timestamped event sequence with an indicator (a mark) at 
 
 The sample path encodes _non-deterministic process behavior_ along two dimensions: the discrete sequence of event types (including the ordering of arrivals and departures), and the continuous inter-event durations.
 
-A useful mental model is a simple coin-flip process in which each flip determines whether the next event is an arrival or a departure. In addition to the outcome itself, we also care about the elapsed time between outcomes, which is the second dimension.
+A useful mental model for the observable behavior of the underlying process is a simple coin flip observed over time. Each flip determines whether the next event is an arrival or a departure. In an arrival-departure process, however, we care about both dimensions of what is observed: the event outcome and the _elapsed time_ to the next event.
 
-For this reason, this type of process is also called a _binary_ flow process. The same machinery extends naturally to a broader class of non-deterministic marked point processes, but this library currently implements only the binary case.
+We call this class of non-deterministic models _flow processes_. The specific case where event type is binary (arrival or departure) is a _binary_ flow process. The same machinery extends naturally to a broader class of non-deterministic marked point processes, but this library currently implements only the binary case.
 
-Note: An `id` mark that pairs arrivals with departures is _optional_ for the core invariant metrics, but _required_ for item-level sojourn-time measurements. This only becomes relevant when discussing convergence, stability and the familiar steady steady version of Little's Law.
+Note: An `id` mark that pairs arrivals with departures is _optional_ for the core invariant metrics, but _required_ for item-level sojourn-time measurements. This only becomes relevant when discussing convergence, stability and the familiar steady-state version of Little's Law.
 
 **Output file:** `core/panels/arrival_departure_indicator_process.png`
 
