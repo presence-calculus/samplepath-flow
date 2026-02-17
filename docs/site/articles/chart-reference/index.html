@@ -1250,13 +1250,62 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <p>Builds on the CFD gap: <span
-          class="math inline">\(N(t)\)</span> is the pointwise
-          difference between cumulative arrivals and cumulative
-          departures.</p>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(N(t)=A(T)-D(T)\)</span>.</p>
           <p><strong>Unit:</strong> Elements.</p>
+          <p>The first thing the CFD allows us to do is determine how
+          many elements are present in the process (have arrived but not
+          departed) at any instant of time. On the CFD, this is just the
+          vertical distance between the <span
+          class="math inline">\(A(T)\)</span> and <span
+          class="math inline">\(D(T)\)</span> lines.</p>
+          <p>We may define this as a new process <span
+          class="math display">\[ N(t) = A(T) - D(T)\]</span></p>
+          <blockquote>
+          <p>Note: Here <span class="math inline">\(A(T)\)</span> and
+          <span class="math inline">\(D(T)\)</span> are cumulative
+          functions on <span class="math inline">\((0,T]\)</span>, and
+          we set <span class="math inline">\(t:=T\)</span> at the
+          endpoint; their difference at each <span
+          class="math inline">\(T\)</span> is the instantaneous state
+          <span class="math inline">\(N(t)\)</span>.</p>
+          </blockquote>
+          <p><span class="math inline">\(N(t)\)</span> is the
+          instantaneous number of elements present in the
+          arrival-departure process. This is the quantity we commonly
+          call WIP in software contexts.</p>
+          <p>The plot of <span class="math inline">\(N(t)\)</span>
+          against the event timeline is called the <em>process
+          state</em> chart because, viewed as a process, it is
+          interpretable as an instantaneous state variable of the
+          arrival-departure process.</p>
+          <ul>
+          <li>An arrival event causes it to increase by 1</li>
+          <li>A departure event causes it to decrease by 1</li>
+          <li>Like <span class="math inline">\(A(T)\)</span> and <span
+          class="math inline">\(D(T)\)</span>, <span
+          class="math inline">\(N(t)\)</span> changes only at event
+          boundaries, remaining constant in between.</li>
+          </ul>
+          <blockquote>
+          <p>In summary, the arrival and departure events change the
+          state of the arrival-departure process with <span
+          class="math inline">\(N(t)\)</span> capturing the state as the
+          net <em>effect</em> of cumulative arrivals and departures.</p>
+          </blockquote>
+          <p>One thing that may not be immediately obvious, but is true
+          nevertheless, is that the shared grey area under the <span
+          class="math inline">\(N(t)\)</span> curve is exactly the same
+          area between the arrival and departure lines in the CFD. The
+          differences are mainly due to scaling and display, but the
+          shaded area represents the same quantity, the Presence Mass we
+          saw in the CFD.</p>
+          <p>Generally speaking, the process state plot gives us a
+          simpler and more operationally useful way of examining and
+          reasoning about presence, and so for the most part, we will
+          rely on <span class="math inline">\(N(t)\)</span> as the core
+          flow metric upon which we build the rest of the metrics in the
+          Presence Invariant.</p>
           <p><strong>Output file:</strong>
           <code>core/panels/sample_path_N.png</code></p>
           <h2 id="chart-06-presence-mass-h">3.6 H(T) - Presence

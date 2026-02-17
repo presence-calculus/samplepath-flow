@@ -321,12 +321,32 @@ Before introducing $H(T)$ formally, we begin with an even simpler quantity: the 
 
 </details>
 
-Builds on the CFD gap: $N(t)$ is the pointwise difference between cumulative arrivals and
-cumulative departures.
-
 **Derivation:** $N(t)=A(T)-D(T)$.
 
 **Unit:** Elements.
+
+The first thing the CFD allows us to do is determine how many elements are present in the process (have arrived but not departed) at any instant of time. On the CFD, this is just the vertical distance between the $A(T)$ and $D(T)$ lines.
+
+We may define this as a new process
+$$ N(t) = A(T) - D(T)$$
+
+> Note: Here $A(T)$ and $D(T)$ are cumulative functions on $(0,T]$, and we set $t:=T$ at the endpoint; their difference at each $T$ is the instantaneous state $N(t)$.
+
+$N(t)$ is the instantaneous number of elements present in the arrival-departure process. This is the quantity we commonly call WIP in software contexts.
+
+The plot of $N(t)$ against the event timeline is called the _process state_ chart because, viewed as a process, it is interpretable as an instantaneous state variable of the arrival-departure process.
+
+- An arrival event causes it to increase by 1
+- A departure event causes it to decrease by 1
+- Like $A(T)$ and $D(T)$, $N(t)$ changes only at event boundaries, remaining constant in between.
+
+> In summary, the arrival and departure events change the state of the arrival-departure process with $N(t)$ capturing the state
+as the net _effect_ of cumulative arrivals and departures.
+
+One thing that may not be immediately obvious, but is true nevertheless, is that the shared grey area under the $N(t)$ curve is exactly the same area between the arrival and departure lines in the CFD. The differences are mainly due to scaling and display, but the shaded area represents the same quantity, the Presence Mass we saw in the CFD.
+
+Generally speaking, the process state plot gives us a simpler and more operationally useful way of examining and reasoning about presence, and so for the most part, we will rely on $N(t)$ as the core flow metric upon which we build the rest of the metrics in the Presence Invariant.
+
 
 **Output file:** `core/panels/sample_path_N.png`
 
