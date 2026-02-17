@@ -537,7 +537,11 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <ul>
             <li><a href="#sample-path-flow-metrics"
             id="toc-sample-path-flow-metrics">1 Sample Path Flow
-            Metrics</a></li>
+            Metrics</a>
+            <ul>
+            <li><a href="#methodology" id="toc-methodology">1.1
+            Methodology</a></li>
+            </ul></li>
             <li><a href="#notational-conventions"
             id="toc-notational-conventions">2 Notational Conventions</a>
             <ul>
@@ -550,11 +554,9 @@ Samplepath Analysis Toolkit</em></a></p></p>
             Indexes</a></li>
             <li><a href="#event-display" id="toc-event-display">2.4
             Event display</a></li>
-            <li><a href="#note" id="toc-note">2.5 Note:</a></li>
             </ul></li>
-            <li><a href="#the-presence-invariant-charts"
-            id="toc-the-presence-invariant-charts">3 The Presence
-            Invariant Charts</a>
+            <li><a href="#the-presence-invariant"
+            id="toc-the-presence-invariant">3 The Presence Invariant</a>
             <ul>
             <li><a href="#chart-01-point-process"
             id="toc-chart-01-point-process">3.1 Point Process - Event
@@ -652,6 +654,13 @@ Samplepath Analysis Toolkit</em></a></p></p>
           href="../../articles/theory">Sample Path Theory</a>.</p>
           <p>For CLI options and output contracts, see <a
           href="../../articles/cli">Command Line Reference</a>.</p>
+          <h2 id="methodology">1.1 Methodology</h2>
+          <p>Please see the article <a
+          href="../../articles/a-methodological-contrast">Sample Path
+          Analysis vs Statistics</a> about the deeper methodological
+          contrasts between sample path analysis and current techniques
+          for measuring flow metrics, and why these matter in accurate
+          reasoning about flow.</p>
           <h1 id="notational-conventions">2 Notational Conventions</h1>
           <p>The charts are introduced in a canonical derivation arc
           starting with the sample path: each metric is derived
@@ -761,15 +770,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           gestalt analysis of trajectories across views, especially in
           dashboards. When reviewing these charts, I recommend you take
           a look at both views to build intuition.</p>
-          <h2 id="note">2.5 Note:</h2>
-          <p>Please see the article <a
-          href="../../articles/a-methodological-contrast">Sample Path
-          Analysis vs Statistics</a> about the deeper methodological
-          contrasts between sample path analysis and current techniques
-          for measuring flow metrics, and why these matter in accurate
-          reasoning about flow.</p>
-          <h1 id="the-presence-invariant-charts">3 The Presence
-          Invariant Charts</h1>
+          <h1 id="the-presence-invariant">3 The Presence Invariant</h1>
           <p>The Presence Invariant is the finite-horizon form of
           Little’s Law.</p>
           <p><span class="math display">\[
@@ -785,7 +786,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           view of Little’s Law, But unlike the steady state version the
           presence invariant <em>holds unconditionally at all
           times</em>.</p>
-          <p>This document shows the step-by-step derivation of each
+          <p>This section shows the step-by-step derivation of each
           quantity in the invariant and visualizes how the values of
           each metric at evry point in time are derived from the sample
           path. The charts are presented in a canonical order starting
@@ -945,11 +946,10 @@ Samplepath Analysis Toolkit</em></a></p></p>
           It is the observed behavior of some operational process
           modeled as a sequence of arrival and departure events on a
           timeline.</p>
-          <p>The sample path is represented as a timestamped event
-          sequence with an indicator (a mark) at each timestamp. Here
-          the mark indicates whether an event is an arrival or a
-          departure. For core Presence Invariant calculations, this is
-          sufficient.</p>
+          <p>It is represented as a timestamped event sequence with an
+          indicator (a mark) at each timestamp. Here the mark indicates
+          whether an event is an arrival or a departure. For core
+          Presence Invariant calculations, this is sufficient.</p>
           <p>The sample path encodes <em>non-deterministic process
           behavior</em> along two dimensions: the discrete sequence of
           event types (including the ordering of arrivals and
@@ -1082,6 +1082,13 @@ Samplepath Analysis Toolkit</em></a></p></p>
           about how a change in the underlying events propagates through
           all derived processes over time, and to connect every quantity
           back to the original events via the event index.</p>
+          <p>Think of these relationships like a series of cells
+          updating on a spreadsheet. The next value of the metric
+          depends upon the previous value and the <em>next event</em> on
+          the sample path. This latter choice is non-deterministic.
+          Everything after that is deterministically computed once that
+          choice is resolved. Verify that this holds for <span
+          class="math inline">\(A(T)\)</span>.</p>
           <p>Similar properties hold for <em>every</em> metric we
           compute. Our charts and exports emphasize the
           <em>event-indexed</em> nature of these functions over the
@@ -1113,8 +1120,15 @@ Samplepath Analysis Toolkit</em></a></p></p>
           </figure>
           </details>
           <p>This is the identical construction as <span
-          class="math inline">\(A(T)\)</span> but for departure
-          marks.</p>
+          class="math inline">\(A(T)\)</span> but for departure marks.
+          Like <span class="math inline">\(A(T)\)</span>, <span
+          class="math inline">\(D(T)\)</span> is a right-continuous step
+          function that increases by one at each departure timestamp and
+          is constant between departures.</p>
+          <p>The resulting process determines a new stateful process -
+          the departure process. The overall state of the
+          arrival-departure process can be captured in terms of the
+          states of the arrival and departure processes.</p>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(D(T)=\sum \text{departures in
           }[0,T]\)</span>.</p>

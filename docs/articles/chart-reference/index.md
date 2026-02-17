@@ -43,6 +43,9 @@ formal definitions behind why this matters, see [Sample Path Theory]($document-r
 
 For CLI options and output contracts, see [Command Line Reference]($document-root/articles/cli).
 
+## Methodology
+Please see the article [Sample Path Analysis vs Statistics]($document-root/articles/a-methodological-contrast) about the deeper methodological contrasts between sample path analysis and current techniques for measuring flow metrics, and why these matter
+in accurate reasoning about flow.
 
 
 # Notational Conventions
@@ -103,11 +106,9 @@ Event indexing is a key differentiator of sample path analysis, so charts are sh
 
 Each chart also has a `--no-events` version with overlays removed. These views are useful for higher-level gestalt analysis of trajectories across views, especially in dashboards. When reviewing these charts, I recommend you take a look at both views to build intuition.
 
-## Note:
-Please see the article [Sample Path Analysis vs Statistics]($document-root/articles/a-methodological-contrast) about the deeper methodological contrasts between sample path analysis and current techniques for measuring flow metrics, and why these matter
-in accurate reasoning about flow.
 
-# The Presence Invariant Charts
+
+# The Presence Invariant
 
 The Presence Invariant is the finite-horizon form of Little’s Law.
 
@@ -122,7 +123,7 @@ For the full derivation context and interpretation, refer to [Sample Path Theory
 The quantities in this law are the finite horizon equivalents of the quantities in the familiar steady state view of Little's Law,
 But unlike the steady state version the presence invariant _holds unconditionally at all times_.
 
-This document shows the step-by-step derivation of each quantity in the invariant and visualizes how the values of each metric at evry point in time are derived from the sample path. The charts are presented in a canonical order starting with the input sample path. Each chart depends on one more more metrics in an earlier chart. All calculations are deterministic.
+This section shows the step-by-step derivation of each quantity in the invariant and visualizes how the values of each metric at evry point in time are derived from the sample path. The charts are presented in a canonical order starting with the input sample path. Each chart depends on one more more metrics in an earlier chart. All calculations are deterministic.
 
 Review the theory doc and use it as a cross-reference when reviewing the charts below. The ideas here are relatively straightforward if you spend a little bit of time carefully reading, understanding and reviewing what each chart means and the sequence of derivations.
 
@@ -163,7 +164,7 @@ Review the theory doc and use it as a cross-reference when reviewing the charts 
 
 This is the sample path: the input to sample path analysis. It is the observed behavior of some operational process modeled as a sequence of arrival and departure events on a timeline.
 
-The sample path is represented as a timestamped event sequence with an indicator (a mark) at each timestamp. Here the mark indicates whether an event is an arrival or a departure. For core Presence Invariant calculations, this is sufficient.
+It is represented as a timestamped event sequence with an indicator (a mark) at each timestamp. Here the mark indicates whether an event is an arrival or a departure. For core Presence Invariant calculations, this is sufficient.
 
 The sample path encodes _non-deterministic process behavior_ along two dimensions: the discrete sequence of event types (including the ordering of arrivals and departures), and the continuous inter-event durations.
 
@@ -236,9 +237,9 @@ The same arrival structure can also be indexed by event order, yielding the embe
 
 Another crucial observation is that these processes are deterministic _functionals_ of the realized sample path. Each metric is obtained by applying a well-defined mapping, or a sequence of mappings, to the underlying sample path. This allows us to reason _deterministically_ about how a change in the underlying events propagates through all derived processes over time, and to connect every quantity back to the original events via the event index.
 
+Think of these relationships like a series of cells updating on a spreadsheet. The next value of the metric depends upon the previous value and the _next event_ on the sample path. This latter choice is non-deterministic. Everything after that is deterministically computed once that choice is resolved. Verify that this holds for $A(T)$.
+
 Similar properties hold for _every_ metric we compute. Our charts and exports emphasize the _event-indexed_ nature of these functions over the sample path. This stands in stark contrast to statistical measures, where we typically speak only of correlations between aggregates rather than deterministic dependence.
-
-
 
 
 **Output file:** `core/panels/cumulative_arrivals_A.png`
@@ -257,7 +258,9 @@ Similar properties hold for _every_ metric we compute. Our charts and exports em
 
 </details>
 
-This is the identical construction as $A(T)$ but for departure marks.
+This is the identical construction as $A(T)$ but for departure marks. Like $A(T)$, $D(T)$ is a right-continuous step function that increases by one at each departure timestamp and is constant between departures.
+
+The resulting process determines a new stateful process - the departure process. The overall state of the arrival-departure process can be captured in terms of the states of the arrival and departure processes.
 
 **Derivation:** $D(T)=\sum \text{departures in }[0,T]$.
 
