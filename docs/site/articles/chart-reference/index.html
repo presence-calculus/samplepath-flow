@@ -576,7 +576,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
             id="toc-chart-06-presence-mass-h">3.6 H(T) - Presence
             Mass</a></li>
             <li><a href="#chart-07-time-average-l"
-            id="toc-chart-07-time-average-l">3.7 L(T) - Time-Average
+            id="toc-chart-07-time-average-l">3.7 L(T) - Time-Average of
             Presence</a></li>
             <li><a href="#chart-08-arrival-rate-lambda"
             id="toc-chart-08-arrival-rate-lambda">3.8 <span
@@ -625,6 +625,19 @@ Samplepath Analysis Toolkit</em></a></p></p>
             <span class="math inline">\(\lambda^*(t)\cdot
             W^*(t)\)</span></a></li>
             </ul></li>
+            <li><a href="#appendices" id="toc-appendices">5
+            Appendices</a>
+            <ul>
+            <li><a href="#derivative-of-lt"
+            id="toc-derivative-of-lt">5.1 Derivative of <span
+            class="math inline">\(L(T)\)</span></a></li>
+            <li><a
+            href="#structural-vs-transient-effects-on-a-sample-path"
+            id="toc-structural-vs-transient-effects-on-a-sample-path">5.2
+            Structural vs Transient Effects on a Sample Path</a></li>
+            </ul></li>
+            <li><a href="#references" id="toc-references">6
+            References</a></li>
             </ul>
           </nav>
         </aside>
@@ -698,7 +711,9 @@ Samplepath Analysis Toolkit</em></a></p></p>
           denotes a <em>prefix horizon</em> of the observation interval,
           i.e. an interval <span class="math inline">\((0, T]\)</span>
           with <span class="math inline">\(0 &lt; T \le
-          T_{\max}\)</span>.</p></li>
+          T_{\max}\)</span>. We adopt half-open intervals by default:
+          the interval excludes the left endpoint and includes the right
+          endpoint.</p></li>
           <li><p>For a fixed horizon <span
           class="math inline">\(T\)</span>, the within-window time
           variable <span class="math inline">\(t\)</span> satisfies
@@ -1356,7 +1371,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           \]</span></p>
           <blockquote>
           <p>Note that presence mass lives in a product space of
-          elements and time and that this the units of <span
+          elements and time, so the units of <span
           class="math inline">\(H(T)\)</span> are element-time.</p>
           </blockquote>
           <p>Now when <span class="math inline">\(H(T)\)</span> is
@@ -1415,7 +1430,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           </blockquote>
           <p><strong>Output file:</strong>
           <code>core/panels/cumulative_presence_mass_H.png</code></p>
-          <h2 id="chart-07-time-average-l">3.7 L(T) - Time-Average
+          <h2 id="chart-07-time-average-l">3.7 L(T) - Time-Average of
           Presence</h2>
           <p><code>with-events</code></p>
           <figure>
@@ -1437,12 +1452,201 @@ Samplepath Analysis Toolkit</em></a></p></p>
           (no-events)</figcaption>
           </figure>
           </details>
-          <p>Builds on <span class="math inline">\(H(T)\)</span> by
-          normalizing by elapsed time, yielding time-average
-          presence.</p>
           <p><strong>Derivation:</strong> <span
           class="math inline">\(L(T)=H(T)/T\)</span>.</p>
           <p><strong>Unit:</strong> Elements.</p>
+          <p>We now have the core machinery in place to derive the
+          quantities in the Presence Invariant</p>
+          <p><span class="math display">\[
+          L(T) = \Lambda(T)\, w(T).
+          \]</span></p>
+          <p>First we examine the left-hand side of the invariant, <span
+          class="math inline">\(L(T)\)</span>. This is simply cumulative
+          presence <span class="math inline">\(H(T)\)</span> normalized
+          over the observation interval <span
+          class="math inline">\(T\)</span>:</p>
+          <p><span class="math display">\[
+          L(T) = \frac{H(T)}{T}
+          = \frac{1}{T} \int_0^T N(t)\,dt.
+          \]</span></p>
+          <p>Before jumping into the details, the reader is urged to
+          carefully review the charts of <span
+          class="math inline">\(N(t)\)</span>, <span
+          class="math inline">\(H(T)\)</span>, and <span
+          class="math inline">\(L(T)\)</span> and get an intuition for
+          what the relationship of each of these charts to the
+          underlying events in the point process might be.</p>
+          <p>We call <span class="math inline">\(L(T)\)</span> the
+          <em>time average of presence</em>. But what does that
+          mean?</p>
+          <h3 id="lt-as-a-moving-average-of-nt"><span
+          class="math inline">\(L(T)\)</span> as a moving average of
+          <span class="math inline">\(N(t)\)</span></h3>
+          <p>Recall that <span class="math inline">\(H(T)\)</span> is
+          cumulative presence mass over <span
+          class="math inline">\((0,T]\)</span>, obtained by integrating
+          <span class="math inline">\(N(t)\)</span> over time. It is
+          therefore a time-weighted accumulation of the instantaneous
+          process state.</p>
+          <p>Dividing by <span class="math inline">\(T\)</span> yields
+          the time average of <span class="math inline">\(N(t)\)</span>
+          over <span class="math inline">\((0,T]\)</span>. Thus <span
+          class="math inline">\(L(T)\)</span> can be interpreted
+          directly in terms of <span
+          class="math inline">\(N(t)\)</span>, which is a more tangible
+          quantity.</p>
+          <p>The straightforward interpretation is that <span
+          class="math inline">\(L(T)\)</span> is a long-horizon
+          <em>moving average</em> of <span
+          class="math inline">\(N(t)\)</span>: each additional moment
+          the process spends in state <span
+          class="math inline">\(N(t)\)</span> contributes an increment
+          of time to the numerator, while the denominator grows linearly
+          as the observation window expands.</p>
+          <p>This gives <span class="math inline">\(L(T)\)</span>
+          several important structural properties:</p>
+          <ul>
+          <li><p>It does not jump when arrivals or departures occur: the
+          integration step in <span class="math inline">\(H(T)\)</span>
+          removes discontinuities, and normalization in <span
+          class="math inline">\(L(T)\)</span> causes the
+          <em>influence</em> of any individual event to be
+          time-weighted.</p></li>
+          <li><p>It adjusts gradually: as <span
+          class="math inline">\(T\)</span> grows, each new increment of
+          time carries weight proportional to <span
+          class="math inline">\(1/T\)</span>.</p></li>
+          <li><p>The effect of any <em>finite</em> disturbance fades
+          over time, <em>unless</em> the underlying state process
+          sustains linear (or faster) growth in <span
+          class="math inline">\(N(t)\)</span>.</p></li>
+          </ul>
+          <blockquote>
+          <p>For this reason, <span class="math inline">\(L(T)\)</span>
+          serves as a diagnostic of persistent structural changes in the
+          state process. Transient fluctuations are progressively washed
+          out. What remains visible in <span
+          class="math inline">\(L(T)\)</span> as <span
+          class="math inline">\(T\)</span> grows are only those
+          components of <span class="math inline">\(N(t)\)</span> that
+          persist.</p>
+          </blockquote>
+          <p>If <span class="math inline">\(L(T)\)</span> rises, falls,
+          or stabilizes, it does so because the underlying state process
+          exhibits sustained imbalance, sustained correction, or
+          sustained equilibrium. We will return to this when we discuss
+          convergence, equilibrium, and stability.</p>
+          <p>Also see <a
+          href="#structural-vs-transient-effects-on-a-sample-path">Structural
+          vs Transient Effects on a Sample Path</a> for the relationship
+          between <span class="math inline">\(L(T)\)</span> and the
+          common-cause/special-cause distinction from Statistical
+          Process Control.</p>
+          <h3 id="how-lt-changes">How <span
+          class="math inline">\(L(T)\)</span> changes</h3>
+          <p>In <a href="#derivative-of-lt">Derivative of <span
+          class="math inline">\(L(T)\)</span></a> we show that the first
+          derivative of <span class="math inline">\(L(T)\)</span> (the
+          rate at which it changes over time) is given by</p>
+          <p><span class="math display">\[
+          \frac{dL}{dT}
+          =
+          \frac{N(t) - L(T)}{T}.
+          \]</span> Here <span class="math inline">\(N(t)\)</span>
+          should be interpreted as the instantaneous state at the
+          endpoint of the interval <span
+          class="math inline">\((0,T]\)</span>. So this compares the
+          moving average of <span class="math inline">\(N(t)\)</span>
+          over <span class="math inline">\((0,T]\)</span> to the
+          endpoint value <span class="math inline">\(N(t)\)</span>.</p>
+          <p>This expression is a standard result for the
+          <em>sensitivity of a cumulative moving average</em> and it
+          makes the relationship between <span
+          class="math inline">\(N(t)\)</span> and <span
+          class="math inline">\(L(T)\)</span> explicit:</p>
+          <ul>
+          <li>If <span class="math inline">\(N(t) &gt; L(T)\)</span>,
+          then <span class="math inline">\(\frac{dL}{dT} &gt; 0\)</span>
+          and <span class="math inline">\(L(T)\)</span> increases.</li>
+          <li>If <span class="math inline">\(N(t) &lt; L(T)\)</span>,
+          then <span class="math inline">\(\frac{dL}{dT} &lt; 0\)</span>
+          and <span class="math inline">\(L(T)\)</span> decreases.</li>
+          <li>The rate of adjustment is proportional to <span
+          class="math inline">\(1/T\)</span>.</li>
+          </ul>
+          <p>Thus <span class="math inline">\(L(T)\)</span> tracks <span
+          class="math inline">\(N(t)\)</span> with diminishing
+          sensitivity over time: over longer horizons, <span
+          class="math inline">\(L(T)\)</span> adjusts more slowly to
+          changes in the instantaneous state.</p>
+          <h3 id="symmetry-of-arrivals-and-departures">Symmetry of
+          Arrivals and Departures</h3>
+          <p>Arrivals and departures affect <span
+          class="math inline">\(L(T)\)</span> only through their impact
+          on <span class="math inline">\(N(t)\)</span>.</p>
+          <ul>
+          <li>An arrival increases <span
+          class="math inline">\(N(t)\)</span> by one.</li>
+          <li>A departure decreases <span
+          class="math inline">\(N(t)\)</span> by one.</li>
+          </ul>
+          <p>Because the evolution of <span
+          class="math inline">\(L(T)\)</span> depends only on the
+          difference <span class="math inline">\(N(t) - L(T)\)</span>,
+          arrivals and departures enter symmetrically at the level of
+          the state variable. Each event shifts <span
+          class="math inline">\(N(t)\)</span> up or down, and <span
+          class="math inline">\(L(T)\)</span> responds according to the
+          same averaging rule.</p>
+          <blockquote>
+          <p>Unlike <span class="math inline">\(H(T)\)</span>, where
+          arrivals and departures have visibly different geometric
+          effects on slope, at the level of <span
+          class="math inline">\(L(T)\)</span> their influence is
+          structurally symmetric: both modify the instantaneous state,
+          and the running average <em>adjusts toward that
+          state</em>.</p>
+          </blockquote>
+          <h3 id="lt-as-an-average-accumulation-rate-of-presence"><span
+          class="math inline">\(L(T)\)</span> as an average accumulation
+          rate of presence</h3>
+          <p>Since <span class="math inline">\(H(T)\)</span> is the
+          time-weighted accumulation of instantaneous states over <span
+          class="math inline">\((0,T]\)</span>, it follows that</p>
+          <p><span class="math display">\[
+          L(T) = \frac{H(T)}{T}
+          \]</span></p>
+          <p>is the average value of <span
+          class="math inline">\(N(t)\)</span> over that interval.
+          Because</p>
+          <p><span class="math display">\[
+          \frac{dH}{dT} = N(t),
+          \]</span></p>
+          <p><span class="math inline">\(N(t)\)</span> represents the
+          instantaneous rate at which presence mass accumulates.
+          Accordingly, <span class="math inline">\(L(T)\)</span> is the
+          <em>average rate of accumulation</em> of presence mass over
+          <span class="math inline">\((0,T]\)</span>.</p>
+          <p>Importantly, this is an arithmetic time average taken along
+          a realized sample path. It is not a distributional quantity
+          and does not rely on stationarity or probabilistic
+          assumptions.</p>
+          <p>Depending on how presence is interpreted, this quantity
+          expresses a core operational metric. If the objective is to
+          accumulate presence mass, a higher value of <span
+          class="math inline">\(L(T)\)</span> implies a higher average
+          accumulation rate. If the objective is to minimize
+          accumulation (for example, reducing delay exposure in a
+          delivery process), then lower values imply that delays are
+          accumulating at a lower rate.</p>
+          <blockquote>
+          <p>In summary, <span class="math inline">\(L(T)\)</span>
+          serves as a primary operational metric for an
+          arrival–departure process as a whole. However, it cannot
+          always be interpreted in isolation. This is where the
+          quantities on the right-hand side of the Presence Invariant
+          become essential.</p>
+          </blockquote>
           <p><strong>Output file:</strong>
           <code>core/panels/time_average_N_L.png</code></p>
           <h2 id="chart-08-arrival-rate-lambda">3.8 <span
@@ -1832,6 +2036,104 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <p><strong>Unit:</strong> Elements.</p>
           <p><strong>Output file:</strong>
           <code>sample_path_convergence.png</code></p>
+          <h1 id="appendices">5 Appendices</h1>
+          <h2 id="derivative-of-lt">5.1 Derivative of <span
+          class="math inline">\(L(T)\)</span></h2>
+          <p>The derivation of <span class="math display">\[
+          \frac{dL}{dT}
+          =
+          \frac{N(t) - L(T)}{T}.
+          \]</span> Here <span class="math inline">\(N(t)\)</span>
+          should be interpreted as the instantaneous state at the
+          endpoint of the interval <span
+          class="math inline">\((0,T]\)</span>.</p>
+          <p>Start with</p>
+          <p><span class="math display">\[
+          L(T) = \frac{H(T)}{T}.
+          \]</span></p>
+          <p>Think of this as a quotient of two functions of <span
+          class="math inline">\(T\)</span>:</p>
+          <ul>
+          <li>numerator: <span class="math inline">\(H(T)\)</span><br />
+          </li>
+          <li>denominator: <span class="math inline">\(T\)</span></li>
+          </ul>
+          <p>Differentiate using the quotient rule:</p>
+          <p><span class="math display">\[
+          \frac{d}{dT}\left(\frac{H(T)}{T}\right)
+          =
+          \frac{T \cdot \frac{dH}{dT} - H(T) \cdot
+          \frac{d}{dT}(T)}{T^2}.
+          \]</span></p>
+          <p>Now simplify the pieces:</p>
+          <ul>
+          <li><span class="math inline">\(\frac{d}{dT}(T) =
+          1\)</span><br />
+          </li>
+          <li><span class="math inline">\(\frac{dH}{dT} = N(t)\)</span>
+          (because <span class="math inline">\(H(T) = \int_0^T
+          N(t)\,dt\)</span>)</li>
+          </ul>
+          <p>Substitute both:</p>
+          <p><span class="math display">\[
+          \frac{dL}{dT}
+          =
+          \frac{T \cdot N(t) - H(T) \cdot 1}{T^2}
+          =
+          \frac{T N(t) - H(T)}{T^2}.
+          \]</span></p>
+          <p>Now rewrite <span class="math inline">\(H(T)\)</span> in
+          terms of <span class="math inline">\(L(T)\)</span>:</p>
+          <p>Since <span class="math inline">\(L(T) =
+          \frac{H(T)}{T}\)</span>, we have <span
+          class="math inline">\(H(T) = T L(T)\)</span>.</p>
+          <p>Substitute:</p>
+          <p><span class="math display">\[
+          \frac{dL}{dT}
+          =
+          \frac{T N(t) - T L(T)}{T^2}
+          =
+          \frac{T\big(N(t) - L(T)\big)}{T^2}.
+          \]</span></p>
+          <p>Cancel one factor of <span
+          class="math inline">\(T\)</span>:</p>
+          <p><span class="math display">\[
+          \frac{dL}{dT}
+          =
+          \frac{N(t) - L(T)}{T}.
+          \]</span></p>
+          <h2 id="structural-vs-transient-effects-on-a-sample-path">5.2
+          Structural vs Transient Effects on a Sample Path</h2>
+          <p>The behavior of <span class="math inline">\(L(T)\)</span>
+          provides a deterministic sample path analogue of the
+          common-cause / special-cause distinction in SPC, but without
+          requiring any probabilistic or statistical assumptions.</p>
+          <p>Because <span class="math inline">\(L(T)\)</span> is
+          defined directly from the realized sample path — via
+          integration and normalization — it distinguishes between:</p>
+          <ul>
+          <li><strong>Finite, localized disturbances</strong>, whose
+          influence decays as <span class="math inline">\(1/T\)</span>,
+          and<br />
+          </li>
+          <li><strong>Sustained structural effects</strong>, whose
+          influence persists because they continuously contribute
+          presence mass over time.</li>
+          </ul>
+          <p>This distinction does not rely on stationarity, ergodicity,
+          or the existence of stable distributions. It operates directly
+          on the observed prefix of the process and remains valid even
+          in transient, unstable, or regime-shifting systems.</p>
+          <p>In fact, this sample-path diagnostic is most useful
+          precisely in those regimes where statistical process control
+          is not yet justified — before averages stabilize and
+          distributional assumptions become defensible.</p>
+          <p>Once the process exhibits sustained stability and time
+          averages converge, traditional SPC methods can be layered on
+          top. But <span class="math inline">\(L(T)\)</span> provides
+          structural insight prior to — and independent of — those
+          probabilistic assumptions.</p>
+          <h1 class="unnumbered" id="references">6 References</h1>
           <div id="refs" class="references csl-bib-body"
           data-entry-spacing="0" role="list">
           <div id="ref-eltaha1999" class="csl-entry" role="listitem">
