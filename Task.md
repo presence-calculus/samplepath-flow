@@ -23,3 +23,19 @@ Before beginning any work, review the code for the plots and the cli and metrics
 ------
 
 Before beginning anything review this brief and all supporting documentation and sketch out an initial set of tasks that need to be done to get going. Write them down below so that I can review. Ask any questions you need. We wont begin work until we have a good plan in place.
+
+## Execution Plan Checklist (2026-02-14)
+
+- [x] Create and switch to task branch `codex/docs-v2`.
+- [x] Create theory document at `docs/articles/theory/index.md` using the same article format and conventions.
+- [x] Draft theory/background narrative from `docs/articles/chart-reference/Sample-Path-Analysis-Presentation (1).pdf`.
+- [x] Refactor `docs/articles/cli/index.md` to focus on CLI usage and output contracts only.
+- [x] Refactor `docs/articles/chart-reference/index.md` to focus on chart reference only, aligned with current chart outputs.
+- [x] Use `with-events` examples as defaults; evaluate where `no-events` comparisons add value.
+- [x] Add cross-links between theory, CLI reference, chart reference, and `docs/articles/not-statistics/index.md`.
+- [x] Update `docs/build/pandoc_template.html` navigation to include the Theory page.
+- [x] Rebuild docs via `docs/build/pandocs.sh` and include generated `docs/site/*` updates for changed docs.
+- [ ] Run validation checks: `PRE_COMMIT_HOME=.pre-commit-cache pre-commit run --all-files` and `UV_CACHE_DIR=.uv-cache uv run pytest`.
+  - `pre-commit` blocked in sandbox due network-required hook environment install.
+  - `uv run pytest` blocked by local `uv` runtime panic; fallback `./.venv/bin/pytest` passed.
+- [x] Prepare review summary before requesting commit approval.

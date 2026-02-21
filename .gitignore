@@ -57,6 +57,9 @@ charts
 #precommit
 .pre-commit/
 
+# local matplotlib cache
+.matplotlib-cache/
+
 # --- OS junk ---
 .DS_Store
 Thumbs.db

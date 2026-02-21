@@ -90,8 +90,8 @@ class MetricDerivations:
     """Centralized derivation strings for core flow metrics."""
 
     DERIVATIONS: dict[str, str] = {
-        "A": "A(T) = ∑ arrivals in [0, T]",
-        "D": "D(T) = ∑ departures in [0, T]",
+        "A": "A(T) = ∑ arrivals in (t0, T]",
+        "D": "D(T) = ∑ departures in (t0, T]",
         "N": "N(t) = A(T) − D(T)",
         "H": "H(T) = ∫₀ᵀ N(t) dt",
         "L": "L(T) = H(T) / T",
@@ -99,7 +99,7 @@ class MetricDerivations:
         "Theta": "Θ(T) = D(T) / T",
         "w": "w(T) = H(T) / A(T)",
         "w_prime": "w'(T) = H(T) / D(T)",
-        "W_star": "W*(T) = AVG(departure time − arrival time) for departures in [0, T]",
+        "W_star": "W*(T) = AVG(departure time − arrival time) for departures in (t0, T]",
     }
 
     @classmethod

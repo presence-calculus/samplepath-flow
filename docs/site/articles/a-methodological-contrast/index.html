@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Package Overview</title>
+  <title>Sample Path Analysis vs Statistics</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -168,7 +168,27 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-
+    /* CSS for citations */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+      margin-bottom: 0em;
+    }
+    .hanging-indent div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }
     html {
       box-sizing: border-box;
       font-size: 100%;
@@ -485,6 +505,9 @@
     }
 
   </style>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+  type="text/javascript"></script>
 </head>
 <body>
   <div class="wrapper">
@@ -498,157 +521,131 @@
         <a href="https://samplepath.pcalc.org/examples/README.html">Examples</a>
       </nav>
                   <header id="title-block-header">
-        <h1 class="title"><strong>Package Overview</strong></h1>
-
-        <p class="author"><p><a href=""><em>Sample Path Analysis
-Toolkit</em></a></p></p>
+        <h1 class="title"><strong>Sample Path Analysis vs
+Statistics</strong></h1>
+        <p class="subtitle">Contrasting Methodologies</p>
+        <p class="author"><p><a href=""><em>Dr. Krishna
+Kumar</em></a></p></p>
 
               </header>
-                  <div class="header-image">
-        <img src="../../assets/sample_path_N.png" alt="Header image"/>
-      </div>
-            <div class="doc-layout">
+                  <div class="doc-layout">
                 <div class="doc-content">
-          <h1 id="sample-path-analysis">Sample Path Analysis</h1>
-          <p>This library implements <em>sample path analysis,</em> a
-          technique for analyzing <em>macro dynamics</em> of flow
-          processes in complex adaptive systems. It provides
-          deterministic tools to analyze the <em>long-run</em> behavior
-          of stochastic flow processes:</p>
-          <ul>
-          <li>Arrival/departure equilibrium</li>
-          <li>Process time coherence, and</li>
-          <li>Process stability</li>
-          </ul>
-          <p>The relies on the finite-window formulation of <a
-          href="https://docs.pcalc.org/articles/littles-law"><strong>Little’s
-          Law</strong></a>.</p>
-          <p>The focus of the analysis is a single <em>sample path</em>
-          of a flow process: a <em>continuous</em> real-valued function
-          that describes a particular process behavior when observed
-          over a long, but finite period of time (see figure).</p>
-          <p>A key aspect of this technique is that it is
-          <em>distribution-free</em>. It does not require well-defined
-          statistical or probability distributions to reason rigorously
-          about a flow process. Please see <a
-          href="../not-statistics">sample path analysis is not a
-          statistical method</a> for more details.</p>
-          <p>As a result, this technique allows us to extend many
-          results from stochastic process theory to processes operating
-          in complex adaptive systems, where stable statistical
-          distributions often don’t exist. Our focus is operations
-          management in software development, but the techniques here
-          are much more general.</p>
-          <h2 id="history-and-origins">History and Origins</h2>
-          <p>Sample path analysis is not new. The formal theory has been
-          worked out thoroughly by researchers in stochastic process
-          theory and has been stable for over 30 years. They are just
-          not familiar in the software industry.</p>
-          <p>Dr. Shaler Stidham discovered the technique when he
-          provided the first deterministic proof of Little’s Law in
-          1972. So the core ideas here are nearly 60 years old!</p>
-          <p>In the years since Dr. Stidham and other researchers in
-          stochastic process theory have shown the power and versatility
-          of this technique to provide deterministic sample path
-          oriented results of many classical results in queueing theory
-          that required very stringent probabilistic assumptions like
-          stationarity and ergodicity to prove previously.</p>
-          <p>The canonical reference detailing this work is the textbook
-          <a
-          href="https://www.researchgate.net/publication/303785171_Sample-Path_Analysis_of_Queueing_Systems">Sample
-          Path Analysis of Queueing Systems</a> by Muhammed El-Taha and
-          Shaler Stidham (a downloadable PDF is available at the link).
-          This package directly implements many of the concepts in this
-          textbook.</p>
-          <p>See our article on <a
-          href="https://docs.pcalc.org/articles/littles-law">Little’s
-          Law</a> for comprehensive background and source
-          references.</p>
-          <h2 id="why-this-is-significant">Why this is significant</h2>
-          <p>Conditions like non-stationarity and non-ergodic behavior
-          and lack of stable distributions are <em>exactly</em> the
-          dividing line between complex adaptive systems and simpler,
-          ordered systems when viewed from an operations management
-          lens.</p>
-          <p>This is the situation we face in digital operations
-          management. The default assumptions that underpin operational
-          analysis in ordered domains – that processes are stable and
-          that steady state behavior can be observed and analyzed –
-          breaks down in this environment.</p>
-          <p>Sample path analysis allows us to adapt these principles to
-          processes that operate far from equilibrium and whose behavior
-          is history sensitive, path dependent and sensitive to initial
-          conditions. All these are hallmarks of a CAS.</p>
-          <p>There are several capabilities we get from this:</p>
-          <ul>
-          <li>We can precisely define, measure and reason about
-          properties such as equilibrium, coherence and stability, of
-          real-world process using transaction data from operations
-          management tools.</li>
-          <li>We can retrospectively reason about cause and effect in
-          observed behavior of these operational processes, and do so in
-          a deterministic fashion - <em>even for process that are not
-          stable</em>.</li>
-          </ul>
-          <p>These are precisely the conditions that confound
-          traditional statistical and probabilistic reasoning about
-          operational processes in the digital domain. Thus sample path
-          analysis is <em>the</em> technical bridge to rigorously model
-          and measure flow processes in such contexts.</p>
-          <hr />
-          <h1 id="key-concepts">Key Concepts</h1>
-          <p>Please see our continuing series on Little’s Law and sample
-          path analysis at <a
-          href="https://www.polaris-flow-dispatch.com">The Polaris Flow
-          Dispatch</a> for accessible overviews of the theory.</p>
-          <p>In particular,</p>
-          <ul>
-          <li><a
-          href="https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law">The
-          Many Faces of Little’s Law</a>.</li>
-          <li><a
-          href="https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive">Little’s
-          Law in a Complex Adaptive System</a></li>
-          </ul>
-          <p>cover most of the background needed to work with this
-          library at a high level.</p>
-          <p>The example analyses in these posts were produced using
-          this library and can be found in the <a
-          href="./examples/polaris">examples</a> directory together with
-          their original source data.</p>
-          <p>Please subscribe to <a
-          href="https://www.polaris-flow-dispatch.com">The Polaris Flow
-          Dispatch</a> if you are interested in staying abreast of
-          developments and applications of these concepts.</p>
-          <h2 id="flow-processes">Flow processes</h2>
-          <p>A <a
-          href="https://www.polaris-flow-dispatch.com/i/172332418/flow-processes">flow
-          process</a> is simply a timeline of events from some
-          underlying operational domain, where events have
-          <em>effects</em> that persist beyond the time of the event.
-          The effects are encoded using metadata (called marks) to
-          describe them. The generality of the model comes from the fact
-          that marks can be arbitrary real-valued functions of time that
-          meet some very weak requirements.</p>
-          <p>Typically data for analyzing a flow process are extracted
-          from real-time transaction logs of digital operations
-          management tools.</p>
-          <p>The current version of the library only supports the
-          <em>offline</em> analysis of <em>binary flow processes</em>.
-          These are flow processes where the marks denote the start or
-          end of an observed presence of a domain element within some
-          system boundary.</p>
-          <p>All queueing processes fall into this category, as do a
-          much larger class of general input-output processes. These are
-          the simplest kind of flow processes we analyze in the presence
-          calculus, but they cover the vast majority of operational use
-          cases we currently model in software delivery, so we will
-          start there. They are governed by the L=λW form of Little’s
-          Law.</p>
-          <p>We highly recommend reading <a
-          href="https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law">The
-          Many Faces of Little’s Law</a> for background on these
-          concepts.</p>
+          <p>Many traditional flow metrics implementations (for example,
+          those described by Vacanti <span class="citation"
+          data-cites="vacanti2015">[1]</span>) compute metrics over
+          uniform reporting intervals in order to preserve unit
+          consistency and comparability across time. In this
+          construction, the event-time process is partitioned into fixed
+          calendar periods, and measurements are indexed by reporting
+          period rather than by exact event timestamps. To the best of
+          my knowledge, every commercial flow metrics tool on the market
+          works this way.</p>
+          <p>In these implementations the aggregation occurs
+          <em>before</em> measurement: the reporting windows define the
+          object being analyzed, not merely the way it is displayed.
+          This is a key difference between the way calendar-index in
+          sample path flow metrics works, and the current flow metrics
+          tools</p>
+          <p>Unlike in sample path analysis, fine-grained event data are
+          replaced with counts aggregated over reporting periods, and
+          those aggregates become the <em>input</em> to all subsequent
+          measurements. Once this transformation occurs, the original
+          event-time process is no longer recoverable from the data used
+          to construct the flow metrics — including fundamental
+          constructs such as the Cumulative Flow Diagram.</p>
+          <p>Formally, given a reporting grid <span
+          class="math inline">\(\{t_k\}\)</span>, the mapping from the
+          ordered event timestamps <span
+          class="math inline">\(\{a_i\}\)</span> to interval counts
+          <span class="math inline">\(\{A(t_k)\}\)</span> is
+          many-to-one. Information about event ordering and spacing
+          within each reporting window is lost. The resulting analysis
+          is therefore performed on an aggregated, interval-indexed
+          process rather than on the original event-time trajectory
+          itself.</p>
+          <p>This has consequences. Changing the index set from event
+          time to reporting period replaces the original event-indexed
+          process with an interval-indexed aggregate process. The
+          intra-interval temporal structure — including exact ordering,
+          spacing, and interaction of events — is not preserved in the
+          metric definition itself.</p>
+          <p>Aggregation before measurement introduces structural
+          ambiguity. Once fine-grained event information is discarded,
+          multiple distinct event-time trajectories become
+          observationally indistinguishable. Deterministic relationships
+          that hold pathwise may then appear only as
+          <em>statistical</em> relationships in the aggregated
+          representation.</p>
+          <p>It is natural then, to interpret flow metrics as
+          statistical constructs derived from sampled reporting
+          intervals rather than as deterministic functionals of a
+          realized event-time trajectory. The object under analysis has
+          changed: instead of reasoning about the evolution of a path,
+          we reason about aggregates indexed by reporting periods.</p>
+          <p>A representational choice becomes a conceptual mismatch
+          when relationships that are deterministic at the path level
+          are treated as statistical properties of sampled data. Flow
+          analysis then devolves into reasoning about statistical
+          summaries over aggregates, averages, percentiles etc, rather
+          than direct reasoning about the underlying deterministic
+          pathwise relationships.</p>
+          <p>This issue becomes especially acute in non-stationary
+          processes. Input aggregation implicitly assumes that behavior
+          within each reporting window can be summarized without loss of
+          essential structure. In a non-stationary environment — where
+          rates, ordering, and interactions evolve over time — the
+          intra-interval dynamics often determine future behavior. As we
+          have seen, it is the tightly coupled relationships between the
+          various flow state variables that determine the dynamics of
+          the flow processes, and these dont conform to externally
+          imposed calendar boundaries, Flow is endogeneous and bleeds
+          across such boundaries, and recognizing this is key to
+          measruring and analyzing flow.</p>
+          <p>Sample path analysis takes a more principled approach.
+          Metrics are defined as deterministic functionals of the full
+          event history, indexed by event time at the resolution at
+          which the events were observed. Any subsequent sampling is
+          applied only to the already-computed pathwise <em>metrics</em>
+          purely for visualization or reporting purposes. All the
+          metrics being reported are sample consistently at the same
+          <em>points in time</em> at coarser granularities, and the
+          presence invariant ensures that all the relationships that
+          hold at every instant in the finest timescales also hold for
+          the sampled metrics.</p>
+          <p>So Preserving information structure and invariants comes
+          before preserving units. Metrics in current flow analysis
+          tools operate on an aggregated representation of the process,
+          whereas event-indexed metrics in sample path analysis preserve
+          the exact temporal evolution of the underlying events.</p>
+          <p>Consistency of units in displaying <em>metrics</em> can
+          still be achieved by scaling measurements computed at fixed
+          event resolution into human-friendly units, as we routinely do
+          when <em>presenting</em> sample path metrics. This scaling
+          preserves unit consistency without altering the underlying
+          object being measured or discarding temporal structure.</p>
+          <p>Crucially, the validity of these pathwise relationships
+          does not depend on stationarity. The same deterministic
+          functionals apply to both stationary and non-stationary
+          processes, because they are defined directly on the realized
+          event history rather than on assumptions about long-run
+          statistical equilibrium.</p>
+          <p>This is the methodological advantage of sample path
+          analysis: it preserves the full event-time structure of the
+          process and therefore retains access to deterministic
+          relationships that interval-aggregated statistical approaches
+          cannot represent.</p>
+          <p>I would argue that this is the only <em>correct</em> way of
+          measuring flow metrics.</p>
+          <h2 class="unnumbered" id="references">References</h2>
+          <div id="refs" class="references csl-bib-body"
+          data-entry-spacing="0" role="list">
+          <div id="ref-vacanti2015" class="csl-entry" role="listitem">
+          <div class="csl-left-margin">[1] </div><div
+          class="csl-right-inline">D. S. Vacanti, <em>Actionable agile
+          metrics for predictability: An introduction</em>. Daniel
+          Vacanti, 2015.</div>
+          </div>
+          </div>
         </div>
       </div>
             <footer id="presence-link" role="contentinfo">

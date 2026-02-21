@@ -168,72 +168,27 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    /* CSS for syntax highlighting */
-    html { -webkit-text-size-adjust: 100%; }
-    pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-    pre > code.sourceCode > span:empty { height: 1.2em; }
-    .sourceCode { overflow: visible; }
-    code.sourceCode > span { color: inherit; text-decoration: inherit; }
-    div.sourceCode { margin: 1em 0; }
-    pre.sourceCode { margin: 0; }
-    @media screen {
-    div.sourceCode { overflow: auto; }
+    /* CSS for citations */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+      margin-bottom: 0em;
     }
-    @media print {
-    pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    .hanging-indent div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
     }
-    pre.numberSource code
-      { counter-reset: source-line 0; }
-    pre.numberSource code > span
-      { position: relative; left: -4em; counter-increment: source-line; }
-    pre.numberSource code > span > a:first-child::before
-      { content: counter(source-line);
-        position: relative; left: -1em; text-align: right; vertical-align: baseline;
-        border: none; display: inline-block;
-        -webkit-touch-callout: none; -webkit-user-select: none;
-        -khtml-user-select: none; -moz-user-select: none;
-        -ms-user-select: none; user-select: none;
-        padding: 0 4px; width: 4em;
-        color: #aaaaaa;
-      }
-    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-    div.sourceCode
-      {   }
-    @media screen {
-    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
     }
-    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-    code span.at { color: #7d9029; } /* Attribute */
-    code span.bn { color: #40a070; } /* BaseN */
-    code span.bu { color: #008000; } /* BuiltIn */
-    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-    code span.ch { color: #4070a0; } /* Char */
-    code span.cn { color: #880000; } /* Constant */
-    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-    code span.dt { color: #902000; } /* DataType */
-    code span.dv { color: #40a070; } /* DecVal */
-    code span.er { color: #ff0000; font-weight: bold; } /* Error */
-    code span.ex { } /* Extension */
-    code span.fl { color: #40a070; } /* Float */
-    code span.fu { color: #06287e; } /* Function */
-    code span.im { color: #008000; font-weight: bold; } /* Import */
-    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-    code span.op { color: #666666; } /* Operator */
-    code span.ot { color: #007020; } /* Other */
-    code span.pp { color: #bc7a00; } /* Preprocessor */
-    code span.sc { color: #4070a0; } /* SpecialChar */
-    code span.ss { color: #bb6688; } /* SpecialString */
-    code span.st { color: #4070a0; } /* String */
-    code span.va { color: #19177c; } /* Variable */
-    code span.vs { color: #4070a0; } /* VerbatimString */
-    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }
     html {
       box-sizing: border-box;
       font-size: 100%;
@@ -266,7 +221,7 @@
     }
 
     #page {
-      max-width: 880px;
+      max-width: 1240px;
       width: 100%;
       padding: 2rem 1rem;
     }
@@ -318,12 +273,52 @@
       text-align: center;
     }
 
-    nav#TOC {
-      margin: 2rem 0;
+    .doc-layout {
+      display: block;
+      margin-top: 1rem;
+    }
+
+    .doc-content {
+      min-width: 0;
+    }
+
+    .doc-toc {
+      margin: 1rem 0 1.5rem;
+    }
+
+    .doc-toc nav#TOC {
+      margin: 0;
       padding: 1rem;
-      border: 1px solid #eee;
+      border: 1px solid #e5e7ea;
       background: #fafafa;
+      border-radius: 8px;
       overflow-x: auto;
+    }
+
+    nav#TOC h2 {
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+
+    nav#TOC ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      line-height: 1.45;
+    }
+
+    nav#TOC li {
+      margin: 0.22rem 0;
+    }
+
+    nav#TOC a {
+      color: #1f2937;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    nav#TOC a:hover {
+      text-decoration: underline;
     }
 
     figure {
@@ -336,6 +331,89 @@
       height: auto;
       display: block;
       margin: 2rem auto;
+    }
+
+    .doc-content img.lightboxable {
+      cursor: zoom-in;
+      border-radius: 6px;
+      box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.08);
+      transition: transform 140ms ease, box-shadow 140ms ease;
+    }
+
+    .doc-content img.lightboxable:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(17, 24, 39, 0.18);
+    }
+
+    .doc-content img.lightboxable:focus-visible {
+      outline: 3px solid #6b7280;
+      outline-offset: 2px;
+    }
+
+    .doc-content figure {
+      position: relative;
+    }
+
+    .doc-content figure.has-lightbox::after {
+      content: "";
+      position: absolute;
+      right: 0.75rem;
+      top: 0.75rem;
+      width: 2rem;
+      height: 2rem;
+      background-color: rgba(255, 255, 255, 0.92);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='15 3 21 3 21 9'/%3E%3Cpolyline points='9 21 3 21 3 15'/%3E%3Cline x1='21' y1='3' x2='14' y2='10'/%3E%3Cline x1='3' y1='21' x2='10' y2='14'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 1.1rem 1.1rem;
+      border: 1px solid rgba(17, 24, 39, 0.2);
+      border-radius: 999px;
+      pointer-events: none;
+    }
+
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 10, 10, 0.88);
+      padding: 2.5rem 1rem 1rem;
+    }
+
+    .lightbox-overlay.is-open {
+      display: flex;
+    }
+
+    .lightbox-overlay img {
+      max-width: min(96vw, 1800px);
+      max-height: 88vh;
+      width: auto;
+      height: auto;
+      margin: 0;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 0.8rem;
+      right: 0.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      background: rgba(17, 24, 39, 0.82);
+      color: #fff;
+      border-radius: 999px;
+      width: 2.2rem;
+      height: 2.2rem;
+      font-size: 1.2rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .lightbox-close:hover {
+      background: rgba(17, 24, 39, 0.95);
     }
 
     figcaption {
@@ -404,6 +482,28 @@
       }
     }
 
+    @media screen and (min-width: 1120px) {
+      .doc-layout.has-toc {
+        display: grid;
+        grid-template-columns: minmax(240px, 290px) minmax(0, 1fr);
+        gap: 2rem;
+        align-items: start;
+      }
+
+      .doc-layout.has-toc .doc-toc {
+        position: sticky;
+        top: 1.25rem;
+        max-height: calc(100vh - 2.5rem);
+        overflow: auto;
+        margin: 0;
+        padding-right: 0.15rem;
+      }
+
+      .doc-layout.has-toc .doc-content {
+        min-width: 0;
+      }
+    }
+
   </style>
   <script
   src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
@@ -415,6 +515,7 @@
       <nav class="site-nav" aria-label="Primary">
         <a href="https://samplepath.pcalc.org/index.html">Home</a>
         <a href="https://samplepath.pcalc.org/articles/package-overview/index.html">Package Overview</a>
+        <a href="https://samplepath.pcalc.org/articles/theory/index.html">Theory</a>
         <a href="https://samplepath.pcalc.org/articles/cli/index.html">Command Line</a>
         <a href="https://samplepath.pcalc.org/articles/chart-reference/index.html">Chart Reference</a>
         <a href="https://samplepath.pcalc.org/examples/README.html">Examples</a>
@@ -427,721 +528,2754 @@ Samplepath Analysis Toolkit</em></a></p></p>
 
               </header>
                   <div class="header-image">
-        <img src="../../assets/sample_path_flow_metrics.png" alt="Header image"/>
+        <img src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/arrival_departure_indicator_process.png" alt="Header image"/>
       </div>
-                  <nav id="TOC" role="doc-toc">
-        <h2 id="toc-title">Contents</h2>
-        <ul>
-        <li><a href="#what-is-sample-path-analysis"
-        id="toc-what-is-sample-path-analysis">1 What is Sample Path
-        Analysis?</a>
-        <ul>
-        <li><a href="#the-charts." id="toc-the-charts.">1.1 The
-        charts.</a></li>
-        </ul></li>
-        <li><a href="#a-worked-example" id="toc-a-worked-example">2 A
-        Worked Example</a></li>
-        <li><a href="#sample-path-flow-metrics"
-        id="toc-sample-path-flow-metrics">3 Sample Path Flow Metrics</a>
-        <ul>
-        <li><a href="#the-core-calculations-for-littles-law"
-        id="toc-the-core-calculations-for-littles-law">3.1 The Core
-        Calculations for Little’s Law</a></li>
-        <li><a href="#summary-chart" id="toc-summary-chart">3.2 Summary
-        chart</a></li>
-        <li><a href="#component-metrics" id="toc-component-metrics">3.3
-        Component metrics</a>
-        <ul>
-        <li><a href="#the-sample-path-nt"
-        id="toc-the-sample-path-nt">The sample path <span
-        class="math inline">\(N(t)\)</span></a></li>
-        <li><a href="#the-cumulative-presence-mass"
-        id="toc-the-cumulative-presence-mass">The cumulative presence
-        mass</a></li>
-        <li><a href="#lt-time-average-of-nt"
-        id="toc-lt-time-average-of-nt"><span
-        class="math inline">\(L(T)\)</span>: Time average of <span
-        class="math inline">\(N(t)\)</span></a></li>
-        <li><a href="#lambdat-cumulative-arrival-rate"
-        id="toc-lambdat-cumulative-arrival-rate"><span
-        class="math inline">\(\Lambda(T)\)</span>: Cumulative arrival
-        rate</a></li>
-        <li><a href="#wt-average-residence-time-per-arrival"
-        id="toc-wt-average-residence-time-per-arrival"><span
-        class="math inline">\(w(T)\)</span>: Average residence time per
-        arrival</a></li>
-        </ul></li>
-        <li><a href="#the-finite-version-of-littles-law"
-        id="toc-the-finite-version-of-littles-law">3.4 The finite
-        version of Little’s Law</a></li>
-        </ul></li>
-        </ul>
-      </nav>
-            <blockquote>
-            <blockquote>
-            <p><strong>Note: <em>This document is a work in progress.
-            This note will be removed when all the charts produced by
-            the analysis are documented</em></strong>.</p>
-            </blockquote>
-            </blockquote>
-            <h1 id="what-is-sample-path-analysis">1 What is Sample Path
-            Analysis?</h1>
-            <p>Sample path analysis is a <em>deterministic</em> analysis
-            that can be run on any observed flow process history. It
-            lets us reason about the dynamics and stability of flow
-            processes over the long run, and in real-time.</p>
-            <p>We use sample path analysis to determine whether a
-            process is stable, and if not what the causes of instability
-            are, and what needs to be done to move the process towards
-            operationally acceptable range of stability.</p>
-            <p><strong>Please see our technical note</strong>: <a
-            href="../../articles/not-statistics">Sample path analysis is
-            not a statistical technique.</a></p>
-            <h2 id="the-charts.">1.1 The charts.</h2>
-            <p>The results of the analysis are a collection of charts
-            that are written to an output directory.</p>
-            <p>For input <code>events.csv</code>, output is organized as
-            follows:</p>
-            <div class="sourceCode" id="cb1"><pre
-            class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>output-dir<span class="op">&gt;</span>/</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> events/</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="ex">└──</span> <span class="op">&lt;</span>scenario<span class="op">&gt;</span>/                 <span class="co"># e.g., latest</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> input/                  <span class="co"># a snapshot  of the input csv data</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> core/                   <span class="co"># core flow metrics &amp; tables</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="ex">│</span>   └── panels/             <span class="co"># single-panel charts</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> convergence/            <span class="co"># convergence vs divergence</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="ex">│</span>   └── panels/             <span class="co"># single-panel charts</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> stability/              <span class="co"># boundedness and existence of limits</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="ex">│</span>   └── panels/             <span class="co"># single-panel charts</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="ex">├──</span> advanced/               <span class="co"># optional deep-dive charts</span></span></code></pre></div>
-            <p>This reference describes every chart produced by the
-            <code>samplepath</code> CLI, grouped by chart type.</p>
-            <h1 id="a-worked-example">2 A Worked Example</h1>
-            <p>The example charts in this reference and the underlying
-            narrative are discussed in our post <a
-            href="https://www.polaris-flow-dispatch.com/i/172332418/sample-path-analysis-a-worked-example">Little’s
-            Law in a Complex Adaptive System</a></p>
-            <p>The example charts in each section below are drawn from
-            the Polaris scenario <a
-            href="https://github.com/presence-calculus/samplepath/tree/main/examples/polaris/flow-of-work/complete-stories-outliers-removed">completed-stories-outliers-removed</a>.</p>
-            <p>Note: All calculations are done in <em>continuous
-            time</em> and all charts report time accumulations in
-            hours.</p>
-            <h1 id="sample-path-flow-metrics">3 Sample Path Flow
-            Metrics</h1>
-            <p>Time series charts showing the core functions that govern
-            the long run dynamics of a <a
-            href="https://www.polaris-flow-dispatch.com/i/172332418/flow-processes">flow
-            process</a>.</p>
-            <blockquote>
-            <p>To keep things grounded think of the csv file that you
-            are providing as input to the analysis as the flow process
-            under analysis.</p>
-            <p>The current version of the library only analyzes binary
-            flow processes - where start and end dates represent
-            arrivals/departures events, the effect we are measuring is
-            the presence or absence of items in the process, and the
-            sample path represents the <strong>counting
-            process</strong>: the number of items present in the process
-            at any moment in time (aka the WIP).</p>
-            <p>As we will note along the way, <strong>every
-            concept</strong> in this document generalizes even for the
-            much more general forms of flow processes once you plug in a
-            different sample path. In particular, the set of outputs
-            produced by sample path analysis are
-            <strong>identical</strong> even after generalization!</p>
-            <p>This is why this set of charts is the
-            <strong>foundation</strong> of flow process dynamics.</p>
-            </blockquote>
-            <p><strong>Conventions</strong></p>
+            <div class="doc-layout has-toc">
+                <aside class="doc-toc" aria-label="Contents">
+          <nav id="TOC" role="doc-toc">
+            <h2 id="toc-title">Contents</h2>
             <ul>
-            <li><p>All charts are defined over a finite observation
-            horizon of length <span
-            class="math inline">\(T_{\max}\)</span>.</p></li>
-            <li><p>Lower-case <span class="math inline">\(t\)</span> is
-            a parameter denoting <em>instantaneous</em> time.</p>
-            <p>Functions of <span class="math inline">\(t\)</span> (such
-            as <span class="math inline">\(N(t)\)</span>) denote sample
-            paths: the values of some measurable property of a process
-            at a specific moment <span class="math inline">\(t \in
-            [0,\,T_{\max}]\)</span>.</p></li>
-            <li><p>Upper-case <span class="math inline">\(T\)</span> is
-            a <em>prefix parameter</em>: a scalar value that determines
-            a <em>time interval</em> <span
-            class="math inline">\([0,\,T]\)</span>.</p>
-            <p>Functions of <span class="math inline">\(T\)</span> (such
-            as <span class="math inline">\(L(T)\)</span>, <span
-            class="math inline">\(\Lambda(T)\)</span>, and <span
-            class="math inline">\(w(T)\)</span> below) are
-            <em>functionals</em>: functions that take a sample path as
-            input and compute a scalar value from the behavior of that
-            function over that interval <span
-            class="math inline">\([0,T]\)</span>. Here <span
-            class="math inline">\(T\)</span> can range over any value in
-            the observation window <span
-            class="math inline">\((0,\,T_{\max}]\)</span>.</p>
-            <p>These functionals are purely deterministic, pathwise
-            calculations (definite integrals in our case) and should not
-            be confused with statistical aggregates.</p></li>
-            </ul>
-            <h2 id="the-core-calculations-for-littles-law">3.1 The Core
-            Calculations for Little’s Law</h2>
-            <p>The input to the analysis is a sample path <span
-            class="math inline">\(N(t)\)</span>.</p>
-            <p>There are six core functionals:</p>
+            <li><a href="#sample-path-analysis"
+            id="toc-sample-path-analysis">1 Sample Path Analysis</a>
             <ul>
-            <li><span class="math inline">\(H(T)\)</span>: the
-            cumulative presence mass under the sample path over <span
-            class="math inline">\([0,T]\)</span>.</li>
-            <li><span class="math inline">\(L(T)\)</span>: the time
-            average of <span class="math inline">\(N(t)\)</span>,
-            defined as <span
-            class="math inline">\(L(T)=\frac{H(T)}{T}\)</span>.</li>
-            <li><span class="math inline">\(\Lambda(T)\)</span>: the
-            cumulative arrival rate, defined as <span
-            class="math inline">\(\Lambda(T)=\frac{A(T)}{T}\)</span>.</li>
-            <li><span class="math inline">\(w(T)\)</span>: the average
-            residence time per arrival, defined as <span
-            class="math inline">\(w(T)=\frac{H(T)}{A(T)}\)</span>.</li>
-            <li><span class="math inline">\(\Theta(T)\)</span>: the
-            cumulative departure rate, defined as <span
-            class="math inline">\(\Theta(T)=\frac{D(T)}{T}\)</span>.</li>
-            <li><span class="math inline">\(w&#39;(T)\)</span>: the
-            average residence time per departure, defined as <span
-            class="math inline">\(w&#39;(T)=\frac{H(T)}{D(T)}\)</span>.</li>
-            </ul>
-            <p>We may write L(T) as</p>
-            <p><span class="math display">\[
-            L(T) = \frac{H(T)}{T}
-                 = \frac{A(T)}{T}.\frac{H(T)}{A(T)}.
-            \]</span></p>
-            <p>Which we may write as,</p>
-            <p><span class="math display">\[
-            L(T) = \Lambda(T).w(T).
-            \]</span></p>
-            <p>This is a finite version of Little’s Law, which we call
-            the <em>Presence Invariant for arrivals</em>.</p>
-            <blockquote>
-            <p>It is a deterministic accounting identity that expresses
-            the relationship between the time average of cumulative
-            presence mass and same cumulative presence mass averaged
-            across arrivals when viewed over a consistent observation
-            winodw.</p>
-            </blockquote>
-            <p>Interestingly we can repeat these calculations with
-            departures instead of arrivals.</p>
-            <p><span class="math display">\[
-            L(T) = \frac{H(T)}{T}
-                 = \frac{D(T)}{T}.\frac{H(T)}{D(T)}.
-            \]</span></p>
-            <p>which we may write as</p>
-            <p><span class="math display">\[
-            L(T) = \Theta(T).w&#39;(T).
-            \]</span></p>
-            <p>Thus we have the <em>Presence Invariant for
-            departures</em>:</p>
-            <p><span class="math display">\[
-            \Lambda(T).w(T) = L(T) = \Theta(T).w&#39;(T)
-            \]</span></p>
-            <p>and this holds <em>for all time points over all finite
-            observation windows</em>.</p>
-            <blockquote>
-            <p>The Presence Invariant defined above are
-            <em>deterministic identities</em> that hold
-            <em>simultaneously </em>for every point in time in every
-            finite observation window <span
-            class="math inline">\([0,T]\)</span> with <span
-            class="math inline">\(0 &lt; T &lt; \infty\)</span> and
-            <span class="math inline">\(A(T) &gt; 0\)</span>.</p>
-            </blockquote>
-            <p>This implies that the three component functions in each
-            invariant <em>always</em> evolve in a way that preserves the
-            identity, <em>even when the arrival and departure focused
-            arrival/departure rates, and residence times are not
-            equal</em>.</p>
-            <p>These invariants are thus <em>deterministic
-            constraints</em> that governs the global dynamics of
-            <em>any</em> flow process, even those that are not operating
-            in steady state. It is the foundation for adapting Little’s
-            Law for use in processes that operate far from steady state
-            equilibrium like most software processes are.</p>
-            <h2 id="summary-chart">3.2 Summary chart</h2>
-            <p>This chart can be found at the top level under
-            <code>&lt;scenario&gt;/</code></p>
-            <table>
-            <colgroup>
-            <col style="width: 13%" />
-            <col style="width: 37%" />
-            <col style="width: 49%" />
-            </colgroup>
-            <thead>
-            <tr>
-            <th>File</th>
-            <th>What it shows</th>
-            <th>What it means</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-            <td><code>sample_path_flow_metrics.png</code></td>
-            <td>Four-panel vertical stack: <code>N(t)</code>,
-            <code>L(T)</code>, <code>Λ(T)</code>, <code>w(T)</code> over
-            the same time axis.</td>
-            <td>One-glance view of the core finite-window Little’s Law
-            metrics and how they co-evolve along the sample path.</td>
-            </tr>
-            </tbody>
-            </table>
-            <figure>
-            <img src="images/sample_path_flow_metrics.png"
-            alt="Fig 1. Sample Path Flow Metrics" />
-            <figcaption aria-hidden="true">Fig 1. Sample Path Flow
-            Metrics</figcaption>
-            </figure>
-            <p>In this chart the main thing to pay attention to are the
-            <em>relationships</em> between the <em>changes</em> in each
-            of these component charts over time.</p>
+            <li><a href="#methodology" id="toc-methodology">1.1
+            Methodology</a></li>
+            </ul></li>
+            <li><a href="#notational-conventions"
+            id="toc-notational-conventions">2 Notational Conventions</a>
             <ul>
-            <li>At any point in time review whether <span
-            class="math inline">\(L(T)\)</span> the time average of
-            <span class="math inline">\(N(t)\)</span> is changing or
-            flat.</li>
-            <li>If it is changing then the finite version of Little’s
-            Law tells us that this must be because at least one of <span
-            class="math inline">\(\Lambda(T)\)</span> or <span
-            class="math inline">\(w(T)\)</span> changed.</li>
-            </ul>
-            <p>It means that these are the <em>only</em> possible
-            explanations:</p>
+            <li><a href="#measurements" id="toc-measurements">2.1
+            Measurements</a></li>
+            <li><a href="#notation" id="toc-notation">2.2
+            Notation</a></li>
+            <li><a href="#timescales-and-indexes"
+            id="toc-timescales-and-indexes">2.3 Timescales and
+            Indexes</a></li>
+            <li><a href="#event-display" id="toc-event-display">2.4
+            Event display</a></li>
+            </ul></li>
+            <li><a href="#sample-path-flow-metrics"
+            id="toc-sample-path-flow-metrics">3 Sample Path Flow
+            Metrics</a></li>
+            <li><a href="#flow-dynamics" id="toc-flow-dynamics">4 Flow
+            Dynamics</a>
             <ul>
-            <li><span class="math inline">\(\Lambda(T)\)</span> changed:
-            more or fewer things are arriving.</li>
-            <li><span class="math inline">\(w(T)\)</span> changed:
-            things are taking more or less time to finish.</li>
-            <li>A combination of the two.</li>
-            </ul>
-            <p>In the last case there are two possibilities.</p>
-            <p>Since <span class="math inline">\(L(T)\)</span> is the
-            product of <span class="math inline">\(\Lambda(T)\)</span>
-            and <span class="math inline">\(w(T)\)</span>:</p>
+            <li><a href="#chart-01-point-process"
+            id="toc-chart-01-point-process">4.1 Point Process - Event
+            Stream</a></li>
+            <li><a href="#chart-02-arrivals-a"
+            id="toc-chart-02-arrivals-a">4.2 A(T) - Cumulative
+            Arrivals</a></li>
+            <li><a href="#chart-03-departures-d"
+            id="toc-chart-03-departures-d">4.3 D(T) - Cumulative
+            Departures</a></li>
+            <li><a href="#chart-04-cfd" id="toc-chart-04-cfd">4.4 CFD -
+            Cumulative Flow Diagram</a></li>
+            <li><a href="#chart-05-sample-path-n"
+            id="toc-chart-05-sample-path-n">4.5 N(t) - Process
+            State</a></li>
+            <li><a href="#chart-06-presence-mass-h"
+            id="toc-chart-06-presence-mass-h">4.6 H(T) - Presence
+            Mass</a></li>
+            <li><a href="#chart-07-time-average-l"
+            id="toc-chart-07-time-average-l">4.7 L(T) - Time-Average of
+            Presence</a></li>
+            </ul></li>
+            <li><a href="#flow-geometry" id="toc-flow-geometry">5 Flow
+            Geometry</a>
             <ul>
-            <li>If they move in the same direction they lead to
-            proportionally large changes in L(T)</li>
-            <li>If they move in opposite directions, the changes cancel
-            each other and <span class="math inline">\(L(T)\)</span>
-            tends to flatten.</li>
-            </ul>
-            <p>The last situation happens often when there is an
-            internal feedback loop at play in the process.</p>
-            <p>All these different types of dynamics can be at play at
-            different points in the evolution of the process. This chart
-            is the place where all those long run dynamics will show
-            most directly and clearly.</p>
-            <p>It helps us answer “how did the process evolve to produce
-            the flow metrics we are seeing at any given moment in time?”
-            These causal relationships allows us to monitor changes in
-            L(T) and then immediately investigate the cause of that
-            change.</p>
-            <p>See our post <a
-            href="https://www.polaris-flow-dispatch.com/i/171471652/the-causal-mechanism">The
-            Causal Arrow in Little’s Law</a> for more discussion on what
-            this means.</p>
-            <hr />
-            <h2 id="component-metrics">3.3 Component metrics</h2>
-            <p>Stacks (multi-panel composite charts) are written at the
-            root of <code>core/</code>:</p>
-            <table>
-            <colgroup>
-            <col style="width: 27%" />
-            <col style="width: 72%" />
-            </colgroup>
-            <thead>
-            <tr>
-            <th>File</th>
-            <th>What it shows</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-            <td><code>core/sample_path_flow_metrics.png</code></td>
-            <td>Four-panel stack: <code>N(t)</code>, <code>L(T)</code>,
-            <code>Λ(T)</code>, <code>w(T)</code> over the same time
-            axis.</td>
-            </tr>
-            <tr>
-            <td><code>core/lt_derivation_stack.png</code></td>
-            <td>Four-panel stack: CFD, <code>N(t)</code>,
-            <code>H(T)</code>, <code>L(T)</code> showing how L(T) is
-            derived.</td>
-            </tr>
-            <tr>
-            <td><code>core/departure_flow_metrics.png</code></td>
-            <td>Four-panel stack: <code>N(T)</code>, <code>L(T)</code>,
-            <code>Θ(T)</code>, <code>w'(T)</code> over the same time
-            axis.</td>
-            </tr>
-            </tbody>
-            </table>
-            <p>Individual panels are written under
-            <code>core/panels/</code>:</p>
-            <table>
-            <colgroup>
-            <col style="width: 16%" />
-            <col style="width: 39%" />
-            <col style="width: 43%" />
-            </colgroup>
-            <thead>
-            <tr>
-            <th>File</th>
-            <th>What it shows</th>
-            <th>What it means</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-            <td><code>core/panels/sample_path_N.png</code></td>
-            <td>Step chart of <code>N(t)</code> (count of elements
-            present in the boundary) vs time.</td>
-            <td>Raw sample path of WIP/presence: queues, surges, and
-            droughts show up directly.</td>
-            </tr>
-            <tr>
-            <td><code>core/panels/time_average_N_L.png</code></td>
-            <td>Line chart of <code>L(T)</code> = time-average of
-            <code>N(t)</code> over <code>[0, T]</code>.</td>
-            <td>Tracks how average WIP over the observation window
-            converges (or doesn’t). This is the “L” in Little’s Law,
-            measured pathwise.</td>
-            </tr>
-            <tr>
-            <td><code>core/panels/cumulative_arrival_rate_Lambda.png</code></td>
-            <td>Line chart of <code>Λ(T)</code> (cumulative arrival rate
-            <code>A(T)/(T−t₀)</code>), with optional percentile clipping
-            and warmup exclusion.</td>
-            <td>Empirical arrival rate over time, with tools to ignore
-            early transients and outliers.</td>
-            </tr>
-            <tr>
-            <td><code>core/panels/average_residence_time_w.png</code></td>
-            <td>Line chart of <code>w(T)</code> (average residence time
-            per arrival over the window, in hours).</td>
-            <td>Shows how the time items spend in the boundary evolves;
-            long/fat tails and slow drainage show up as increasing
-            <code>w(T)</code>.</td>
-            </tr>
-            <tr>
-            <td><code>core/panels/cumulative_departure_rate_Theta.png</code></td>
-            <td>Line chart of <code>Θ(T)</code> (cumulative departure
-            rate <code>D(T)/(T−t₀)</code>).</td>
-            <td>Tracks how average departures per unit time evolve along
-            the observation window.</td>
-            </tr>
-            <tr>
-            <td><code>core/panels/average_residence_time_w_prime.png</code></td>
-            <td>Line chart of <code>w'(T)</code> (average residence time
-            per departure, in hours).</td>
-            <td>Shows how average residence time per departure evolves;
-            divergence signals increasing drag on departures.</td>
-            </tr>
-            <tr>
-            <td><code>core/panels/cumulative_presence_mass_H.png</code></td>
-            <td>Line chart of <code>H(T)</code> (cumulative presence
-            mass over the window, in item-hours).</td>
-            <td>Total presence mass accumulated by items in the system,
-            used in <code>L(T)</code> and <code>w(T)</code>
-            definitions.</td>
-            </tr>
-            <tr>
-            <td><code>core/panels/littles_law_invariant.png</code></td>
-            <td>Scatter of <code>L(T)</code> (x-axis) vs
-            <code>Λ(T)·w(T)</code> (y-axis) with <code>y=x</code>
-            reference line, equal aspect ratio.</td>
-            <td>Pure Little’s Law invariant check: all finite points
-            should lie on <code>y=x</code> if the metric calculations
-            are consistent.</td>
-            </tr>
-            <tr>
-            <td><code>core/panels/departure_littles_law_invariant.png</code></td>
-            <td>Scatter of <code>L(T)</code> (x-axis) vs
-            <code>Θ(T)·w'(T)</code> (y-axis) with <code>y=x</code>
-            reference line, equal aspect ratio.</td>
-            <td>Departure-focused invariant check: all finite points
-            should lie on <code>y=x</code> if the metric calculations
-            are consistent.</td>
-            </tr>
-            </tbody>
-            </table>
-            <p>Their detail descriptions follow.</p>
-            <h3 id="the-sample-path-nt">The sample path <span
-            class="math inline">\(N(t)\)</span></h3>
-            <p><code>sample_path_N.png</code></p>
-            <p>Since we measure in continuous time, this chart is a
-            <em>step chart</em>.</p>
+            <li><a href="#chart-08-arrival-rate-lambda"
+            id="toc-chart-08-arrival-rate-lambda">5.1 <span
+            class="math inline">\(\Lambda(T)\)</span> - Arrival
+            Rate</a></li>
+            <li><a href="#chart-09-residence-w"
+            id="toc-chart-09-residence-w">5.2 w(T) - Residence Time per
+            Arrival</a></li>
+            <li><a href="#chart-12-departure-rate-theta"
+            id="toc-chart-12-departure-rate-theta">5.3 <span
+            class="math inline">\(\Theta(T)\)</span> - Departure Rate
+            (Throughput)</a></li>
+            <li><a href="#chart-13-residence-w-prime"
+            id="toc-chart-13-residence-w-prime">5.4 w’(T) - Residence
+            per Departure</a></li>
+            <li><a href="#chart-14-departure-invariant"
+            id="toc-chart-14-departure-invariant">5.5 <span
+            class="math inline">\(L(T)=\Theta(T)\cdot w&#39;(T)\)</span>
+            Invariant - Departure Invariant</a></li>
+            <li><a href="#chart-10-arrival-invariant"
+            id="toc-chart-10-arrival-invariant">5.6 <span
+            class="math inline">\(L(T)=\Lambda(T)\cdot w(T)\)</span>
+            Invariant - Arrival Invariant</a></li>
+            </ul></li>
+            <li><a href="#reasoning-about-flow"
+            id="toc-reasoning-about-flow">6 Reasoning about Flow</a>
             <ul>
-            <li>The line will go up with each arrival and go down with
-            each departure.</li>
-            <li>The line will stay steady if departures and arrivals
-            balance each other at a given instant.</li>
-            <li>In between arrivals and departures, the line will stay
-            flat.</li>
+            <li><a href="#chart-11-arrival-stack"
+            id="toc-chart-11-arrival-stack">6.1 Arrival Stack - Arrival
+            Dashboard</a></li>
+            <li><a href="#chart-15-departure-stack"
+            id="toc-chart-15-departure-stack">6.2 Departure Focused
+            Stack - Departure Dashboard</a></li>
+            </ul></li>
+            <li><a href="#convergence-and-stability"
+            id="toc-convergence-and-stability">7 Convergence and
+            Stability</a>
+            <ul>
+            <li><a href="#chart-16-arrival-departure-rate-convergence"
+            id="toc-chart-16-arrival-departure-rate-convergence">7.1
+            <span class="math inline">\(\Lambda(T)\)</span>-<span
+            class="math inline">\(\Theta(T)\)</span> Rate Convergence -
+            Rate Convergence</a></li>
+            <li><a href="#chart-17-process-time-convergence"
+            id="toc-chart-17-process-time-convergence">7.2 Process Time
+            Convergence - Time Convergence</a></li>
+            <li><a href="#chart-20-sample-path-convergence"
+            id="toc-chart-20-sample-path-convergence">7.3 Top-Level
+            Convergence <span class="math inline">\(L(T)\)</span> vs
+            <span class="math inline">\(\lambda^*(t)\cdot
+            W^*(t)\)</span></a></li>
+            </ul></li>
+            <li><a href="#appendices" id="toc-appendices">8
+            Appendices</a>
+            <ul>
+            <li><a href="#derivative-of-lt"
+            id="toc-derivative-of-lt">8.1 Derivative of <span
+            class="math inline">\(L(T)\)</span></a></li>
+            <li><a
+            href="#structural-vs-transient-effects-on-a-sample-path"
+            id="toc-structural-vs-transient-effects-on-a-sample-path">8.2
+            Structural vs Transient Effects on a Sample Path</a></li>
+            <li><a
+            href="#perspective-symmetry-of-the-presence-invariant"
+            id="toc-perspective-symmetry-of-the-presence-invariant">8.3
+            Perspective Symmetry of the Presence Invariant</a></li>
+            </ul></li>
+            <li><a href="#references" id="toc-references">9
+            References</a></li>
             </ul>
-            <p>This is a real time chart that reveals current
-            congestion, bursts, and idle periods.</p>
-            <blockquote>
-            <p>If you are familiar with Cumulative Flow Diagrams, <span
-            class="math inline">\(N(t)\)</span> represents the distance
-            between the cumulative arrival line and the cumulative
-            departure line in the diagram.</p>
-            </blockquote>
-            <figure>
-            <img src="images/core/sample_path_N.png"
-            alt="Sample Path" />
-            <figcaption aria-hidden="true">Sample Path</figcaption>
-            </figure>
-            <h3 id="the-cumulative-presence-mass">The cumulative
-            presence mass</h3>
-            <p>A key quantity in sample path analysis is the
-            <em>cumulative presence mass</em>. This is calculated as the
-            definite integral of the sample path curve over [0,T]</p>
-            <p><span class="math display">\[
-            H(T) = \int_0^T N(t) dt
-            \]</span></p>
-            <p>Since the mass is a product of the number of items
-            present over time, the units of H(T) are in item-time. In
-            the language of the Presence Calculus, <span
-            class="math inline">\(H(T)\)</span> is <em>cumulative
-            presence</em> function over the sample path <span
-            class="math inline">\(N(t)\)</span>.</p>
-            <p>The functions that drive flow-process dynamics are the
-            time and item averages of H(T): L(T) and w(T). These
-            continuous functions of time are the key quantities in the
-            <em>finite version of Little’s Law</em>.</p>
-            <h3 id="lt-time-average-of-nt"><span
-            class="math inline">\(L(T)\)</span>: Time average of <span
-            class="math inline">\(N(t)\)</span></h3>
-            <p><code>time_average_N_L.png</code></p>
-            <p>Time-average WIP:</p>
-            <p><code>L(T)</code> is the time average of the cumulative
-            presence mass. May also be viewed as the rate at which the
-            area H(T) grows.</p>
-            <p>Its units are in items.</p>
-            <pre><code>L(T) = (1/T) H(T)</code></pre>
-            <p>Reveals whether long run average WIP diverges or
-            converges. This is the key top level indicator of process
-            stability. A flat line here indicates a stable process.</p>
-            <p>Please note once again that this is <em>not a statistical
-            average</em>.</p>
-            <figure>
-            <img src="images/core/time_average_N_L.png"
-            alt="Time Average of WIP" />
-            <figcaption aria-hidden="true">Time Average of
-            WIP</figcaption>
-            </figure>
-            <h3 id="lambdat-cumulative-arrival-rate"><span
-            class="math inline">\(\Lambda(T)\)</span>: Cumulative
-            arrival rate</h3>
-            <p><code>cumulative_arrival_rate_Lambda.png</code></p>
-            <p><code>Λ(T)</code> is the arrival rate of items that have
-            arrived up to T (may include items that started before the
-            window):</p>
-            <pre><code>Λ(T) = A(T) / T</code></pre>
-            <p>It’s units are items/time</p>
-            <p>If WIP was zero at the beginning of the observation
-            window, then this is the same as the arrival rate, otherwise
-            this over-counts the arrival rate at the start, but as we
-            observe the process for longer periods, those initial
-            end-effects get averaged out.</p>
-            <figure>
-            <img src="images/core/time_average_N_L.png"
-            alt="Cumulative Arrival Rate" />
-            <figcaption aria-hidden="true">Cumulative Arrival
-            Rate</figcaption>
-            </figure>
-            <h3 id="wt-average-residence-time-per-arrival"><span
-            class="math inline">\(w(T)\)</span>: Average residence time
-            per arrival</h3>
-            <p><code>average_residence_time_w.png</code></p>
-            <p>Average time items are observed as spending in the
-            observation window up to time T (clips the time that is
-            spent outside the window and thus not observed).</p>
-            <pre><code>w(T) =  H(T)/A(T)</code></pre>
-            <p>Tracks how “observed time in system” evolves over the
-            sample path. Its units are time.</p>
-            <p>Please see our posts <a
-            href="https://www.polaris-flow-dispatch.com/p/what-is-residence-time">What
-            is Residence Time</a> and <a
-            href="https://www.polaris-flow-dispatch.com/p/how-long-does-it-take">How
-            long does it take</a> for an explanation of what this metric
-            means.</p>
-            <p><em>Understanding the difference and relationship between
-            residence time and familiar metrics like Lead Time, Cycle
-            Time and Work Item Age is crucial for understanding why
-            sample path analysis works and these posts explain
-            this.</em></p>
-            <figure>
-            <img src="images/core/average_residence_time_w.png"
-            alt="Average Residence Time per Arrival" />
-            <figcaption aria-hidden="true">Average Residence Time per
-            Arrival</figcaption>
-            </figure>
-            <h2 id="the-finite-version-of-littles-law">3.4 The finite
-            version of Little’s Law</h2>
-            <p><code>littles_law_invariant.png</code></p>
-            <p>This plot visualizes the <a
-            href="https://www.polaris-flow-dispatch.com/i/172332418/the-finite-version-of-littles-law">finite
-            version of Little’s Law</a> at work.</p>
-            <p>It states that for all T,
-            <code>L(T)=Λ(T)·w(T)</code>.</p>
-            <p>We verify this by showing that when we plot
-            <code>L(T)</code> vs <code>Λ(T)·w(T)</code> on a scatter
-            plot, all the points will lie on the with
-            <code>y = x</code>.</p>
-            <figure>
-            <img src="images/core/littles_law_invariant.png"
-            alt="Little’s Law Invariant" />
-            <figcaption aria-hidden="true">Little’s Law
-            Invariant</figcaption>
-            </figure>
-            <p>Notice how points cluster around certain values of L(T).
-            These are significant operating modes for the process as it
-            moves towards stable states.</p>
-            <hr />
-            <!--
-            # Convergence - Equilibrium & coherence
-
-            | File                          | What it shows                                                                                                                   | What it means                                                                                                                                         |
-            | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-            | `sample_path_convergence.png` | Scatter of `L(T)` (x-axis) vs `λ*(t)·W*(t)` (y-axis) with `y=x` and an ε-band; annotated with a coherence score over a horizon. | Direct visual and quantitative test of whether the finite-window sample path obeys Little’s Law asymptotically (sample-path convergence / coherence). |
-
-            ![Sample Path Convergence](images/sample_path_convergence.png)
-
-            | File                                                         | What it shows                                                                                                                                                      | What it means                                                                                                                               |
-            | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-            | `convergence/arrival_departure_equilibrium.png`              | Two-row stack: (1) cumulative arrivals `A(t)` vs cumulative departures `D(t)`; (2) `Λ(T)` vs throughput rate `θ(T)=D(T)/(T−t₀)` with masking after last departure. | Tests arrival/departure equilibrium: whether `A(t)` and `D(t)` grow together and arrival/throughput rates converge.                         |
-            | `convergence/panels/arrival_rate_convergence.png`            | Single panel: `Λ(T)` and `λ*(t)` (empirical arrival rate) over time, with optional warmup and percentile-based y-limits.                                           | Compares window-averaged arrival rate to the element-wise empirical rate; checks consistency of the two ways of measuring “arrival rate”.   |
-            | `convergence/panels/residence_time_convergence.png`          | Single panel: `w(T)` vs `W*(t)` (empirical mean sojourn time of completed items) over time.                                                                        | Coherence between residence-time and sojourn-time views: if the process is coherent, these two series should converge together.             |
-            | `convergence/residence_sojourn_coherence.png`                | Two-row stack: (1) `w(T)` vs `W*(t)` overlay; (2) scatter of individual sojourn times against time, with `w(T)` as a reference line.                               | Ties the averaged quantities back to individual element sojourn times; helps see whether outliers or subpopulations are driving divergence. |
-            | `convergence/panels/residence_time_sojourn_time_scatter.png` | Line of `w(T)` over time with overlaid scatter of element *age* (if `--incomplete`) or sojourn time (if `--completed` / default).                                  | Visualizes how individual element ages/sojourn times relate to the evolving average residence time, and whether a stable band emerges.      |
-
-            ## `convergence/`
-
-            ```
-            <scenario>/convergence/
-            <scenario>/convergence/panels/
-            ```
-
-            ______________________________________________________________________
-
-            ## `convergence/arrival_departure_equilibrium.png`
-
-            Cumulative arrivals vs departures, plus arrival/throughput rate comparison.\
-            Tests for equilibrium.
-
-            ## `convergence/panels/arrival_rate_convergence.png`
-
-            `Λ(T)` (window-average) and `λ*(t)` (empirical).\
-            Checks rate consistency.
-
-            ## `convergence/panels/residence_time_convergence.png`
-
-            `w(T)` vs `W*(t)`.\
-            Coherence between window-average residence and empirical sojourn time.
-
-            ## `convergence/residence_sojourn_coherence.png`
-
-            Two-row comparison of averages + individual sojourn scatter.
-
-            ## `convergence/panels/residence_time_sojourn_time_scatter.png`
-
-            `w(T)` overlaid with individual ages or sojourns.
-
-            ## `sample_path_convergence.png`
-
-            Scatter of `L(T)` vs `λ*(t)·W*(t)` with tolerance band.\
-            Highest-level convergence and coherence view.
-
-            Controlled by **Convergence Options**:\
-            `--convergence`, `--coherence-eps`, `--completed`, `--incomplete`, `--warmup`.
-
-            ______________________________________________________________________
-
-            # Stability Charts
-
-            ## `stability/` and `stability/panels/` — Rate stability
-
-            | File                                         | What it shows                                                                                                          | What it means                                                                                                                                                     |
-            | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-            | `stability/panels/wip_growth_rate.png`       | Two-row stack: (1) `N(t)` step chart; (2) WIP growth rate `N(T)/T` with reference lines at 0 and 1.                    | Tests whether WIP grows linearly (instability) or sublinearly/flat (bounded or stabilizing), using a rate perspective.                                            |
-            | `stability/panels/total_age_growth_rate.png` | Two-row stack: (1) total active age `R(t)` in hours; (2) age growth rate `R(T)/T` with reference lines at 0 and 1.     | Looks at growth of total age of WIP: sustained growth points to accumulating, aging work and potential instability.                                               |
-            | `stability/rate_stability.png`               | Four-row stack: (1) `N(T)/T`; (2) `R(T)/T`; (3) `λ*(T)`; (4) `w(T)` vs `W*(t)`. Captioned “Equilibrium and Coherence”. | Integrated stability view: WIP and age growth rates, empirical arrival rate, and residence/sojourn coherence all on one canvas to assess long-run rate stability. |
-
-            Written under:
-
-            ```
-            <scenario>/stability/
-            <scenario>/stability/panels/
-            ```
-
-            Controlled by **Stability Options**: `--stability`.
-
-            ## `stability/panels/wip_growth_rate.png`
-
-            `N(t)` and its growth rate `N(T)/T`.\
-            Detects sublinear vs linear growth.
-
-            ## `stability/panels/total_age_growth_rate.png`
-
-            Total age `R(t)` and its growth rate.\
-            Identifies aging accumulation.
-
-            ## `stability/rate_stability.png`
-
-            Four-panel stability synthesis:
-
-            - `N(T)/T`
-            - `R(T)/T`
-            - `λ*(T)`
-            - `w(T)` vs `W*(t)`
-
-            ______________________________________________________________________
-
-            ______________________________________________________________________
-
-            # Advanced Charts
-
-            ## `advanced/` — Error terms, end-effects, and manifold view
-
-            | File                                                        | What it shows                                                                                                                                            | What it means                                                                                                                                                                         |
-            | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-            | `advanced/residence_convergence_errors.png`                 | Three-row stack: (1) `w(T)` vs `W*(t)` (dynamic); (2) `Λ(T)` vs `λ*(t)` (dynamic); (3) error magnitudes `e_W(T)` and `e_Λ(T)` with optional ε threshold. | Tracks *how* coherence is approached or violated, with explicit error terms for residence time and arrival rate over time.                                                            |
-            | `advanced/residence_time_convergence_errors_endeffects.png` | Four-row stack: same as above plus an end-effects panel with `r_H(T)` (mass share), `r_B(T)` (boundary share), and `ρ(T)=T/W*(t)`.                       | Decomposes residual errors into end-effect contributions and time-scaling, making it clear when divergence is driven by boundary conditions vs ongoing dynamics.                      |
-            | `advanced/invariant_manifold3D_log.png`                     | 3D log–log–log manifold plot: `x = log Λ(T)`, `y = log w(T)`, `z = log L(T)`, plotting the sample-path trajectory on the plane `z = x + y`.              | Geometric view of Little’s Law as an invariant plane; lets you see whether the observed trajectory sticks to the manifold and how it moves across regimes in (rate, time, WIP) space. |
-
-            Written under:
-
-            ```
-            <scenario>/advanced/
-            ```
-
-            Controlled by **Advanced Options**: `--advanced`.
-
-            ## `advanced/residence_convergence_errors.png`
-
-            `w(T)` vs `W*(t)`;\
-            `Λ(T)` vs `λ*(t)`;\
-            error magnitudes.
-
-            ## `advanced/residence_time_convergence_errors_endeffects.png`
-
-            Adds end-effects: `r_H(T)`, `r_B(T)`, `ρ(T)`.
-
-            ## `advanced/invariant_manifold3D_log.png`
-
-            3D log–log–log manifold:\
-            `(log Λ(T), log w(T), log L(T))` on the plane `z = x + y`.
-
-            ______________________________________________________________________
-            -->
+          </nav>
+        </aside>
+                <div class="doc-content">
+          <h1 id="sample-path-analysis">1 Sample Path Analysis</h1>
+          <p>This document is a catalog of charts generated by the
+          sample path analysis toolkit.</p>
+          <p>Given an input sample path (an arrival/departure point
+          process, as shown above), all computations are deterministic.
+          Every value depends only on event order and the elapsed time
+          between events on that path.</p>
+          <p>Each chart shows one or more metrics and their
+          relationships to each other and to the underlying events on
+          the sample path. At any point in time, each metric value can
+          be traced to the <em>specific event(s)</em> that produced it.
+          That is what enables reliable cause-and-effect analysis of
+          flow-metric changes.</p>
+          <p>None of these calculations are statistical summaries, and
+          none rely on probabilistic assumptions. To repeat: given the
+          input sample path, every value is fully determined.</p>
+          <p>Another key feature: canonical sample path flow metrics are
+          indexed by <em>events</em> on the sample path.
+          Calendar-indexed views are derived samples of the same
+          event-resolved calculations. For theory and formal definitions
+          behind why this matters, see <a
+          href="../../articles/theory">Sample Path Theory</a>.</p>
+          <p>For CLI options and output contracts, see <a
+          href="../../articles/cli">Command Line Reference</a>.</p>
+          <h2 id="methodology">1.1 Methodology</h2>
+          <p>Please see the article <a
+          href="../../articles/a-methodological-contrast">Sample Path
+          Analysis vs Statistics</a> about the deeper methodological
+          contrasts between sample path analysis and current techniques
+          for measuring flow metrics, and why these matter in accurate
+          reasoning about flow.</p>
+          <h1 id="notational-conventions">2 Notational Conventions</h1>
+          <p>The charts are introduced in a canonical derivation arc
+          starting with the sample path: each metric is derived
+          deterministically from prior metrics or directly from the
+          sample path itself. The reader is strongly encouraged to read
+          these entries in order, as earlier entries introduce
+          theoretical concepts and terminology in context, and they are
+          assumed in later ones.</p>
+          <h2 id="measurements">2.1 Measurements</h2>
+          <p>All measurements are defined over an observation window
+          with a <em>fixed</em> starting point that we will denote as
+          <span class="math inline">\(0\)</span>. The underlying process
+          may evolve stochastically or non-deterministically. At any
+          moment, however, we work with the realized prefix of its
+          sample path observed up to a finite horizon <span
+          class="math inline">\(T_{\max}\)</span>. It is important to
+          note that <span class="math inline">\(T_{\max}\)</span>
+          denotes the <em>elapsed time</em> since the fixed origin <span
+          class="math inline">\(0\)</span>, not an absolute
+          timestamp.</p>
+          <p>As more events are observed, additional portions of the
+          sample path are revealed, the observable horizon extends, and
+          the associated measurements are recomputed on the extended
+          prefix.</p>
+          <p>Given a realized sample path up to a fixed finite horizon,
+          all measurements made over that prefix are deterministic. Even
+          when the underlying process is non-deterministic, the
+          measurements applied to the observed prefix are not.</p>
+          <h2 id="notation">2.2 Notation</h2>
+          <ul>
+          <li><p>Lower-case <span class="math inline">\(t\)</span>
+          denotes <em>instantaneous</em> time.<br />
+          </p></li>
+          <li><p>Upper-case <span class="math inline">\(T\)</span>
+          denotes a <em>prefix horizon</em> of the observation interval,
+          i.e. an interval <span class="math inline">\((0, T]\)</span>
+          with <span class="math inline">\(0 &lt; T \le
+          T_{\max}\)</span>. We adopt half-open intervals by default:
+          the interval excludes the left endpoint and includes the right
+          endpoint.</p></li>
+          <li><p>For a fixed horizon <span
+          class="math inline">\(T\)</span>, the within-window time
+          variable <span class="math inline">\(t\)</span> satisfies
+          <span class="math inline">\(0 &lt; t \le T\)</span>.</p></li>
+          <li><p>Functions of <span class="math inline">\(t\)</span>
+          (such as <span class="math inline">\(N(t)\)</span>) denote
+          instantaneous sample-path values at time <span
+          class="math inline">\(t\)</span>.</p></li>
+          <li><p>Functions of <span class="math inline">\(T\)</span>
+          represent <em>cumulative quantities</em> or normalized
+          quantities derived from them, computed over the interval <span
+          class="math inline">\((0, T]\)</span>.</p>
+          <p>For each <span class="math inline">\(T\)</span>, we
+          consider the prefix window <span class="math inline">\((0,
+          T]\)</span>. Endpoint quantities such as <span
+          class="math inline">\(F(T)\)</span> are values determined by
+          the prefix up to and including time <span
+          class="math inline">\(T\)</span>, and as <span
+          class="math inline">\(T\)</span> varies over <span
+          class="math inline">\((0, T_{\max}]\)</span>, these endpoint
+          values form the trajectory <span class="math inline">\(T
+          \mapsto F(T)\)</span> which is what we display on all the
+          charts by default.</p>
+          <blockquote>
+          <p>This uses the standard <a
+          href="https://en.wikipedia.org/wiki/C%C3%A0dl%C3%A0g">càdlàg</a>
+          convention for counting/jump processes: sample paths are
+          right-continuous with left limits.</p>
+          </blockquote></li>
+          </ul>
+          <p>All cumulative functions are deterministic, pathwise
+          calculations (definite integrals, discrete sums, and
+          finite-window normalizations) applied to the realized prefix
+          and should not be confused with statistical measures or
+          ensemble aggregates.</p>
+          <h2 id="timescales-and-indexes">2.3 Timescales and
+          Indexes</h2>
+          <p>All charts use continuous time on the x-axis.</p>
+          <ul>
+          <li>In event-indexed views, points are evaluated at exact
+          event timestamps from the input sample path.</li>
+          <li>In calendar-indexed views, points are evaluated at
+          calendar boundaries, but values are still computed from the
+          same underlying event-resolved pathwise calculations.</li>
+          </ul>
+          <p>Internally, durations are measured in seconds and then
+          durations and rates are converted automatically to a
+          consistent scale suitable for human-friendly display. This
+          automatic scaling of units happens <em>on the y-axis
+          only</em>; the x-axis remains continuous time.</p>
+          <p>Calendar indexing is simply a coarser <em>sampling
+          grid</em> over <em>metrics</em> computed from the
+          event-resolved sample path at the input granularity. We do not
+          pre-aggregate events into calendar buckets and then compute
+          flow metrics from those aggregates, like other flow metrics
+          tools (incorrectly) do.</p>
+          <p>All core charts shown in this document should be assumed to
+          be event-indexed by default, unless explicitly specified
+          otherwise.</p>
+          <p>Although calendar dates may appear on the time axis as
+          reference labels, the underlying x-axis values correspond to
+          exact event timestamps. These timestamps are not constrained
+          to fall on calendar reporting boundaries and may occur at
+          arbitrary points in continuous time.</p>
+          <h2 id="event-display">2.4 Event display</h2>
+          <p>Event indexing is a key differentiator of sample path
+          analysis, so charts are shown with event-resolved overlays by
+          default: each plotted point is tied to an arrival or departure
+          event. This makes the event-level impact on each flow-metric
+          trajectory explicit. Arrival points are colored purple,
+          departure points green, and each point includes a drop line to
+          its x-axis timestamp. This detail is essential for
+          deterministic cause-and-effect analysis.</p>
+          <p>Each chart also has a <code>--no-events</code> version with
+          overlays removed. These views are useful for higher-level
+          gestalt analysis of trajectories across views, especially in
+          dashboards. When reviewing these charts, I recommend you take
+          a look at both views to build intuition.</p>
+          <h1 id="sample-path-flow-metrics">3 Sample Path Flow
+          Metrics</h1>
+          <p>The Presence Invariant is the finite-horizon form of
+          Little’s Law.</p>
+          <p><span class="math display">\[
+          \begin{aligned}
+          L(T) &amp;= \Lambda(T)\,w(T) = \Theta(T)\,w&#39;(T)
+          \end{aligned}
+          \]</span></p>
+          <p>For the full derivation context and interpretation, refer
+          to <a href="../../articles/theory#presence-invariant">Sample
+          Path Theory: Presence Invariant</a>.</p>
+          <p>The quantities in this law are the finite horizon
+          equivalents of the quantities in the familiar steady state
+          view of Little’s Law, But unlike the steady state version the
+          presence invariant <em>holds unconditionally at all
+          times</em>.</p>
+          <p>This chapter is organized into three layers:</p>
+          <ol type="1">
+          <li><strong>Flow Dynamics</strong>: metrics from the sample
+          path up to <span class="math inline">\(L(T)\)</span> that
+          determine process dynamics.</li>
+          <li><strong>Flow Geometry</strong>: arrival/departure
+          factorizations and invariant constraints that provide
+          diagnostic coordinates for reasoning about flow.</li>
+          <li><strong>Reasoning about Flow</strong>: aligned multi-panel
+          stack views that combine dynamics and geometry on a common
+          timeline.</li>
+          </ol>
+          <p>Convergence and stability are presented afterward as a
+          separate chapter, so the core structural story stands on its
+          own.</p>
+          <h1 id="flow-dynamics">4 Flow Dynamics</h1>
+          <table>
+          <colgroup>
+          <col style="width: 25%" />
+          <col style="width: 25%" />
+          <col style="width: 25%" />
+          <col style="width: 25%" />
+          </colgroup>
+          <thead>
+          <tr>
+          <th>Chart</th>
+          <th>Name</th>
+          <th>Formula</th>
+          <th>Units</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+          <td><a href="#chart-01-point-process">Point Process</a></td>
+          <td>Sample Path</td>
+          <td>Input event stream</td>
+          <td>N/A</td>
+          </tr>
+          <tr>
+          <td><a href="#chart-02-arrivals-a">A(T)</a></td>
+          <td>Cumulative Arrivals</td>
+          <td><span class="math inline">\(A(T)=\sum \text{arrivals in
+          }(0,T]\)</span></td>
+          <td>Elem</td>
+          </tr>
+          <tr>
+          <td><a href="#chart-03-departures-d">D(T)</a></td>
+          <td>Cumulative Departures</td>
+          <td><span class="math inline">\(D(T)=\sum \text{departures in
+          }(0,T]\)</span></td>
+          <td>Elem</td>
+          </tr>
+          <tr>
+          <td><a href="#chart-04-cfd">CFD</a></td>
+          <td>Cumulative Flow Diagram</td>
+          <td></td>
+          <td>N/A</td>
+          </tr>
+          <tr>
+          <td><a href="#chart-05-sample-path-n">N(t)</a></td>
+          <td>Instantaneous Process State</td>
+          <td><span class="math inline">\(N(t)=A(T)-D(T)\)</span></td>
+          <td>Elem</td>
+          </tr>
+          <tr>
+          <td><a href="#chart-06-presence-mass-h">H(T)</a></td>
+          <td>Cumulative Presence Mass</td>
+          <td><span class="math inline">\(H(T)=\int_0^T
+          N(t)\,dt\)</span></td>
+          <td>Elem-Time</td>
+          </tr>
+          <tr>
+          <td><a href="#chart-07-time-average-l">L(T)</a></td>
+          <td>(Time) Average State</td>
+          <td><span class="math inline">\(L(T)=H(T)/T\)</span></td>
+          <td>Elem</td>
+          </tr>
+          </tbody>
+          </table>
+          <h2 id="chart-01-point-process">4.1 Point Process - Event
+          Stream</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/arrival_departure_indicator_process.png"
+          alt="Point Process (with-events)" />
+          <figcaption aria-hidden="true">Point Process
+          (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/core/panels/arrival_departure_indicator_process.png"
+          alt="Point Process (no-events)" />
+          <figcaption aria-hidden="true">Point Process
+          (no-events)</figcaption>
+          </figure>
+          </details>
+          <p>This is the sample path: the input to sample path analysis.
+          It is the observed behavior of some operational process
+          modeled as a sequence of arrival and departure events on a
+          timeline.</p>
+          <p>It is represented as a timestamped event sequence with an
+          indicator (a mark) at each timestamp. Here the mark indicates
+          whether an event is an arrival or a departure. For core
+          Presence Invariant calculations, this is sufficient.</p>
+          <p>The sample path encodes <em>non-deterministic process
+          behavior</em> along two dimensions: the discrete sequence of
+          event types (including the ordering of arrivals and
+          departures), and the continuous inter-event durations.</p>
+          <p>A useful mental model for the observable behavior of the
+          underlying process is a simple coin flip observed over time.
+          Each flip determines whether the next event is an arrival or a
+          departure. In an arrival-departure process, however, we care
+          about both dimensions of what is observed: the event outcome
+          and the <em>elapsed time</em> to the next event.</p>
+          <p>We call this class of non-deterministic models <em>flow
+          processes</em>. The specific case where event type is binary
+          (arrival or departure) is a <em>binary</em> flow process. The
+          same machinery extends naturally to a broader class of
+          non-deterministic marked point processes, but this library
+          currently implements only the binary case.</p>
+          <p>Note: An <code>id</code> mark that pairs arrivals with
+          departures is <em>optional</em> for the core invariant
+          metrics, but <em>required</em> for item-level sojourn-time
+          measurements. This only becomes relevant when discussing
+          convergence, stability and the familiar steady-state version
+          of Little’s Law.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/arrival_departure_indicator_process.png</code></p>
+          <h2 id="chart-02-arrivals-a">4.2 A(T) - Cumulative
+          Arrivals</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/cumulative_arrivals_A.png"
+          alt="A(T) cumulative arrivals (with-events)" />
+          <figcaption aria-hidden="true">A(T) cumulative arrivals
+          (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/core/panels/cumulative_arrivals_A.png"
+          alt="A(T) cumulative arrivals (no-events)" />
+          <figcaption aria-hidden="true">A(T) cumulative arrivals
+          (no-events)</figcaption>
+          </figure>
+          </details>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(A(T)=\sum \text{arrivals in
+          }(0,T]\)</span>.</p>
+          <p><strong>Unit:</strong> Elements.</p>
+          <p>The simplest measurement on the sample path is a
+          <em>cumulative count</em>. In particular, for a moment <span
+          class="math inline">\(T\)</span> in the observation window
+          <span class="math inline">\((0, T_{\max}]\)</span>, we count
+          the arrivals observed in the prefix interval <span
+          class="math inline">\((0, T]\)</span>.</p>
+          <p>Formally, following our convention, we define</p>
+          <p><span class="math display">\[
+          A(T)=\#\{\,i:\ 0 &lt; a_i \le T\,\}
+          \]</span></p>
+          <p>where <span class="math inline">\(a_i\)</span> is an
+          arrival timestamp and <span class="math inline">\(\#\)</span>
+          denotes set cardinality. In most contexts however, we will use
+          the simpler but less precise notation shown in the derivation
+          above.</p>
+          <p>While this appears to be a simple metric, several important
+          structural properties are worth highlighting, and they
+          motivate conceptual distinctions that fundamentally separate
+          sample path analysis from traditional statistical approaches
+          to measuring flow.</p>
+          <h3 id="events-define-measurements">Events define
+          measurements</h3>
+          <p>The key observation is that the trajectory of <span
+          class="math inline">\(A(T)\)</span> is completely determined
+          by discrete arrival events.</p>
+          <ul>
+          <li><span class="math inline">\(A(T)\)</span> is defined for
+          all <span class="math inline">\(T \in (0, T_{\max}]\)</span>,
+          so it is a function of time.</li>
+          <li>It is a right-continuous step function that <em>increases
+          by one at each arrival timestamp</em> and <em>is constant
+          between arrival events</em>.</li>
+          <li>Given the ordered arrival timestamps, the entire function
+          is uniquely determined for all <span
+          class="math inline">\(T\)</span>.</li>
+          </ul>
+          <p>The reader is urged to verify that these properties hold
+          for the examples we have shown.</p>
+          <h3 id="measurements-map-to-state">Measurements map to
+          state</h3>
+          <p>This stepwise structure naturally leads to the notion of
+          process <em>state</em>.</p>
+          <p>The value of <span class="math inline">\(A(T)\)</span> at a
+          given time <span class="math inline">\(T\)</span> can be
+          viewed as the state of the counting process at that moment. As
+          <span class="math inline">\(T\)</span> increases, this state
+          evolves over time. State transitions occur only at arrival
+          timestamps, where <span class="math inline">\(A(T)\)</span>
+          increases by one; between arrivals, the state remains
+          constant.</p>
+          <p><span class="math inline">\(A(T)\)</span> itself models a
+          single dimensional state - a cumulative count of arrivals. As
+          we will soon see, all flow metrics can be viewed as processes,
+          that model higher dimensional states arising from the
+          interactions of these lower dimensional states.</p>
+          <h3 id="state-and-time-define-processes">State and time define
+          processes</h3>
+          <p>In stochastic process theory, a <em>process</em> is defined
+          as a mapping from an index set to a state space. The counting
+          process <span class="math inline">\(A(T)\)</span> is a simple
+          example: it maps continuous time <span
+          class="math inline">\(T\)</span> to the state space <span
+          class="math inline">\(\mathbb{N}\)</span> of natural
+          numbers.</p>
+          <p>The same arrival structure can also be indexed by event
+          order, yielding the embedded discrete-time sequence <span
+          class="math inline">\(\{A(a_i)\}\)</span> evaluated at arrival
+          times. These two parameterizations — time-indexed and
+          event-indexed — describe the same underlying arrival
+          process.</p>
+          <blockquote>
+          <p>In El-Taha and Stidham <span class="citation"
+          data-cites="eltaha1999">[1]</span>, such processes are called
+          <em>processes with an embedded point process</em>. We will use
+          the more informal term <em>event-indexed</em> process
+          throughout this document, with the assumption that such
+          processes can be parametrized by event time stamps or
+          continuous time.</p>
+          </blockquote>
+          <p>Another crucial observation is that these processes are
+          deterministic <em>functionals</em> of the realized sample
+          path. Each metric is obtained by applying a well-defined
+          mapping, or a sequence of mappings, to the underlying sample
+          path. This allows us to reason <em>deterministically</em>
+          about how a change in the underlying events propagates through
+          all derived processes over time, and to connect every quantity
+          back to the original events via the event index.</p>
+          <p>Think of these relationships like a series of cells
+          updating on a spreadsheet. The next value of the metric
+          depends upon the previous value and the <em>next event</em> on
+          the sample path. This latter choice is non-deterministic.
+          Everything after that is deterministically computed once that
+          choice is resolved. Verify that this holds for <span
+          class="math inline">\(A(T)\)</span>.</p>
+          <p>Similar properties hold for <em>every</em> metric we
+          compute. Our charts and exports emphasize the
+          <em>event-indexed</em> nature of these functions over the
+          sample path. This stands in stark contrast to statistical
+          measures, where we typically speak only of correlations
+          between aggregates rather than deterministic dependence.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/cumulative_arrivals_A.png</code></p>
+          <h2 id="chart-03-departures-d">4.3 D(T) - Cumulative
+          Departures</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/cumulative_departures_D.png"
+          alt="D(T) cumulative departures (with-events)" />
+          <figcaption aria-hidden="true">D(T) cumulative departures
+          (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/core/panels/cumulative_departures_D.png"
+          alt="D(T) cumulative departures (no-events)" />
+          <figcaption aria-hidden="true">D(T) cumulative departures
+          (no-events)</figcaption>
+          </figure>
+          </details>
+          <p>This is the identical construction as <span
+          class="math inline">\(A(T)\)</span> but for departure marks.
+          Like <span class="math inline">\(A(T)\)</span>, <span
+          class="math inline">\(D(T)\)</span> is a right-continuous step
+          function that increases by one at each departure timestamp and
+          is constant between departures.</p>
+          <p>The resulting process determines a new stateful process -
+          the departure process.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(D(T)=\sum \text{departures in
+          }(0,T]\)</span>.</p>
+          <p><strong>Unit:</strong> Elements.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/cumulative_departures_D.png</code></p>
+          <h2 id="chart-04-cfd">4.4 CFD - Cumulative Flow Diagram</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/cumulative_flow_diagram.png"
+          alt="CFD (with-events)" />
+          <figcaption aria-hidden="true">CFD (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/core/panels/cumulative_flow_diagram.png"
+          alt="CFD (no-events)" />
+          <figcaption aria-hidden="true">CFD (no-events)</figcaption>
+          </figure>
+          </details>
+          <p>The Cumulative Flow Diagram (CFD) is the central
+          construction for modeling and measuring an arrival-departure
+          process. It is not itself a metric, but a visualization that
+          exposes the key variables governing flow.</p>
+          <p>Mechanically, it consists of the two counting processes
+          <span class="math inline">\(A(T)\)</span> and <span
+          class="math inline">\(D(T)\)</span> plotted together over the
+          same sample path. However, the superposition of these
+          processes reveals geometric relationships that impose
+          structural constraints on the behavior of the
+          arrival–departure process over time.</p>
+          <p>Before turning to the formal derivation, consider the
+          intuition. If the arrival and departure curves are viewed as
+          the bounding cumulative curves of the process, the shaded
+          region between them represents a measurable quantity that
+          accumulates over time. Since the horizontal axis is indexed by
+          time, this region corresponds to a time-accumulated quantity
+          that can be computed and reasoned about concretely. The
+          accumulated area up to time <span
+          class="math inline">\(T\)</span> therefore defines another
+          process with its own state.</p>
+          <p>We call this quantity <em>Presence Mass</em> (or simply
+          <em>Presence</em>). Formally, it is the area between the
+          arrival and departure curves over the interval <span
+          class="math inline">\((0,T]\)</span>. Intuitively, it measures
+          both:</p>
+          <ul>
+          <li>how many elements are present in the process (the vertical
+          separation between the curves), and<br />
+          </li>
+          <li>for how long those elements remain present (the horizontal
+          extent over time).</li>
+          </ul>
+          <p>Larger areas correspond to greater presence mass in the
+          system; smaller areas correspond to less.</p>
+          <p>The interpretation of presence mass is entirely
+          context-dependent. If arrivals represent new customers,
+          greater presence mass may be desirable. If arrivals represent
+          defects, smaller presence mass is preferable. Sample path flow
+          analysis does not assign meaning to the quantities; it
+          measures and characterizes the structure of flow through
+          presence mass in a systematic and mathematically consistent
+          way.</p>
+          <p>Presence mass — the area between the bounding curves — is a
+          measurable quantity, <span
+          class="math inline">\(H(T)\)</span>, representing accumulated
+          presence over the interval <span
+          class="math inline">\((0,T]\)</span>. Together, the counting
+          processes <span class="math inline">\(A(\cdot)\)</span> and
+          <span class="math inline">\(D(\cdot)\)</span> — and
+          equivalently the derived quantity <span
+          class="math inline">\(H(T)\)</span> — form a sufficient state
+          description for the classical arrival–departure flow
+          model.</p>
+          <p>All standard flow metrics — including time averages,
+          throughput rates, and finite-window variants of Little’s Law —
+          can be expressed as deterministic functionals of the counting
+          processes <span class="math inline">\(A(\cdot)\)</span> and
+          <span class="math inline">\(D(\cdot)\)</span>.</p>
+          <p>Before introducing <span
+          class="math inline">\(H(T)\)</span> formally, we begin with an
+          even simpler quantity: the instantaneous state of the
+          arrival–departure process.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/cumulative_flow_diagram.png</code></p>
+          <h2 id="chart-05-sample-path-n">4.5 N(t) - Process State</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/sample_path_N.png"
+          alt="N(t) sample path (with-events)" />
+          <figcaption aria-hidden="true">N(t) sample path
+          (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/core/panels/sample_path_N.png"
+          alt="N(t) sample path (no-events)" />
+          <figcaption aria-hidden="true">N(t) sample path
+          (no-events)</figcaption>
+          </figure>
+          </details>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(N(t)=A(T)-D(T)\)</span>.</p>
+          <p><strong>Unit:</strong> Elements.</p>
+          <p>The first thing the CFD allows us to do is determine how
+          many elements are present in the process (have arrived but not
+          departed) at any instant of time. On the CFD, this is just the
+          vertical distance between the <span
+          class="math inline">\(A(T)\)</span> and <span
+          class="math inline">\(D(T)\)</span> lines.</p>
+          <p>We may define this as a new process <span
+          class="math display">\[ N(t) = A(T) - D(T)\]</span></p>
+          <blockquote>
+          <p>Note: Here <span class="math inline">\(A(T)\)</span> and
+          <span class="math inline">\(D(T)\)</span> are cumulative
+          functions on <span class="math inline">\((0,T]\)</span>, and
+          we set <span class="math inline">\(t:=T\)</span> at the
+          endpoint; their difference at each <span
+          class="math inline">\(T\)</span> is the instantaneous state
+          <span class="math inline">\(N(t)\)</span>.</p>
+          </blockquote>
+          <p><span class="math inline">\(N(t)\)</span> is the
+          instantaneous number of elements present in the
+          arrival-departure process. This is the quantity we commonly
+          call WIP in software contexts.</p>
+          <p>The plot of <span class="math inline">\(N(t)\)</span>
+          against the event timeline is called the <em>process
+          state</em> chart because, viewed as a process, it is
+          interpretable as an instantaneous state variable of the
+          arrival-departure process.</p>
+          <ul>
+          <li>An arrival event causes it to increase by 1</li>
+          <li>A departure event causes it to decrease by 1</li>
+          <li>Like <span class="math inline">\(A(T)\)</span> and <span
+          class="math inline">\(D(T)\)</span>, <span
+          class="math inline">\(N(t)\)</span> changes only at event
+          boundaries, remaining constant in between.</li>
+          </ul>
+          <blockquote>
+          <p>In summary, the arrival and departure events change the
+          state of the arrival-departure process with <span
+          class="math inline">\(N(t)\)</span> capturing the state as the
+          net <em>effect</em> of cumulative arrivals and departures.</p>
+          </blockquote>
+          <p>One thing that may not be immediately obvious, but is true
+          nevertheless, is that the shared grey area under the <span
+          class="math inline">\(N(t)\)</span> curve is exactly the same
+          area between the arrival and departure lines in the CFD. The
+          differences are mainly due to scaling and display, but the
+          shaded area represents the same quantity, the Presence Mass we
+          saw in the CFD.</p>
+          <p>Generally speaking, the process state plot gives us a
+          simpler and more operationally useful way of examining and
+          reasoning about presence, and so for the most part, we will
+          rely on <span class="math inline">\(N(t)\)</span> as the core
+          flow metric upon which we build the rest of the metrics in the
+          Presence Invariant.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/sample_path_N.png</code></p>
+          <h2 id="chart-06-presence-mass-h">4.6 H(T) - Presence
+          Mass</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/cumulative_presence_mass_H.png"
+          alt="H(T) presence mass (with-events)" />
+          <figcaption aria-hidden="true">H(T) presence mass
+          (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/core/panels/cumulative_presence_mass_H.png"
+          alt="H(T) presence mass (no-events)" />
+          <figcaption aria-hidden="true">H(T) presence mass
+          (no-events)</figcaption>
+          </figure>
+          </details>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(H(T)=\int_0^T N(t)\,dt\)</span>.</p>
+          <p><strong>Unit:</strong> Elements-Time.</p>
+          <p>In addition to the number of elements present at any
+          instant, the CFD also visualizes how long they were present.
+          To make this notion precise, examine the <span
+          class="math inline">\(N(t)\)</span> chart carefully. Since
+          <span class="math inline">\(N(t)\)</span> changes value only
+          at event boundaries and remains constant between them, each
+          interval between changes can be interpreted as the time the
+          arrival–departure process remains in a given state.</p>
+          <p>Each rectangular segment under the <span
+          class="math inline">\(N(t)\)</span> path represents a
+          time-weighted accumulation of presence mass in that state.
+          This is the incremental presence mass generated while the
+          process remained at that cardinality.</p>
+          <p>The cumulative presence mass added over an interval <span
+          class="math inline">\((0,T]\)</span> is the sum of these
+          rectangles. More generally, it is expressed as the definite
+          integral of <span class="math inline">\(N(t)\)</span>, which
+          also captures any partial accumulation between events:</p>
+          <p><span class="math display">\[
+          H(T) = \int_0^T N(t)\,dt
+          \]</span></p>
+          <blockquote>
+          <p>Note that presence mass lives in a product space of
+          elements and time, so the units of <span
+          class="math inline">\(H(T)\)</span> are element-time.</p>
+          </blockquote>
+          <p>Now when <span class="math inline">\(H(T)\)</span> is
+          plotted against time, it inherits structural properties from
+          <span class="math inline">\(N(t)\)</span>:</p>
+          <ul>
+          <li>Events change the trajectory of <span
+          class="math inline">\(H(T)\)</span>.</li>
+          <li>Between events, the path increases linearly.</li>
+          <li>The slope of the path between events is <span
+          class="math inline">\(N(t)\)</span>, the instantaneous state
+          of the process over that interval.</li>
+          <li>Arrival events increase the slope; departures decrease the
+          slope.</li>
+          <li>The path is flat when <span
+          class="math inline">\(N(t)=0\)</span>.</li>
+          </ul>
+          <p>The reader is encouraged to compare the charts of <span
+          class="math inline">\(N(t)\)</span> and <span
+          class="math inline">\(H(T)\)</span> and confirm that this
+          structure holds exactly. Like its inputs, <span
+          class="math inline">\(H(T)\)</span> is a deterministic
+          functional of the realized sample path of <span
+          class="math inline">\(N(t)\)</span>. Once the trajectory of
+          <span class="math inline">\(N(t)\)</span> over <span
+          class="math inline">\((0,T]\)</span> is known, the value of
+          <span class="math inline">\(H(T)\)</span> is uniquely
+          determined: <span class="math inline">\(H(T)\)</span> is
+          obtained purely by integrating the observed path.</p>
+          <blockquote>
+          <p><span class="math inline">\(H(T)\)</span> encodes a simple
+          rule: higher cardinality process states accumulate presence at
+          a faster rate.</p>
+          </blockquote>
+          <p>Whether this is desirable depends on context. In a
+          development setting, where <span
+          class="math inline">\(N(t)\)</span> represents WIP, presence
+          corresponds to delay exposure, and higher <span
+          class="math inline">\(N(t)\)</span> implies delay is
+          accumulating more rapidly. In a customer service context,
+          presence may represent active customer engagement, implying
+          faster growth in retained customers. The mathematics is
+          agnostic to interpretation; only the objective changes.</p>
+          <blockquote>
+          <p>This makes <span class="math inline">\(H(T)\)</span> the
+          minimal integrated variable that captures the history of
+          process states over <span
+          class="math inline">\((0,T]\)</span>. While <span
+          class="math inline">\(N(t)\)</span> captures the instantaneous
+          state, <span class="math inline">\(H(T)\)</span> captures the
+          accumulated presence generated by that state over time. In
+          this sense, <span class="math inline">\(H(T)\)</span>
+          compresses the entire past evolution of <span
+          class="math inline">\(N(t)\)</span> into a single scalar
+          quantity that evolves over time.</p>
+          </blockquote>
+          <p><strong>Output file:</strong>
+          <code>core/panels/cumulative_presence_mass_H.png</code></p>
+          <h2 id="chart-07-time-average-l">4.7 L(T) - Time-Average of
+          Presence</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/time_average_N_L.png"
+          alt="L(T) time average (with-events)" />
+          <figcaption aria-hidden="true">L(T) time average
+          (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/core/panels/time_average_N_L.png"
+          alt="L(T) time average (no-events)" />
+          <figcaption aria-hidden="true">L(T) time average
+          (no-events)</figcaption>
+          </figure>
+          </details>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(L(T)=H(T)/T\)</span>.</p>
+          <p><strong>Unit:</strong> Elements.</p>
+          <p>We now have the core machinery in place to derive the
+          quantities in the Presence Invariant</p>
+          <p><span class="math display">\[
+          L(T) = \Lambda(T)\, w(T).
+          \]</span></p>
+          <p>First we examine the left-hand side of the invariant, <span
+          class="math inline">\(L(T)\)</span>. This is simply cumulative
+          presence <span class="math inline">\(H(T)\)</span> normalized
+          over the observation interval <span
+          class="math inline">\(T\)</span>:</p>
+          <p><span class="math display">\[
+          L(T) = \frac{H(T)}{T}
+          = \frac{1}{T} \int_0^T N(t)\,dt.
+          \]</span></p>
+          <p>Before jumping into the details, the reader is urged to
+          carefully review the charts of <span
+          class="math inline">\(N(t)\)</span>, <span
+          class="math inline">\(H(T)\)</span>, and <span
+          class="math inline">\(L(T)\)</span> and get an intuition for
+          what the relationship of each of these charts to the
+          underlying events in the point process might be.</p>
+          <p>We call <span class="math inline">\(L(T)\)</span> the
+          <em>time average of presence</em>. But what does that
+          mean?</p>
+          <h3 id="lt-as-a-moving-average-of-nt"><span
+          class="math inline">\(L(T)\)</span> as a moving average of
+          <span class="math inline">\(N(t)\)</span></h3>
+          <p>Recall that <span class="math inline">\(H(T)\)</span> is
+          cumulative presence mass over <span
+          class="math inline">\((0,T]\)</span>, obtained by integrating
+          <span class="math inline">\(N(t)\)</span> over time. It is
+          therefore a time-weighted accumulation of the instantaneous
+          process state.</p>
+          <p>Dividing by <span class="math inline">\(T\)</span> yields
+          the time average of <span class="math inline">\(N(t)\)</span>
+          over <span class="math inline">\((0,T]\)</span>. Thus <span
+          class="math inline">\(L(T)\)</span> can be interpreted
+          directly in terms of <span
+          class="math inline">\(N(t)\)</span>, which is a more tangible
+          quantity.</p>
+          <p>The straightforward interpretation is that <span
+          class="math inline">\(L(T)\)</span> is a long-horizon
+          <em>moving average</em> of <span
+          class="math inline">\(N(t)\)</span>: each additional moment
+          the process spends in state <span
+          class="math inline">\(N(t)\)</span> contributes an increment
+          of time to the numerator, while the denominator grows linearly
+          as the observation window expands.</p>
+          <p>This gives <span class="math inline">\(L(T)\)</span>
+          several important structural properties:</p>
+          <ul>
+          <li><p>It does not jump when arrivals or departures occur: the
+          integration step in <span class="math inline">\(H(T)\)</span>
+          removes discontinuities, and normalization in <span
+          class="math inline">\(L(T)\)</span> causes the
+          <em>influence</em> of any individual event to be
+          time-weighted.</p></li>
+          <li><p>It adjusts gradually: as <span
+          class="math inline">\(T\)</span> grows, each new increment of
+          time carries weight proportional to <span
+          class="math inline">\(1/T\)</span>.</p></li>
+          <li><p>The effect of any <em>finite</em> disturbance fades
+          over time, <em>unless</em> the underlying state process
+          sustains linear (or faster) growth in <span
+          class="math inline">\(N(t)\)</span>.</p></li>
+          </ul>
+          <blockquote>
+          <p>For this reason, <span class="math inline">\(L(T)\)</span>
+          serves as a diagnostic of persistent structural changes in the
+          state process. Transient fluctuations are progressively washed
+          out. What remains visible in <span
+          class="math inline">\(L(T)\)</span> as <span
+          class="math inline">\(T\)</span> grows are only those
+          components of <span class="math inline">\(N(t)\)</span> that
+          persist.</p>
+          </blockquote>
+          <p>If <span class="math inline">\(L(T)\)</span> rises, falls,
+          or stabilizes, it does so because the underlying state process
+          exhibits sustained imbalance, sustained correction, or
+          sustained equilibrium. We will return to this when we discuss
+          convergence, equilibrium, and stability.</p>
+          <p>Also see <a
+          href="#structural-vs-transient-effects-on-a-sample-path">Structural
+          vs Transient Effects on a Sample Path</a> for the relationship
+          between <span class="math inline">\(L(T)\)</span> and the
+          common-cause/special-cause distinction from Statistical
+          Process Control.</p>
+          <h3 id="how-lt-changes">How <span
+          class="math inline">\(L(T)\)</span> changes</h3>
+          <p>In <a href="#derivative-of-lt">Derivative of <span
+          class="math inline">\(L(T)\)</span></a> we show that the first
+          derivative of <span class="math inline">\(L(T)\)</span> (the
+          rate at which it changes over time) is given by</p>
+          <p><span class="math display">\[
+          \frac{dL}{dT}
+          =
+          \frac{N(t) - L(T)}{T}.
+          \]</span> Here <span class="math inline">\(N(t)\)</span>
+          should be interpreted as the instantaneous state at the
+          endpoint of the interval <span
+          class="math inline">\((0,T]\)</span>. So this compares the
+          moving average of <span class="math inline">\(N(t)\)</span>
+          over <span class="math inline">\((0,T]\)</span> to the
+          endpoint value <span class="math inline">\(N(t)\)</span>.</p>
+          <p>This expression is a standard result for the
+          <em>sensitivity of a cumulative moving average</em> and it
+          makes the relationship between <span
+          class="math inline">\(N(t)\)</span> and <span
+          class="math inline">\(L(T)\)</span> explicit:</p>
+          <ul>
+          <li>If <span class="math inline">\(N(t) &gt; L(T)\)</span>,
+          then <span class="math inline">\(\frac{dL}{dT} &gt; 0\)</span>
+          and <span class="math inline">\(L(T)\)</span> increases.</li>
+          <li>If <span class="math inline">\(N(t) &lt; L(T)\)</span>,
+          then <span class="math inline">\(\frac{dL}{dT} &lt; 0\)</span>
+          and <span class="math inline">\(L(T)\)</span> decreases.</li>
+          <li>The rate of adjustment is proportional to <span
+          class="math inline">\(1/T\)</span>.</li>
+          </ul>
+          <p>Thus <span class="math inline">\(L(T)\)</span> tracks <span
+          class="math inline">\(N(t)\)</span> with diminishing
+          sensitivity over time: over longer horizons, <span
+          class="math inline">\(L(T)\)</span> adjusts more slowly to
+          changes in the instantaneous state.</p>
+          <h3 id="symmetry-of-arrivals-and-departures">Symmetry of
+          Arrivals and Departures</h3>
+          <p>Arrivals and departures affect <span
+          class="math inline">\(L(T)\)</span> only through their impact
+          on <span class="math inline">\(N(t)\)</span>.</p>
+          <ul>
+          <li>An arrival increases <span
+          class="math inline">\(N(t)\)</span> by one.</li>
+          <li>A departure decreases <span
+          class="math inline">\(N(t)\)</span> by one.</li>
+          </ul>
+          <p>Because the evolution of <span
+          class="math inline">\(L(T)\)</span> depends only on the
+          difference <span class="math inline">\(N(t) - L(T)\)</span>,
+          arrivals and departures enter symmetrically at the level of
+          the state variable. Each event shifts <span
+          class="math inline">\(N(t)\)</span> up or down, and <span
+          class="math inline">\(L(T)\)</span> responds according to the
+          same averaging rule.</p>
+          <blockquote>
+          <p>Unlike <span class="math inline">\(H(T)\)</span>, where
+          arrivals and departures have visibly different geometric
+          effects on slope, at the level of <span
+          class="math inline">\(L(T)\)</span> their influence is
+          structurally symmetric: both modify the instantaneous state,
+          and the running average <em>adjusts toward that
+          state</em>.</p>
+          </blockquote>
+          <h3 id="lt-as-an-average-accumulation-rate-of-presence"><span
+          class="math inline">\(L(T)\)</span> as an average accumulation
+          rate of presence</h3>
+          <p>Since <span class="math inline">\(H(T)\)</span> is the
+          time-weighted accumulation of instantaneous states over <span
+          class="math inline">\((0,T]\)</span>, it follows that</p>
+          <p><span class="math display">\[
+          L(T) = \frac{H(T)}{T}
+          \]</span></p>
+          <p>is the average value of <span
+          class="math inline">\(N(t)\)</span> over that interval.
+          Because</p>
+          <p><span class="math display">\[
+          \frac{dH}{dT} = N(t),
+          \]</span></p>
+          <p><span class="math inline">\(N(t)\)</span> represents the
+          instantaneous rate at which presence mass accumulates.
+          Accordingly, <span class="math inline">\(L(T)\)</span> is the
+          <em>average rate of accumulation</em> of presence mass over
+          <span class="math inline">\((0,T]\)</span>.</p>
+          <p>Importantly, this is an arithmetic time average taken along
+          a realized sample path. It is not a distributional quantity
+          and does not rely on stationarity or probabilistic
+          assumptions.</p>
+          <p>Depending on how presence is interpreted, this quantity
+          expresses a core operational metric. If the objective is to
+          accumulate presence mass, a higher value of <span
+          class="math inline">\(L(T)\)</span> implies a higher average
+          accumulation rate. If the objective is to minimize
+          accumulation (for example, reducing delay exposure in a
+          delivery process), then lower values imply that delays are
+          accumulating at a lower rate.</p>
+          <blockquote>
+          <p>In summary, <span class="math inline">\(L(T)\)</span>
+          serves as a primary operational metric for an
+          arrival–departure process as a whole. However, it cannot
+          always be interpreted in isolation. This is where the
+          quantities on the right-hand side of the Presence Invariant
+          become essential.</p>
+          </blockquote>
+          <p><strong>Output file:</strong>
+          <code>core/panels/time_average_N_L.png</code></p>
+          <h1 id="flow-geometry">5 Flow Geometry</h1>
+          <table>
+          <colgroup>
+          <col style="width: 25%" />
+          <col style="width: 25%" />
+          <col style="width: 25%" />
+          <col style="width: 25%" />
+          </colgroup>
+          <thead>
+          <tr>
+          <th>Chart</th>
+          <th>Name</th>
+          <th>Formula</th>
+          <th>Units</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+          <td><a href="#chart-08-arrival-rate-lambda"><span
+          class="math inline">\(\Lambda(T)\)</span></a></td>
+          <td>Arrival Rate</td>
+          <td><span
+          class="math inline">\(\Lambda(T)=A(T)/T\)</span></td>
+          <td>Elem/Time</td>
+          </tr>
+          <tr>
+          <td><a href="#chart-09-residence-w">w(T)</a></td>
+          <td>Residence Time per Arrival</td>
+          <td><span class="math inline">\(w(T)=H(T)/A(T)\)</span></td>
+          <td>Time</td>
+          </tr>
+          <tr>
+          <td><a href="#chart-12-departure-rate-theta"><span
+          class="math inline">\(\Theta(T)\)</span></a></td>
+          <td>Departure Rate (Throughput)</td>
+          <td><span class="math inline">\(\Theta(T)=D(T)/T\)</span></td>
+          <td>Elem/Time</td>
+          </tr>
+          <tr>
+          <td><a href="#chart-13-residence-w-prime">w’(T)</a></td>
+          <td>Residence Time per Departure</td>
+          <td><span
+          class="math inline">\(w&#39;(T)=H(T)/D(T)\)</span></td>
+          <td>Time</td>
+          </tr>
+          <tr>
+          <td><a href="#chart-10-arrival-invariant">Arrival
+          Invariant</a></td>
+          <td>Arrival-Side Invariant</td>
+          <td><span class="math inline">\(L(T)=\Lambda(T)\cdot
+          w(T)\)</span></td>
+          <td>Elem</td>
+          </tr>
+          <tr>
+          <td><a href="#chart-14-departure-invariant">Departure
+          Invariant</a></td>
+          <td>Departure-Side Invariant</td>
+          <td><span class="math inline">\(L(T)=\Theta(T)\cdot
+          w&#39;(T)\)</span></td>
+          <td>Elem</td>
+          </tr>
+          </tbody>
+          </table>
+          <h2 id="chart-08-arrival-rate-lambda">5.1 <span
+          class="math inline">\(\Lambda(T)\)</span> - Arrival Rate</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/cumulative_arrival_rate_Lambda.png"
+          alt="Lambda(T) arrival rate (with-events)" />
+          <figcaption aria-hidden="true">Lambda(T) arrival rate
+          (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/core/panels/cumulative_arrival_rate_Lambda.png"
+          alt="Lambda(T) arrival rate (no-events)" />
+          <figcaption aria-hidden="true">Lambda(T) arrival rate
+          (no-events)</figcaption>
+          </figure>
+          </details>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(\Lambda(T)=A(T)/T\)</span>.</p>
+          <p><strong>Unit:</strong> Elements/Time.</p>
+          <p>We now turn to the first quantity on the right-hand side of
+          the Presence Invariant,</p>
+          <p><span class="math display">\[
+          L(T) = \Lambda(T)\, w(T).
+          \]</span></p>
+          <p>The term <span class="math inline">\(\Lambda(T)\)</span> is
+          defined as</p>
+          <p><span class="math display">\[
+          \Lambda(T) = \frac{A(T)}{T},
+          \]</span></p>
+          <p>where <span class="math inline">\(A(T)\)</span> denotes the
+          cumulative number of arrivals over <span
+          class="math inline">\((0,T]\)</span>.</p>
+          <p>We will call <span
+          class="math inline">\(\Lambda(T)\)</span> the <em>cumulative
+          arrival rate</em> over the observation horizon. Unlike an
+          instantaneous rate, it is defined purely from cumulative
+          counts and normalization over time.</p>
+          <h3 id="lambdat-as-a-moving-average-of-event-occurrence"><span
+          class="math inline">\(\Lambda(T)\)</span> as a moving average
+          of event occurrence</h3>
+          <p>Since <span class="math inline">\(A(T)\)</span> is a
+          nondecreasing step function that increments by one at each
+          arrival, dividing by <span class="math inline">\(T\)</span>
+          yields the time-average rate of arrivals over <span
+          class="math inline">\((0,T]\)</span>.</p>
+          <p>In this sense, <span
+          class="math inline">\(\Lambda(T)\)</span> is a long-horizon
+          moving average of event occurrence. Each new arrival increases
+          the numerator by one, while the denominator grows continuously
+          as the observation window expands.</p>
+          <p>Like L(T) it gives <span
+          class="math inline">\(\Lambda(T)\)</span> several structural
+          properties:</p>
+          <ul>
+          <li><p>It changes only at arrival times: between arrivals,
+          <span class="math inline">\(A(T)\)</span> is constant and
+          <span class="math inline">\(\Lambda(T)\)</span> decreases
+          smoothly as <span class="math inline">\(T\)</span>
+          grows.</p></li>
+          <li><p>The influence of any single arrival decays over time:
+          its contribution to <span
+          class="math inline">\(\Lambda(T)\)</span> is proportional to
+          <span class="math inline">\(1/T\)</span>.</p></li>
+          <li><p>Sustained increases or decreases in arrival intensity
+          persist in <span class="math inline">\(\Lambda(T)\)</span>
+          only if they represent a structural change in the long-run
+          event generation process.</p></li>
+          </ul>
+          <p>Thus <span class="math inline">\(\Lambda(T)\)</span>
+          filters transient bursts of arrivals in much the same way that
+          <span class="math inline">\(L(T)\)</span> filters transient
+          fluctuations in state.</p>
+          <h3 id="how-lambdat-changes">How <span
+          class="math inline">\(\Lambda(T)\)</span> changes</h3>
+          <p>At an arrival time, <span
+          class="math inline">\(A(T)\)</span> increases by one,
+          producing an upward jump in <span
+          class="math inline">\(\Lambda(T)\)</span> of magnitude
+          approximately <span class="math inline">\(1/T\)</span>.</p>
+          <p>Between arrivals, it decays,</p>
+          <p><span class="math display">\[
+          \frac{d\Lambda}{dT}
+          =
+          \frac{-A(T)}{T^2}
+          =
+          -\frac{\Lambda(T)}{T}.
+          \]</span></p>
+          <p>So <span class="math inline">\(\Lambda(T)\)</span> exhibits
+          a characteristic “jump-and-decay” pattern:</p>
+          <ul>
+          <li>Each arrival produces a discrete upward adjustment.</li>
+          <li>Between arrivals, the rate decays gradually as <span
+          class="math inline">\(1/T\)</span>.</li>
+          <li>The responsiveness of <span
+          class="math inline">\(\Lambda(T)\)</span> to new arrivals
+          diminishes over longer horizons.</li>
+          </ul>
+          <p>As <span class="math inline">\(T\)</span> grows, the
+          cumulative rate becomes progressively less sensitive to
+          individual events and increasingly reflective of sustained
+          arrival behavior.</p>
+          <h3 id="structural-interpretation">Structural
+          interpretation</h3>
+          <p>Because <span class="math inline">\(\Lambda(T)\)</span> is
+          defined purely from cumulative counts and time normalization,
+          it does not require stationarity or probabilistic assumptions.
+          It is a deterministic functional of the realized sample
+          path.</p>
+          <p>If <span class="math inline">\(\Lambda(T)\)</span>
+          stabilizes, it indicates that arrivals are occurring at a
+          sustained average rate over the observed horizon. If it drifts
+          upward or downward persistently, it signals structural change
+          in event intensity.</p>
+          <p>Importantly, <span
+          class="math inline">\(\Lambda(T)\)</span> cannot be
+          interpreted in isolation. A declining <span
+          class="math inline">\(\Lambda(T)\)</span> may indicate reduced
+          demand — or it may reflect reduced system throughput due to
+          aging instability. As we will see in the section on
+          convergence and stability, its meaning emerges only in
+          relation to <span class="math inline">\(w(T)\)</span> and
+          <span class="math inline">\(L(T)\)</span> through the Presence
+          Invariant.</p>
+          <p>Note: In the example chart, <span
+          class="math inline">\(\Lambda(T)\)</span> exhibits small
+          V-shaped kinks that seemingly don’t agree with the theory
+          above. These arise when a relatively long gap between arrivals
+          allows <span class="math inline">\(\Lambda(T)\)</span> to
+          decay as <span class="math inline">\(T\)</span> grows,
+          followed by a new arrival that produces a discrete upward
+          adjustment of size approximately <span
+          class="math inline">\(1/T\)</span>.</p>
+          <p>Such behavior is most pronounced during the warm-up period
+          over short horizons, when <span
+          class="math inline">\(T\)</span> is not yet large and
+          individual events carry relatively high weight. As the
+          observation horizon grows, these effects diminish and <span
+          class="math inline">\(\Lambda(T)\)</span> becomes
+          progressively smoother.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/cumulative_arrival_rate_Lambda.png</code></p>
+          <h2 id="chart-09-residence-w">5.2 w(T) - Residence Time per
+          Arrival</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/average_residence_time_w.png"
+          alt="w(T) residence per arrival (with-events)" />
+          <figcaption aria-hidden="true">w(T) residence per arrival
+          (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/core/panels/average_residence_time_w.png"
+          alt="w(T) residence per arrival (no-events)" />
+          <figcaption aria-hidden="true">w(T) residence per arrival
+          (no-events)</figcaption>
+          </figure>
+          </details>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(w(T)=H(T)/A(T)\)</span>.</p>
+          <p><strong>Unit:</strong> Time.</p>
+          <p>We now turn to the second quantity on the right-hand side
+          of the Presence Invariant,</p>
+          <p><span class="math display">\[
+          L(T) = \Lambda(T)\, w(T).
+          \]</span></p>
+          <p>The term <span class="math inline">\(w(T)\)</span> is
+          defined implicitly by the invariant as</p>
+          <p><span class="math display">\[
+          w(T) = \frac{L(T)}{\Lambda(T)} = \frac{H(T)}{A(T)}.
+          \]</span></p>
+          <p>Thus <span class="math inline">\(w(T)\)</span> represents
+          cumulative presence mass normalized by the cumulative number
+          of arrivals. The units of <span
+          class="math inline">\(w(T)\)</span> are time — but what kind
+          of time does it represent?</p>
+          <h3 id="wt-as-an-average-process-time"><span
+          class="math inline">\(w(T)\)</span> as an average process
+          time</h3>
+          <p>Since <span class="math inline">\(H(T)\)</span> measures
+          total accumulated presence mass — that is, total time spent in
+          system across all items over <span
+          class="math inline">\((0,T]\)</span> — dividing by <span
+          class="math inline">\(A(T)\)</span> distributes that
+          accumulated time across the arrivals observed up to time <span
+          class="math inline">\(T\)</span>.</p>
+          <p>In this sense, <span class="math inline">\(w(T)\)</span> is
+          the average amount of presence mass attributable per arrival
+          over the observation horizon. It is not the average time any
+          single item spends in the process, nor is it an expected value
+          in a distributional sense. Rather, it is a finite-horizon
+          <em>amortization</em> of accumulated time across realized
+          arrivals.</p>
+          <p>Each additional moment that any item remains in the system
+          increases <span class="math inline">\(H(T)\)</span>, and
+          therefore increases <span class="math inline">\(w(T)\)</span>,
+          unless offset by additional arrivals in the denominator.</p>
+          <h3 id="structural-properties-of-wt">Structural properties of
+          <span class="math inline">\(w(T)\)</span></h3>
+          <p>Because <span class="math inline">\(w(T) =
+          H(T)/A(T)\)</span>, its behavior reflects the interaction of
+          cumulative presence and cumulative arrivals:</p>
+          <ul>
+          <li>It increases when presence mass accumulates faster than
+          arrivals.</li>
+          <li>It decreases when arrivals accumulate faster than presence
+          mass.</li>
+          </ul>
+          <p>The first condition typically corresponds to longer
+          presence per arrival; the second to shorter presence or
+          increased arrival intensity relative to accumulated
+          presence.</p>
+          <p>Between arrivals, <span class="math inline">\(A(T)\)</span>
+          is constant and <span class="math inline">\(H(T)\)</span>
+          grows at rate <span
+          class="math inline">\(N(t)\big|_{t=T}\)</span>. Departures
+          reduce <span class="math inline">\(N(t)\)</span> and therefore
+          immediately reduce the growth rate of <span
+          class="math inline">\(H(T)\)</span>, and hence the slope of
+          <span class="math inline">\(w(T)\)</span>.</p>
+          <p>Thus arrivals affect <span
+          class="math inline">\(w(T)\)</span> through discrete
+          denominator adjustments, while departures affect it
+          continuously through the numerator growth rate. The impact of
+          departures is reflected in <span
+          class="math inline">\(w(T)\)</span> through slower growth in
+          the numerator.</p>
+          <p>In fact, for <span class="math inline">\(T\)</span> between
+          arrival times,</p>
+          <p><span class="math display">\[
+          \frac{dw}{dT} = \frac{1}{A(T)}\,\frac{dH}{dT} =
+          \frac{N(t)\big|_{t=T}}{A(T)}.
+          \]</span></p>
+          <p>At an arrival time <span class="math inline">\(T\)</span>,
+          <span class="math inline">\(A\)</span> jumps from <span
+          class="math inline">\(A_{\text{pre}}\)</span> to <span
+          class="math inline">\(A_{\text{post}}=A_{\text{pre}}+1\)</span>,
+          while <span class="math inline">\(H(T)\)</span> is continuous.
+          Hence</p>
+          <p><span class="math display">\[
+          w_{\text{pre}}=\frac{H(T)}{A_{\text{pre}}},\qquad
+          w_{\text{post}}=\frac{H(T)}{A_{\text{post}}}=\frac{H(T)}{A_{\text{pre}}+1}&lt;w_{\text{pre}}.
+          \]</span></p>
+          <p>Thus <span class="math inline">\(w(T)\)</span> has a
+          characteristic “smooth growth punctuated by arrival-time
+          adjustments” structure: it increases continuously between
+          arrivals, and it may step down when a new arrival increases
+          the amortization base.</p>
+          <p>As with the other metrics, the influence of any finite
+          disturbance on <span class="math inline">\(w(T)\)</span>
+          diminishes as <span class="math inline">\(A(T)\)</span> grows,
+          provided arrivals continue to occur.</p>
+          <h3 id="structural-interpretation-1">Structural
+          interpretation</h3>
+          <p><span class="math inline">\(w(T)\)</span> captures the time
+          dimension of flow. While <span
+          class="math inline">\(\Lambda(T)\)</span> measures how
+          frequently items enter the system, <span
+          class="math inline">\(w(T)\)</span> measures how much time, on
+          average, those arrivals collectively account for in
+          accumulated presence mass.</p>
+          <p>Importantly, <span class="math inline">\(w(T)\)</span> may
+          increase even when <span class="math inline">\(L(T)\)</span>
+          remains stable, if arrival intensity declines correspondingly.
+          Conversely, <span class="math inline">\(w(T)\)</span> may
+          stabilize even in the presence of moderate fluctuations in
+          <span class="math inline">\(L(T)\)</span>, provided arrivals
+          scale proportionally.</p>
+          <p>Like <span class="math inline">\(L(T)\)</span> and <span
+          class="math inline">\(\Lambda(T)\)</span>, <span
+          class="math inline">\(w(T)\)</span> is a deterministic
+          functional of the realized sample path. It requires no
+          stationarity or distributional assumptions. However, it cannot
+          be interpreted in isolation. Only through its interaction with
+          <span class="math inline">\(\Lambda(T)\)</span> does it fully
+          describe the structural state of the arrival–departure
+          process.</p>
+          <h3 id="but-what-is-residence-time-really">But what is
+          residence time, really?</h3>
+          <p>While the mathematics is precise and internally consistent,
+          the notion of residence time is one of the most conceptually
+          unfamiliar elements of the Presence Calculus approach to flow
+          metrics.</p>
+          <p>Traditionally, process time is defined very simply: take
+          the arrival and departure times of completed items and compute
+          their average sojourn time (commonly called lead time or cycle
+          time). This definition feels natural because it attaches a
+          duration to each item and averages those durations.</p>
+          <p>Residence time, by contrast, is defined indirectly through
+          the invariant:</p>
+          <p><span class="math display">\[
+          w(T) = \frac{H(T)}{A(T)}.
+          \]</span></p>
+          <p>It is an amortization of accumulated presence mass across
+          arrivals, rather than an average of completed durations. At
+          first glance, this appears less intuitive.</p>
+          <p>The reason this definition is necessary is structural. The
+          finite-horizon identity</p>
+          <p><span class="math display">\[
+          L(T) = \Lambda(T)\, w(T)
+          \]</span></p>
+          <p>must hold over a single consistent observation interval
+          <span class="math inline">\((0,T]\)</span>. The traditional
+          average sojourn time, computed only over completed departures,
+          does not generally factor cleanly with <span
+          class="math inline">\(L(T)\)</span> and <span
+          class="math inline">\(\Lambda(T)\)</span> unless the
+          underlying process is stable and long-run limits exist.</p>
+          <p>In a transient or non-stationary process:</p>
+          <ul>
+          <li><span class="math inline">\(L(T)\)</span> is defined over
+          the full prefix.</li>
+          <li><span class="math inline">\(\Lambda(T)\)</span> is defined
+          over the full prefix.</li>
+          <li>A completion-based average sojourn time is defined only
+          over departed elements.</li>
+          </ul>
+          <p>These are not aligned measurements. As a result, the
+          traditional notion of average process time cannot, in general,
+          serve as the time factor in the invariant unless the system
+          has converged to steady state.</p>
+          <p>Residence time resolves this misalignment. Because it is
+          defined directly from cumulative presence and cumulative
+          arrivals over the same interval, it preserves the structural
+          identity for any finite prefix — regardless of stationarity,
+          ergodicity, or convergence.</p>
+          <p>Moreover, it accounts for the presence mass of both
+          departed elements and elements that have arrived but not yet
+          departed. In other words, it is a unified metric that
+          incorporates both completed and aging in-process work.
+          Completion-based averages exclude unfinished work; residence
+          time does not.</p>
+          <p>In a non-stationary or unstable process, a completion-based
+          average sojourn time measures only the durations of departed
+          items. It excludes the time already accumulated by items that
+          have arrived but not yet departed. When aging work is building
+          up, this exclusion can materially understate the total time
+          exposure within the process.</p>
+          <p>Residence time avoids this undercounting. Because it
+          amortizes cumulative presence mass over all arrivals in the
+          observation interval, it accounts for both completed and
+          in-process work. As a result, it remains structurally aligned
+          with <span class="math inline">\(L(T)\)</span> and <span
+          class="math inline">\(\Lambda(T)\)</span> even when the
+          process is transient or unstable.</p>
+          <p>Thus no generality is lost by adopting the residence-time
+          definition as the default for “process time”. In steady state
+          it converges to the classical average sojourn time; outside
+          steady state it provides the correct generalization of process
+          time to non-stationary settings.</p>
+          <p>As we shall see, there are multiple consistent ways to
+          amortize presence mass over events, each yielding different
+          structural insight. In steady state, they coincide with
+          classical definitions. Outside steady state, they retain
+          meaning and preserve the invariant, whereas traditional
+          completion-based averages do not.</p>
+          <p>For a more intuitive and informal explanation of these
+          ideas, see my articles in the <em>Polaris Flow
+          Dispatch</em>:<br />
+          <a
+          href="https://open.substack.com/pub/thepolarisflowdispatch/p/how-long-does-it-take">How
+          long does it take</a><br />
+          <a
+          href="https://open.substack.com/pub/thepolarisflowdispatch/p/what-is-residence-time">What
+          is residence time?</a></p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/average_residence_time_w.png</code></p>
+          <h2 id="chart-12-departure-rate-theta">5.3 <span
+          class="math inline">\(\Theta(T)\)</span> - Departure Rate
+          (Throughput)</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/cumulative_departure_rate_Theta.png"
+          alt="Theta(T) departure rate (with-events)" />
+          <figcaption aria-hidden="true">Theta(T) departure rate
+          (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/core/panels/cumulative_departure_rate_Theta.png"
+          alt="Theta(T) departure rate (no-events)" />
+          <figcaption aria-hidden="true">Theta(T) departure rate
+          (no-events)</figcaption>
+          </figure>
+          </details>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(\Theta(T)=D(T)/T\)</span>.</p>
+          <p><strong>Unit:</strong> Elements/Time.</p>
+          <p>The cumulative departure rate is the departure-focused
+          counterpart of the arrival rate.</p>
+          <p><span class="math display">\[
+          \Theta(T) = \frac{D(T)}{T},
+          \]</span></p>
+          <p>where <span class="math inline">\(D(T)\)</span> denotes the
+          cumulative number of departures over <span
+          class="math inline">\((0,T]\)</span>.</p>
+          <p>We will refer to <span
+          class="math inline">\(\Theta(T)\)</span> as the
+          <em>throughput</em> over the observation horizon. Like <span
+          class="math inline">\(\Lambda(T)\)</span>, it is defined
+          purely from cumulative counts and time normalization. It
+          requires no stationarity assumptions and is a deterministic
+          functional of the realized sample path.</p>
+          <h3 id="structural-behavior-of-thetat">Structural behavior of
+          <span class="math inline">\(\Theta(T)\)</span></h3>
+          <p>Because <span class="math inline">\(D(T)\)</span> is a
+          nondecreasing step function that increments at departure
+          times, <span class="math inline">\(\Theta(T)\)</span> has the
+          same jump–decay structure as <span
+          class="math inline">\(\Lambda(T)\)</span>:</p>
+          <ul>
+          <li>At a departure time, <span
+          class="math inline">\(D(T)\)</span> increases by one,
+          producing an upward jump in <span
+          class="math inline">\(\Theta(T)\)</span> of size approximately
+          <span class="math inline">\(1/T\)</span>.</li>
+          <li>Between departures, <span
+          class="math inline">\(D(T)\)</span> is constant while <span
+          class="math inline">\(T\)</span> grows, so <span
+          class="math inline">\(\Theta(T)\)</span> decays smoothly as
+          <span class="math inline">\(1/T\)</span>.</li>
+          <li>The influence of any single departure diminishes as the
+          observation horizon expands.</li>
+          </ul>
+          <p>Thus, visually and mechanically, <span
+          class="math inline">\(\Theta(T)\)</span> behaves in a manner
+          parallel to <span
+          class="math inline">\(\Lambda(T)\)</span>.</p>
+          <h3 id="key-differences-from-lambdat">Key differences from
+          <span class="math inline">\(\Lambda(T)\)</span></h3>
+          <p>Although their mechanics are similar, <span
+          class="math inline">\(\Theta(T)\)</span> and <span
+          class="math inline">\(\Lambda(T)\)</span> reflect
+          fundamentally different aspects of the process.</p>
+          <ul>
+          <li><span class="math inline">\(\Lambda(T)\)</span> measures
+          <em>input intensity</em> — how frequently work enters the
+          system.</li>
+          <li><span class="math inline">\(\Theta(T)\)</span> measures
+          <em>output realization</em> — how frequently work
+          completes.</li>
+          </ul>
+          <p>The two need not coincide over finite horizons. In
+          transient or unstable regimes:</p>
+          <ul>
+          <li>If arrivals persistently exceed departures, then <span
+          class="math inline">\(\Lambda(T) &gt; \Theta(T)\)</span> and
+          backlog grows.</li>
+          <li>If departures temporarily exceed arrivals, then <span
+          class="math inline">\(\Theta(T) &gt; \Lambda(T)\)</span> and
+          backlog shrinks.</li>
+          <li>Only in sustained equilibrium do the two rates align over
+          time.</li>
+          </ul>
+          <p>Unlike <span class="math inline">\(\Lambda(T)\)</span>,
+          which is unaffected by departures, <span
+          class="math inline">\(\Theta(T)\)</span> is entirely driven by
+          completion behavior and may be constrained by aging, blocking,
+          capacity limits, or starvation effects within the system.</p>
+          <p>As we can see in this example, the arrival rate stabilizes
+          quite early, but throughput is much slower to “catch up”. In a
+          stable process, these two <em>rates</em> eventually align and
+          converge to the same value. We’ll discuss this shortly in the
+          section on convergence and stability.</p>
+          <h3 id="structural-interpretation-2">Structural
+          interpretation</h3>
+          <p><span class="math inline">\(\Theta(T)\)</span> captures the
+          realized output rate of the process over <span
+          class="math inline">\((0,T]\)</span>. It is the operational
+          throughput metric — what the process actually delivers.</p>
+          <p>In stable regimes, <span
+          class="math inline">\(\Theta(T)\)</span> and <span
+          class="math inline">\(\Lambda(T)\)</span> converge to the same
+          long-run rate. In non-stationary settings, their divergence
+          provides a direct structural signal of imbalance between input
+          and output.</p>
+          <p>As with the other cumulative rates, <span
+          class="math inline">\(\Theta(T)\)</span> becomes progressively
+          less sensitive to individual events as <span
+          class="math inline">\(T\)</span> grows, and increasingly
+          reflective of sustained structural behavior.</p>
+          <h3 id="impact-on-presence-mass">Impact on presence mass</h3>
+          <p>Like arrival rate, throughput affects presence mass through
+          its impact on the state process. Because</p>
+          <p><span class="math display">\[
+          \frac{dH}{dt} = N(t),
+          \]</span></p>
+          <p>departures reduce <span class="math inline">\(N(t)\)</span>
+          and therefore immediately reduce the rate at which presence
+          mass accumulates. Sustained throughput constrains the growth
+          of cumulative presence mass; insufficient throughput allows
+          presence mass to accumulate more rapidly.</p>
+          <p>In the arrival-indexed Presence Invariant, <span
+          class="math inline">\(\Lambda(T)\)</span> provides the event
+          rate and <span class="math inline">\(w(T)\)</span> provides
+          the corresponding amortized time factor. A fully parallel
+          departure-indexed invariant replaces <span
+          class="math inline">\(\Lambda(T)\)</span> with <span
+          class="math inline">\(\Theta(T)\)</span>, yielding an
+          equivalent factorization of <span
+          class="math inline">\(L(T)\)</span> in throughput terms. We
+          will return to this departure-focused formulation of the
+          Presence Invariant shortly.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/cumulative_departure_rate_Theta.png</code></p>
+          <h2 id="chart-13-residence-w-prime">5.4 w’(T) - Residence per
+          Departure</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/average_residence_time_w_prime.png"
+          alt="w’(T) residence per departure (with-events)" />
+          <figcaption aria-hidden="true">w’(T) residence per departure
+          (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/core/panels/average_residence_time_w_prime.png"
+          alt="w’(T) residence per departure (no-events)" />
+          <figcaption aria-hidden="true">w’(T) residence per departure
+          (no-events)</figcaption>
+          </figure>
+          </details>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(w&#39;(T)=H(T)/D(T)\)</span>.</p>
+          <p><strong>Unit:</strong> Time.</p>
+          <p>In parallel with the arrival-indexed amortization of <span
+          class="math inline">\(H(T)\)</span></p>
+          <p><span class="math display">\[
+          w(T) = \frac{H(T)}{A(T)},
+          \]</span></p>
+          <p>we define the departure-indexed residence time</p>
+          <p><span class="math display">\[
+          w&#39;(T) = \frac{H(T)}{D(T)}.
+          \]</span></p>
+          <p>This quantity represents cumulative presence mass
+          normalized by cumulative departures over <span
+          class="math inline">\((0,T]\)</span>. Its units are time. We
+          interpret <span class="math inline">\(w&#39;(T)\)</span> as
+          the <em>amortized residence time per completed item</em> over
+          the observation horizon.</p>
+          <h3 id="interpretation">Interpretation</h3>
+          <p>Since <span class="math inline">\(H(T)\)</span> measures
+          total accumulated time spent in system by all items over <span
+          class="math inline">\((0,T]\)</span>, dividing by <span
+          class="math inline">\(D(T)\)</span> distributes that
+          accumulated time across completed departures.</p>
+          <p>Thus:</p>
+          <ul>
+          <li><span class="math inline">\(w(T)\)</span> amortizes
+          accumulated presence over <strong>arrivals</strong>.</li>
+          <li><span class="math inline">\(w&#39;(T)\)</span> amortizes
+          accumulated presence over <strong>departures</strong>.</li>
+          </ul>
+          <p>The distinction is structural:</p>
+          <ul>
+          <li><span class="math inline">\(w(T)\)</span> measures time
+          exposure relative to incoming work.</li>
+          <li><span class="math inline">\(w&#39;(T)\)</span> measures
+          time exposure relative to completed output.</li>
+          </ul>
+          <p>In a stable regime where arrivals and departures balance
+          asymptotically, the two converge to the same steady-state
+          process time. In transient or unstable regimes, they can
+          differ significantly.</p>
+          <h3 id="structural-behavior">Structural behavior</h3>
+          <p>Because <span class="math inline">\(D(T)\)</span>
+          increments at departure times:</p>
+          <ul>
+          <li><span class="math inline">\(w&#39;(T)\)</span> may exhibit
+          discrete downward adjustments at departures (denominator
+          jumps).</li>
+          <li>Between departures, <span
+          class="math inline">\(D(T)\)</span> is constant while <span
+          class="math inline">\(H(T)\)</span> continues to accumulate,
+          so <span class="math inline">\(w&#39;(T)\)</span> increases
+          smoothly at rate</li>
+          </ul>
+          <p><span class="math display">\[
+          \frac{dw&#39;}{dT} = \frac{N(t)\big|_{t=T}}{D(T)}.
+          \]</span></p>
+          <p>Thus <span class="math inline">\(w&#39;(T)\)</span> grows
+          continuously between completions and adjusts downward when
+          output occurs.</p>
+          <h3
+          id="arrival-based-vs-departure-based-process-time">Arrival-based
+          vs Departure-based process time</h3>
+          <p>The difference between <span
+          class="math inline">\(w(T)\)</span> and <span
+          class="math inline">\(w&#39;(T)\)</span> reflects two
+          complementary viewpoints:</p>
+          <ul>
+          <li><p>Measuring process time against arrivals asks:<br />
+          <em>How much time exposure does each unit of incoming work
+          generate?</em></p></li>
+          <li><p>Measuring process time against departures asks:<br />
+          <em>How much accumulated time corresponds to each unit of
+          completed output?</em></p></li>
+          </ul>
+          <p>In stable regimes these perspectives coincide. In
+          non-stationary settings they reveal different structural
+          features — for example, when presence mass grows there is
+          typically divergence between the two, reflecting imbalance
+          between arrivals and departures. In the section on
+          convergence, we will discuss the relationship between <span
+          class="math inline">\(w(T)\)</span> and <span
+          class="math inline">\(w&#39;(T)\)</span>.</p>
+          <p>But the key thing here is that both are finite-horizon
+          generalizations of process time that preserve structural
+          consistency with the Presence Invariant. So let’s first
+          complete the picture by looking at the departure-focused
+          version of the Presence Invariant.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/average_residence_time_w_prime.png</code></p>
+          <h2 id="chart-14-departure-invariant">5.5 <span
+          class="math inline">\(L(T)=\Theta(T)\cdot w&#39;(T)\)</span>
+          Invariant - Departure Invariant</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/departure_littles_law_invariant.png"
+          alt="Departure invariant (with-events)" />
+          <figcaption aria-hidden="true">Departure invariant
+          (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/core/panels/departure_littles_law_invariant.png"
+          alt="Departure invariant (no-events)" />
+          <figcaption aria-hidden="true">Departure invariant
+          (no-events)</figcaption>
+          </figure>
+          </details>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(L(T)=\Theta(T)\cdot w&#39;(T)\)</span>.
+          <strong>Unit:</strong> Elements.</p>
+          <p>The <strong>departure form of the Presence
+          Invariant</strong> is written using the same notation
+          established earlier. For every finite interval <span
+          class="math inline">\((0,T]\)</span> with at least one
+          departure,</p>
+          <p><span class="math display">\[
+          L(T) = \Theta(T)\, w&#39;(T),
+          \]</span></p>
+          <p>where <span class="math inline">\(\Theta(T)\)</span> is the
+          departure rate over <span class="math inline">\((0,T]\)</span>
+          and <span class="math inline">\(w&#39;(T)\)</span> is the
+          amortized residence time per departure.</p>
+          <p>As in the arrival form, this identity holds exactly on the
+          realized sample path for every admissible <span
+          class="math inline">\(T\)</span> (assuming at least one
+          departure). It is purely deterministic and requires no
+          steady–state or probabilistic assumptions.</p>
+          <p>When plotted as a scatter of <span
+          class="math inline">\(L(T)\)</span> versus <span
+          class="math inline">\(\Theta(T) w&#39;(T)\)</span>, the points
+          lie exactly on the line <span class="math inline">\(x =
+          y\)</span>. Moreover, the points in this chart are identical
+          to those in the arrival-based chart at every common event
+          time. The main difference is that we are highlighting the
+          points indexed by departure events rather than arrival
+          events.</p>
+          <p>For each <span class="math inline">\(T\)</span> where both
+          quantities are defined,</p>
+          <p><span class="math display">\[
+          \Lambda(T) w(T) = L(T) = \Theta(T) w&#39;(T).
+          \]</span></p>
+          <p>The only practical difference between the charts arises at
+          the beginning of the process. The arrival-based view includes
+          early prefixes in which arrivals have occurred but no
+          departures have yet been observed. The departure-based view
+          excludes those prefixes. As a result, the visible scales or
+          density of points may differ slightly in the early region,
+          even though every shared event time produces the same point on
+          the diagonal.</p>
+          <p>For a deeper discussion of symmetry across arrival and
+          departure parameterizations, see <a
+          href="#perspective-symmetry-of-the-presence-invariant">Perspective
+          Symmetry of the Presence Invariant</a>.</p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/departure_littles_law_invariant.png</code></p>
+          <h2 id="chart-10-arrival-invariant">5.6 <span
+          class="math inline">\(L(T)=\Lambda(T)\cdot w(T)\)</span>
+          Invariant - Arrival Invariant</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/littles_law_invariant.png"
+          alt="Arrival invariant (with-events)" />
+          <figcaption aria-hidden="true">Arrival invariant
+          (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/core/panels/littles_law_invariant.png"
+          alt="Arrival invariant (no-events)" />
+          <figcaption aria-hidden="true">Arrival invariant
+          (no-events)</figcaption>
+          </figure>
+          </details>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(L(T)=\Lambda(T)\cdot w(T)\)</span>.
+          <strong>Units:</strong> Elements</p>
+          <p>The <strong>arrival form of the Presence Invariant</strong>
+          states that for every finite interval <span
+          class="math inline">\((0,T]\)</span>, with <span
+          class="math inline">\(0 &lt; T &lt; T_{\max}\)</span>,</p>
+          <p><span class="math display">\[
+          L(T) = \Lambda(T)\, w(T),
+          \]</span></p>
+          <p>where <span class="math inline">\(L(T)\)</span> is the
+          time–average presence over <span
+          class="math inline">\((0,T]\)</span>, <span
+          class="math inline">\(\Lambda(T)\)</span> is the arrival rate
+          over that same interval, and <span
+          class="math inline">\(w(T)\)</span> is the amortized residence
+          time per arrival.</p>
+          <p>This identity is exact and deterministic given a sample
+          path. It does not rely on steady state, stationarity, or
+          probabilistic assumptions. Each quantity is computed from the
+          same realized arrival–departure history, and the equality
+          holds for every admissible <span
+          class="math inline">\(T\)</span>.</p>
+          <p>The invariant imposes a structural constraint: the three
+          variables cannot vary independently. The relation removes one
+          degree of freedom. Given any two of <span
+          class="math inline">\(\{L(T), \Lambda(T), w(T)\}\)</span> at a
+          fixed <span class="math inline">\(T\)</span>, the third is
+          uniquely determined. Any observed <em>change</em> in one
+          coordinate must be reconciled through a <em>compensating
+          change</em> in at least one of the others.</p>
+          <p>This structure becomes visually explicit in the scatter
+          plot of <span class="math inline">\(L(T)\)</span> versus <span
+          class="math inline">\(\Lambda(T) w(T)\)</span>. Each plotted
+          point corresponds to a specific event time <span
+          class="math inline">\(T\)</span> (arrival or departure). The
+          horizontal coordinate is the directly computed time–average
+          presence <span class="math inline">\(L(T)\)</span>, and the
+          vertical coordinate is the product <span
+          class="math inline">\(\Lambda(T) w(T)\)</span> computed from
+          the same prefix of the sample path.</p>
+          <p>The Presence Invariant says that all points in this scatter
+          plot lie exactly on the line <span class="math inline">\(x =
+          y\)</span>. The chart is a geometric manifestation of the
+          invariant itself. Every event updates <span
+          class="math inline">\(A(T)\)</span> or <span
+          class="math inline">\(D(T)\)</span>, which updates <span
+          class="math inline">\(N(t)\)</span>, which determines <span
+          class="math inline">\(H(T)\)</span>, which in turn determines
+          <span class="math inline">\(L(T)\)</span>. Simultaneously, the
+          same prefix determines <span
+          class="math inline">\(\Lambda(T)\)</span> and <span
+          class="math inline">\(w(T)\)</span>. The coincidence of the
+          two coordinates is enforced by the algebra of the sample
+          path.</p>
+          <p>The evolution of the process over time appears as a
+          sequence of event–indexed points sliding along the diagonal.
+          Translucent points represent earlier portions of the history,
+          while opaque points represent more recent history. Clusters
+          form in regions where the moving average <span
+          class="math inline">\(L(T)\)</span> stabilizes or repeatedly
+          returns. These clusters mark regimes in which the joint
+          dynamics of arrival rate and amortized residence time sustain
+          a relatively stable level of time–average presence. When the
+          regime shifts, the points migrate to a different region of the
+          diagonal, but they never leave it.</p>
+          <p>Compare the points near <span class="math inline">\(L(T)
+          \approx 2.3\)</span> in this chart with the corresponding
+          segment of the <span class="math inline">\(L(T)\)</span> time
+          series. The dense grouping along the diagonal reflects the
+          same plateau visible in the time–indexed view. The two charts
+          display the same dynamics from orthogonal perspectives: one
+          indexed by time, the other indexed by the invariant
+          constraint.</p>
+          <p>Thus the chart has two simultaneous interpretations.
+          Geometrically, it displays the invariant constraint <span
+          class="math inline">\(L(T) = \Lambda(T) w(T)\)</span> as the
+          one–dimensional manifold in <span
+          class="math inline">\(\mathbb{R}^2\)</span> on which all
+          admissible states must lie. Dynamically, it shows how the
+          realized process traverses that manifold as arrival and
+          departure events accumulate over time.</p>
+          <p>If the relation is expanded into three dimensions by
+          plotting <span class="math inline">\((L(T), \Lambda(T),
+          w(T))\)</span>, the resulting trajectory lies on the
+          two–dimensional surface defined by</p>
+          <p><span class="math display">\[
+          L = \Lambda w.
+          \]</span></p>
+          <p>The two–dimensional scatter is therefore a projection of a
+          higher–dimensional constrained trajectory evolving in time. In
+          practice, this projection provides the clearest visualization
+          of the core structural fact: the dynamics of the
+          arrival–departure process are constrained to lie on the
+          surface determined by the Presence Invariant.</p>
+          <p>To see a visualization of the complete path in time on the
+          surface in 3D see the manifold chart at
+          <code>advanced/invariant_manifold3D_log.png</code></p>
+          <p><strong>Output file:</strong>
+          <code>core/panels/littles_law_invariant.png</code></p>
+          <h1 id="reasoning-about-flow">6 Reasoning about Flow</h1>
+          <table>
+          <colgroup>
+          <col style="width: 25%" />
+          <col style="width: 25%" />
+          <col style="width: 25%" />
+          <col style="width: 25%" />
+          </colgroup>
+          <thead>
+          <tr>
+          <th>Chart</th>
+          <th>Name</th>
+          <th>Formula</th>
+          <th>Units</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+          <td><a href="#chart-11-arrival-stack">Arrival Stack</a></td>
+          <td>Arrival Focused Flow Dashboard</td>
+          <td><span class="math inline">\(N(t), L(T), \Lambda(T),
+          w(T)\)</span></td>
+          <td>N/A</td>
+          </tr>
+          <tr>
+          <td><a href="#chart-15-departure-stack">Departure
+          Stack</a></td>
+          <td>Departure Focused Flow Dashboard</td>
+          <td><span class="math inline">\(N(t), L(T), \Theta(T),
+          w&#39;(T)\)</span></td>
+          <td>N/A</td>
+          </tr>
+          </tbody>
+          </table>
+          <h2 id="chart-11-arrival-stack">6.1 Arrival Stack - Arrival
+          Dashboard</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/sample_path_flow_metrics.png"
+          alt="Arrival stack (with-events)" />
+          <figcaption aria-hidden="true">Arrival stack
+          (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/sample_path_flow_metrics.png"
+          alt="Arrival stack (no-events)" />
+          <figcaption aria-hidden="true">Arrival stack
+          (no-events)</figcaption>
+          </figure>
+          </details>
+          <p>The arrival stack displays <span
+          class="math inline">\(N(t)\)</span>, the instantaneous process
+          state, and the three parameters of the arrival form of the
+          Presence Invariant on a common event timeline:</p>
+          <p><span class="math display">\[
+          L(T) = \Lambda(T)\, w(T).
+          \]</span></p>
+          <p>From top to bottom we see:</p>
+          <ul>
+          <li><span class="math inline">\(N(t) = A(t) - D(t)\)</span>,
+          the instantaneous process state,</li>
+          <li><span class="math inline">\(L(T) = H(T)/T\)</span>, the
+          time-average presence,</li>
+          <li><span class="math inline">\(\Lambda(T) = A(T)/T\)</span>,
+          the cumulative arrival rate,</li>
+          <li><span class="math inline">\(w(T) = H(T)/A(T)\)</span>, the
+          amortized residence time per arrival.</li>
+          </ul>
+          <p>These are not independent charts. At every event time <span
+          class="math inline">\(T\)</span>, the values shown in the
+          bottom three panels satisfy the invariant exactly. If <span
+          class="math inline">\(L(T)\)</span> changes, it must be
+          because either <span
+          class="math inline">\(\Lambda(T)\)</span>, <span
+          class="math inline">\(w(T)\)</span>, or both changed.</p>
+          <h4 id="how-changes-propagate">How changes propagate</h4>
+          <p>There are three structurally distinct cases:</p>
+          <ol type="1">
+          <li><strong>Arrival event</strong></li>
+          </ol>
+          <ul>
+          <li><span class="math inline">\(A(T)\)</span> increases.</li>
+          <li><span class="math inline">\(\Lambda(T)\)</span> jumps
+          upward.</li>
+          <li><span class="math inline">\(w(T)\)</span> typically
+          decreases (the new arrival has zero residence so far).</li>
+          <li><span class="math inline">\(L(T)\)</span> adjusts
+          according to the product.</li>
+          </ul>
+          <p>Early in the timeline, the sharp movement in <span
+          class="math inline">\(\Lambda(T)\)</span> (third panel)
+          produces visible adjustments in both <span
+          class="math inline">\(w(T)\)</span> (fourth panel) and <span
+          class="math inline">\(L(T)\)</span> (second panel). The
+          invariant is enforcing a rebalance at each arrival.</p>
+          <ol start="2" type="1">
+          <li><strong>Departure event</strong></li>
+          </ol>
+          <ul>
+          <li><span class="math inline">\(A(T)\)</span> does not
+          change.</li>
+          <li><span class="math inline">\(\Lambda(T)\)</span> remains
+          continuous.</li>
+          <li><span class="math inline">\(H(T)\)</span> changes slope
+          because <span class="math inline">\(N(t)\)</span> steps
+          down.</li>
+          <li><span class="math inline">\(w(T)\)</span> adjusts to
+          reflect updated amortized residence.</li>
+          <li><span class="math inline">\(L(T)\)</span> shifts according
+          to the new accumulated presence.</li>
+          </ul>
+          <p>Let’s take a closer look at this case, because it
+          illustrates some of the more subtle aspects of how these
+          metrics interact with each other through the cumulative
+          presence mass <span class="math inline">\(H(T)\)</span>.
+          Consider the sequence of departures around 4/21. In the top
+          panel, <span class="math inline">\(N(t)\)</span> steps down
+          several times in close succession. Let’s examine the causal
+          chain that this departure event causes to the arrival-focused
+          metrics.</p>
+          <p>At a high level it looks like this:</p>
+          <p>Departure -&gt; change in <span
+          class="math inline">\(N(t)\)</span> -&gt; change in slope of
+          <span class="math inline">\(H(T)\)</span> -&gt; change in
+          <span class="math inline">\(L(T)\)</span> and <span
+          class="math inline">\(w(T)\)</span>.</p>
+          <p>At a departure time <span
+          class="math inline">\(T\)</span>:</p>
+          <ul>
+          <li><span class="math inline">\(A(T)\)</span> does not
+          change.</li>
+          <li><span class="math inline">\(\Lambda(T) = A(T)/T\)</span>
+          does not jump (though it will drift over time).</li>
+          <li><span class="math inline">\(N(t)\)</span> steps down.</li>
+          <li>The slope of <span class="math inline">\(H(T) = \int_0^T
+          N(t)\,dt\)</span> decreases immediately.</li>
+          </ul>
+          <p>Because <span class="math inline">\(w(T) =
+          H(T)/A(T)\)</span> and <span
+          class="math inline">\(A(T)\)</span> is fixed during a stretch
+          with no arrivals, any change in the slope of <span
+          class="math inline">\(H(T)\)</span> directly changes the slope
+          of <span class="math inline">\(w(T)\)</span>. As long as <span
+          class="math inline">\(N(t) &gt; 0\)</span>, <span
+          class="math inline">\(H(T)\)</span> continues to increase, so
+          <span class="math inline">\(w(T)\)</span> continues to
+          increase, but now at a reduced rate.</p>
+          <p>Similarly, <span class="math inline">\(L(T) =
+          H(T)/T\)</span> evolves as a moving average of <span
+          class="math inline">\(N(t)\)</span>. Between events,</p>
+          <p><span class="math display">\[
+          \frac{d}{dT} L(T) = \frac{N(T) - L(T)}{T}.
+          \]</span></p>
+          <p>This relationship explains the “catch up” behavior visible
+          in the chart. After consecutive departures reduce <span
+          class="math inline">\(N(t)\)</span>, the instantaneous state
+          may fall below the current time-average <span
+          class="math inline">\(L(T)\)</span>. When <span
+          class="math inline">\(N(T) &lt; L(T)\)</span>, the derivative
+          above becomes negative and <span
+          class="math inline">\(L(T)\)</span> drifts downward. The
+          average adjusts toward the new, lower level of the state.</p>
+          <p>Importantly, <span class="math inline">\(w(T)\)</span> does
+          not need to drift downward just because <span
+          class="math inline">\(L(T)\)</span> does. During a no-arrival
+          stretch:</p>
+          <ul>
+          <li><span class="math inline">\(A(T)\)</span> is
+          constant,</li>
+          <li><span class="math inline">\(H(T)\)</span> continues to
+          increase (if <span class="math inline">\(N(t) &gt;
+          0\)</span>),</li>
+          <li>so <span class="math inline">\(w(T)\)</span> continues to
+          increase,</li>
+          <li>while <span class="math inline">\(\Lambda(T) =
+          A(T)/T\)</span> gradually decreases as <span
+          class="math inline">\(T\)</span> grows.</li>
+          </ul>
+          <p>The invariant</p>
+          <p><span class="math display">\[
+          L(T) = \Lambda(T)\, w(T)
+          \]</span></p>
+          <p>remains satisfied throughout. The downward drift in <span
+          class="math inline">\(L(T)\)</span> can be explained by the
+          combined effect of a slowly decreasing <span
+          class="math inline">\(\Lambda(T)\)</span> and a more slowly
+          increasing <span class="math inline">\(w(T)\)</span>.</p>
+          <p>The key point is that the Presence Invariant is not an
+          active balancing force. It is an accounting identity that
+          remains true because all three quantities are derived from the
+          same accumulated presence mass <span
+          class="math inline">\(H(T)\)</span>. The real dynamics are
+          driven by the evolution of <span
+          class="math inline">\(N(t)\)</span>, its direct impact on
+          <span class="math inline">\(H(T)\)</span>, and the
+          moving-average structure of <span
+          class="math inline">\(L(T)\)</span>. The invariant simply
+          makes the consequences of those dynamics algebraically
+          explicit.</p>
+          <ol start="3" type="1">
+          <li><strong>Between events</strong></li>
+          </ol>
+          <p>Between discrete arrivals and departures, <span
+          class="math inline">\(N(t)\)</span> is constant. Over those
+          intervals:</p>
+          <ul>
+          <li><span class="math inline">\(H(T)\)</span> grows
+          linearly,</li>
+          <li><span class="math inline">\(A(T)\)</span> is
+          constant,</li>
+          <li><span class="math inline">\(w(T)\)</span> increases
+          smoothly,</li>
+          <li><span class="math inline">\(\Lambda(T)\)</span> decreases
+          gradually (denominator <span class="math inline">\(T\)</span>
+          grows),</li>
+          <li><span class="math inline">\(L(T)\)</span> evolves smoothly
+          as the product.</li>
+          </ul>
+          <p>The invariant governs these continuous drifts just as
+          strictly as it governs the jumps.</p>
+          <p>At every point in the charts, any visible change in <span
+          class="math inline">\(L(T)\)</span> can be traced to a change
+          in <span class="math inline">\(\Lambda(T)\)</span>, <span
+          class="math inline">\(w(T)\)</span>, or both. The three panels
+          move in tandem because they are algebraically coupled.</p>
+          <h3
+          id="short-term-fluctuations-vs-long-term-smoothing">Short-Term
+          Fluctuations vs Long-Term Smoothing</h3>
+          <p>The top panel shows pronounced short-term volatility in
+          <span class="math inline">\(N(t)\)</span>. Arrivals and
+          departures cause discrete upward and downward steps. These
+          fluctuations are local and event-driven.</p>
+          <p>By contrast, <span class="math inline">\(L(T)\)</span> in
+          the second panel evolves much more smoothly.</p>
+          <p>This smoothing occurs because:</p>
+          <ul>
+          <li><span class="math inline">\(L(T) = H(T)/T\)</span> is a
+          time average,</li>
+          <li><span class="math inline">\(H(T)\)</span> integrates <span
+          class="math inline">\(N(t)\)</span> over time,</li>
+          <li>integration dampens short spikes,</li>
+          <li>division by <span class="math inline">\(T\)</span> further
+          attenuates early volatility as time grows.</li>
+          </ul>
+          <p>For example:</p>
+          <ul>
+          <li>In early April, <span class="math inline">\(N(t)\)</span>
+          oscillates between 1 and 3. <span
+          class="math inline">\(L(T)\)</span> moves noticeably because
+          <span class="math inline">\(T\)</span> is small and each
+          increment materially affects the average.</li>
+          <li>Later in the timeline, even when <span
+          class="math inline">\(N(t)\)</span> jumps from 2 to 4 and
+          back, <span class="math inline">\(L(T)\)</span> barely shifts.
+          The accumulated history dominates any single event.</li>
+          </ul>
+          <p>The chart therefore illustrates two distinct dynamics:</p>
+          <ul>
+          <li><strong>State volatility</strong> in <span
+          class="math inline">\(N(t)\)</span> driven by discrete
+          events,</li>
+          <li><strong>Structural stability</strong> in <span
+          class="math inline">\(L(T)\)</span> driven by time
+          accumulation.</li>
+          </ul>
+          <p>The arrival stack makes this relationship explicit.
+          Short-term changes in <span
+          class="math inline">\(N(t)\)</span> feed deterministically
+          into <span class="math inline">\(H(T)\)</span>, which feeds
+          into both <span class="math inline">\(w(T)\)</span> and <span
+          class="math inline">\(L(T)\)</span>, and must reconcile with
+          <span class="math inline">\(\Lambda(T)\)</span> through the
+          invariant. Over time, the averaging effect of <span
+          class="math inline">\(H(T)/T\)</span> produces a stable
+          trajectory even when the instantaneous state continues to
+          fluctuate.</p>
+          <p>This is the practical meaning of the invariant in action:
+          the short-term dynamics of the process are absorbed into a
+          longer-term structural quantity that evolves smoothly while
+          remaining algebraically constrained at every event.</p>
+          <p><strong>Output file:</strong>
+          <code>sample_path_flow_metrics.png</code></p>
+          <h2 id="chart-15-departure-stack">6.2 Departure Focused Stack
+          - Departure Dashboard</h2>
+          <p><code>with-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/core/departure_flow_metrics.png"
+          alt="Departure stack (with-events)" />
+          <figcaption aria-hidden="true">Departure stack
+          (with-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          No-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/core/departure_flow_metrics.png"
+          alt="Departure stack (no-events)" />
+          <figcaption aria-hidden="true">Departure stack
+          (no-events)</figcaption>
+          </figure>
+          </details>
+          <p>Builds on Steps 5, 7, 11, and 12 by presenting the
+          departure-side dashboard in aligned panels.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(L(T)=\Theta(T)\cdot
+          w&#39;(T)\)</span>.</p>
+          <p><strong>Unit:</strong> Mixed (Elements, Elements/Time,
+          Time).</p>
+          <p><strong>Output file:</strong>
+          <code>core/departure_flow_metrics.png</code></p>
+          <h1 id="convergence-and-stability">7 Convergence and
+          Stability</h1>
+          <table>
+          <colgroup>
+          <col style="width: 25%" />
+          <col style="width: 25%" />
+          <col style="width: 25%" />
+          <col style="width: 25%" />
+          </colgroup>
+          <thead>
+          <tr>
+          <th>Chart</th>
+          <th>Short Name</th>
+          <th>Formula</th>
+          <th>Units</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+          <td><a
+          href="#chart-16-arrival-departure-rate-convergence"><span
+          class="math inline">\(\Lambda(T)\)</span>-<span
+          class="math inline">\(\Theta(T)\)</span> Rate
+          Convergence</a></td>
+          <td>Rate Convergence</td>
+          <td><span class="math inline">\(\Lambda(T)=A(T)/T\)</span> vs
+          <span class="math inline">\(\Theta(T)=D(T)/T\)</span></td>
+          <td>Elem/Time</td>
+          </tr>
+          <tr>
+          <td><a href="#chart-17-process-time-convergence">Process Time
+          Convergence</a></td>
+          <td>Time Convergence</td>
+          <td><span class="math inline">\(w(T)=H(T)/A(T)\)</span> vs
+          <span class="math inline">\(W^*(t)\)</span></td>
+          <td>Time</td>
+          </tr>
+          <tr>
+          <td><a href="#chart-20-sample-path-convergence">Top-Level
+          Convergence <span class="math inline">\(L(T)\)</span> vs <span
+          class="math inline">\(\lambda^*(t)\cdot
+          W^*(t)\)</span></a></td>
+          <td>Top-Level Convergence</td>
+          <td><span class="math inline">\(L(T)\)</span> vs <span
+          class="math inline">\(\lambda^*(t)\cdot W^*(t)\)</span></td>
+          <td>Elem</td>
+          </tr>
+          </tbody>
+          </table>
+          <h2 id="chart-16-arrival-departure-rate-convergence">7.1 <span
+          class="math inline">\(\Lambda(T)\)</span>-<span
+          class="math inline">\(\Theta(T)\)</span> Rate Convergence -
+          Rate Convergence</h2>
+          <p><code>no-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/convergence/panels/arrival_departure_rate_convergence.png"
+          alt="Arrival-departure rate convergence (no-events)" />
+          <figcaption aria-hidden="true">Arrival-departure rate
+          convergence (no-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          With-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/convergence/panels/arrival_departure_rate_convergence.png"
+          alt="Arrival-departure rate convergence (with-events)" />
+          <figcaption aria-hidden="true">Arrival-departure rate
+          convergence (with-events)</figcaption>
+          </figure>
+          </details>
+          <p>Builds from Steps 8 and 11 by directly comparing cumulative
+          arrival and departure rate trajectories.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(\Lambda(T)=A(T)/T\)</span> vs <span
+          class="math inline">\(\Theta(T)=D(T)/T\)</span>.</p>
+          <p><strong>Unit:</strong> Elements/Time.</p>
+          <p><strong>Output file:</strong>
+          <code>convergence/panels/arrival_departure_rate_convergence.png</code></p>
+          <h2 id="chart-17-process-time-convergence">7.2 Process Time
+          Convergence - Time Convergence</h2>
+          <p><code>no-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/convergence/panels/process_time_convergence.png"
+          alt="Process time convergence (no-events)" />
+          <figcaption aria-hidden="true">Process time convergence
+          (no-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          With-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/convergence/panels/process_time_convergence.png"
+          alt="Process time convergence (with-events)" />
+          <figcaption aria-hidden="true">Process time convergence
+          (with-events)</figcaption>
+          </figure>
+          </details>
+          <p>Builds from Step 9a by comparing finite-window residence
+          behavior to empirical process-time behavior.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(w(T)=H(T)/A(T)\)</span> vs <span
+          class="math inline">\(W^*(t)\)</span>.</p>
+          <p><strong>Unit:</strong> Time.</p>
+          <p>Studying the arrival-indexed and departure-indexed versions
+          of process time side by side is highly diagnostic in unstable
+          or transient regimes.</p>
+          <p>Recall:</p>
+          <p><span class="math display">\[
+          w(T) = \frac{H(T)}{A(T)},
+          \qquad
+          w&#39;(T) = \frac{H(T)}{D(T)}.
+          \]</span></p>
+          <p>Both share the same numerator — cumulative presence mass
+          <span class="math inline">\(H(T)\)</span> — but differ in
+          their normalization. This difference is the signal.</p>
+          <h3 id="arrivals-exceed-departures">Arrivals Exceed
+          Departures</h3>
+          <p>If arrivals persistently exceed departures,</p>
+          <p><span class="math display">\[
+          A(T) &gt; D(T),
+          \]</span></p>
+          <p>presence mass accumulates more rapidly.</p>
+          <p>In this case:</p>
+          <ul>
+          <li><span class="math inline">\(w(T)\)</span> increases, but
+          is moderated by a growing arrival base.</li>
+          <li><span class="math inline">\(w&#39;(T)\)</span> increases
+          faster, since the departure base is smaller.</li>
+          </ul>
+          <p>A widening gap with <span class="math inline">\(w&#39;(T)
+          \gg w(T)\)</span> indicates structural under-delivery relative
+          to demand. Time exposure per completed item grows faster than
+          time exposure per arrival. This is the geometric signature of
+          saturation.</p>
+          <h3 id="aging-instability">Aging Instability</h3>
+          <p>Suppose WIP remains bounded but some items age indefinitely
+          while others complete.</p>
+          <p>Then <span class="math inline">\(H(T)\)</span> grows
+          linearly, and arrivals may continue at a steady rate.</p>
+          <p>In this regime:</p>
+          <ul>
+          <li><span class="math inline">\(w(T)\)</span> may remain
+          stable,</li>
+          <li>while <span class="math inline">\(w&#39;(T)\)</span>
+          increases.</li>
+          </ul>
+          <p>This pattern indicates that completed work appears healthy
+          relative to arrivals, but accumulated exposure per completed
+          item is rising. The system is completing some work efficiently
+          while other work ages in place.</p>
+          <h3 id="throughput-surge-backlog-reduction">Throughput Surge
+          (Backlog Reduction)</h3>
+          <p>If departures temporarily exceed arrivals,</p>
+          <ul>
+          <li><span class="math inline">\(D(T)\)</span> grows faster
+          than <span class="math inline">\(A(T)\)</span>,</li>
+          <li>cumulative imbalance narrows.</li>
+          </ul>
+          <p>In such regimes, <span
+          class="math inline">\(w&#39;(T)\)</span> will often decrease
+          relative to <span class="math inline">\(w(T)\)</span>, since
+          the departure base expands more rapidly. However, this is not
+          mechanically guaranteed, because both quantities share the
+          same numerator <span class="math inline">\(H(T)\)</span> and
+          therefore depend on the detailed interaction between presence
+          accumulation and event rates.</p>
+          <p>In general the gap between the two measures,</p>
+          <p><span class="math display">\[
+          \frac{w&#39;(T)}{w(T)} = \frac{A(T)}{D(T)},
+          \]</span></p>
+          <p>narrows whenever <span class="math inline">\(D(T)\)</span>
+          grows faster than <span class="math inline">\(A(T)\)</span>.
+          This convergence reflects active reduction of cumulative
+          imbalance and structural progress toward equilibrium.</p>
+          <h3 id="structural-equilibrium">Structural Equilibrium</h3>
+          <p>In sustained equilibrium,</p>
+          <p><span class="math display">\[
+          \Lambda(T) \approx \Theta(T),
+          \]</span></p>
+          <p>and asymptotically,</p>
+          <p><span class="math display">\[
+          w(T) \approx w&#39;(T).
+          \]</span></p>
+          <p>Convergence of the two measures indicates structural
+          balance between demand and throughput. Persistent divergence
+          indicates imbalance.</p>
+          <h3 id="interpreting-the-difference">Interpreting the
+          Difference</h3>
+          <p>The ratio of the two measures is</p>
+          <p><span class="math display">\[
+          \frac{w&#39;(T)}{w(T)} = \frac{A(T)}{D(T)}.
+          \]</span></p>
+          <p>Thus divergence between them directly reflects cumulative
+          imbalance between arrivals and departures.</p>
+          <p>Comparing <span class="math inline">\(w(T)\)</span> and
+          <span class="math inline">\(w&#39;(T)\)</span> separates three
+          structural forces:</p>
+          <ul>
+          <li>Demand pressure (arrival intensity),</li>
+          <li>Delivery performance (throughput),</li>
+          <li>Accumulated exposure (presence mass).</li>
+          </ul>
+          <p>Viewed together, they reveal whether instability arises
+          from excess demand, insufficient throughput, aging
+          concentration, or oscillatory feedback dynamics. Neither
+          measure alone can provide this level of structural diagnostic
+          insight.</p>
+          <p><strong>Output file:</strong>
+          <code>convergence/panels/process_time_convergence.png</code></p>
+          <h2 id="chart-20-sample-path-convergence">7.3 Top-Level
+          Convergence <span class="math inline">\(L(T)\)</span> vs <span
+          class="math inline">\(\lambda^*(t)\cdot W^*(t)\)</span></h2>
+          <p><code>no-events</code></p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/no-events/sample_path_convergence.png"
+          alt="Sample path convergence (no-events)" />
+          <figcaption aria-hidden="true">Sample path convergence
+          (no-events)</figcaption>
+          </figure>
+          <details>
+          <summary>
+          With-events version
+          </summary>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/sample_path_convergence.png"
+          alt="Sample path convergence (with-events)" />
+          <figcaption aria-hidden="true">Sample path convergence
+          (with-events)</figcaption>
+          </figure>
+          </details>
+          <p>Builds on the full chain by giving a top-level convergence
+          diagnostic for the finite-window Little’s Law relation over
+          the observation horizon.</p>
+          <p><strong>Derivation:</strong> <span
+          class="math inline">\(L(T)\)</span> vs <span
+          class="math inline">\(\lambda^*(t)\cdot W^*(t)\)</span>.</p>
+          <p><strong>Unit:</strong> Elements.</p>
+          <p><strong>Output file:</strong>
+          <code>sample_path_convergence.png</code></p>
+          <h1 id="appendices">8 Appendices</h1>
+          <h2 id="derivative-of-lt">8.1 Derivative of <span
+          class="math inline">\(L(T)\)</span></h2>
+          <p>In this appendix we derive the formula <span
+          class="math display">\[
+          \frac{dL}{dT}
+          =
+          \frac{N(t) - L(T)}{T}.
+          \]</span> This formula is a standard derivation of the
+          sensitivity of a cumulative moving average, which, in effect
+          is what <span class="math inline">\(L(T)\)</span> is. Here
+          <span class="math inline">\(N(t)\)</span> should be
+          interpreted as the instantaneous state of the arrival
+          departure process at the endpoint of the interval <span
+          class="math inline">\((0,T]\)</span>.</p>
+          <p>Start with</p>
+          <p><span class="math display">\[
+          L(T) = \frac{H(T)}{T}.
+          \]</span></p>
+          <p>Think of this as a quotient of two functions of <span
+          class="math inline">\(T\)</span>:</p>
+          <ul>
+          <li>numerator: <span class="math inline">\(H(T)\)</span><br />
+          </li>
+          <li>denominator: <span class="math inline">\(T\)</span></li>
+          </ul>
+          <p>Differentiate using the quotient rule:</p>
+          <p><span class="math display">\[
+          \frac{d}{dT}\left(\frac{H(T)}{T}\right)
+          =
+          \frac{T \cdot \frac{dH}{dT} - H(T) \cdot
+          \frac{d}{dT}(T)}{T^2}.
+          \]</span></p>
+          <p>Now simplify the pieces:</p>
+          <ul>
+          <li><span class="math inline">\(\frac{d}{dT}(T) =
+          1\)</span><br />
+          </li>
+          <li><span class="math inline">\(\frac{dH}{dT} = N(t)\)</span>
+          (because <span class="math inline">\(H(T) = \int_0^T
+          N(t)\,dt\)</span>)</li>
+          </ul>
+          <p>Substitute both:</p>
+          <p><span class="math display">\[
+          \frac{dL}{dT}
+          =
+          \frac{T \cdot N(t) - H(T) \cdot 1}{T^2}
+          =
+          \frac{T N(t) - H(T)}{T^2}.
+          \]</span></p>
+          <p>Now rewrite <span class="math inline">\(H(T)\)</span> in
+          terms of <span class="math inline">\(L(T)\)</span>:</p>
+          <p>Since <span class="math inline">\(L(T) =
+          \frac{H(T)}{T}\)</span>, we have <span
+          class="math inline">\(H(T) = T L(T)\)</span>.</p>
+          <p>Substitute:</p>
+          <p><span class="math display">\[
+          \frac{dL}{dT}
+          =
+          \frac{T N(t) - T L(T)}{T^2}
+          =
+          \frac{T\big(N(t) - L(T)\big)}{T^2}.
+          \]</span></p>
+          <p>Cancel one factor of <span
+          class="math inline">\(T\)</span>:</p>
+          <p><span class="math display">\[
+          \frac{dL}{dT}
+          =
+          \frac{N(t) - L(T)}{T}.
+          \]</span></p>
+          <h2 id="structural-vs-transient-effects-on-a-sample-path">8.2
+          Structural vs Transient Effects on a Sample Path</h2>
+          <p>The behavior of <span class="math inline">\(L(T)\)</span>
+          provides a deterministic sample-path analogue of the
+          special-cause / common-cause distinction in SPC <span
+          class="citation" data-cites="wheeler2000">[2]</span>, but
+          without requiring any probabilistic or statistical
+          assumptions.</p>
+          <p>Because <span class="math inline">\(L(T)\)</span> is
+          defined directly from the realized sample path — via
+          integration and normalization — it distinguishes between
+          finite disturbances and sustained structural effects <em>in
+          terms of their long-horizon contribution to time-average
+          presence</em>:</p>
+          <ul>
+          <li><strong>Finite, localized disturbances</strong>, whose
+          influence decays as <span class="math inline">\(1/T\)</span>,
+          and<br />
+          </li>
+          <li><strong>Sustained structural effects</strong>, whose
+          influence persists because they continuously contribute
+          presence mass over time.</li>
+          </ul>
+          <p>This distinction does not rely on stationarity, ergodicity,
+          or the existence of stable distributions. It operates directly
+          on the observed prefix of the process and remains valid even
+          in transient, unstable, or regime-shifting systems.</p>
+          <p>In fact, this sample-path diagnostic is most useful
+          precisely in those regimes where statistical process control
+          is not yet justified — before averages stabilize and
+          distributional assumptions become defensible.</p>
+          <p>Once the process exhibits sustained stability and time
+          averages converge, traditional SPC methods can be layered on
+          top. But <span class="math inline">\(L(T)\)</span> provides
+          structural insight prior to — and independent of — those
+          probabilistic assumptions.</p>
+          <p>To be clear, we are not suggesting that these are different
+          ways of tackling the same problem. SPC and special/common
+          cause analysis seek to identify and distinguish between
+          sources of <em>variability</em> (typically through
+          distributional properties such as variance) under the
+          assumption that a stable or quasi-stable average exists.</p>
+          <p>While SPC techniques can sometimes be extended to
+          non-stationary settings, their foundational assumptions are
+          strained in such regimes. By contrast, sample path analysis
+          does not model distributions; instead, it characterizes
+          structural evolution along a single observed realized
+          path.</p>
+          <p>Accordingly, sample path methods reveal persistent
+          structural regime shifts and long-horizon imbalances —
+          together with their causal attribution — that are typically
+          outside the intended scope of classical SPC and related
+          disciplines.</p>
+          <h2 id="perspective-symmetry-of-the-presence-invariant">8.3
+          Perspective Symmetry of the Presence Invariant</h2>
+          <p>The arrival and departure forms of the Presence Invariant
+          express the same structural identity through two different
+          factorizations of the same sample path history:</p>
+          <p><span class="math display">\[
+          L(T) = \Lambda(T) w(T) = \Theta(T) w&#39;(T).
+          \]</span></p>
+          <p>This is a structural symmetry of the sample path, and not
+          related to other symmetries that arise at equilibrium or under
+          asymptotic conditions. Both forms are exact decompositions of
+          the <em>same accumulated presence mass</em> determined by the
+          realized arrival–departure history up to time <span
+          class="math inline">\(T\)</span>. The conserved quantity in
+          this symmetry is cumulative presence mass, equivalently
+          expressed through <span class="math inline">\(L(T)\)</span> at
+          each fixed <span class="math inline">\(T\)</span>.</p>
+          <p>However, what changes between views is the
+          parameterization. In the arrival form, time-average presence
+          is factored into an arrival rate and an amortized residence
+          time per arrival. In the departure form, it is factored into a
+          departure rate and an amortized residence time per departure.
+          The individual components generally differ:</p>
+          <ul>
+          <li><span class="math inline">\(\Lambda(T) \neq
+          \Theta(T)\)</span> on finite intervals,</li>
+          <li><span class="math inline">\(w(T) \neq w&#39;(T)\)</span>
+          in general.</li>
+          </ul>
+          <p>Yet the product evaluates to the same scalar <span
+          class="math inline">\(L(T)\)</span> in both cases.</p>
+          <p>This is a factorization symmetry. The coordinates change,
+          but the observable does not. Arrival indexing and departure
+          indexing are dual coordinate systems on the same invariant
+          surface defined by</p>
+          <p><span class="math display">\[
+          L = \text{rate} \times \text{amortized residence}.
+          \]</span></p>
+          <p>Switching perspective corresponds to a reparameterization
+          of that surface, while leaving the underlying geometry
+          intact.</p>
+          <p>Symmetries reveal deep structural properties of a process.
+          Here, the symmetry between arrival and departure perspectives
+          reveals that conservation of presence mass lies at the core of
+          how flow metrics evolve in any arrival-departure process.
+          Presence mass accumulates deterministically from the same
+          boundary events, whether viewed from input or output.</p>
+          <p>The sample path techniques shown here are robust because
+          they are perspective-independent. Most flow metrics privilege
+          either the arrival or departure view. These techniques show
+          that this is unnecessary. The bookkeeping along arrival and
+          departure perspectives varies, but it varies in a way that
+          preserves the value of <span
+          class="math inline">\(L(T)\)</span> at each point in time.
+          Even though the decomposition changes, it preserves an
+          underlying quantity, presence mass. We can therefore switch
+          between perspectives at will, depending on the questions we
+          ask.</p>
+          <p>In this sense, the Presence Calculus is closely analogous
+          to double-entry bookkeeping in accounting. Each
+          arrival-departure event contributes to accumulated presence
+          mass, and the invariant ensures that the totals reconcile
+          regardless of which ledger is used. Arrival-indexed and
+          departure-indexed decompositions are two balanced ledgers
+          recording the same conserved quantity, cumulative presence
+          mass. The equality of the two factorizations is the balancing
+          condition imposed by the structure of the sample path
+          itself.</p>
+          <h1 class="unnumbered" id="references">9 References</h1>
+          <div id="refs" class="references csl-bib-body"
+          data-entry-spacing="0" role="list">
+          <div id="ref-eltaha1999" class="csl-entry" role="listitem">
+          <div class="csl-left-margin">[1] </div><div
+          class="csl-right-inline">M. El-Taha and S. Stidham,
+          <em>Sample-path analysis of queueing systems</em>, vol. 11. in
+          International series in operations research &amp; management
+          science, vol. 11. Boston, MA: Springer Science &amp; Business
+          Media, 1999, p. 295.</div>
+          </div>
+          <div id="ref-wheeler2000" class="csl-entry" role="listitem">
+          <div class="csl-left-margin">[2] </div><div
+          class="csl-right-inline">D. Wheeler, <em>Understanding
+          variation: The key to managing chaos</em>. SPC Press,
+          2000.</div>
+          </div>
+          </div>
+        </div>
+      </div>
             <footer id="presence-link" role="contentinfo">
         <a href="https://samplepath.pcalc.org" target="_blank" rel="noreferrer">The Sample Path Analysis Toolkit</a>
         <div style="margin-top: 0.35rem; font-size: 0.85rem; color: #555;">
@@ -1150,5 +3284,73 @@ Samplepath Analysis Toolkit</em></a></p></p>
       </footer>
     </div>
   </div>
+  <div class="lightbox-overlay" id="image-lightbox" aria-hidden="true">
+    <button class="lightbox-close" id="lightbox-close" aria-label="Close image overlay" type="button">×</button>
+    <img id="lightbox-image" alt="Expanded chart image" />
+  </div>
+  <script>
+    (function () {
+      var container = document.querySelector(".doc-content");
+      if (!container) return;
+
+      var overlay = document.getElementById("image-lightbox");
+      var overlayImage = document.getElementById("lightbox-image");
+      var closeBtn = document.getElementById("lightbox-close");
+      if (!overlay || !overlayImage || !closeBtn) return;
+
+      var lastFocused = null;
+
+      function openLightbox(img) {
+        var src = img.getAttribute("src");
+        if (!src) return;
+        lastFocused = document.activeElement;
+        overlayImage.setAttribute("src", src);
+        overlayImage.setAttribute("alt", img.getAttribute("alt") || "Expanded chart image");
+        overlay.classList.add("is-open");
+        overlay.setAttribute("aria-hidden", "false");
+        closeBtn.focus();
+      }
+
+      function closeLightbox() {
+        overlay.classList.remove("is-open");
+        overlay.setAttribute("aria-hidden", "true");
+        overlayImage.setAttribute("src", "");
+        if (lastFocused && typeof lastFocused.focus === "function") {
+          lastFocused.focus();
+        }
+      }
+
+      var images = container.querySelectorAll("img");
+      images.forEach(function (img) {
+        if (img.closest(".header-image")) return;
+        img.classList.add("lightboxable");
+        img.setAttribute("tabindex", "0");
+        img.setAttribute("role", "button");
+        img.setAttribute("aria-label", (img.getAttribute("alt") || "Image") + ". Click to expand.");
+
+        var fig = img.closest("figure");
+        if (fig) fig.classList.add("has-lightbox");
+
+        img.addEventListener("click", function () { openLightbox(img); });
+        img.addEventListener("keydown", function (ev) {
+          if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            openLightbox(img);
+          }
+        });
+      });
+
+      closeBtn.addEventListener("click", closeLightbox);
+      overlay.addEventListener("click", function (ev) {
+        if (ev.target === overlay) closeLightbox();
+      });
+
+      document.addEventListener("keydown", function (ev) {
+        if (ev.key === "Escape" && overlay.classList.contains("is-open")) {
+          closeLightbox();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

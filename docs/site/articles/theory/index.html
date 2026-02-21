@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Package Overview</title>
+  <title>Sample Path Theory</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -485,6 +485,9 @@
     }
 
   </style>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+  type="text/javascript"></script>
 </head>
 <body>
   <div class="wrapper">
@@ -498,157 +501,241 @@
         <a href="https://samplepath.pcalc.org/examples/README.html">Examples</a>
       </nav>
                   <header id="title-block-header">
-        <h1 class="title"><strong>Package Overview</strong></h1>
+        <h1 class="title"><strong>Sample Path Theory</strong></h1>
 
-        <p class="author"><p><a href=""><em>Sample Path Analysis
-Toolkit</em></a></p></p>
+        <p class="author"><p><a href="https://github.com/presence-calculus/samplepath"><em>The
+Samplepath Analysis Toolkit</em></a></p></p>
 
               </header>
                   <div class="header-image">
-        <img src="../../assets/sample_path_N.png" alt="Header image"/>
+        <img src="../../assets/sample_path_flow_metrics.png" alt="Header image"/>
       </div>
-            <div class="doc-layout">
+            <div class="doc-layout has-toc">
+                <aside class="doc-toc" aria-label="Contents">
+          <nav id="TOC" role="doc-toc">
+            <h2 id="toc-title">Contents</h2>
+            <ul>
+            <li><a href="#why-sample-path-analysis"
+            id="toc-why-sample-path-analysis">1 Why Sample Path
+            Analysis</a></li>
+            <li><a href="#from-events-to-flow-state"
+            id="toc-from-events-to-flow-state">2 From Events to Flow
+            State</a>
+            <ul>
+            <li><a href="#event-counts" id="toc-event-counts">2.1 Event
+            Counts</a></li>
+            <li><a href="#instantaneous-state"
+            id="toc-instantaneous-state">2.2 Instantaneous
+            State</a></li>
+            <li><a href="#presence-mass" id="toc-presence-mass">2.3
+            Presence Mass</a></li>
+            </ul></li>
+            <li><a href="#finite-window-littles-law"
+            id="toc-finite-window-littles-law">3 Finite-Window Little’s
+            Law</a></li>
+            <li><a href="#presence-invariant"
+            id="toc-presence-invariant">4 Presence Invariant</a></li>
+            <li><a href="#interpreting-the-invariant"
+            id="toc-interpreting-the-invariant">5 Interpreting the
+            Invariant</a></li>
+            <li><a href="#stability-convergence-and-coherence"
+            id="toc-stability-convergence-and-coherence">6 Stability,
+            Convergence, and Coherence</a></li>
+            <li><a href="#event-indexed-vs-calendar-indexed-views"
+            id="toc-event-indexed-vs-calendar-indexed-views">7
+            Event-Indexed vs Calendar-Indexed Views</a></li>
+            <li><a href="#how-this-maps-to-the-docs"
+            id="toc-how-this-maps-to-the-docs">8 How This Maps to the
+            Docs</a></li>
+            <li><a href="#presentation-backbone"
+            id="toc-presentation-backbone">9 Presentation
+            Backbone</a></li>
+            </ul>
+          </nav>
+        </aside>
                 <div class="doc-content">
-          <h1 id="sample-path-analysis">Sample Path Analysis</h1>
-          <p>This library implements <em>sample path analysis,</em> a
-          technique for analyzing <em>macro dynamics</em> of flow
-          processes in complex adaptive systems. It provides
-          deterministic tools to analyze the <em>long-run</em> behavior
-          of stochastic flow processes:</p>
+          <h1 id="why-sample-path-analysis">1 Why Sample Path
+          Analysis</h1>
+          <p>Sample path analysis studies one observed history of a flow
+          process and computes measurements on that history without
+          introducing additional randomness.</p>
+          <p>For the toolkit, a flow process is modeled from timestamped
+          start/end events for each item. This gives a marked point
+          process: event times with marks (arrival/departure
+          semantics).</p>
+          <p>The key practical consequence is:</p>
           <ul>
-          <li>Arrival/departure equilibrium</li>
-          <li>Process time coherence, and</li>
-          <li>Process stability</li>
+          <li>Once a sample path is observed, core flow measurements are
+          deterministic functions of that path.</li>
+          <li>Metric changes happen at event boundaries and are fully
+          constrained by event order.</li>
           </ul>
-          <p>The relies on the finite-window formulation of <a
-          href="https://docs.pcalc.org/articles/littles-law"><strong>Little’s
-          Law</strong></a>.</p>
-          <p>The focus of the analysis is a single <em>sample path</em>
-          of a flow process: a <em>continuous</em> real-valued function
-          that describes a particular process behavior when observed
-          over a long, but finite period of time (see figure).</p>
-          <p>A key aspect of this technique is that it is
-          <em>distribution-free</em>. It does not require well-defined
-          statistical or probability distributions to reason rigorously
-          about a flow process. Please see <a
-          href="../not-statistics">sample path analysis is not a
-          statistical method</a> for more details.</p>
-          <p>As a result, this technique allows us to extend many
-          results from stochastic process theory to processes operating
-          in complex adaptive systems, where stable statistical
-          distributions often don’t exist. Our focus is operations
-          management in software development, but the techniques here
-          are much more general.</p>
-          <h2 id="history-and-origins">History and Origins</h2>
-          <p>Sample path analysis is not new. The formal theory has been
-          worked out thoroughly by researchers in stochastic process
-          theory and has been stable for over 30 years. They are just
-          not familiar in the software industry.</p>
-          <p>Dr. Shaler Stidham discovered the technique when he
-          provided the first deterministic proof of Little’s Law in
-          1972. So the core ideas here are nearly 60 years old!</p>
-          <p>In the years since Dr. Stidham and other researchers in
-          stochastic process theory have shown the power and versatility
-          of this technique to provide deterministic sample path
-          oriented results of many classical results in queueing theory
-          that required very stringent probabilistic assumptions like
-          stationarity and ergodicity to prove previously.</p>
-          <p>The canonical reference detailing this work is the textbook
-          <a
-          href="https://www.researchgate.net/publication/303785171_Sample-Path_Analysis_of_Queueing_Systems">Sample
-          Path Analysis of Queueing Systems</a> by Muhammed El-Taha and
-          Shaler Stidham (a downloadable PDF is available at the link).
-          This package directly implements many of the concepts in this
-          textbook.</p>
-          <p>See our article on <a
-          href="https://docs.pcalc.org/articles/littles-law">Little’s
-          Law</a> for comprehensive background and source
-          references.</p>
-          <h2 id="why-this-is-significant">Why this is significant</h2>
-          <p>Conditions like non-stationarity and non-ergodic behavior
-          and lack of stable distributions are <em>exactly</em> the
-          dividing line between complex adaptive systems and simpler,
-          ordered systems when viewed from an operations management
-          lens.</p>
-          <p>This is the situation we face in digital operations
-          management. The default assumptions that underpin operational
-          analysis in ordered domains – that processes are stable and
-          that steady state behavior can be observed and analyzed –
-          breaks down in this environment.</p>
-          <p>Sample path analysis allows us to adapt these principles to
-          processes that operate far from equilibrium and whose behavior
-          is history sensitive, path dependent and sensitive to initial
-          conditions. All these are hallmarks of a CAS.</p>
-          <p>There are several capabilities we get from this:</p>
+          <p>For background on why this is different from statistical
+          summary workflows, see <a
+          href="../../articles/not-statistics">Sample path analysis is
+          not statistics</a>.</p>
+          <h1 id="from-events-to-flow-state">2 From Events to Flow
+          State</h1>
+          <h2 id="event-counts">2.1 Event Counts</h2>
+          <p>Let:</p>
           <ul>
-          <li>We can precisely define, measure and reason about
-          properties such as equilibrium, coherence and stability, of
-          real-world process using transaction data from operations
-          management tools.</li>
-          <li>We can retrospectively reason about cause and effect in
-          observed behavior of these operational processes, and do so in
-          a deterministic fashion - <em>even for process that are not
-          stable</em>.</li>
+          <li><span class="math inline">\(A(T)\)</span> be cumulative
+          arrivals up to time <span
+          class="math inline">\(T\)</span>.</li>
+          <li><span class="math inline">\(D(T)\)</span> be cumulative
+          departures up to time <span
+          class="math inline">\(T\)</span>.</li>
           </ul>
-          <p>These are precisely the conditions that confound
-          traditional statistical and probabilistic reasoning about
-          operational processes in the digital domain. Thus sample path
-          analysis is <em>the</em> technical bridge to rigorously model
-          and measure flow processes in such contexts.</p>
-          <hr />
-          <h1 id="key-concepts">Key Concepts</h1>
-          <p>Please see our continuing series on Little’s Law and sample
-          path analysis at <a
-          href="https://www.polaris-flow-dispatch.com">The Polaris Flow
-          Dispatch</a> for accessible overviews of the theory.</p>
-          <p>In particular,</p>
+          <p>These are step functions that move only when events
+          occur.</p>
+          <h2 id="instantaneous-state">2.2 Instantaneous State</h2>
+          <p>Define the sample path of work-in-process:</p>
+          <p><span class="math display">\[
+          N(t) = A(T) - D(T)
+          \]</span></p>
+          <p>where <span class="math inline">\(t\)</span> is an instant
+          and <span class="math inline">\(T=t-t_0\)</span> is elapsed
+          observation time from the start of the window.</p>
+          <p><code>N(t)</code> is the instantaneous state of the
+          process.</p>
+          <h2 id="presence-mass">2.3 Presence Mass</h2>
+          <p>Define cumulative presence mass:</p>
+          <p><span class="math display">\[
+          H(T) = \int_0^T N(t)\,dt
+          \]</span></p>
+          <p><code>H(T)</code> is measured in item-time. It captures
+          accumulated presence over the observation window and is the
+          core quantity from which the Little’s Law components are
+          derived.</p>
+          <h1 id="finite-window-littles-law">3 Finite-Window Little’s
+          Law</h1>
+          <p>Define:</p>
+          <p><span class="math display">\[
+          L(T)=\frac{H(T)}{T},\quad \Lambda(T)=\frac{A(T)}{T},\quad
+          w(T)=\frac{H(T)}{A(T)}
+          \]</span></p>
+          <p>Then:</p>
+          <p><span class="math display">\[
+          L(T)=\Lambda(T)\,w(T)
+          \]</span></p>
+          <p>This is the finite-window form of Little’s Law.</p>
+          <p>For departures, define:</p>
+          <p><span class="math display">\[
+          \Theta(T)=\frac{D(T)}{T},\quad w&#39;(T)=\frac{H(T)}{D(T)}
+          \]</span></p>
+          <p>Then:</p>
+          <p><span class="math display">\[
+          L(T)=\Theta(T)\,w&#39;(T)
+          \]</span></p>
+          <p>Together:</p>
+          <p><span class="math display">\[
+          \Lambda(T)\,w(T)=L(T)=\Theta(T)\,w&#39;(T)
+          \]</span></p>
+          <p>This identity is the <strong>presence invariant</strong>
+          used throughout the toolkit.</p>
+          <h1 id="presence-invariant">4 Presence Invariant</h1>
+          <p>The Presence Invariant is the finite-horizon identity
+          underlying Little’s Law. It states that cumulative presence
+          mass <span class="math inline">\(H(T)\)</span> can be
+          expressed either as time-average state multiplied by time, or
+          as an event-rate multiplied by amortized presence mass per
+          event.</p>
+          <p>Formally,</p>
+          <p><span class="math display">\[
+          H(T) = L(T)\,T = A(T)\,w(T) = D(T)\,w&#39;(T)
+          \]</span></p>
+          <p>Dividing through by <span class="math inline">\(T\)</span>
+          gives the familiar finite-horizon Little form:</p>
+          <p><span class="math display">\[
+          L(T) = \Lambda(T)\,w(T) = \Theta(T)\,w&#39;(T)
+          \]</span></p>
+          <p>Conceptually:</p>
           <ul>
-          <li><a
-          href="https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law">The
-          Many Faces of Little’s Law</a>.</li>
-          <li><a
-          href="https://www.polaris-flow-dispatch.com/p/littles-law-in-a-complex-adaptive">Little’s
-          Law in a Complex Adaptive System</a></li>
+          <li><span class="math inline">\(H(T)\)</span> is the conserved
+          quantity (presence mass).</li>
+          <li><span class="math inline">\(L(T)\)</span> is the
+          time-average state (average WIP).</li>
+          <li><span class="math inline">\(\Lambda(T)/\Theta(T)\)</span>
+          are two different event rates over the observation
+          window.</li>
+          <li><span class="math inline">\(w(T)/w&#39;(T)\)</span> are
+          the corresponding amortized presence per event (also called
+          average residence time).</li>
           </ul>
-          <p>cover most of the background needed to work with this
-          library at a high level.</p>
-          <p>The example analyses in these posts were produced using
-          this library and can be found in the <a
-          href="./examples/polaris">examples</a> directory together with
-          their original source data.</p>
-          <p>Please subscribe to <a
-          href="https://www.polaris-flow-dispatch.com">The Polaris Flow
-          Dispatch</a> if you are interested in staying abreast of
-          developments and applications of these concepts.</p>
-          <h2 id="flow-processes">Flow processes</h2>
-          <p>A <a
-          href="https://www.polaris-flow-dispatch.com/i/172332418/flow-processes">flow
-          process</a> is simply a timeline of events from some
-          underlying operational domain, where events have
-          <em>effects</em> that persist beyond the time of the event.
-          The effects are encoded using metadata (called marks) to
-          describe them. The generality of the model comes from the fact
-          that marks can be arbitrary real-valued functions of time that
-          meet some very weak requirements.</p>
-          <p>Typically data for analyzing a flow process are extracted
-          from real-time transaction logs of digital operations
-          management tools.</p>
-          <p>The current version of the library only supports the
-          <em>offline</em> analysis of <em>binary flow processes</em>.
-          These are flow processes where the marks denote the start or
-          end of an observed presence of a domain element within some
-          system boundary.</p>
-          <p>All queueing processes fall into this category, as do a
-          much larger class of general input-output processes. These are
-          the simplest kind of flow processes we analyze in the presence
-          calculus, but they cover the vast majority of operational use
-          cases we currently model in software delivery, so we will
-          start there. They are governed by the L=λW form of Little’s
-          Law.</p>
-          <p>We highly recommend reading <a
-          href="https://www.polaris-flow-dispatch.com/p/the-many-faces-of-littles-law">The
-          Many Faces of Little’s Law</a> for background on these
-          concepts.</p>
+          <p>All of these quantities are deterministic functionals of
+          the same realized sample path.</p>
+          <p>For the chart-by-chart construction paired with this
+          section, see <a
+          href="../../articles/chart-reference#the-presence-invariant-charts">Chart
+          Reference: The Presence Invariant Charts</a>.</p>
+          <h1 id="interpreting-the-invariant">5 Interpreting the
+          Invariant</h1>
+          <p><code>L(T)</code> is controlled by two levers:</p>
+          <ul>
+          <li>Time-control lever: arrival intensity via
+          <code>Λ(T)</code>.</li>
+          <li>State-control lever: per-arrival residence via
+          <code>w(T)</code>.</li>
+          </ul>
+          <p>When <code>L(T)</code> changes, the change must come from
+          one or both of those components. The same logic applies to the
+          departure-side pair <code>Θ(T)</code> and
+          <code>w'(T)</code>.</p>
+          <p>This gives a deterministic cause-effect frame for process
+          diagnostics.</p>
+          <h1 id="stability-convergence-and-coherence">6 Stability,
+          Convergence, and Coherence</h1>
+          <p>Operationally, we monitor whether key time-varying
+          functions approach stable behavior:</p>
+          <ul>
+          <li>Rate equilibrium: arrival-side and departure-side rates
+          align over long horizons.</li>
+          <li>Process-time convergence: residence and sojourn views
+          become coherent.</li>
+          <li>Bounded growth: WIP and active-age growth rates remain
+          controlled.</li>
+          </ul>
+          <p>When finite-window functions converge to limits, the
+          familiar steady-state expression <span
+          class="math inline">\(L=\lambda W\)</span> is recovered as an
+          asymptotic consequence.</p>
+          <h1 id="event-indexed-vs-calendar-indexed-views">7
+          Event-Indexed vs Calendar-Indexed Views</h1>
+          <p>The toolkit supports two reporting views over the same
+          underlying calculations:</p>
+          <ul>
+          <li>Event-indexed view: evaluate metrics at event
+          timestamps.</li>
+          <li>Calendar-indexed view: evaluate the same cumulative
+          metrics at calendar boundaries.</li>
+          </ul>
+          <p>Calendar-indexed outputs are sub-sampled views of
+          cumulative event-ordered dynamics, not bucket-aggregated
+          redefinitions.</p>
+          <p>Use event indexing when investigating causal transitions
+          and exact boundary effects. Use calendar indexing when
+          reporting periodic snapshots while preserving metric
+          meaning.</p>
+          <h1 id="how-this-maps-to-the-docs">8 How This Maps to the
+          Docs</h1>
+          <ul>
+          <li>CLI semantics and option contracts: <a
+          href="../../articles/cli">Command Line Reference</a></li>
+          <li>Chart-level interpretation and file-by-file outputs: <a
+          href="../../articles/chart-reference">Chart Reference</a></li>
+          </ul>
+          <h1 id="presentation-backbone">9 Presentation Backbone</h1>
+          <p>This article is based on the narrative arc from
+          <code>docs/articles/chart-reference/Sample-Path-Analysis-Presentation (1).pdf</code>
+          and is intended to be the shared conceptual foundation for
+          both the CLI and chart-reference documents.</p>
+          <figure>
+          <img
+          src="../../articles/chart-reference/chart_reference_small/with-events/sample_path_flow_metrics.png"
+          alt="Sample Path Flow Metrics (with events)" />
+          <figcaption aria-hidden="true">Sample Path Flow Metrics (with
+          events)</figcaption>
+          </figure>
         </div>
       </div>
             <footer id="presence-link" role="contentinfo">
