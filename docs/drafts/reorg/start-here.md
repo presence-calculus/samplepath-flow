@@ -51,9 +51,12 @@ We begin with the simpler and well-understood case of arrival-departure flow pro
 
 The generalization is beyond the scope of this document. It is the subject of [The Presence Calculus - A Gentle Introduction](https://docs.pcalc.org/articles/intro-to-presence-calculus/). While it stands alone, those ideas are easier to grasp if you first see how they manifest in the simpler arrival-departure case, which is what this document covers.
 
-## Arrival-Departure Processes
+# The Process Models
 
 We will pay close attention to model assumptions as we develop the case. Clarifying hidden assumptions is central to understanding the strengths and weaknesses of any analytical technique. Many arguments here hinge on exposing those assumptions and mapping them to the contexts in which these techniques are applied today.
+
+
+## Arrival-Departure Processes
 
 All current flow-metric models are based on what we may call arrival-departure processes: discrete _items_ arrive at a system or process boundary and depart after some time. Flow metrics measure key properties of this process: the average time between arrival and departure of individual items over a period (lead time, cycle time, and related variants, depending on boundary definition), arrival and departure rates over the same period (throughput), and the number of items in the system at a point in time (instantaneous WIP) or on average over a period (average WIP).
 
@@ -66,6 +69,27 @@ Even these stronger implementations, however, still face core methodological iss
 Our methods aim to provide process-agnostic flow metrics derived from a formal definition of an arrival-departure process, robust under _any_ realization that conforms to that model, even when underlying processes operate in volatile and changing environments.
 
 So what is that model, precisely? This is where fundamental differences begin to emerge.
+
+## Flow Process Model
+
+The process model we use for sample path analysis is subtly different from the standard arrival-departure model above. It is strictly more general and has fewer assumptions, but the differences are also more fundamental than that.
+
+Formally, the domain of analysis consists of processes described by a set of _events_ that denote beginnings and endings we can observe in time. We continue to call these arrival and departure events to preserve continuity with existing practice, but the key difference is that we analyze the process primarily through the event definitions themselves.
+
+![A Flow Process]($document-root/assets/beginnings-endings.png){#fig:begin-end}
+
+In particular, we do not require that the events in [@fig:begin-end] are associated with well-defined items, or that structural boundaries are fixed in advance. The only requirement is that, by observation, we can determine whether an event denotes a beginning or an ending. The primary unit of analysis in this ontology is the domain event. We also do not require explicit correspondence between arrivals and departures, for example by matching them through an item identifier.
+
+This may be surprising, because you may wonder how we can measure concepts such as lead time, cycle time, WIP, and throughput if we cannot identify items. That is precisely a clue that the generalization here runs deeper than simply changing the names of what we call events.
+
+To make this more intuitive, consider a record of births and deaths in a population. We can treat these as arrivals and departures. We are implicitly talking about people being born and dying, and we can measure population in units of people and lifespans in units of time, without needing explicit correspondence between a specific birth and a specific death, or a single integrated record of both.
+
+This reveals something important about flow and flow metrics: these are gestalt properties of a process, not necessarily properties derived by aggregating the experience of individual items traversing that process. The latter perspective is especially important when measuring customer experience in operational settings. When we want to measure and reason from that perspective, we introduce clearer correspondence between arrivals and departures. But many of the most useful aspects of reasoning about flow for process improvement do not require that level of detail. We can go a long way without ever talking about items.
+
+In fact, this is a major source of mismatches in how flow is modeled and measured today. Most current methods focus on flow as an aggregate of item behavior. We spend a great deal of effort discussing item size, granularity, and similarity. One key insight from sample path analysis is that we can go the other way: the _aggregate behavior of items can be derived from the aggregate behavior of the process_. This not only eliminates confusion about what we are measuring, it also gives us a more powerful and general set of techniques for reasoning about flow in domains far removed from operations.
+
+This is not an intuitive concept and requires more careful explanation. We will return to it repeatedly because it is one of the most important takeaways from this discussion.
+
 
 
 
