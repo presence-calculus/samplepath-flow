@@ -29,7 +29,7 @@ Flow metrics and flow-analysis techniques have been used in software for nearly 
 
 Measuring and managing flow is now baseline practice across much of the software industry. It may be surprising, then, that I argue we need substantially different ways to measure, model, and reason about flow if the goal is systematic _process improvement_.
 
-As AI-augmented engineering reshapes how work is performed, the methods we use to reason about flow must remain robust under structural change. I will argue that this is a real limitation in how we measure processes today.
+As AI-augmented engineering reshapes how work is performed, the methods we use to reason about flow must remain robust under structural change. This is a real limitation in how we measure processes today.
 
 Most measurement techniques in use today rely implicitly on strict process assumptions for accuracy and coherence. In a period of disruption, volatility, and structural change in software delivery, those assumptions will become harder to defend.
 
@@ -37,7 +37,7 @@ The techniques shown here use _exactly_ the same inputs you already use to analy
 
 Such claims require proof: first, that a real limitation exists in prevailing methods; second, that the proposed alternatives resolve it. This document lays out that case at a high level. The broader project and documentation provide the mathematical foundation, derivations, and open-source tooling needed to validate these claims directly on your own data.
 
-None of the core mathematical ideas are new. Many were established decades ago in queueing theory. In particular, the sample path analysis techniques underlying this work trace to Shaler Stidham’s 1972 deterministic proof of [Little’s Law](https://docs.pcalc.org/articles/littles-law/) and are mainstream complements to statistical and probabilistic analyses of stochastic processes, which is exactly how we use them here. Little’s Law is foundational to flow analysis, though in software delivery it is often invoked loosely, without exploiting its full structural implications. This is another key point of departure for our methods.
+None of the core mathematical ideas are new. Many were established decades ago in queueing theory. In particular, the sample path analysis techniques underlying this work trace to Shaler Stidham’s 1972 deterministic proof of [Little’s Law](https://docs.pcalc.org/articles/littles-law/) and are mainstream complements to statistical and probabilistic analyses of stochastic processes — which is exactly how they are used here. Little’s Law is foundational to flow analysis, though in software delivery it is often invoked loosely, without exploiting its full structural implications. This is another key point of departure for our methods.
 
 The theoretical foundation for our methods is presented in *Sample Path Analysis of Queueing Systems* by El-Taha and Stidham [@eltaha1999]. Our contribution is practical: translating this theory into operational tools that can be applied directly to real software-delivery systems, and simplifying terminology where needed so it maps more clearly to the domain without losing rigor.
 
@@ -49,7 +49,7 @@ This work is part of the larger research program known as [The Presence Calculus
 
 We begin with the simpler and well-understood case of arrival-departure flow processes, which all current flow models build on, to expose key concepts in a familiar setting. These concepts generalize beyond the arrival-departure case while keeping the modeling and measurement techniques analytically tractable. That is what makes these ideas powerful, beyond simply being a better way to measure flow metrics.
 
-That is beyond the scope of this document. That generalization is the subject of [The Presence Calculus - A Gentle Introduction](https://docs.pcalc.org/articles/intro-to-presence-calculus/). While it stands alone, those ideas are easier to grasp if you first see how they manifest in the simpler arrival-departure case, which is what this document covers.
+The generalization is beyond the scope of this document. It is the subject of [The Presence Calculus - A Gentle Introduction](https://docs.pcalc.org/articles/intro-to-presence-calculus/). While it stands alone, those ideas are easier to grasp if you first see how they manifest in the simpler arrival-departure case, which is what this document covers.
 
 
 # References
