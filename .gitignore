@@ -64,3 +64,4 @@ charts
 .DS_Store
 Thumbs.db
 /.pre-commit-cache/
+/docs/drafts/external/polarisadvisor/
