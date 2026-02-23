@@ -43,6 +43,7 @@ The theoretical foundation for our methods is presented in *Sample Path Analysis
 
 Applying these ideas requires conceptual shifts if you are very familiar with current methods. This document introduces those shifts and points to the theory and tooling needed to verify each claim. While the underlying mathematics is elementary, the perspective shift is significant and may be disorienting if you are comfortable with current techniques.
 
+
 This work is part of the larger research program known as [The Presence Calculus Project](https://docs.pcalc.org), developed over several years within my advisory practice, [The Polaris Advisor Program](https://polarisadvisor.com). The current toolkit reinterprets flow analysis using techniques from the Presence Calculus and strictly generalizes conventional flow-metric models. The Presence Calculus itself extends beyond flow analysis to a wider class of operational measurement problems.
 
 We begin with the simpler and well-understood case of arrival-departure flow processes, which all current flow models build on, to expose key concepts in a familiar setting. These concepts generalize beyond the arrival-departure case while keeping the modeling and measurement techniques analytically tractable. That is what makes these ideas powerful, beyond simply being a better way to measure flow metrics.
@@ -130,47 +131,60 @@ This is the perspective we exploit: structural properties of flow processes can 
 
 ## The Sample Path of a Flow Process
 
-What is a sample path for an arrival/departure process?
+We begin by specifying how non-determinism enters the model. Imagine we are observing arrivals and departures over time.
+We record:
 
-We begin by specifying how non-determinism enters the model. As we observe a flow process over time, events occur sequentially. At each event we observe:
-
-- The **timestamp** of the event.
+- The **timestamp** of the event.  
 - The **type** of event (arrival or departure).
 
-Equivalently, we may think of the inter-event time and the event type as the two random variables governing the process.
+We can think of this as a non-deterministic process on two random variables: the event type, which is analogous to a coin toss, and
+the elapsed time _between_ events. The second random variable is recoverable from the timestamps and is a much richer object than the arrival/departure binary. Everything we think of as flow can be described in terms of the interactions of these two random variables.
 
-Mathematically, this object is a **marked point process**: a sequence of timestamps, each carrying a mark. The minimal mark set here is {arrival, departure}. The timestamps determine the elapsed times between events.
-
-Such a marked point process may be viewed as a single sample path of an arrival/departure process whose broader non-deterministic structure may be unknown.
+Mathematically, this object is a **marked point process**: a sequence of timestamps, each carrying a mark. The minimal mark set here is {arrival, departure}. The timestamps determine the elapsed times between events. We may think of such a marked point process as a single sample path of an arrival/departure process whose broader non-deterministic structure may be unknown.
 
 [@fig:mpp] shows an example of an arrival/departure marked point process. This realized event history is the _input_ to sample path analysis.
 
 ![Arrival/Departure Marked Point Process]($document-root/assets/arrival-departure-mpp.png){#fig:mpp}
 
-The key insight from sample path analysis is this:
+Any observed history of a non-deterministic process is a common finite prefix of some infinite set of sample paths. Once we fix that prefix, any further non-determinism lies in those possible futures[^-non-determinism]. Once a finite prefix has been observed, every quantity we compute from it is determined by that prefix.
 
-Any observed history is a finite prefix of an infinite set of possible future continuations. The non-determinism lies in those possible futures. Once a finite prefix has been observed, every deterministic computation derived from it is fully determined by that prefix.
-In the case of the coin toss process, this can be visualized as in [@fig:prefix]
+[^-non-determinism]: There is an implicit qualifier in this claim: we are assuming that the non-determinism we care about in our model is confined to the random variables under analysis. There are, of course, many other potential sources of non-determinism even in a single arrival/departure process, including measurement errors.
+
+
+In the case of the coin toss process, this can be visualized as in [@fig:prefix].
 
 ![Sample Paths Prefixes]($document-root/assets/sample-path-prefix.png){#fig:prefix}
 
-If we model an operational process as an arrival/departure marked point process, then once a finite segment of the sample path is observed, all flow metrics over that segment are _deterministic functionals_ of the sample path. No distributional assumptions are required to compute or reason about them.
+In the case of an arrival/departure process, we will show that if a finite segment of the sample path, a marked point process, is observed, all remaining flow metrics and empirical distributions derive from simple deterministic functions that measure properties of the observed sample path, much like the statement that the number of heads observed on the coin-toss sample path is 37.
 
-The structure of flow is encoded directly in the realized event history. This gives us simpler and fully deterministic tools for analyzing flow in any process where the event history can be captured accurately. The machinery that makes this possible is what sample path analysis develops.
+In other words, the structure of flow is encoded directly in the realized event history. If the event history is captured accurately, the quantities we associate with flow can be read off mechanically from this history. In this context, randomness always lives in the future, and there is no need to invoke probabilistic or statistical assumptions or language when reasoning about *observed* flow.
 
-Thus sample path analysis lives strictly within the domain of operational analysis. Distributions are still important, especially if we are reasoning about those possible futures in prediction models. But that is not the only place where they are useful.
+The machinery that makes this possible is what we call sample path analysis.
 
-## Where Items and Distributions Matter
+## Where Distributions Matter
 
-Much of operational flow analysis focuses on describing item-level distributions of flow metrics, particularly of lead time and throiughput. These are very useful, helping us assess customer experience, tail risk, etc. However, as we will see, Little’s Law implies that there is no intrinsic non-determinism in these distributions beyond what is already encoded in the sample path above. They are structurally constrained by, and coupled through, the aggregate behavior of the underlying arrival and departure processes. Randomness in item-level flow metrics comes entirely from randomness on the sample paths of the arrival/depature process.
+Probability and statistics still matter, especially when we are reasoning about possible futures in prediction models. But they are not the starting point.
 
-The primary quantities that govern how these distributions behave are the more primitive sample-path flow metrics we will develop.   They are structural properties of the process, not the aggregate properties of item level behavior. These dont require item-level identification of arrivals and departures, nor do they require us to construct distributions to reason about their properties.
+In current industry practice, flow measurement and analysis focus on producing item-level empirical distributions of metrics such as lead time and throughput. These are useful. They help quantitatively describe and characterize customer experience, tail risk, service levels, and a whole host of other operationally useful metrics.
 
-To produce those item level distributions,  we must extend the MPP by explicitly identifying arrival and departure events with ids. Then the entire empirical distribution of item-level process times is also completely determined by the realized event structure, for a given sample path _prefix_. In this sense, the structural properties of the arrival and departure events are primary, and all other flow metrics and their distributions are derived.
+However, given the non-deterministic model above, there is no _intrinsic_ non-determinism in those distributions beyond what is already encoded in the sample path of arrivals and departures. They are structurally constrained by the aggregate behavior of the underlying arrival and departure processes. Randomness in item-level flow metrics originates in randomness on the sample paths of the arrival/departure process. In that sense, treating these empirical distributions as first-class probabilistic or statistical constructs is fraught.
 
-Making this hierarchy explicit — non-deterministic event structure first, structural flow analysis second, distributional summaries third — is a major distinction between sample path analysis and current methods. It also has significant implications for how these secondary artifacts should be interpreted and used in applications such as forecasting.
+The primary quantities that govern how these distributions behave are the more primitive sample-path flow metrics we will develop. These are _structural properties of the process_, not _aggregate properties of item-level behavior_. They do not require item-level identification of arrivals and departures, nor do they require constructing distributions in order to reason about their properties.
 
-This is not a trivial concept and requires more careful explanation. This document and much of the rest of supporting documentation and tools on this site are intended to provide those explanations.
+If we want item-level distributions, we may extend the marked point process by explicitly pairing arrivals and departures with identifiers. Once that pairing is defined, the entire empirical distribution of item-level process times over a given sample-path prefix is determined by the realized event structure.
+
+This establishes a hierarchy:
+
+1. Non-deterministic event structure.  
+2. Structural flow metrics derived from that structure.  
+3. Distributional summaries derived from explicit item pairing.
+
+Making this hierarchy explicit distinguishes sample path analysis from current practice and changes how these secondary artifacts, such as empirical distributions, should be interpreted, particularly in forecasting.
+
+This is not an intuitive shift, and some of the language and machinery we develop will be unfamiliar. The payoff is a set of techniques for reasoning about flow that do not depend on distributional assumptions, and whose core results hold unconditionally on every realized sample path.
+
+The remainder of this document, and the supporting material on this site, develops the details.
+
 
 
 
