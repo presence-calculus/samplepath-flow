@@ -564,12 +564,7 @@ Kumar</em></a></p></p>
 
             <ul>
             <li><a href="#introduction" id="toc-introduction">1
-            Introduction</a>
-            <ul>
-            <li><a href="#the-presence-calculus-project"
-            id="toc-the-presence-calculus-project">1.1 The Presence
-            Calculus Project</a></li>
-            </ul></li>
+            Introduction</a></li>
             <li><a href="#the-process-models"
             id="toc-the-process-models">2 The Process Models</a>
             <ul>
@@ -578,6 +573,8 @@ Kumar</em></a></p></p>
             Processes</a></li>
             <li><a href="#flow-process-model"
             id="toc-flow-process-model">2.2 Flow Process Model</a></li>
+            <li><a href="#where-items-matter"
+            id="toc-where-items-matter">2.3 Where Items Matter</a></li>
             </ul></li>
             <li><a href="#references" id="toc-references">3
             References</a></li>
@@ -660,8 +657,6 @@ Kumar</em></a></p></p>
           elementary, the perspective shift is significant and may be
           disorienting if you are comfortable with current
           techniques.</p>
-          <h2 id="the-presence-calculus-project">1.1 The Presence
-          Calculus Project</h2>
           <p>This work is part of the larger research program known as
           <a href="https://docs.pcalc.org">The Presence Calculus
           Project</a>, developed over several years within my advisory
@@ -799,10 +794,49 @@ Kumar</em></a></p></p>
           knowledge of individual items. This not only clarifies what
           must be measured to reason about flow (event structure), it
           also provides a more general framework that applies even in
-          domains where the notion of discrete items is less tangible.
-          This is not an intuitive concept and requires more careful
-          explanation. We will return to it repeatedly because it is one
-          of the most important takeaways from this discussion.</p>
+          domains where the notion of discrete items is less
+          tangible.</p>
+          <h2 id="where-items-matter">2.3 Where Items Matter</h2>
+          <p>To be clear, I am not saying that item-level flow metrics
+          and their distributions are not useful. They are very useful
+          in operational settings to assess customer experience, tail
+          risk, etc. However, as we will see, Little’s Law implies that
+          statistical distributions of flow metrics such as lead time
+          and throughput are not <em>independent</em>. They are
+          structurally constrained by, and coupled through, the
+          aggregate behavior of the underlying arrival and departure
+          processes. Randomness in flow metrics comes entirely from
+          randomness in the event structure.</p>
+          <p>The item-level distributions are derived consequences of
+          that deeper structure, and this structure is revealed by
+          sample path analysis. The primary quantities that govern how
+          these distributions behave are the more primitive sample-path
+          flow metrics we will develop. These are <em>deterministic</em>
+          once have observed a sample path, the key <em>structural
+          relationships</em> among common statistical
+          <em>distributions</em> follow <em>deterministically</em> as
+          well.</p>
+          <p>If, <em>in addition</em>, we introduce an explicit pairing
+          between arrival and departure events by identifying items,
+          then the entire empirical distribution of item-level process
+          times is also completely determined by the realized event
+          structure. In this sense, the stochastic properties of the
+          arrival and departure events are primary, and all other flow
+          metrics and their distributions are derived. The key thing
+          sample path analysis shows is that <em>once we have an
+          observed event structure</em> over some finite time period,
+          the remaining artifacts, including distributions, are
+          completely determined.</p>
+          <p>Making this hierarchy explicit — event structure first,
+          structural flow metrics second, distributional summaries third
+          — is a major distinction between sample path analysis and
+          current methods. It also has significant implications for how
+          these secondary artifacts should be interpreted and used in
+          applications such as forecasting.</p>
+          <p>This is not an intuitive concept and requires more careful
+          explanation. This document and much of the rest of supporting
+          documentation and tools on this site are intended to provide
+          those explanations.</p>
           <h1 class="unnumbered" id="references">3 References</h1>
           <div id="refs" class="references csl-bib-body"
           data-entry-spacing="0" role="list">

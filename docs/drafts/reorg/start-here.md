@@ -43,8 +43,6 @@ The theoretical foundation for our methods is presented in *Sample Path Analysis
 
 Applying these ideas requires conceptual shifts if you are very familiar with current methods. This document introduces those shifts and points to the theory and tooling needed to verify each claim. While the underlying mathematics is elementary, the perspective shift is significant and may be disorienting if you are comfortable with current techniques.
 
-## The Presence Calculus Project
-
 This work is part of the larger research program known as [The Presence Calculus Project](https://docs.pcalc.org), developed over several years within my advisory practice, [The Polaris Advisor Program](https://polarisadvisor.com). The current toolkit reinterprets flow analysis using techniques from the Presence Calculus and strictly generalizes conventional flow-metric models. The Presence Calculus itself extends beyond flow analysis to a wider class of operational measurement problems.
 
 We begin with the simpler and well-understood case of arrival-departure flow processes, which all current flow models build on, to expose key concepts in a familiar setting. These concepts generalize beyond the arrival-departure case while keeping the modeling and measurement techniques analytically tractable. That is what makes these ideas powerful, beyond simply being a better way to measure flow metrics.
@@ -90,7 +88,23 @@ This reveals something important about flow and flow metrics: these are gestalt 
 
 In fact, this is a major source of mismatches in how flow is modeled and measured today. Most current methods measure flow in terms of statistical aggregates of item behavior: distributions of lead times, throughput, etc. We spend a great deal of effort discussing item size, granularity, and similarity. None of this is essential for defining the core structural properties that drive process behavior.
 
-One key insight from sample path analysis is that the quantities needed to analyze the structural behavior of a flow process are determined entirely by the events. Once arrival and departure _processes_ are defined, the core flow relationships follow from them, without requiring detailed knowledge of individual items. This not only clarifies what must be measured to reason about flow (event structure), it also provides a more general framework that applies even in domains where the notion of discrete items is less tangible. This is not an intuitive concept and requires more careful explanation. We will return to it repeatedly because it is one of the most important takeaways from this discussion.
+One key insight from sample path analysis is that the quantities needed to analyze the structural behavior of a flow process are determined entirely by the events. Once arrival and departure _processes_ are defined, the core flow relationships follow from them, without requiring detailed knowledge of individual items. This not only clarifies what must be measured to reason about flow (event structure), it also provides a more general framework that applies even in domains where the notion of discrete items is less tangible.
+
+
+
+## Where Items Matter
+
+To be clear, I am not saying that item-level flow metrics and their distributions are not useful. They are very useful in operational settings to assess customer experience, tail risk, etc. However, as we will see, Little’s Law implies that statistical distributions of flow metrics such as lead time and throughput are not _independent_. They are structurally constrained by, and coupled through, the aggregate behavior of the underlying arrival and departure processes. Randomness in flow metrics comes entirely from randomness in the event structure.
+
+The item-level distributions are derived consequences of that deeper structure, and this structure is revealed by sample path analysis. The primary quantities that govern how these distributions behave are the more primitive sample-path flow metrics we will develop. These are _deterministic_ once have observed a sample path, the key _structural relationships_ among common statistical _distributions_ follow _deterministically_ as well.
+
+If, _in addition_, we introduce an explicit pairing between arrival and departure events by identifying items, then the entire empirical distribution of item-level process times is also completely determined by the realized event structure. In this sense, the stochastic properties of the arrival and departure events are primary, and all other flow metrics and their distributions are derived. The key thing sample path analysis shows is that _once we have an observed event structure_ over some finite time period, the remaining artifacts, including distributions, are completely determined.
+
+Making this hierarchy explicit — event structure first, structural flow metrics second, distributional summaries third — is a major distinction between sample path analysis and current methods. It also has significant implications for how these secondary artifacts should be interpreted and used in applications such as forecasting.
+
+This is not an intuitive concept and requires more careful explanation. This document and much of the rest of supporting documentation and tools on this site are intended to provide those explanations.
+
+
 
 
 
