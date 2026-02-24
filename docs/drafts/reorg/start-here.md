@@ -25,30 +25,46 @@ link-citations: true
 
 # Introduction
 
-Flow metrics and flow-analysis techniques have been used in software for nearly 20 years. This lineage runs from the Poppendiecks [@poppendieck2003; @poppendieck2006], who introduced lead time, throughput, and work in progress (WIP) to Lean software development, to David Anderson’s popularization of the Kanban method [@anderson2010] as an empirical management approach for knowledge work. As Value Stream Management matured and flow-based improvement became embedded in DevOps and product organizations, a broader toolkit of metrics and analytical methods, including those popularized by Dan Vacanti [@vacanti2015], was adopted for operational management and forecasting.
+Flow metrics and flow-analysis techniques have been used for operations management in the software industry for nearly 20 years. This lineage runs from the Poppendiecks [@poppendieck2003; @poppendieck2006], who introduced lead time, throughput, and work in progress (WIP) to Lean software development, to David Anderson’s popularization of the Kanban method [@anderson2010] as an empirical management approach for knowledge work. As Value Stream Management matured and flow-based improvement became embedded in DevOps and product organizations, a broader toolkit of metrics and analytical methods, including those popularized by Dan Vacanti [@vacanti2015], was adopted for operational management and forecasting.
 
-Measuring and managing flow is now baseline practice across much of the software industry. It may be surprising, then, that I argue we need substantially different ways to measure, model, and reason about flow if the goal is systematic _process improvement_.
+Measuring and managing flow is now a well-understood baseline practice, even if adoption and execution vary widely. It may be surprising, then, that I argue we need substantially different ways to measure, model, and reason about flow in the software industry. This document and related work make that case.
 
-As AI-augmented engineering reshapes how work is performed, the methods we use to reason about flow must remain robust under structural change. This is a real limitation in how we measure processes today.
+The argument at a high level is this: our application of these ideas in software is built on an incomplete understanding of what the metrics measure, why they are relevant in our context, and how precisely they can support decisions across different contexts.
 
-Most measurement techniques in use today rely implicitly on strict process assumptions for accuracy and coherence. In a period of disruption, volatility, and structural change in software delivery, those assumptions will become harder to defend.
+For example, it is widely accepted that throughput and process-time metrics such as lead time and cycle time are important performance measures in a delivery context. But in adapting them to software development, we often do not account for the economic context in which we measure them. Throughput alone does not translate into meaningful economic outcomes. Process time in its various forms, and cost of delay, are often more critical, yet we still have few useful ways to connect those quantities to operational decision-making [^-wsjf].
 
-The techniques shown here use _exactly_ the same inputs you already use to analyze flow. The difference is _what_ we measure and _how_ we measure it. The answers are often different from those produced by current methods. The claim is that these are the mathematically correct answers in the more general settings we now operate in.
+[^-wsjf]: WSJF job scheduling is, of course, one of the "standard" answers here, but it is a relatively crude heuristic and only a minor application of a deeper and more nuanced topic.
+
+Further, Little's Law shows that these concepts are not independent. It implies structural relationships between process time and throughput that manifest as economic trade-offs, constraining the courses of action available as we pursue specific outcomes.
+
+While Little's Law is widely name-checked to justify common practices, the throughlines between those practices and the underlying theory often rest on assumptions derived from their original application in manufacturing. There are software-development contexts where these assumptions are valid. For example, if you build and deliver software on a fixed-price contract basis, traditional economic models of throughput and resource utilization are often the right ones, and we can get direct leverage by adopting those ideas, as many careful practitioners do.
+
+But if you are selling a SaaS product, product-development throughput is not nearly as important as careful selection of what goes into the product, understanding cost of delay, and optimizing delivery processes to stay responsive to shifting markets. Market performance depends on much more than delivering the right product. Time to market, network effects in the ecosystem in which the product operates, and related factors play a much larger role. So if we are focusing on product development in this context, we need tools that can incorporate these notions into our modeling assumptions _before_ we design operational processes.
+
+Today, we mostly live in an awkward middle ground: we allude to these larger concerns when talking about process improvement, but our prescriptions and methodologies largely remain shackled to a limited set of generic ideas borrowed from industrial production: reduce WIP, remove waste, small batches, faster feedback, and so on. They are treated as universal solutions, applicable without business context, with no reliable way to connect how and why adopting any of them improves business outcomes, and no systematic way to measure and prove they work in a given context.
+
+Our first objective in this document is to shore up those foundations. Doing so reveals where current practices fit within the broader mathematical context provided by a rigorous theory of flow processes, helps us understand where and when certain approaches are appropriate, and whether a particular improvement method is likely to be effective before implementation.
 
 Such claims require proof: first, that a real limitation exists in prevailing methods; second, that the proposed alternatives resolve it. This document lays out that case at a high level. The broader project and documentation provide the mathematical foundation, derivations, and open-source tooling needed to validate these claims directly on your own data.
 
-None of the core mathematical ideas are new. Many were established decades ago in queueing theory. In particular, the sample path analysis techniques underlying this work trace to Shaler Stidham’s 1972 deterministic proof of [Little’s Law](https://docs.pcalc.org/articles/littles-law/) and are mainstream complements to statistical and probabilistic analyses of stochastic processes, which is exactly how they are used here. Little’s Law is foundational to flow analysis, though in software delivery it is often invoked loosely, without exploiting its full structural implications. This is another key point of departure for our methods.
+None of the core mathematical ideas are new. Many were established decades ago in queueing theory[^-queueing-theory]. In particular, the sample path analysis techniques underlying this work trace to Shaler Stidham’s 1972 deterministic proof of [Little’s Law](https://docs.pcalc.org/articles/littles-law/) and are mainstream complements to statistical and probabilistic analyses of stochastic processes, which is exactly how they are used here. Little’s Law is foundational to flow analysis, though in software delivery it is often invoked loosely, without exploiting its full structural implications. This is another key point of departure for our methods.
 
-The theoretical foundation for our methods is presented in *Sample Path Analysis of Queueing Systems* by El-Taha and Stidham [@eltaha1999]. Our contribution is practical: translating this theory into operational tools that can be applied directly to real software-delivery systems, and simplifying terminology where needed so it maps more clearly to the domain without losing rigor.
+[^-queueing-theory]: Much of traditional queueing theory cannot be applied as-is in the environments where software development happens, yet those distinctions are often poorly understood. As we will see, several more foundational ideas need to be established before we tackle queueing directly. Once those are in place, a rigorous foundation for managing operational queues emerges naturally.
+
+The theoretical foundation for our methods, which draws clear distinctions between concepts such as flow analysis, queue management, and economic analysis, is presented in *Sample Path Analysis of Queueing Systems* by El-Taha and Stidham [@eltaha1999]. Our contribution is practical: translating this theory into operational tools that can be applied directly to real software-delivery systems, and simplifying terminology where needed so it maps more clearly to the domain without losing rigor.
 
 Applying these ideas requires conceptual shifts if you are very familiar with current methods. This document introduces those shifts and points to the theory and tooling needed to verify each claim. While the underlying mathematics is elementary, the perspective shift is significant and may be disorienting if you are comfortable with current techniques.
 
+To make it easier to navigate these ideas, our toolkit is designed to work with _exactly_ the same inputs you use to measure and analyze flow today. The results will differ, but we will explain why each difference matters. Rather than read this as an abstract theoretical treatise, I encourage you to compare our methods with the methods you use today and assess the claims side by side. While I claim that these are the correct ways to model and measure operational processes, you don't have to take my word for it. Judge for yourself by connecting it to how you are doing this work today.
 
-This work is part of the larger research program known as [The Presence Calculus Project](https://docs.pcalc.org), developed over several years within my advisory practice, [The Polaris Advisor Program](https://polarisadvisor.com). The current toolkit reinterprets flow analysis using techniques from the Presence Calculus and strictly generalizes conventional flow-metric models. The Presence Calculus itself extends beyond flow analysis to a wider class of operational measurement problems.
 
-We begin with the simpler and well-understood case of arrival-departure flow processes, which all current flow models build on, to expose key concepts in a familiar setting. These concepts generalize beyond the arrival-departure case while keeping the modeling and measurement techniques analytically tractable. That is what makes these ideas powerful, beyond simply being a better way to measure flow metrics.
+### The Presence Calculus Project
 
-The generalization is beyond the scope of this document. It is the subject of [The Presence Calculus - A Gentle Introduction](https://docs.pcalc.org/articles/intro-to-presence-calculus/). While it stands alone, those ideas are easier to grasp if you first see how they manifest in the simpler arrival-departure case, which is what this document covers.
+While the current toolkit is focused on helping practitioners draw contrasts with existing methods, this work is part of the larger research program known as [The Presence Calculus Project](https://docs.pcalc.org), developed over several years within my advisory practice, [The Polaris Advisor Program](https://polarisadvisor.com). The Presence Calculus is a generalization of the methods discussed here, and it is where economic and operational reasoning are brought under the same mathematical umbrella.
+
+Before we can talk about economic reasoning, we need to recast operational flow models so they can integrate with economic models. That is the focus of this document. The current toolkit reinterprets flow analysis using techniques from the Presence Calculus and strictly generalizes conventional flow-metric models. The Presence Calculus itself extends beyond flow analysis to a wider class of operational measurement problems, including economic decision-making.
+
+The generalization is beyond the scope of this document. It is the subject of [The Presence Calculus - A Gentle Introduction](https://docs.pcalc.org/articles/intro-to-presence-calculus/). While it stands alone, those ideas are easier to grasp if you first see how they manifest in familiar arrival-departure flow processes, which are the de facto model for operational flow analysis today.
 
 # The Process Models
 
@@ -184,6 +200,27 @@ Making this hierarchy explicit distinguishes sample path analysis from current p
 This is not an intuitive shift, and some of the language and machinery we develop will be unfamiliar. The payoff is a set of techniques for reasoning about flow that do not depend on distributional assumptions, and whose core results hold unconditionally on every realized sample path.
 
 The remainder of this document, and the supporting material on this site, develops the details.
+
+# Sample Path Analysis
+
+We now turn to the substance of sample path analysis. There are many new concepts to absorb and integrate, even in a model as simple as the arrival-departure process.
+
+This chapter provides a high-level roadmap of the key ideas and arguments we develop in the remaining chapters, without defining each one in detail. Think of it as a guide to where each concept fits in the overall architecture of flow.
+
+## The High Level Arc
+
+The previous chapters established that everything in our methods hinges on observing events on the sample path — in the case of flow processes, a marked point process — and analyzing the event structure as observations unfold in time. A good mental model for this is as follows:
+
+- Starting from a fixed point in time, observe the sample path up to time $T$.
+- Compute a set of metrics that describe the state of the process up to that point in time. These are finite-window quantities that are closely related to many of the metrics we measure today, but they are not the same quantities, and the differences matter.
+- Wait for the next event, record the event type, and extend the window by the elapsed time, giving an extended sample path that includes that event.
+- Recompute all metrics deterministically from their previous values and the incremental contribution of the new event.
+
+The fact that we can compute every flow metric this way is not obvious. We have traditionally treated these metrics as statistics, averages and percentiles of distributions. Causal attribution is what makes sample path analysis powerful. It lets us trace changes in flow metrics back to the _contributions of individual events on the timeline_, and this, in turn, gives us tools to shape the _event structure_ so metrics move in the direction we want. This principle is at the heart of why this technique is worth learning.
+
+
+
+
 
 
 
