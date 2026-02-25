@@ -565,22 +565,21 @@ Kumar</em></a></p></p>
             <ul>
             <li><a href="#introduction" id="toc-introduction">1
             Introduction</a></li>
-            <li><a href="#the-process-models"
-            id="toc-the-process-models">2 The Process Models</a>
-            <ul>
             <li><a href="#arrival-departure-processes"
-            id="toc-arrival-departure-processes">2.1 Arrival-Departure
-            Processes</a></li>
-            <li><a href="#flow-process-model"
-            id="toc-flow-process-model">2.2 Flow Process Model</a></li>
+            id="toc-arrival-departure-processes">2 Arrival-Departure
+            Processes</a>
+            <ul>
+            <li><a href="#flow-process-model-for-sample-path-analysis"
+            id="toc-flow-process-model-for-sample-path-analysis">2.1
+            Flow Process Model for Sample Path Analysis</a></li>
             <li><a href="#what-is-a-sample-path"
-            id="toc-what-is-a-sample-path">2.3 What Is a Sample
+            id="toc-what-is-a-sample-path">2.2 What Is a Sample
             Path?</a></li>
             <li><a href="#the-sample-path-of-a-flow-process"
-            id="toc-the-sample-path-of-a-flow-process">2.4 The Sample
+            id="toc-the-sample-path-of-a-flow-process">2.3 The Sample
             Path of a Flow Process</a></li>
             <li><a href="#where-distributions-matter"
-            id="toc-where-distributions-matter">2.5 Where Distributions
+            id="toc-where-distributions-matter">2.4 Where Distributions
             Matter</a></li>
             </ul></li>
             <li><a href="#sample-path-analysis"
@@ -649,10 +648,11 @@ Kumar</em></a></p></p>
           original application in manufacturing. There are
           software-development contexts where these assumptions are
           valid. For example, if you build and deliver software on a
-          fixed-price contract basis, traditional economic models of
-          throughput and resource utilization are often the right ones,
-          and we can get direct leverage by adopting those ideas, as
-          many careful practitioners do.</p>
+          fixed-price contract basis, or your business model is based on
+          marking up the specialized skills of your people, traditional
+          economic models of throughput and resource utilization are
+          often the right ones, and we can get direct leverage by
+          adopting those ideas, as many careful practitioners do.</p>
           <p>But if you are selling a SaaS product, product-development
           throughput is not nearly as important as careful selection of
           what goes into the product, understanding cost of delay, and
@@ -664,12 +664,19 @@ Kumar</em></a></p></p>
           product development in this context, we need tools that can
           incorporate these notions into our modeling assumptions
           <em>before</em> we design operational processes.</p>
-          <p>Today, we mostly live in an awkward middle ground: we
+          <p>Between these poles lies a range of contexts — internal IT,
+          sales operations, marketing, R&amp;D — each with different
+          economic drivers and different relationships between process
+          time, throughput, and value. We cannot apply the same
+          techniques to reason about these quantities and expect them to
+          work equally well in all contexts.</p>
+          <p>Yet today, we mostly live in that awkward middle ground: we
           allude to these larger concerns when talking about process
           improvement, but our prescriptions and methodologies largely
           remain shackled to a limited set of generic ideas borrowed
           from industrial production: reduce WIP, remove waste, small
-          batches, faster feedback, and so on. They are treated as
+          batches, faster feedback, and so on. It’s not that these are
+          not valid things to focus on, but they are treated as
           universal solutions, applicable without business context, with
           no reliable way to connect how and why adopting any of them
           improves business outcomes, and no systematic way to measure
@@ -687,9 +694,9 @@ Kumar</em></a></p></p>
           high level. The broader project and documentation provide the
           mathematical foundation, derivations, and open-source tooling
           needed to validate these claims directly on your own data.</p>
-          <p>None of the core mathematical ideas are new. Many were
-          established decades ago in queueing theory<a href="#fn2"
-          class="footnote-ref" id="fnref2"
+          <p>None of the core mathematical ideas we rely on to make this
+          case are new. Many were established decades ago in queueing
+          theory<a href="#fn2" class="footnote-ref" id="fnref2"
           role="doc-noteref"><sup>2</sup></a>. In particular, the sample
           path analysis techniques underlying this work trace to Shaler
           Stidham’s 1972 deterministic proof of <a
@@ -757,15 +764,8 @@ Kumar</em></a></p></p>
           they manifest in familiar arrival-departure flow processes,
           which are the de facto model for operational flow analysis
           today.</p>
-          <h1 id="the-process-models">2 The Process Models</h1>
-          <p>We will pay close attention to model assumptions as we
-          develop the case. Clarifying hidden assumptions is central to
-          understanding the strengths and weaknesses of any analytical
-          technique. Many arguments here hinge on exposing those
-          assumptions and mapping them to the contexts in which these
-          techniques are applied today.</p>
-          <h2 id="arrival-departure-processes">2.1 Arrival-Departure
-          Processes</h2>
+          <h1 id="arrival-departure-processes">2 Arrival-Departure
+          Processes</h1>
           <p>All current flow-metric models are based on what we may
           call arrival-departure processes: discrete <em>items</em>
           arrive at a system or process boundary and depart after some
@@ -805,10 +805,19 @@ Kumar</em></a></p></p>
           process, robust under <em>any</em> realization that conforms
           to that model, even when underlying processes operate in
           volatile and changing environments.</p>
+          <p>In this sense, an arrival/departure process is to flow
+          analysis what a single-celled organism is to biology. Simple
+          enough to exhibit all the core principles involved, and rich
+          enough to develop the full analytical machinery. We begin here
+          because every structural property we need to study more
+          complex configurations of these processes generalizes from
+          this case. Understanding them well is the foundation of
+          everything that follows.</p>
           <p>So what is that model, precisely? This is where fundamental
           differences begin to emerge.</p>
-          <h2 id="flow-process-model">2.2 Flow Process Model</h2>
-          <p>The process model we use for sample path analysis is subtly
+          <h2 id="flow-process-model-for-sample-path-analysis">2.1 Flow
+          Process Model for Sample Path Analysis</h2>
+          <p>The process model we use for sample path analysis is a bit
           different from the standard arrival-departure model above. It
           is strictly more general and has fewer assumptions, but the
           differences are also more fundamental than that.</p>
@@ -872,7 +881,7 @@ Kumar</em></a></p></p>
           also provides a more general framework that applies even in
           domains where the notion of discrete items is less
           tangible.</p>
-          <h2 id="what-is-a-sample-path">2.3 What Is a Sample Path?</h2>
+          <h2 id="what-is-a-sample-path">2.2 What Is a Sample Path?</h2>
           <p>The term comes from probability theory. A non-deterministic
           process is one that can produce different outcomes under the
           same conditions. When this non-determinism is modeled using
@@ -886,10 +895,13 @@ Kumar</em></a></p></p>
           <p>is one <strong>sample path</strong> of the process. It is
           one realized history. If we restart the experiment, we may
           obtain a different sequence.</p>
-          <p>A deterministic process has exactly one sample path.<br />
-          A non-deterministic (stochastic) process has many possible
-          sample paths.</p>
-          <p>These are two complementary views of the same process, as
+          <ul>
+          <li>A deterministic process has exactly one sample path.<br />
+          </li>
+          <li>A non-deterministic (stochastic) process has many possible
+          sample paths.</li>
+          </ul>
+          <p>There are two complementary views of the same process, as
           shown in Figure 2.</p>
           <figure id="fig:coin-toss">
           <img src="../../assets/coin-toss.png"
@@ -904,12 +916,12 @@ Kumar</em></a></p></p>
           path.</li>
           <li><strong>Down a column (fixed <span
           class="math inline">\(t\)</span>):</strong> outcomes across
-          all possible sequences at one time. Each column defines a
-          random variable <span
+          all possible sequences at one point in time. Each column
+          defines a random variable <span
           class="math inline">\(X(t)\)</span>.</li>
           </ul>
-          <p>Probability theory studies properties that hold across all
-          sample paths via the random variables <span
+          <p>Probability theory studies properties that hold across
+          <em>all</em> sample paths via the random variables <span
           class="math inline">\(X(t)\)</span>.<br />
           For example: “The expected value of <span
           class="math inline">\(X(t)\)</span> is 0.5,” across all sample
@@ -922,28 +934,33 @@ Kumar</em></a></p></p>
           <p>The latter statement is merely an empirical fact. By
           itself, it is not analytically interesting. The power of
           sample path analysis emerges when we study a class of
-          processes and prove structural properties that must hold along
-          <em>any</em> sample path that satisfies certain observable
-          conditions.</p>
-          <p>Sample path analysis requires no distributional or
-          probabilistic assumptions. Its statements are conditioned on a
-          single realized history. This makes it especially useful in
-          operational settings, where we observe only one trajectory and
-          cannot fully characterize the underlying sources of
-          non-determinism.</p>
+          processes and prove non-trivial structural properties that
+          must hold along <em>any</em> sample path that satisfies
+          certain observable conditions. Arrival-Departure processes are
+          an example of such a class.</p>
+          <p>By definition, sample path analysis requires no
+          distributional or probabilistic assumptions. Its statements
+          are conditioned on a single realized history. This makes it
+          especially useful in operational settings, where we observe
+          only one trajectory and cannot fully characterize the
+          underlying sources of non-determinism outside that observed
+          history.</p>
           <p>If additional modeling assumptions are available — for
-          example, a known probability distribution over sample paths —
-          those can be layered on top. But they are not required.</p>
-          <p>The two approaches are complementary. Sample path analysis
-          works under stricter informational constraints and therefore
-          relies on more elementary, but structurally robust,
-          techniques.</p>
+          example, a known a priori probability distribution — those can
+          be layered on top. But they are not required.</p>
+          <p>So the two approaches are complementary. Sample path
+          analysis works under more limited informational constraints
+          and therefore relies on more elementary, but structurally
+          robust, techniques.</p>
           <p>This is the perspective we exploit: structural properties
           of flow processes can be proven to hold along any sample path
           that satisfies verifiable conditions, without committing to
           probabilistic assumptions about the ensemble properties that
-          hold across all sample paths.</p>
-          <h2 id="the-sample-path-of-a-flow-process">2.4 The Sample Path
+          hold across all sample paths. Since we generally don’t have a
+          probability distribution to work with, we will call the
+          underlying process non-deterministic rather than
+          stochastic.</p>
+          <h2 id="the-sample-path-of-a-flow-process">2.3 The Sample Path
           of a Flow Process</h2>
           <p>We begin by specifying how non-determinism enters the
           model. Imagine we are observing arrivals and departures over
@@ -993,22 +1010,27 @@ Kumar</em></a></p></p>
           Prefixes</figcaption>
           </figure>
           <p>In the case of an arrival/departure process, we will show
-          that if a finite segment of the sample path, a marked point
-          process, is observed, all remaining flow metrics and empirical
-          distributions derive from simple deterministic functions that
-          measure properties of the observed sample path, much like the
-          statement that the number of heads observed on the coin-toss
-          sample path is 37.</p>
-          <p>In other words, the structure of flow is encoded directly
-          in the realized event history. If the event history is
-          captured accurately, the quantities we associate with flow can
-          be read off mechanically from this history. In this context,
-          randomness always lives in the future, and there is no need to
-          invoke probabilistic or statistical assumptions or language
-          when reasoning about <em>observed</em> flow.</p>
+          that if a finite prefix of some sample path is observed, all
+          remaining flow metrics and empirical distributions derive from
+          simple deterministic functions that measure properties of that
+          observed path, much like the statement that the number of
+          heads observed on the coin-toss sample path is 37.</p>
+          <p>Since the observed sample path in this case is a marked
+          point process, this implies that the structure of flow is
+          encoded directly in the realized event history. If the event
+          history is captured accurately, the quantities we associate
+          with flow can be read off mechanically from this history. In
+          this context, non-determinism always lives in the future, and
+          there is no need to invoke probabilistic or statistical
+          assumptions or language when reasoning about <em>observed</em>
+          flow. Specifically, the process of <em>measuring</em> flow
+          does not introduce any non-determinism beyond what is already
+          encoded in the observed sample path <a href="#fn5"
+          class="footnote-ref" id="fnref5"
+          role="doc-noteref"><sup>5</sup></a>.</p>
           <p>The machinery that makes this possible is what we call
           sample path analysis.</p>
-          <h2 id="where-distributions-matter">2.5 Where Distributions
+          <h2 id="where-distributions-matter">2.4 Where Distributions
           Matter</h2>
           <p>Probability and statistics still matter, especially when we
           are reasoning about possible futures in prediction models. But
@@ -1074,8 +1096,10 @@ Kumar</em></a></p></p>
           <p>The previous chapters established that everything in our
           methods hinges on observing events on the sample path — in the
           case of flow processes, a marked point process — and analyzing
-          the event structure as observations unfold in time. A good
-          mental model for this is as follows:</p>
+          the event structure as observations unfold in time.</p>
+          <p>A good mental model for this is as follows <a href="#fn6"
+          class="footnote-ref" id="fnref6"
+          role="doc-noteref"><sup>6</sup></a>:</p>
           <ul>
           <li>Starting from a fixed point in time, observe the sample
           path up to time <span class="math inline">\(T\)</span>.</li>
@@ -1086,21 +1110,23 @@ Kumar</em></a></p></p>
           differences matter.</li>
           <li>Wait for the next event, record the event type, and extend
           the window by the elapsed time, giving an extended sample path
-          that includes that event.</li>
+          that includes realized values of the next random element
+          (timestamp and mark)<a href="#fn7" class="footnote-ref"
+          id="fnref7" role="doc-noteref"><sup>7</sup></a>.</li>
           <li>Recompute all metrics deterministically from their
           previous values and the incremental contribution of the new
-          event.</li>
+          variables.</li>
           </ul>
-          <p>The fact that we can compute every flow metric this way is
-          not obvious. We have traditionally treated these metrics as
-          statistics, averages and percentiles of distributions. Causal
-          attribution is what makes sample path analysis powerful. It
-          lets us trace changes in flow metrics back to the
-          <em>contributions of individual events on the timeline</em>,
-          and this, in turn, gives us tools to shape the <em>event
-          structure</em> so metrics move in the direction we want. This
-          principle is at the heart of why this technique is worth
-          learning.</p>
+          <p>The fact that every flow metric in this model can be
+          computed this way is not obvious. We have traditionally
+          treated these metrics as statistics, averages and percentiles
+          of distributions. Provably correct causal <em>attribution</em>
+          is what makes sample path analysis powerful. It lets us trace
+          changes in flow metrics back to the <em>contributions of
+          individual events on the timeline</em>, and this, in turn,
+          gives us tools to shape the <em>event structure</em> so
+          metrics move in the direction we want. This principle is at
+          the heart of why this technique is worth learning.</p>
           <h1 class="unnumbered" id="references">4 References</h1>
           <div id="refs" class="references csl-bib-body"
           data-entry-spacing="0" role="list">
@@ -1180,6 +1206,22 @@ Kumar</em></a></p></p>
           There are, of course, many other potential sources of
           non-determinism even in a single arrival/departure process,
           including measurement errors.<a href="#fnref4"
+          class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+          <li id="fn5"><p>Ensuring this means paying careful attention
+          to the impact of techniques such as sampling on flow
+          measurement. This is a key point of departure in our methods
+          as well.<a href="#fnref5" class="footnote-back"
+          role="doc-backlink">↩︎</a></p></li>
+          <li id="fn6"><p>Even though this is not the way the underlying
+          algorithms are necessarily implemented in the toolkit.<a
+          href="#fnref6" class="footnote-back"
+          role="doc-backlink">↩︎</a></p></li>
+          <li id="fn7"><p>At each step we are observing the realized
+          value of the next random element in some underlying
+          non-deterministic process. Conditioned on the observed prefix,
+          the structural flow quantities defined over that prefix are
+          deterministic functionals of the prefix. This is what we mean
+          when we say “randomness lives in the future.”<a href="#fnref7"
           class="footnote-back" role="doc-backlink">↩︎</a></p></li>
           </ol>
           </section>
