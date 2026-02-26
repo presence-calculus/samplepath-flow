@@ -144,8 +144,6 @@ So the two approaches are complementary. Sample path analysis works under more l
 This is the perspective we exploit: structural properties of flow processes can be proven to hold along any sample path that satisfies verifiable conditions, without committing to probabilistic assumptions about the ensemble properties that hold across all sample paths.
 Since we generally don't have a probability distribution to work with, we will call the underlying process non-deterministic rather than stochastic.
 
-
-
 ## The Sample Path of a Flow Process
 
 We begin by specifying how non-determinism enters the model. Imagine we are observing arrivals and departures over time.
@@ -210,11 +208,11 @@ We now turn to the substance of sample path analysis. There are many new concept
 
 This chapter provides a high-level roadmap of the key ideas and arguments we develop in the remaining chapters, without defining each one in detail. Think of it as a guide to where each concept fits in the overall architecture of flow.
 
-## The High Level Arc
+## Computing sample path flow metrics
 
 The previous chapters established that everything in our methods hinges on observing events on the sample path — in the case of flow processes, a marked point process — and analyzing the event structure as observations unfold in time.
 
-A good mental model for this is as follows [^-mental-model]:
+A good mental model for how we compute these metrics is as follows [^-mental-model]:
 
 [^-mental-model]: Even though this is not the way the underlying algorithms are necessarily implemented in the toolkit.
 
@@ -226,6 +224,40 @@ A good mental model for this is as follows [^-mental-model]:
 [^-random-variables]: At each step we are observing the realized value of the next random element in some underlying non-deterministic process. Conditioned on the observed prefix, the structural flow quantities defined over that prefix are deterministic functionals of the prefix. This is what we mean when we say "randomness lives in the future."
 
 The fact that every flow metric in this model can be computed this way is not obvious. We have traditionally treated these metrics as statistics, averages and percentiles of distributions. Provably correct causal _attribution_ is what makes sample path analysis powerful. It lets us trace changes in flow metrics back to the _contributions of individual events on the timeline_, and this, in turn, gives us tools to shape the _event structure_ so metrics move in the direction we want. This principle is at the heart of why this technique is worth learning.
+
+## Processes and Indexes
+
+In stochastic process theory, the word *process* has a specific meaning: it is a _function_ that maps an index set to a set of states. Put more plainly, a process is something whose state varies along some dimension — most commonly time. The definition is deliberately general, and it captures most things we informally call processes.
+
+In an arrival–departure system, time is naturally one indexing dimension. But what is the state? There are many possibilities, but let's consider one: the cumulative arrival count. At any point in time (the index) we record how many arrivals have occurred up to that moment (the state). If we observe that count at fixed reporting intervals — every minute, hour, or day — we obtain a _process_ indexed by calendar time. For the sample path in [@fig:mpp], this gives the processes in [@fig:calendar-indexed].
+
+![Calendar-Indexed Cumulative Arrivals]($document-root/assets/calendar-indexed-arrivals.png){#fig:calendar-indexed}
+
+But this is not the only way to index the same process. We can instead treat each arrival *event* as a state transition. The cumulative count increases by one at each arrival and remains constant between arrivals. In this view, the process changes state only when an event occurs. The index is no longer an arbitrary reporting schedule; it is the sequence of events that cause the state to change. This process is shown in [@fig:event-indexed].
+
+![Event-Indexed Cumulative Arrivals]($document-root/assets/event-indexed-arrivals.png){#fig:event-indexed}
+
+These two representations describe the same underlying sample path, but they are not equivalent.
+
+Calendar indexing _samples_ the state of the process at chosen time points. It records values, but not necessarily the exact transition structure that produced them. Event indexing, by contrast, is built from the transitions themselves. It records every state change and the order in which those changes occurred. It preserves the full evolution of the system at the resolution of events.
+
+This is a material difference. From the event-indexed representation of cumulative arrival count, we can always produce calendar-indexed measurements for any given reporting frequency. The reverse is not true. Once we observe only sampled or aggregated calendar states, the underlying transition history is no longer recoverable [^-agreement]. The information loss compounds when we derive new quantities by aggregating sampled values.
+
+[^-agreement]: Note, however, that in this example, the two representations agree on the _values_ reported at the same indexes. The information loss is not due to sampling error, but lies in recoverability of the underlying dynamics. The calendar-indexed view cannot say anything about what happens to the process in _between_ samples. The event-indexed view can, unambiguously. However, if we derive processes over these sampled values, then sampling errors do compound meaningfully.
+
+Calendar indexing is the default way of reporting flow metrics today. Flow metric calculations today *begin* by sampling the input and then performing various aggregations over the sampled values. In doing this we lose the structural connection between metric changes and the events that generated them. Metrics plotted over time become trend lines without a direct link back to the events that generate those trends. The choice of straight lines connecting the points in [@fig:calendar-indexed] is not directly defensible, nor is any other interpolation for that matter.
+
+By contrast, event indexing treats each flow metric _as a dynamic process in its own right_. The particular dynamics — how a metric behaves at events and between events — is part of the unique signature of that metric, and we can use it to reason about the metric's evolution over time. The metrics are themselves sample paths of deterministic processes over a sample path from a non-deterministic process. The shape of the sample path — a step chart that changes direction precisely at the event timestamps — follows from the definition of the metric.
+
+With event indexing, every change in a derived flow metric can be tied to the specific state transition that caused it, up to event resolution. This property follows from how the metric is constructed. Of course, this requires that the metric itself be defined so its dynamics can be described in this way. It is somewhat obvious with cumulative arrivals, but as we will show, we can do this for each one of the sample path metrics we develop, even when it is not so obvious.
+
+In particular, the evolution of these sample paths follows predictable rules _in between events_ and events _cause_ the trajectory of the path to change in predictable ways. The only unpredictable element is what that next event is, and when it will change the trajectory of the path. As we will see, this is a much more tractable mechanism to reason about.
+
+El-Taha & Stidham [@eltaha1999] use the term _processes with imbedded point processes_ to describe this class of mathematical objects. We will use the friendlier term _event-indexed processes_ to describe the same class instead. Each one of our sample path flow metrics is an _event-indexed process_.
+
+Viewed this way, each metric has its own unique dynamics that _interact when_ metrics _are composed as mathematical functions_. So both the mathematical definition of a process as a function over sample paths, and its dynamics play important roles in our ability to reason about flow using sample path flow metrics.
+
+At this point it should be clear that sample path analysis is leaving behind traditional statistical inference techniques and moving into the language of dynamical systems analysis. In fact, it is the explicit derivation of the dynamical systems models for flow that is the specific contribution of The Presence Calculus. The next section will solidify that claim.
 
 
 
