@@ -1140,28 +1140,28 @@ Kumar</em></a></p></p>
           commonly time. The definition is deliberately general, and it
           captures most things we informally call processes.</p>
           <p>In an arrival–departure system, time is naturally one
-          indexing dimension. But what is the state? There are many
-          possibilities, but let’s consider one: the cumulative arrival
-          count. At any point in time (the index) we record how many
-          arrivals have occurred up to that moment (the state). If we
-          observe that count at fixed reporting intervals — every
-          minute, hour, or day — we obtain a <em>process</em> indexed by
-          calendar time. For the sample path in Figure 3, this gives the
-          processes in Figure 5.</p>
+          indexing dimension. But what does process state mean in this
+          context? There are many possibilities, but let’s consider one:
+          the cumulative arrival count. At any point in time (the index)
+          we record how many arrivals have occurred up to that moment
+          (the state). If we observe that count at fixed reporting
+          intervals — every minute, hour, or day — we obtain a
+          <em>process</em> indexed by calendar time. For the sample path
+          in Figure 3, this gives the processes in Figure 5.</p>
           <figure id="fig:calendar-indexed">
           <img src="../../assets/calendar-indexed-arrivals.png"
           alt="Figure 5: Calendar-Indexed Cumulative Arrivals" />
           <figcaption aria-hidden="true">Figure 5: Calendar-Indexed
           Cumulative Arrivals</figcaption>
           </figure>
-          <p>But this is not the only way to index the same process. We
-          can instead treat each arrival <em>event</em> as a state
-          transition. The cumulative count increases by one at each
-          arrival and remains constant between arrivals. In this view,
-          the process changes state only when an event occurs. The index
-          is no longer an arbitrary reporting schedule; it is the
-          sequence of events that cause the state to change. This
-          process is shown in Figure 6.</p>
+          <p>But this is not the only way to <em>index</em> the
+          cumulative arrival count process. We can instead treat each
+          arrival <em>event</em> as a state transition. The cumulative
+          count increases by one at each arrival and remains constant
+          between arrivals. In this view, the process changes state only
+          when an event occurs. The index is no longer an arbitrary
+          reporting schedule; it is the sequence of events that cause
+          the state to change. This process is shown in Figure 6.</p>
           <figure id="fig:event-indexed">
           <img src="../../assets/event-indexed-arrivals.png"
           alt="Figure 6: Event-Indexed Cumulative Arrivals" />
@@ -1169,17 +1169,17 @@ Kumar</em></a></p></p>
           Cumulative Arrivals</figcaption>
           </figure>
           <p>These two representations describe the same underlying
-          sample path, but they are not equivalent.</p>
-          <p>Calendar indexing <em>samples</em> the state of the process
-          at chosen time points. It records values, but not necessarily
-          the exact transition structure that produced them. Event
-          indexing, by contrast, is built from the transitions
-          themselves. It records every state change and the order in
-          which those changes occurred. It preserves the full evolution
-          of the system at the resolution of events.</p>
+          arrival-departure process, but they are not equivalent.</p>
+          <p>Calendar indexing <em>samples</em> the state of the
+          arrival-departure process at chosen time points. It records
+          values, but not necessarily the exact transition structure
+          that produced them. Event indexing, by contrast, is built from
+          the transitions themselves. It records every state change and
+          the order in which those changes occurred. It preserves the
+          full evolution of the system at the resolution of events.</p>
           <p>This is a material difference. From the event-indexed
           representation of cumulative arrival count, we can always
-          produce calendar-indexed measurements for any given reporting
+          produce a calendar-indexed one for any given reporting
           frequency. The reverse is not true. Once we observe only
           sampled or aggregated calendar states, the underlying
           transition history is no longer recoverable <a href="#fn8"
@@ -1196,21 +1196,21 @@ Kumar</em></a></p></p>
           without a direct link back to the events that generate those
           trends. The choice of straight lines connecting the points in
           Figure 5 is not directly defensible, nor is any other
-          interpolation for that matter.</p>
+          interpolation for that matter. They become reporting
+          artifacts.</p>
           <p>By contrast, event indexing treats each flow metric <em>as
           a dynamic process in its own right</em>. The particular
           dynamics — how a metric behaves at events and between events —
           is part of the unique signature of that metric, and we can use
           it to reason about the metric’s evolution over time. The
           metrics are themselves sample paths of deterministic processes
-          over a sample path from a non-deterministic process. The shape
-          of the sample path — a step chart that changes direction
-          precisely at the event timestamps — follows from the
+          <em>over a sample path from a non-deterministic process</em>.
+          The shape of the sample path — a step chart that changes
+          direction precisely at the event timestamps — follows from the
           definition of the metric.</p>
           <p>With event indexing, every change in a derived flow metric
           can be tied to the specific state transition that caused it,
-          up to event resolution. This property follows from how the
-          metric is constructed. Of course, this requires that the
+          up to event resolution. Of course, this requires that the
           metric itself be defined so its dynamics can be described in
           this way. It is somewhat obvious with cumulative arrivals, but
           as we will show, we can do this for each one of the sample
@@ -1221,7 +1221,9 @@ Kumar</em></a></p></p>
           predictable ways. The only unpredictable element is what that
           next event is, and when it will change the trajectory of the
           path. As we will see, this is a much more tractable mechanism
-          to reason about.</p>
+          to reason about. In fact, it is the explicit derivation of the
+          dynamical systems models for standard flow metrics that is the
+          specific contribution of The Presence Calculus.</p>
           <p>El-Taha &amp; Stidham <span class="citation"
           data-cites="eltaha1999"><a href="#ref-eltaha1999"
           role="doc-biblioref">[5]</a></span> use the term <em>processes
@@ -1238,11 +1240,8 @@ Kumar</em></a></p></p>
           about flow using sample path flow metrics.</p>
           <p>At this point it should be clear that sample path analysis
           is leaving behind traditional statistical inference techniques
-          and moving into the language of dynamical systems analysis. In
-          fact, it is the explicit derivation of the dynamical systems
-          models for flow that is the specific contribution of The
-          Presence Calculus. The next section will solidify that
-          claim.</p>
+          and moving into the language of dynamical systems analysis.
+          The next section will solidify that claim.</p>
           <h1 class="unnumbered" id="references">4 References</h1>
           <div id="refs" class="references csl-bib-body"
           data-entry-spacing="0" role="list">
