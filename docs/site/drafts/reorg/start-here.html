@@ -635,17 +635,20 @@ Kumar</em></a></p></p>
           important performance measures in a delivery context. But in
           adapting them to software development, we often do not account
           for the economic context in which we measure them. Throughput
-          alone does not translate into meaningful economic outcomes.
-          Process time in its various forms, and cost of delay, are
-          often more critical, yet we still have few useful ways to
-          connect those quantities to operational decision-making <a
-          href="#fn1" class="footnote-ref" id="fnref1"
+          alone does not always translate into meaningful economic
+          outcomes. Process time in its various forms, and cost of
+          delay, are often equally important economically, yet we still
+          have few useful ways to connect those quantities to
+          operational decision-making <a href="#fn1"
+          class="footnote-ref" id="fnref1"
           role="doc-noteref"><sup>1</sup></a>.</p>
-          <p>Further, Little’s Law shows that these concepts are not
-          independent. It implies structural relationships between
-          process time and throughput that manifest as economic
-          trade-offs, constraining the courses of action available as we
-          pursue specific outcomes.</p>
+          <p>Further, <a
+          href="https://docs.pcalc.org/articles/littles-law">Little’s
+          Law</a> shows that these concepts are not independent. It
+          implies structural relationships between process time and
+          throughput that manifest as economic trade-offs, constraining
+          the courses of action available as we pursue specific
+          outcomes.</p>
           <p>While Little’s Law is widely name-checked to justify common
           practices, the throughlines between those practices and the
           underlying theory often rest on assumptions derived from their
@@ -688,9 +691,9 @@ Kumar</em></a></p></p>
           <p>Our first objective in this document is to shore up those
           foundations. Doing so reveals where current practices fit
           within the broader mathematical context provided by a rigorous
-          theory of flow processes, helps us understand where and when
-          certain approaches are appropriate, and whether a particular
-          improvement method is likely to be effective before
+          theory of flow processes. It helps us understand where and
+          when certain approaches are appropriate, and whether a
+          particular improvement method is likely to be effective before
           implementation.</p>
           <p>Such claims require proof: first, that a real limitation
           exists in prevailing methods; second, that the proposed
@@ -809,7 +812,7 @@ Kumar</em></a></p></p>
           process, robust under <em>any</em> realization that conforms
           to that model, even when underlying processes operate in
           volatile and changing environments.</p>
-          <p>In this sense, an arrival/departure process is to flow
+          <p>In a sense, an arrival/departure process is to flow
           analysis what a single-celled organism is to biology. Simple
           enough to exhibit all the core principles involved, and rich
           enough to develop the full analytical machinery. We begin here
@@ -817,8 +820,6 @@ Kumar</em></a></p></p>
           complex configurations of these processes generalizes from
           this case. Understanding them well is the foundation of
           everything that follows.</p>
-          <p>So what is that model, precisely? This is where fundamental
-          differences begin to emerge.</p>
           <h2 id="flow-process-model-for-sample-path-analysis">2.1 Flow
           Process Model for Sample Path Analysis</h2>
           <p>The process model we use for sample path analysis is a bit
@@ -860,9 +861,9 @@ Kumar</em></a></p></p>
           correspondence between a specific birth and a specific death,
           or a single integrated record of both.</p>
           <p>This reveals something important about flow and flow
-          metrics: these are gestalt properties of a process, not
-          necessarily properties derived by aggregating the experience
-          of individual items traversing that process. Many of the most
+          metrics: these are gestalt properties of a <em>process</em>,
+          not simply properties derived by aggregating the experience of
+          individual items traversing that process. Many of the most
           useful aspects of reasoning about flow for process improvement
           do not require that level of detail. We can go a long way
           without ever talking about items <a href="#fn3"
@@ -1214,7 +1215,7 @@ Kumar</em></a></p></p>
           difference in Figure 6 is that the shape of the sample path —
           in this case, a step chart that changes direction precisely at
           the event timestamps — follows from the definition of the
-          metric. In Figure 5 no such inference can be made.</p>
+          metric. In Figure 5, no such inference can be made.</p>
           <p>With event indexing, every change in a derived flow metric
           can be tied to the specific state transition that caused it,
           up to event resolution. This is important if we want to
