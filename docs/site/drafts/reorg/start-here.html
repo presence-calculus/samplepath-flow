@@ -1208,47 +1208,51 @@ Kumar</em></a></p></p>
           dynamics — how a metric behaves at events and between events —
           is part of the unique signature of that metric, and we can use
           it to reason about the metric’s evolution over time. The
-          metrics are themselves sample paths of deterministic processes
-          <em>over a sample path from a non-deterministic process</em>.
-          The shape of the sample path — a step chart that changes
-          direction precisely at the event timestamps — follows from the
-          definition of the metric.</p>
+          metrics are <em>themselves</em> deterministic processes
+          <em>over a sample path from a non-deterministic process</em>
+          and the plots are sample paths of these processes. The key
+          difference in Figure 6 is that the shape of the sample path —
+          in this case, a step chart that changes direction precisely at
+          the event timestamps — follows from the definition of the
+          metric. In Figure 5 no such inference can be made.</p>
           <p>With event indexing, every change in a derived flow metric
           can be tied to the specific state transition that caused it,
-          up to event resolution. Of course, this requires that the
-          metric itself be defined so its dynamics can be described in
-          this way. It is somewhat obvious with cumulative arrivals, but
-          as we will show, we can do this for each one of the sample
-          path metrics we develop, even when it is not so obvious.</p>
-          <p>In particular, the evolution of these sample paths follows
+          up to event resolution. This is important if we want to
+          understand <em>why</em> a specific change happened. Of course,
+          this requires that the metric itself be defined so its
+          dynamics can be described in this way. It is somewhat obvious
+          with cumulative arrivals, but as we will show, we can do this
+          for each one of the sample path metrics we develop, even when
+          it is not so obvious. In fact, it is this explicit derivation
+          of the dynamics for standard flow metrics that is the specific
+          contribution of The Presence Calculus to flow analysis.</p>
+          <p>Specifically, the evolution of these sample paths follows
           predictable rules: events <em>cause</em> the trajectory of the
           path to change in predictable ways and <em>in between
           events</em> we can state how the path behaves
           deterministically. The only unpredictable element is what that
           next event is, and when it will change the trajectory of the
-          path. As we will see, this is a much more tractable mechanism
-          to reason about flow. In fact, it is this explicit derivation
-          of the dynamical systems models for standard flow metrics that
-          is the specific contribution of The Presence Calculus to flow
-          analysis.</p>
+          path. As we will see, this is a much more tractable setup to
+          reason about flow.</p>
           <p>El-Taha &amp; Stidham <span class="citation"
           data-cites="eltaha1999"><a href="#ref-eltaha1999"
           role="doc-biblioref">[5]</a></span> use the term <em>processes
           with imbedded point processes</em> to describe this class of
           mathematical objects. We will use the friendlier term
           <em>event-indexed processes</em> to describe the same class
-          instead. Each one of our sample path flow metrics is an
-          <em>event-indexed process</em>.</p>
+          instead. Each one of our sample path flow metrics is a
+          deterministic <em>event-indexed process</em> over a sample
+          path of a non-deterministic process.</p>
           <p>Viewed this way, each metric has its own unique dynamics
-          that <em>interact when</em> metrics <em>are composed as
-          mathematical functions</em>. So both the mathematical
-          definition of a process as a function over sample paths, and
-          its dynamics play important roles in our ability to reason
-          about flow using sample path flow metrics.</p>
-          <p>At this point it should be clear that sample path analysis
-          is leaving behind traditional statistical inference techniques
-          and moving into the language of dynamical systems analysis.
-          The next section will solidify that claim.</p>
+          that <em>interact</em> when metrics <em>are composed as
+          mathematical functions</em>. These interactions can also be
+          derived deterministically. So both the mathematical definition
+          of a process as a function over sample paths, and its dynamics
+          play important roles in our ability to reason about flow using
+          sample path flow metrics.</p>
+          <p>The next section formalizes the shift in flow analysis from
+          statistical inference over distributions to the study of
+          deterministic dynamics along realized sample paths.</p>
           <h1 class="unnumbered" id="references">4 References</h1>
           <div id="refs" class="references csl-bib-body"
           data-entry-spacing="0" role="list">
