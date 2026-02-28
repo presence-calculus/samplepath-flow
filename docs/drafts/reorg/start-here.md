@@ -272,55 +272,70 @@ In the case of arrival–departure processes, we develop the dynamic model by ex
 
 Taken together, these give us a fully deterministic measurement substrate for reasoning about flow. Conditioned on a realized sample path, we can answer unambiguously: how did the process evolve to reach its current state? That, in turn, is the foundation we need to reason about the consequences of the process being in that state. This includes economic consequences, but is not limited to them.
 
-First, lets put together a birds-eye view of all the moving parts without too many technical details so that we can see the overall arc of how these concepts all fit together. The metrics reference  document goes into all this in much greater detail.
+We begin with a bird's-eye view of the moving parts, without full technical detail, so that the overall arc is visible before we examine each piece. The metrics reference document develops each concept in full.
 
 ### Flow Dynamics
- We've already seen the core concepts involved in modeling metrics as dynamic processes in the cumulative arrival count $A(T)$ metric.  We extend this idea to cumulative departure counts $D(T)$ and then derive a number of processes from there each of which captures a higher order notion of the "state" of the arrival departure process.
+We've already seen the core concepts involved in modeling metrics as dynamic processes in the cumulative arrival count $A(T)$ metric. We extend this idea to cumulative departure counts $D(T)$ and then derive a number of processes from there, each of which captures a higher-order notion of the "state" of the arrival-departure process.
 
-The chain of processes that model both the short run and long run dynamics of an arrival-departure process is shown in [@fig:flow-dynamics] below. [^-differential-equations]
+The chain of processes that model both the short-run and long-run dynamics of an arrival-departure process is shown in [@fig:flow-dynamics] below.[^-differential-equations]
 
-[^-differential-equations]: The formal way to describe such models is as a system of difference or differential equations, and this is possible here as well. But we are more interested in explaining the underlying concepts intuitively, so we will opt for plain english here. The metrics reference has a more technical treatments with precise  mathematical definitions of the concepts involved.
+[^-differential-equations]: The formal way to describe such models is as a system of difference or differential equations, and this is possible here as well. But we are more interested in explaining the underlying concepts intuitively, so we will opt for plain English here. The metrics reference has a more technical treatment with precise mathematical definitions of the concepts involved.
 
 ![The Dynamics Model]($document-root/assets/flow-dynamics.png){#fig:flow-dynamics}
 
-In [@fig:flow-dynamics] each  oval represents a flow metric that models a specific aspect of the observed dynamics of the underlying arrival-departure process. Each metric depends on one or more previous metrics and time plays a crucial role all through. Changes in every metric are traceable back to the events on the sample path.
+In [@fig:flow-dynamics] each oval represents a flow metric that models a specific aspect of the observed dynamics of the underlying arrival-departure process. Each metric depends on one or more previous metrics, and time plays a crucial role throughout. Changes in every metric are traceable back to the events on the sample path.
 
-Lets go through the individual metrics briefly in order, starting with cumulative arrival count and cumulative departure count - the ones that are directly calculated from the sample path.
+Let's go through the individual metrics briefly in order, starting with cumulative arrival count and cumulative departure count — the ones that are directly calculated from the sample path.
 
-- **Cumulative Arrival Count - $A(T)$**: We've already seen this one, it counts the number of arrivals observed in a time interval $T$.
+- **Cumulative Arrival Count — $A(T)$**: We've already seen this one. It counts the number of arrivals observed in a time interval $T$.
 
   *Dynamics*: $A(T)$ increases by 1 with every arrival and remains unchanged on departure events, and in between events.
 
-- **Cumulative Departure Count - $D(T)$ **: The departure process counterpart.
+- **Cumulative Departure Count — $D(T)$**: The departure process counterpart.
 
     *Dynamics*: It increases by 1 with every departure and remains unchanged otherwise.
 
-- **Instantaneous Presence - $N(t) = A(T) - D(T)$**: This metric measures _imbalance_ between cumulative arrival and departure counts at an instant. We call this the instantaneous presence [^-presence].
+- **Instantaneous Presence — $N(t) = A(T) - D(T)$**: This metric measures _imbalance_ between cumulative arrival and departure counts at an instant. We call this the instantaneous presence.[^-presence]
 
-    Since $A(T)$ and $D(T)$ represent states of the arrival-departure process, $N(T)$ also encodes a process state - a higher-order state representing the imbalance between the two other states.Think of $N(t)$ as instantaneous WIP as you connect it to the familiar flow metrics [^-wip].
+    Since $A(T)$ and $D(T)$ represent cumulative states of the arrival-departure process, $N(t)$ also encodes a process state — a higher-order state representing the imbalance between the two cumulative counts. Think of $N(t)$ as instantaneous WIP as you connect it to the familiar flow metrics.[^-wip]
 
      *Dynamics*: The value of $N(t)$ increases by 1 with every arrival, decreases by 1 with every departure, and remains constant in between.
 
-[^-presence]:  In general, presence is a quantity that represents the flow of some measurable quantity and here we are measuring its instantaneous value.  The presence calculus allows us to generalize this simple notion to much more general mathematical settings. The arrival-departure count imbalance is one of the simplest notions of presence we can establish for an arrival-departure process.
-See [The Presence Calculus, A Gentle Introduction](https://docs.pcalc.org/articles/intro-to-presence-calculus/)for a more general definitions of Presence and many more examples.
-[^-wip]: The reason  we dont define it as a such, is that WIP is a specific *interpretation* that applies to specific domains. A more general concept heremight be occupancy, but even this requires specific assumptions that are not necessary to reason about flow, so we will stick with the least restrictive definition of $N(t)$ as imbalance. Further both WIP and occupancy are a type of presence, but not all presence is of this type. That is the key thing to remember.
+[^-presence]: In general, presence is a quantity that represents the flow of some measurable quantity, and here we are measuring its instantaneous value. The Presence Calculus allows us to generalize this simple notion to much more general mathematical settings. The arrival-departure count imbalance is one of the simplest notions of presence we can establish for an arrival-departure process. See [The Presence Calculus, A Gentle Introduction](https://docs.pcalc.org/articles/intro-to-presence-calculus/) for more general definitions of Presence and many more examples.
+[^-wip]: The reason we don't define it as such is that WIP is a specific *interpretation* that applies to specific domains. A more general concept here might be occupancy, but even this requires specific assumptions that are not necessary to reason about flow, so we will stick with the least restrictive definition of $N(t)$ as imbalance. Further, both WIP and occupancy are a type of presence, but not all presence is of this type. That is the key thing to remember.
 
-- $H(T)$.
+- **Cumulative Presence Mass — $H(T)=\int_0^T N(t)\,dt$**: This is accumulated presence over the interval $(0,T]$ (the area under $N(t)$, equivalently the area between $A(T)$ and $D(T)$). It is the key integrated quantity that carries process history in element-time units.
 
--
+  *Dynamics*: $H(T)$ does not jump at arrivals or departures. Arrivals/departures change $N(t)$, which changes the **slope** of $H(T)$. Between events, $H(T)$ is linear with slope equal to the current $N(t)$ (flat when $N(t)=0$).
 
+- **Time-Average Presence — $L(T)=H(T)/T$**: This is the time-average of presence over $(0,T]$, i.e. the moving average of $N(t)$ over the observed prefix. It is the left-hand side quantity in the Presence Invariant.
 
+  *Dynamics*: $L(T)$ is continuous at event times (no jumps). Between events it adjusts toward the current state: it rises when $N(t)>L(T)$ and falls when $N(t)<L(T)$. Its responsiveness decays over time (roughly at rate $1/T$), so transient fluctuations are smoothed while persistent effects remain visible.
 
-
+In the table below, we summarize the dynamics model.
 
 | Metric | Derivation Formula | On arrival | On departure | Between events                            |
 |---|---|------------|--------------|-------------------------------------------|
-| $A(T)$ | $A(T)=\sum \text{ arrivals in }(0,T]$ | +1.        | Unchanged.   | Constant.                                 |
+| $A(T)$ | $A(T)=\sum \text{ arrivals in }(0,T]$ | +1         | Unchanged    | Constant.                                 |
 | $D(T)$ | $D(T)=\sum \text{ departures in }(0,T]$ | Unchanged  | +1           | Constant.                                 |
-| $N(T)$ | $N(T)=A(T)-D(T)$ | +1.        | -1           | Constant.                                 |
-| $H(T)$ | $H(T)=\int_0^T N(t)\,dt$ | Unchanged  | Unchanged    | Increases linearly; with slope $N$.       |
-| $L(T)$ | $L(T)=H(T)/T$ | Unchanged  | Unchanged    | Seeks $N$ rises if $N>L,$ falls if $N<L$. |
+| $N(T)$ | $N(T)=A(T)-D(T)$ | +1         | −1           | Constant.                                 |
+| $H(T)$ | $H(T)=\int_0^T N(t)\,dt$ | Unchanged  | Unchanged    | Increases linearly, with slope $N$.       |
+| $L(T)$ | $L(T)=H(T)/T$ | Unchanged  | Unchanged    | Seeks $N$: rises if $N>L$, falls if $N<L$. |
 
+We can think of this chain as encoding memory about process behavior across different timescales. Events are instantaneous and discrete and carry no memory. Cumulative counts remember how many events have occurred, but not what happened between them. From an observers perspective, cumulative arrival and departure counts evolve independently: the arrival departure model has no intrinsic way to connect process state across the two processes.   _Presence_ is the quantity that models the interaction between the two. Instantaneous presence models the instantaneous imbalance between arrival and departure counts as a process state that evolves over time. At this point we have the basic machinery we need to talk about state transitions of the arrival-departure process as a whole.
+
+In the underlying arrival departure model, the time between events determines the _how long_ the process remains in a state. At each event, arrival or departure, the process changes state and in between events, it stays in the same state. Cumulative presence encodes time-weighted presence in a given state - this is what the integral in $H(T)$ does. If we observe an arrival-departure process for a finite amount of time, the value of $H(T)$ as $T$ evolves can be interpreted as a continuous state variable for the process, one that encodes the entire history of the process as observed so far. We can think of this as the global state of the process at any moment in time.
+
+The rules by which each of these processes evolve are completely determined by the dynamics of the underlying arrival-departure process, and these in turn are specified by the event type and time between events in the observed sample paths. So we now have a clean causal chain that explains precisely how the global state of the process evolves from its instantaneous states. As we will see shortly, $H(T)$ and it's relationship to $N(t)$ via integration,  encodes everything we need to reason about flow in the arrival-departure process. In a very real sense, these are the fundamental flow metrics on which all our existing flow metrics depend upon. Everything we normally think of and measure as flow metrics: throughput, process time, occupancy metrics, costs etc all can be derived deterministically given $H(T)$ and the chain of processes that lead to it.
+
+You'll notice we have conspicuously avoided including $L(T)$ in this chain, even though we have included it in the dynamic model and provided rules for its evolution. This is intentional. $L(T)$ plays a different role in the model compared to its inputs. We can think of the chain of processes that lead to $L(T)$ as unnormalized metrics that are measured and monitored on a real timescale.
+
+$L(T)$ and the remaining metrics we will show are normalized by the length observation window, giving us a basis to reason about relative changes in the observed behavior over time. $L(T)$ in particular, is a half-open moving average of instantaneous presence: the left endpoin is fixed and the right endpoint varies continuously. This allows us to distinguish between the significance of transient presence (process states held for short periods of time) and stable presence (states that persist or the process returns to repeatedly over its history). It also lets us identify stable states, and detect convergence and divergence of the instantaneous presence from these stable states. As we derive in the metrics reference, the relationship between $N(t)$ and $L(T) is precisely the relationship that measures the sensitivity of a moving average with the underlying value it is tracking. This is the entire basis of why $L(T)$ behaves as it does.
+
+So why did we include this in the dynamics model? Its because this behavior of the moving average introduces time averaging as a distnct new causal mechanism that drives the behavior of the remaining flow metrics, which are also time nomalized metrics in every sense. These relationships are _constrained_ by the finite version of Little's Law, which we call the Presence Invariant for reasons that will become clear shortly. Throughput and process time (in its various forms) are essentially deterministic accounting identities
+Given L(T) as derived above, the invariant constrains how throughput and process time must adjust in order to conserve the total value of cumulative presence. We call this the principle the conservation of cumulative presence. Arrival rates, throughputs and process times can be viewed as ways to factor a give cumulative presence value given $L(T)$, The Presence Invariant is the constraint that governs admissible factorizations such that the cumulative presence is conserved. The invariant has a very clear geometric interpretation that makes these ideas crystal clear.
+
+So to recap, $L(T)$ is the bridge between flow dynamics and flow geometry. The numerator of $L(T)$ is driven by arrival-departure events. The denominator brings in the effects of time normalization. These are the causal drivers of the dynamics of all the remaining metrics we will derive. The dynamics of those metrics are simply a result of the dynamics of $L(T)$ intersecting with the Presence Invariant, which in turn encodes the principle of conservation of presence.
 
 
 
