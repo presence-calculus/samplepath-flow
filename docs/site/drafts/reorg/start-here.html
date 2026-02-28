@@ -591,6 +591,9 @@ Kumar</em></a></p></p>
             <li><a href="#processes-and-indexes"
             id="toc-processes-and-indexes">3.2 Processes and
             Indexes</a></li>
+            <li><a href="#flow-dynamics-and-flow-geometry"
+            id="toc-flow-dynamics-and-flow-geometry">3.3 Flow Dynamics
+            and Flow Geometry</a></li>
             </ul></li>
             <li><a href="#references" id="toc-references">4
             References</a></li>
@@ -1090,9 +1093,9 @@ Kumar</em></a></p></p>
           <p>The remainder of this document, and the supporting material
           on this site, develops the details.</p>
           <h1 id="sample-path-analysis">3 Sample Path Analysis</h1>
-          <p>We now turn to the substance of sample path analysis. There
-          are many new concepts to absorb and integrate, even in a model
-          as simple as the arrival-departure process.</p>
+          <p>Before we turn to the substance of sample path analysis,
+          there are many new concepts to absorb and integrate, even in a
+          model as simple as the arrival-departure process.</p>
           <p>This chapter provides a high-level roadmap of the key ideas
           and arguments we develop in the remaining chapters, without
           defining each one in detail. Think of it as a guide to where
@@ -1251,9 +1254,184 @@ Kumar</em></a></p></p>
           of a process as a function over sample paths, and its dynamics
           play important roles in our ability to reason about flow using
           sample path flow metrics.</p>
-          <p>The next section formalizes the shift in flow analysis from
-          statistical inference over distributions to the study of
-          deterministic dynamics along realized sample paths.</p>
+          <p>Unless otherwise stated, event-indexed processes are the
+          default throughout. Calendar-indexed views will be introduced
+          later, when we turn to reporting and aggregation over
+          <em>event-indexed metrics</em>. The next section formalizes
+          the shift from statistical inference over distributions to the
+          study of deterministic dynamics along realized sample
+          paths.</p>
+          <h2 id="flow-dynamics-and-flow-geometry">3.3 Flow Dynamics and
+          Flow Geometry</h2>
+          <p>A dynamic model describes how a flow process evolves over
+          time. It specifies the causal mechanisms: how arrivals,
+          departures, and other exogenous inputs change process state,
+          and how those changes update derived quantities along the
+          sample path.</p>
+          <p>By contrast, process <em>geometry</em> describes the
+          structural constraints on that evolution. Geometry does not
+          tell us what will happen next or why; it tells us what
+          <em>must</em> be true, regardless of how the process is
+          driven. It encodes conservation laws, invariants, and
+          deterministic relationships that bind the derived processes
+          together.</p>
+          <p>When we ask why a process is behaving a certain way, we
+          need both perspectives. The dynamic model explains how
+          particular inputs produce specific state transitions and
+          feedback effects. The geometry explains how those transitions
+          must propagate to maintain internal consistency across the
+          state of the process and its derived quantities.</p>
+          <p>Dynamics governs causal chains and loops. Geometry governs
+          conservation and constraint. Together they determine the
+          admissible trajectories of the process on its sample path.</p>
+          <p>In the case of arrival–departure processes, we develop the
+          dynamic model by extending the cumulative arrival and
+          departure counts into a richer representation of process
+          state. The finite form of Little’s Law — expressed as the
+          <em>Presence Invariant</em> — provides the geometric
+          structure. It defines the global constraint that binds counts,
+          rates, and derived quantities into the relationships we need
+          to reason about flow.</p>
+          <p>Taken together, these give us a fully deterministic
+          measurement substrate for reasoning about flow. Conditioned on
+          a realized sample path, we can answer unambiguously: how did
+          the process evolve to reach its current state? That, in turn,
+          is the foundation we need to reason about the consequences of
+          the process being in that state. This includes economic
+          consequences, but is not limited to them.</p>
+          <p>First, lets put together a birds-eye view of all the moving
+          parts without too many technical details so that we can see
+          the overall arc of how these concepts all fit together. The
+          metrics reference document goes into all this in much greater
+          detail.</p>
+          <h3 id="flow-dynamics">Flow Dynamics</h3>
+          <p>We’ve already seen the core concepts involved in modeling
+          metrics as dynamic processes in the cumulative arrival count
+          <span class="math inline">\(A(T)\)</span> metric. We extend
+          this idea to cumulative departure counts <span
+          class="math inline">\(D(T)\)</span> and then derive a number
+          of processes from there each of which captures a higher order
+          notion of the “state” of the arrival departure process.</p>
+          <p>The chain of processes that model both the short run and
+          long run dynamics of an arrival-departure process is shown in
+          Figure 7 below. <a href="#fn9" class="footnote-ref"
+          id="fnref9" role="doc-noteref"><sup>9</sup></a></p>
+          <figure id="fig:flow-dynamics">
+          <img src="../../assets/flow-dynamics.png"
+          alt="Figure 7: The Dynamics Model" />
+          <figcaption aria-hidden="true">Figure 7: The Dynamics
+          Model</figcaption>
+          </figure>
+          <p>In Figure 7 each oval represents a flow metric that models
+          a specific aspect of the observed dynamics of the underlying
+          arrival-departure process. Each metric depends on one or more
+          previous metrics and time plays a crucial role all through.
+          Changes in every metric are traceable back to the events on
+          the sample path.</p>
+          <p>Lets go through the individual metrics briefly in order,
+          starting with cumulative arrival count and cumulative
+          departure count - the ones that are directly calculated from
+          the sample path.</p>
+          <ul>
+          <li><p><strong>Cumulative Arrival Count - <span
+          class="math inline">\(A(T)\)</span></strong>: We’ve already
+          seen this one, it counts the number of arrivals observed in a
+          time interval <span class="math inline">\(T\)</span>.</p>
+          <p><em>Dynamics</em>: <span
+          class="math inline">\(A(T)\)</span> increases by 1 with every
+          arrival and remains unchanged on departure events, and in
+          between events.</p></li>
+          <li><p><strong>Cumulative Departure Count - <span
+          class="math inline">\(D(T)\)</span> </strong>: The departure
+          process counterpart.</p>
+          <p><em>Dynamics</em>: It increases by 1 with every departure
+          and remains unchanged otherwise.</p></li>
+          <li><p><strong>Instantaneous Presence - <span
+          class="math inline">\(N(t) = A(T) - D(T)\)</span></strong>:
+          This metric measures <em>imbalance</em> between cumulative
+          arrival and departure counts at an instant. We call this the
+          instantaneous presence <a href="#fn10" class="footnote-ref"
+          id="fnref10" role="doc-noteref"><sup>10</sup></a>.</p>
+          <p>Since <span class="math inline">\(A(T)\)</span> and <span
+          class="math inline">\(D(T)\)</span> represent states of the
+          arrival-departure process, <span
+          class="math inline">\(N(T)\)</span> also encodes a process
+          state - a higher-order state representing the imbalance
+          between the two other states.Think of <span
+          class="math inline">\(N(t)\)</span> as instantaneous WIP as
+          you connect it to the familiar flow metrics <a href="#fn11"
+          class="footnote-ref" id="fnref11"
+          role="doc-noteref"><sup>11</sup></a>.</p>
+          <p><em>Dynamics</em>: The value of <span
+          class="math inline">\(N(t)\)</span> increases by 1 with every
+          arrival, decreases by 1 with every departure, and remains
+          constant in between.</p></li>
+          </ul>
+          <ul>
+          <li><p><span class="math inline">\(H(T)\)</span>.</p></li>
+          <li></li>
+          </ul>
+          <table>
+          <colgroup>
+          <col style="width: 4%" />
+          <col style="width: 4%" />
+          <col style="width: 16%" />
+          <col style="width: 18%" />
+          <col style="width: 57%" />
+          </colgroup>
+          <thead>
+          <tr>
+          <th>Metric</th>
+          <th>Derivation Formula</th>
+          <th>On arrival</th>
+          <th>On departure</th>
+          <th>Between events</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+          <td><span class="math inline">\(A(T)\)</span></td>
+          <td><span class="math inline">\(A(T)=\sum \text{ arrivals in
+          }(0,T]\)</span></td>
+          <td>+1.</td>
+          <td>Unchanged.</td>
+          <td>Constant.</td>
+          </tr>
+          <tr>
+          <td><span class="math inline">\(D(T)\)</span></td>
+          <td><span class="math inline">\(D(T)=\sum \text{ departures in
+          }(0,T]\)</span></td>
+          <td>Unchanged</td>
+          <td>+1</td>
+          <td>Constant.</td>
+          </tr>
+          <tr>
+          <td><span class="math inline">\(N(T)\)</span></td>
+          <td><span class="math inline">\(N(T)=A(T)-D(T)\)</span></td>
+          <td>+1.</td>
+          <td>-1</td>
+          <td>Constant.</td>
+          </tr>
+          <tr>
+          <td><span class="math inline">\(H(T)\)</span></td>
+          <td><span class="math inline">\(H(T)=\int_0^T
+          N(t)\,dt\)</span></td>
+          <td>Unchanged</td>
+          <td>Unchanged</td>
+          <td>Increases linearly; with slope <span
+          class="math inline">\(N\)</span>.</td>
+          </tr>
+          <tr>
+          <td><span class="math inline">\(L(T)\)</span></td>
+          <td><span class="math inline">\(L(T)=H(T)/T\)</span></td>
+          <td>Unchanged</td>
+          <td>Unchanged</td>
+          <td>Seeks <span class="math inline">\(N\)</span> rises if
+          <span class="math inline">\(N&gt;L,\)</span> falls if <span
+          class="math inline">\(N&lt;L\)</span>.</td>
+          </tr>
+          </tbody>
+          </table>
           <h1 class="unnumbered" id="references">4 References</h1>
           <div id="refs" class="references csl-bib-body"
           data-entry-spacing="0" role="list">
@@ -1359,6 +1537,37 @@ Kumar</em></a></p></p>
           event-indexed view can, unambiguously. However, if we derive
           processes over these sampled values, then sampling errors do
           compound meaningfully.<a href="#fnref8" class="footnote-back"
+          role="doc-backlink">↩︎</a></p></li>
+          <li id="fn9"><p>The formal way to describe such models is as a
+          system of difference or differential equations, and this is
+          possible here as well. But we are more interested in
+          explaining the underlying concepts intuitively, so we will opt
+          for plain english here. The metrics reference has a more
+          technical treatments with precise mathematical definitions of
+          the concepts involved.<a href="#fnref9" class="footnote-back"
+          role="doc-backlink">↩︎</a></p></li>
+          <li id="fn10"><p>In general, presence is a quantity that
+          represents the flow of some measurable quantity and here we
+          are measuring its instantaneous value. The presence calculus
+          allows us to generalize this simple notion to much more
+          general mathematical settings. The arrival-departure count
+          imbalance is one of the simplest notions of presence we can
+          establish for an arrival-departure process. See <a
+          href="https://docs.pcalc.org/articles/intro-to-presence-calculus/">The
+          Presence Calculus, A Gentle Introduction</a>for a more general
+          definitions of Presence and many more examples.<a
+          href="#fnref10" class="footnote-back"
+          role="doc-backlink">↩︎</a></p></li>
+          <li id="fn11"><p>The reason we dont define it as a such, is
+          that WIP is a specific <em>interpretation</em> that applies to
+          specific domains. A more general concept heremight be
+          occupancy, but even this requires specific assumptions that
+          are not necessary to reason about flow, so we will stick with
+          the least restrictive definition of <span
+          class="math inline">\(N(t)\)</span> as imbalance. Further both
+          WIP and occupancy are a type of presence, but not all presence
+          is of this type. That is the key thing to remember.<a
+          href="#fnref11" class="footnote-back"
           role="doc-backlink">↩︎</a></p></li>
           </ol>
           </section>

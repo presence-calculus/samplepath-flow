@@ -202,7 +202,7 @@ The remainder of this document, and the supporting material on this site, develo
 
 # Sample Path Analysis
 
-We now turn to the substance of sample path analysis. There are many new concepts to absorb and integrate, even in a model as simple as the arrival-departure process.
+Before we turn to the substance of sample path analysis, there are many new concepts to absorb and integrate, even in a model as simple as the arrival-departure process.
 
 This chapter provides a high-level roadmap of the key ideas and arguments we develop in the remaining chapters, without defining each one in detail. Think of it as a guide to where each concept fits in the overall architecture of flow.
 
@@ -255,8 +255,71 @@ El-Taha & Stidham [@eltaha1999] use the term _processes with imbedded point proc
 
 Viewed this way, each metric has its own unique dynamics that _interact_ when metrics _are composed as mathematical functions_. These interactions can also be derived deterministically. So both the mathematical definition of a process as a function over sample paths, and its dynamics play important roles in our ability to reason about flow using sample path flow metrics.
 
-The next section formalizes the shift in flow analysis from statistical inference over distributions to the study of deterministic dynamics along realized sample paths.
+Unless otherwise stated, event-indexed processes are the default throughout. Calendar-indexed views will be introduced later, when we turn to reporting and aggregation over _event-indexed metrics_. The next section formalizes the shift from statistical inference over distributions to the study of deterministic dynamics along realized sample paths.
 
+
+## Flow Dynamics and Flow Geometry
+
+A dynamic model describes how a flow process evolves over time. It specifies the causal mechanisms: how arrivals, departures, and other exogenous inputs change process state, and how those changes update derived quantities along the sample path.
+
+By contrast, process *geometry* describes the structural constraints on that evolution. Geometry does not tell us what will happen next or why; it tells us what *must* be true, regardless of how the process is driven. It encodes conservation laws, invariants, and deterministic relationships that bind the derived processes together.
+
+When we ask why a process is behaving a certain way, we need both perspectives. The dynamic model explains how particular inputs produce specific state transitions and feedback effects. The geometry explains how those transitions must propagate to maintain internal consistency across the state of the process and its derived quantities.
+
+Dynamics governs causal chains and loops. Geometry governs conservation and constraint. Together they determine the admissible trajectories of the process on its sample path.
+
+In the case of arrival–departure processes, we develop the dynamic model by extending the cumulative arrival and departure counts into a richer representation of process state. The finite form of Little’s Law — expressed as the *Presence Invariant* — provides the geometric structure. It defines the global constraint that binds counts, rates, and derived quantities into the relationships we need to reason about flow.
+
+Taken together, these give us a fully deterministic measurement substrate for reasoning about flow. Conditioned on a realized sample path, we can answer unambiguously: how did the process evolve to reach its current state? That, in turn, is the foundation we need to reason about the consequences of the process being in that state. This includes economic consequences, but is not limited to them.
+
+First, lets put together a birds-eye view of all the moving parts without too many technical details so that we can see the overall arc of how these concepts all fit together. The metrics reference  document goes into all this in much greater detail.
+
+### Flow Dynamics
+ We've already seen the core concepts involved in modeling metrics as dynamic processes in the cumulative arrival count $A(T)$ metric.  We extend this idea to cumulative departure counts $D(T)$ and then derive a number of processes from there each of which captures a higher order notion of the "state" of the arrival departure process.
+
+The chain of processes that model both the short run and long run dynamics of an arrival-departure process is shown in [@fig:flow-dynamics] below. [^-differential-equations]
+
+[^-differential-equations]: The formal way to describe such models is as a system of difference or differential equations, and this is possible here as well. But we are more interested in explaining the underlying concepts intuitively, so we will opt for plain english here. The metrics reference has a more technical treatments with precise  mathematical definitions of the concepts involved.
+
+![The Dynamics Model]($document-root/assets/flow-dynamics.png){#fig:flow-dynamics}
+
+In [@fig:flow-dynamics] each  oval represents a flow metric that models a specific aspect of the observed dynamics of the underlying arrival-departure process. Each metric depends on one or more previous metrics and time plays a crucial role all through. Changes in every metric are traceable back to the events on the sample path.
+
+Lets go through the individual metrics briefly in order, starting with cumulative arrival count and cumulative departure count - the ones that are directly calculated from the sample path.
+
+- **Cumulative Arrival Count - $A(T)$**: We've already seen this one, it counts the number of arrivals observed in a time interval $T$.
+
+  *Dynamics*: $A(T)$ increases by 1 with every arrival and remains unchanged on departure events, and in between events.
+
+- **Cumulative Departure Count - $D(T)$ **: The departure process counterpart.
+
+    *Dynamics*: It increases by 1 with every departure and remains unchanged otherwise.
+
+- **Instantaneous Presence - $N(t) = A(T) - D(T)$**: This metric measures _imbalance_ between cumulative arrival and departure counts at an instant. We call this the instantaneous presence [^-presence].
+
+    Since $A(T)$ and $D(T)$ represent states of the arrival-departure process, $N(T)$ also encodes a process state - a higher-order state representing the imbalance between the two other states.Think of $N(t)$ as instantaneous WIP as you connect it to the familiar flow metrics [^-wip].
+
+     *Dynamics*: The value of $N(t)$ increases by 1 with every arrival, decreases by 1 with every departure, and remains constant in between.
+
+[^-presence]:  In general, presence is a quantity that represents the flow of some measurable quantity and here we are measuring its instantaneous value.  The presence calculus allows us to generalize this simple notion to much more general mathematical settings. The arrival-departure count imbalance is one of the simplest notions of presence we can establish for an arrival-departure process.
+See [The Presence Calculus, A Gentle Introduction](https://docs.pcalc.org/articles/intro-to-presence-calculus/)for a more general definitions of Presence and many more examples.
+[^-wip]: The reason  we dont define it as a such, is that WIP is a specific *interpretation* that applies to specific domains. A more general concept heremight be occupancy, but even this requires specific assumptions that are not necessary to reason about flow, so we will stick with the least restrictive definition of $N(t)$ as imbalance. Further both WIP and occupancy are a type of presence, but not all presence is of this type. That is the key thing to remember.
+
+- $H(T)$.
+
+-
+
+
+
+
+
+| Metric | Derivation Formula | On arrival | On departure | Between events                            |
+|---|---|------------|--------------|-------------------------------------------|
+| $A(T)$ | $A(T)=\sum \text{ arrivals in }(0,T]$ | +1.        | Unchanged.   | Constant.                                 |
+| $D(T)$ | $D(T)=\sum \text{ departures in }(0,T]$ | Unchanged  | +1           | Constant.                                 |
+| $N(T)$ | $N(T)=A(T)-D(T)$ | +1.        | -1           | Constant.                                 |
+| $H(T)$ | $H(T)=\int_0^T N(t)\,dt$ | Unchanged  | Unchanged    | Increases linearly; with slope $N$.       |
+| $L(T)$ | $L(T)=H(T)/T$ | Unchanged  | Unchanged    | Seeks $N$ rises if $N>L,$ falls if $N<L$. |
 
 
 
