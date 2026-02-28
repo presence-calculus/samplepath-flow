@@ -5,8 +5,10 @@ repos:
     rev: v6.0.0
     hooks:
       - id: end-of-file-fixer
+        exclude: ^docs/site/
       - id: trailing-whitespace
         args: [ --markdown-linebreak-ext=md ]
+        exclude: ^docs/site/
 
   # --- isort: import sorting (Black-compatible) ---
   - repo: https://github.com/pycqa/isort

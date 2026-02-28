@@ -553,7 +553,7 @@ Processes</strong></h1>
         <p class="subtitle">A Gentle Introduction</p>
         <p class="author"><p><a href="https://polarisadvisor.com"><em>Dr. Krishna
 Kumar</em></a></p></p>
-
+        
               </header>
                   <div class="header-image">
         <img src="../../assets/who-ordered-this.png" alt="Header image"/>
@@ -561,7 +561,7 @@ Kumar</em></a></p></p>
             <div class="doc-layout has-toc">
                 <aside class="doc-toc" aria-label="Contents">
           <nav id="TOC" role="doc-toc">
-
+            
             <ul>
             <li><a href="#introduction" id="toc-introduction">1
             Introduction</a></li>
@@ -1502,74 +1502,50 @@ Kumar</em></a></p></p>
           path. So we now have a clean causal chain that explains
           precisely how the global state of the process evolves from its
           instantaneous states.</p>
-          <p>As we will see shortly, <span
-          class="math inline">\(H(T)\)</span> and its relationship to
-          <span class="math inline">\(N(t)\)</span> via integration
-          encodes everything we need to reason about flow at the level
-          of flow states in the arrival–departure process. These are the
-          fundamental flow metrics on which all our existing flow
-          metrics depend. Everything we normally think of and measure as
-          flow metrics — throughput, process time, occupancy metrics,
-          costs, etc. — can be derived deterministically from <span
-          class="math inline">\(H(T)\)</span> together with the chain of
-          processes that lead to it.</p>
-          <p>You’ll notice we have conspicuously avoided including <span
-          class="math inline">\(L(T)\)</span> in this chain, even though
-          we have included it in the dynamic model and provided rules
-          for its evolution. This is intentional. <span
+          <p><span class="math inline">\(H(T)\)</span> and the chain of
+          processes that produce it are the fundamental flow metrics on
+          which all our existing flow metrics depend. Everything we
+          normally think of and measure as flow metrics — throughput,
+          process time, occupancy metrics, costs — can be derived
+          deterministically from this chain. What constrains those
+          derivations is the subject of the next section.</p>
+          <h3 id="lt-bridging-dynamics-and-geometry"><span
+          class="math inline">\(L(T)\)</span> — Bridging Dynamics and
+          Geometry</h3>
+          <p>We have not included <span
+          class="math inline">\(L(T)\)</span> in the causal chain above,
+          even though we included it in the dynamic model and provided
+          rules for its evolution. This is intentional. <span
           class="math inline">\(L(T)\)</span> plays a different role in
-          the model compared with its inputs. We can think of the chain
-          of processes that lead to <span
-          class="math inline">\(L(T)\)</span> as unnormalized metrics
-          that are measured and monitored on a real timescale.</p>
-          <p><span class="math inline">\(L(T)\)</span> and the remaining
-          metrics we will show are normalized by the length of the
-          observation window, giving us a basis to reason about relative
-          changes in the observed behavior over time. <span
-          class="math inline">\(L(T)\)</span> in particular is a
-          half-open moving average of instantaneous presence: the left
+          the model compared with its inputs.</p>
+          <p>The chain of processes that lead to <span
+          class="math inline">\(H(T)\)</span> are unnormalized metrics,
+          measured and monitored on a real timescale. <span
+          class="math inline">\(L(T)\)</span> and the remaining metrics
+          we will derive are normalized by the length of the observation
+          window, giving us a basis to reason about relative changes in
+          the observed behavior over time.</p>
+          <p><span class="math inline">\(L(T)\)</span> in particular is
+          a half-open moving average of instantaneous presence: the left
           endpoint is fixed and the right endpoint varies continuously.
-          This allows us to distinguish between the significance of
-          transient presence (process states held for short periods of
-          time) and stable presence (states that persist or that the
-          process returns to repeatedly over its history). It also lets
-          us identify stable states, and detect convergence and
-          divergence of the instantaneous presence from these stable
-          states. As we derive in the metrics reference, the
-          relationship between <span class="math inline">\(N(t)\)</span>
-          and <span class="math inline">\(L(T)\)</span> is precisely
-          what measures the sensitivity of a moving average to the
-          underlying value it is tracking. This is the entire basis of
-          why <span class="math inline">\(L(T)\)</span> behaves as it
-          does.</p>
-          <p>Why did we include this in the dynamics model? It is
-          because this behavior of the moving average introduces time
-          averaging as a distinct causal mechanism that shapes the
-          behavior of the remaining flow metrics, which are also
-          time-normalized metrics in every sense. These relationships
-          are <em>constrained</em> by the finite version of Little’s
-          Law, which we call the Presence Invariant for reasons that
-          will become clear shortly. Arrival rates, throughputs, and
-          process times can be viewed as ways to factor a given
-          cumulative presence (the global state). Given <span
-          class="math inline">\(L(T)\)</span> as derived above, the
-          invariant constrains how throughput and process time must
-          relate in order to produce that global state. We call this the
-          principle of conservation of cumulative presence. The Presence
-          Invariant is the constraint that governs admissible
-          factorizations such that cumulative presence is conserved. The
-          invariant has a very clear geometric interpretation that makes
-          these ideas crystal clear.</p>
-          <p>So to recap, <span class="math inline">\(L(T)\)</span> is
-          the bridge between flow dynamics and flow geometry. The
-          numerator of <span class="math inline">\(L(T)\)</span> is
-          driven by arrival–departure events. The denominator brings in
-          the effects of time normalization. These are the drivers of
-          the dynamics of the remaining metrics we will derive. The
-          dynamics of those metrics are a result of the dynamics of
-          <span class="math inline">\(L(T)\)</span> intersecting with
-          the Presence Invariant, which in turn encodes the principle of
-          conservation of presence.</p>
+          This allows us to distinguish between transient presence
+          (process states held for short periods of time) and stable
+          presence (states that persist or that the process returns to
+          repeatedly over its history). Its numerator is driven by
+          arrival–departure events. Its denominator brings in the
+          effects of time normalization. Time normalization is itself a
+          causal mechanism — one that shapes the dynamics of every
+          remaining flow metric.</p>
+          <p>Those dynamics are <em>constrained</em> by the finite
+          version of Little’s Law, which we call the Presence Invariant.
+          Arrival rates, throughputs, and process times can be viewed as
+          ways to factor a given cumulative presence (the global state).
+          The invariant constrains how throughput and process time must
+          relate to <span class="math inline">\(L(T)\)</span> in order
+          to <em>produce</em> that global state. We call this the
+          principle of conservation of cumulative presence.</p>
+          <p>The Presence Invariant has a clear geometric interpretation
+          that we develop next.</p>
           <h1 class="unnumbered" id="references">4 References</h1>
           <div id="refs" class="references csl-bib-body"
           data-entry-spacing="0" role="list">
