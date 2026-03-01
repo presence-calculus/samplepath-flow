@@ -344,7 +344,57 @@ $L(T)$ in particular is a half-open moving average of instantaneous presence: th
 
 Those dynamics are _constrained_ by the finite version of Little's Law, which we call the Presence Invariant. A given value of cumulative presence can be factored into rates (arrivals, departures) and durations (process time). The invariant constrains how these rates and durations must relate to $L(T)$ in order to _produce_ that global state. We call this the principle of conservation of cumulative presence.
 
-## The Presence Invariant
+## Flow Geometry
+
+The Presence Calculus and sample path analysis give a mathematically rigorous and principled approach to reasoning about flow geometry and clearly show how flow dynamics are governed by mathematical constraints that are best understood in geometric terms.
+
+To motivate what "geometry" means in the context of flow metrics, let's take the familiar example of the Cumulative Flow Diagram. The CFD is one of the most commonly used visual tools to reason about flow, and the intuitions we gain from the visualization are almost entirely geometric. We make inferences about flow by looking at the distances between lines on a diagram, infer stability by looking at when arrival and departure lines become parallel, look at the shapes and bulges in the CFD to recognize bottlenecks, etc.
+
+But very little of this intuition is directly backed by rigorous mathematical reasoning, and in fact many of the common "rules" for reading the visual cues on the CFD (for example in [@vacanti2015]) and guidance from flow metrics vendors today rely on assumptions and somewhat loose definitions of terms that don't always hold true for all arrival-departure processes. While a CFD is a useful tool for reasoning about stable processes, it quickly becomes unwieldy as a general-purpose tool for reasoning about flow in more general cases.
+
+Our treatment below resolves these ambiguities and gives a set of mathematically sound tools to reason about flow geometrically with a broader set of visual tools that go beyond the simple CFD. We will start, however, with the CFD and map the metrics that govern dynamics onto the CFD. This will then let us pivot to additional visual tools that help us reason about flow geometry in a general arrival-departure process.
+
+### The Cumulative Flow Diagram
+
+The standard way of drawing a cumulative flow diagram (CFD) is to plot the cumulative arrival count $A(T)$ and the cumulative departure count $D(T)$ on the same set of axes and look at geometric properties of the resulting paths in a two-dimensional space, with time on the x-axis and cumulative counts on the y-axis. The goal is to make reliable inferences about the behavior of the process from the geometry induced by the two paths in the two-dimensional space.
+
+Given our definitions of $A(T)$ and $D(T)$, the standard CFD is shown in [@fig:cfd].
+
+![The Cumulative Flow Diagram]($document-root/assets/event-indexed-cfd.png){#fig:cfd}
+
+We'll note a few points here:
+
+- The CFD is constructed using the event-indexed representation of the two paths.
+- The geometry of the paths correctly reflects the dynamics of the processes as we derived it in the last section. Each is a step function that changes only at the event timestamps, which are clearly marked in the diagram.
+- Every point on each path represents the true values of $A(T)$ and $D(T)$, and this holds both at and between the timestamps of the indexing events.
+- The vertical _distance_ between the two paths at any time $t$ gives the value of $N(t)$.
+- The shaded area between the curves over a time interval $[0,T)$ gives the value of $H(T)$.
+
+Note that the last two properties follow directly from the definitions of the metrics and the fact that the path geometry of $A(T)$ and $D(T)$ reflects the true values of these metrics. By contrast, consider the standard construction of the CFD from calendar-indexed paths which is used in every existing flow metrics tool today. This is shown in [@fig:calendar-cfd] using daily and weekly sampling for the same underlying sample path from which we constructed [@fig:cfd].
+
+![The Calendar Indexed CFD]($document-root/assets/calendar-indexed-cfd.png){#fig:calendar-cfd}
+
+Because the calendar-indexed CFD is constructed from point samples of the cumulative arrival and departure counts, the path geometry of the CFD no longer reflects the true values of the metrics _except at the sampling points_. Between sampling points, the visual representation is an interpolation of the underlying step functions rather than the true sample-path geometry. As a result, it cannot be used for exact geometric reasoning about the metrics or their relationships at intermediate times. The telling sign is that the shapes of the paths are not step functions: the slopes between sampling points reflect interpolation, not actual process dynamics.
+
+We can still use this representation to get rough visual cues about flow patterns, but unlike the event-indexed CFD it does not preserve exact geometric interpretations of quantities such as instantaneous presence (vertical distance) or cumulative presence (area) except at the indexed calendar points. Even simple conclusions like using the vertical distance between the paths as a proxy for WIP become approximations once we measure outside the sampled times.
+
+The charts we develop using sample path flow metrics with event-indexed representations do not suffer from this defect. Every one of the visualizations we develop has an exact geometric interpretation: the visual representation aligns with the actual behavior of the underlying functions, and we can read off important aspects of process dynamics from the lengths, areas, slopes, and distances of the paths in each chart.
+
+Flow geometry thus becomes more than a visualization artifact. Extending beyond the simple visual cues in the CFD, it gives us a way to turn the mathematical expressions that define the dynamics and constraints into visual tools that preserve the mathematical meaning of the metrics in their geometric interpretation.
+
+This becomes particularly important as we move beyond $N(t)$ and $H(T)$ and consider time-normalized metrics such as moving averages ($L(T)$), arrival and departure rates, and process times. Contrary to common practice, these cannot in general be read directly from the CFD geometry without imposing strong assumptions about the underlying arrival–departure process (for example, piecewise stationarity, uniform event spacing, or strict arrival/departure ordering). To represent their exact geometric relationships, we require visualizations that extend beyond a simple two-dimensional projection of the input counting processes.
+
+This is what we will show below as we introduce the remaining flow metrics. The correct way to think about their relationship to the CFD is that their admissible values are constrained by the shape of the CFD, even though they are not themselves directly readable from it.
+
+
+
+
+
+
+
+
+
+
 
 
 
