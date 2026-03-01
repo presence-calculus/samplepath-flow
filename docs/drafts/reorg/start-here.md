@@ -202,65 +202,63 @@ The remainder of this document, and the supporting material on this site, develo
 
 # Sample Path Analysis
 
-Before we turn to the substance of sample path analysis, there are many new concepts to absorb and integrate, even in a model as simple as the arrival-departure process.
-
-This chapter provides a high-level roadmap of the key ideas and arguments we develop in the remaining chapters, without defining each one in detail. Think of it as a guide to where each concept fits in the overall architecture of flow.
+In this chapter we will cover the key concepts of sample path analysis of an arrival-departure process using the Presence Calculus. There are several ideas to absorb, even in this simple case, but the overall arc of the analysis that we describe here generalizes beyond this case to the general flow process models described in [The Presence Calculus - A Gentle Introduction](https://docs.pcalc.org/articles/intro-to-presence-calculus/).
 
 ## Computing sample path flow metrics
 
-The previous chapters established that everything in our methods hinges on observing events on the sample path — in the case of flow processes, a marked point process — and analyzing the event structure as observations unfold in time.
+The previous chapters established that everything in our methods hinges on observing events on the sample path — in the case of flow processes, a marked point process — and analyzing the event structure as observations unfold along the time dimension.
 
 A good mental model for how we compute these metrics is as follows [^-mental-model]:
 
 [^-mental-model]: Even though this is not the way the underlying algorithms are necessarily implemented in the toolkit.
 
-- Starting from a fixed point in time, observe the sample path up to time $T$.
-- Compute a set of metrics that describe the state of the process up to that point in time. These are finite-window quantities that are closely related to many of the metrics we measure today, but they are not the same quantities, and the differences matter.
+- Starting from a fixed point in time, observe the sample path - the marked point process consisting of arrival and departure events - up to time $T$.
+- Compute a set of metrics that describe the _state_ of the process up to that point in time. These are finite-window quantities that are closely related to many of the metrics we measure today, but they are not the same quantities, and the differences matter.
 - Wait for the next event, record the event type, and extend the window by the elapsed time, giving an extended sample path that includes realized values of the next random element (timestamp and mark)[^-random-variables].
 - Recompute all metrics deterministically from their previous values and the incremental contribution of the new variables.
 
 [^-random-variables]: At each step we are observing the realized value of the next random element in some underlying non-deterministic process. Conditioned on the observed prefix, the structural flow quantities defined over that prefix are deterministic functionals of the prefix. This is what we mean when we say "randomness lives in the future."
 
-The fact that every flow metric in this model can be computed this way is not obvious. We have traditionally treated these metrics as statistics, averages and percentiles of distributions. Provably correct causal _attribution_ is what makes sample path analysis powerful. It lets us trace changes in flow metrics back to the _contributions of individual events on the timeline_, and this, in turn, gives us tools to shape the _event structure_ so metrics move in the direction we want. This principle is at the heart of why this technique is worth learning.
+The fact that every flow metric in this model can be computed this way is not obvious. We have traditionally treated these metrics as statistics, averages and percentiles of distributions of item level measurements. This has its uses but it does not let us reason reliably about cause and effect given a set of measurements on the process. This is what sample path analysis provides. Provably correct causal _attribution_ makes sample path analysis a fundamentally different and more powerful analysis technique. It lets us trace changes in flow metrics back to the _contributions of individual events on the timeline_, and this, in turn, gives us tools to shape the _event structure_ so metrics move in the direction we want. This principle is at the heart of why this technique is worth learning.
 
 ## Processes and Indexes
 
-In stochastic process theory, the word *process* has a specific meaning: it is a _function_ that maps an index set to a set of states. Put more plainly, a process is something that has state, and whose state varies along some dimension — most commonly time. The definition is deliberately general, and it captures most things we informally call processes.
+In stochastic process theory, the word *process* has a specific meaning: it is a _function_ that maps an _index set_ to a _set of states_. Put more plainly, a process is something that has state, and whose state varies along some dimension — most commonly time. The definition is deliberately general, and it captures most things we informally call processes.
 
-In an arrival–departure system, time is naturally one indexing dimension. But what does process state mean in this context? There are many possibilities. Let's consider one: the cumulative arrival count. At any point in time (the index) we record how many arrivals have occurred up to that moment (the state). If we observe that count at fixed reporting intervals — every minute, hour, or day — we obtain a _process_ indexed by calendar time. For the sample path in [@fig:mpp], this gives the processes in [@fig:calendar-indexed].
+In an arrival–departure system, time is a natural indexing dimension. But what does process state mean in this context? There are many possibilities. Let's consider one: the cumulative arrival count. At any point in time (the index) we record how many arrivals have occurred up to that moment (the state). If we observe that count at fixed reporting intervals — every minute, hour, or day — we obtain a _process_ indexed by calendar time. For the sample path in [@fig:mpp], this gives the processes in [@fig:calendar-indexed].
 
 ![Calendar-Indexed Cumulative Arrivals]($document-root/assets/calendar-indexed-arrivals.png){#fig:calendar-indexed}
 
-But this is not the only way to _index_ the cumulative arrival count process. We can instead treat each arrival *event* as a state transition of the arrival-departure process. The cumulative count increases by one at each arrival and remains constant between arrivals. In this view, the arrival-departure process changes state when an arrival event occurs. We can index the cumulative arrival count process by these events, and then the index is no longer an arbitrary reporting schedule; it is the sequence of events that cause the state to change. This process is shown in [@fig:event-indexed].
+But this is not the only way to _index_ the cumulative arrival count process. We can instead treat each arrival *event* as a state transition of the arrival-departure process. The cumulative count increases by one at each arrival and remains constant between arrivals. In this view, the arrival-departure process _changes state when an arrival event occurs_. We can index the cumulative arrival count process by these events, and then the index is no longer an arbitrary reporting schedule; it is the sequence of events that _cause_ that state to change. This process is shown in [@fig:event-indexed].
 
 ![Event-Indexed Cumulative Arrivals]($document-root/assets/event-indexed-arrivals.png){#fig:event-indexed}
 
-These two representations describe the states of the same underlying arrival-departure process, but they are not equivalent.
+These two representations describe the evolution of _a_ state of the same underlying arrival-departure process, but they are not equivalent.
 
-Calendar indexing _samples_ the state of the arrival-departure process at chosen time points. It records values, but not necessarily the exact transition structure that produced them. Event indexing, by contrast, is built from the transitions themselves. It records every state change and the order in which those changes occurred. It preserves the full evolution of the system at the resolution of events.
+Calendar indexing _samples_ the state at chosen time points. It records values, but not necessarily the exact transition structure that produced them. Event indexing, by contrast, is built from the state transitions themselves. It records every state change and the order in which those changes occurred. It preserves the full evolution of the state changes at the resolution of events.
 
-This is a material difference. From the event-indexed representation of cumulative arrival count, we can always produce a calendar-indexed one for any given reporting frequency. The reverse is not true. Once we observe only sampled or aggregated calendar states, the underlying transition history is no longer recoverable [^-agreement]. The information loss compounds when we derive new quantities by aggregating sampled values.
+From the event-indexed representation of cumulative arrival count, we can always produce a calendar-indexed one for any given reporting frequency. The reverse is not true. Once we observe only sampled or aggregated calendar states, the underlying transition history is no longer recoverable. The information loss compounds when we derive new quantities by aggregating sampled values. This is a material difference.
 
-[^-agreement]: Note, however, that in this example, the two representations agree on the _values_ reported at the same time indexes. The information loss is not due to sampling error, but lies in recoverability of the underlying dynamics. The calendar-indexed view cannot say anything about what happens to the process in _between_ samples. The event-indexed view can, unambiguously. However, if we derive processes over these sampled values, then sampling errors do compound meaningfully.
+Note, however, that in this example, the two representations agree on the _values_ reported at the same time indexes. The information loss is not due to sampling error, but lies in recoverability of the underlying dynamics. The calendar-indexed view cannot say anything about what happens to the process in _between_ samples. The event-indexed view can, unambiguously. In the current example, event-indexing is a measurement and modeling choice that preserves our ability to perform causal analysis on the observed behavior of the process.
 
-Calendar indexing is the default way of reporting flow metrics today. Flow metric calculations today *begin* by sampling the input for some reporting period and then performing various aggregations over the sampled values. In doing this we lose the structural connection between metric changes and the events that generated them. Metrics plotted over time become trend lines without a direct link back to the events that generate those trends. The choice of straight lines connecting the points in [@fig:calendar-indexed] is not directly defensible, nor is any other interpolation for that matter. They become reporting artifacts.
+Calendar indexing is the default way of reporting flow metrics today and this choice reduces the analytical power of the flow analysis techniques that follow. Flow metric calculations today *begin* by sampling the input for some reporting period and then performing various aggregations over the sampled values. In doing this we lose the structural connection between metric changes and the events that generated them. Metrics plotted over time become trend lines without a direct link back to the events that generate those trends. The choice of straight lines connecting the points in [@fig:calendar-indexed] is not directly defensible, nor is any other interpolation for that matter. They become reporting artifacts.
 
 By contrast, event indexing treats each flow metric _as a dynamic process in its own right_. The particular dynamics — how a metric behaves at events and between events — is part of the unique signature of that metric, and we can use it to reason about the metric's evolution over time. The metrics are _themselves_ deterministic processes _over a sample path from a non-deterministic process_ and the plots are sample paths of these processes. The key difference in [@fig:event-indexed] is that the shape of the sample path — in this case, a step chart that changes direction precisely at the event timestamps — follows from the definition of the metric. In [@fig:calendar-indexed], no such inference can be made.
-
-With event indexing, every change in a derived flow metric can be tied to the specific state transition that caused it, up to event resolution. This is important if we want to understand *why* a specific change happened. Of course, this requires that the metric itself be defined so its dynamics can be described in this way. It is somewhat obvious with cumulative arrivals, but as we will show, we can do this for each one of the sample path metrics we develop, even when it is not so obvious. In fact, it is this explicit derivation of the dynamics for standard flow metrics that is the specific contribution of The Presence Calculus to flow analysis.
 
 Specifically, the evolution of these sample paths follows predictable rules: events _cause_ the trajectory of the path to change in predictable ways and _in between events_ we can state how the path behaves deterministically. The only unpredictable element is what that next event is, and when it will change the trajectory of the path. As we will see, this is a much more tractable setup to reason about flow.
 
 El-Taha & Stidham [@eltaha1999] use the term _processes with imbedded point processes_ to describe this class of mathematical objects. We will use the friendlier term _event-indexed processes_ to describe the same class instead. Each one of our sample path flow metrics is a deterministic _event-indexed process_ over a sample path of a non-deterministic process.
 
-Viewed this way, each metric has its own unique dynamics that _interact_ when metrics _are composed as mathematical functions_. These interactions can also be derived deterministically. So both the mathematical definition of a process as a function over sample paths, and its dynamics play important roles in our ability to reason about flow using sample path flow metrics.
+Further, metrics _interact_ when metrics _are composed as mathematical functions_. The dynamics of these composite processes can also be derived deterministically from the dynamics of the input processes. So both the mathematical definition of a process as a function over sample paths, and its dynamics play important roles in our ability to reason about flow using sample path flow metrics.
 
-Unless otherwise stated, event-indexed processes are the default throughout. Calendar-indexed views will be introduced later, when we turn to reporting and aggregation over _event-indexed metrics_. The next section formalizes the shift from statistical inference over distributions to the study of deterministic dynamics along realized sample paths.
+Unless otherwise stated, event-indexed processes are the default throughout. Calendar-indexed views will be introduced later, when we turn to reporting and aggregation over _event-indexed metrics_. The next section formalizes this shift from flow analysis as statistical inference over distributions to the study of deterministic dynamics along realized sample paths.
 
 
 ## Flow Dynamics and Flow Geometry
 
-A dynamic model describes how a flow process evolves over time. It specifies the causal mechanisms: how arrivals, departures, and other exogenous inputs change process state, and how those changes update derived quantities along the sample path.
+A dynamic model describes how a flow process evolves over time. It specifies the _causal mechanisms_: how arrivals, departures, and other exogenous inputs change process state, and how those changes update derived quantities along the sample path.[^-proximate-causality]
+
+[^-proximate-causality]: The type of causal reasoning we do here should not be confused with root cause analysis. The causal links here are between measurements over a sample path and the events on the sample path. The events themselves come from arrival-departure processes that we treat as a black box. The causal model establishes a proximate causal chain that starts with the events and ends with the measurements. At this point any further analysis of cause and effect needs more information than this model is able to provide. The key point, though, is that the simple arrival-departure model can be refined and composed to build more sophisticated models of larger systems. Additional information and context can be added to aid analysis. The machinery here is a reliable building block for rigorous causal analysis of processes in larger systems. Those applications are not in the scope of what we will describe here. The focus is on precisely defining the proximate causal relationships between flow metrics and events on the sample path.
 
 By contrast, process *geometry* describes the structural constraints on that evolution. Geometry does not tell us what will happen next or why; it tells us what *must* be true, regardless of how the process is driven. It encodes conservation laws, invariants, and deterministic relationships that bind the derived processes together.
 
@@ -295,13 +293,14 @@ Let's go through the individual metrics briefly in order, starting with cumulati
 
     *Dynamics*: It increases by 1 with every departure and remains unchanged otherwise.
 
-- **Instantaneous Presence — $N(t) = A(T) - D(T)$**: This metric measures _imbalance_ between cumulative arrival and departure counts at an instant. We call this the instantaneous presence.[^-presence]
+- **Instantaneous Presence — $N(t) = A(T) - D(T)$**: This metric measures _imbalance_ between cumulative arrival and departure counts at an instant. We call this the instantaneous presence. In general, presence is a quantity that represents the instantaneous state of some measurable quantity.[^-presence]
 
-    Since $A(T)$ and $D(T)$ represent cumulative states of the arrival-departure process, $N(t)$ also encodes a process state — a higher-order state representing the imbalance between the two cumulative counts. Think of $N(t)$ as instantaneous WIP as you connect it to the familiar flow metrics.[^-wip]
+    Since $A(T)$ and $D(T)$ represent cumulative states of the arrival-departure process, $N(t)$ encodes a higher-order state representing the imbalance between the two cumulative counts. Think of $N(t)$ as instantaneous WIP as you connect it to the familiar flow metrics.[^-wip]
 
      *Dynamics*: The value of $N(t)$ increases by 1 with every arrival, decreases by 1 with every departure, and remains constant in between.
 
-[^-presence]: In general, presence is a quantity that represents the flow of some measurable quantity, and here we are measuring its instantaneous value. The Presence Calculus allows us to generalize this simple notion to much more general mathematical settings. The arrival-departure count imbalance is one of the simplest notions of presence we can establish for an arrival-departure process. See [The Presence Calculus, A Gentle Introduction](https://docs.pcalc.org/articles/intro-to-presence-calculus/) for more general definitions of Presence and many more examples.
+[^-presence]: Here we have chosen a particular notion of state, arrival-departure imbalance. It is one of the simplest notions of presence we can establish for an arrival-departure process. The Presence Calculus allows us to generalize this to much more general mathematical definitions of state. See [The Presence Calculus, A Gentle Introduction](https://docs.pcalc.org/articles/intro-to-presence-calculus/) for more general definitions and many more examples.
+
 [^-wip]: The reason we don't define it as such is that WIP is a specific *interpretation* that applies to specific domains. A more general concept here might be occupancy, but even this requires specific assumptions that are not necessary to reason about flow, so we will stick with the least restrictive definition of $N(t)$ as imbalance. Further, both WIP and occupancy are a type of presence, but not all presence is of this type. That is the key thing to remember.
 
 - **Cumulative Presence Mass — $H(T)=\int_0^T N(t)\,dt$**: This is accumulated presence over the interval $(0,T]$ (the area under $N(t)$, equivalently the area between $A(T)$ and $D(T)$). It is the key integrated quantity that carries process history in element-time units.
@@ -322,13 +321,18 @@ In the table below, we summarize the dynamics model.
 | $H(T)$ | $H(T)=\int_0^T N(t)\,dt$ | Unchanged  | Unchanged    | Increases linearly, with slope $N$.       |
 | $L(T)$ | $L(T)=H(T)/T$ | Unchanged  | Unchanged    | Seeks $N$: rises if $N>L$, falls if $N<L$. |
 
-We can think of this chain as encoding memory about process behavior across different timescales. Events are instantaneous and discrete and, taken individually, carry no memory. Cumulative counts remember how many events have occurred, but not what happened between them. From an observer’s perspective, cumulative arrival and departure counts evolve as distinct processes; the basic arrival–departure representation does not, by itself, encode the interaction between them. _Presence_ is the quantity that explicitly models that interaction. Instantaneous presence models the instantaneous imbalance between arrival and departure counts as a process state that evolves over time. At this point we have the basic machinery we need to talk about state transitions of the arrival–departure process as a whole. Cumulative presence $H(T)$ gives an integrated view of state across the observed history. Here's how.
+### Interpreting the model
 
-In the underlying arrival–departure model, the time between events determines _how long_ the process remains in a state. At each event, arrival or departure, the process changes state, and in between events, it stays in the same state. Cumulative presence encodes _time-weighted presence_ in a given state — this is what the integral in $H(T)$ does. If we observe an arrival–departure process for a finite amount of time, the value of $H(T)$ as $T$ evolves can be interpreted as a continuous state variable for the process, one that encodes the accumulated state transition history of the process as observed so far. We can think of this as the global flow state of the process at any moment in time.
+We can think of this chain as encoding memory about process behavior across different timescales.
 
-The rules by which each of these processes evolve are completely determined by the dynamics of the underlying arrival–departure process, and these in turn are specified by the event type and time between events in the observed sample path. So we now have a clean causal chain that explains precisely how the global state of the process evolves from its instantaneous states.
+- _Events_ are instantaneous and discrete and, taken individually, carry no memory.
+- _Cumulative counts_ remember how many events have occurred, but not what happened between them. From an observer’s perspective, cumulative arrival and departure counts evolve as distinct processes; the basic arrival–departure representation does not, by itself, encode the interaction between them.
+- _Presence_ is the quantity that explicitly models that interaction. Instantaneous presence models the instantaneous imbalance between arrival and departure counts as a process state that evolves over time. At this point we have the basic machinery we need to talk about state transitions of the arrival–departure process as a whole.
+- _Cumulative presence_ encodes _time-weighted presence_ in a given state — this is what the integral in $H(T)$ does. In the underlying arrival–departure model, the time between events determines _how long_ the process remains in a state. At each event, arrival or departure, the process changes state, and in between events, it stays in the same state. We can think of this as the global flow state of the process that encodes state along two dimensions — the imbalance in cumulative counts and how long that imbalance persists.
 
 $H(T)$ and the chain of processes that produce it are the fundamental flow metrics on which all our existing flow metrics depend. Everything we normally think of and measure as flow metrics — throughput, process time, occupancy metrics, costs — can be derived deterministically from this chain. What constrains those derivations is the subject of the next section.
+
+The rules by which each of these processes evolve are completely determined by the dynamics of the underlying arrival–departure process, and these in turn are specified by the event type and time between events in the observed sample path. So we now have a clean causal chain that explains precisely how the global state of the process evolves from its instantaneous states.
 
 ### $L(T)$ — Bridging Dynamics and Geometry
 
@@ -338,9 +342,11 @@ The chain of processes that lead to $H(T)$ are unnormalized metrics, measured an
 
 $L(T)$ in particular is a half-open moving average of instantaneous presence: the left endpoint is fixed and the right endpoint varies continuously. This allows us to distinguish between transient presence (process states held for short periods of time) and stable presence (states that persist or that the process returns to repeatedly over its history). Its numerator is driven by arrival–departure events. Its denominator brings in the effects of time normalization. Time normalization is itself a causal mechanism — one that shapes the dynamics of every remaining flow metric.
 
-Those dynamics are _constrained_ by the finite version of Little's Law, which we call the Presence Invariant. Arrival rates, throughputs, and process times can be viewed as ways to factor a given cumulative presence (the global state). The invariant constrains how throughput and process time must relate to $L(T)$ in order to _produce_ that global state. We call this the principle of conservation of cumulative presence.
+Those dynamics are _constrained_ by the finite version of Little's Law, which we call the Presence Invariant. A given value of cumulative presence can be factored into rates (arrivals, departures) and durations (process time). The invariant constrains how these rates and durations must relate to $L(T)$ in order to _produce_ that global state. We call this the principle of conservation of cumulative presence.
 
-The Presence Invariant has a clear geometric interpretation that we develop next.
+## The Presence Invariant
+
+
 
 
 
