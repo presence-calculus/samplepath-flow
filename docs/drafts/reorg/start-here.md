@@ -249,30 +249,46 @@ Specifically, the evolution of these sample paths follows predictable rules: eve
 
 El-Taha & Stidham [@eltaha1999] use the term _processes with imbedded point processes_ to describe this class of mathematical objects. We will use the friendlier term _event-indexed processes_ to describe the same class instead. Each one of our sample path flow metrics is a deterministic _event-indexed process_ over a sample path of a non-deterministic process.
 
-Further, metrics _interact_ when metrics _are composed as mathematical functions_. The dynamics of these composite processes can also be derived deterministically from the dynamics of the input processes. So both the mathematical definition of a process as a function over sample paths, and its dynamics play important roles in our ability to reason about flow using sample path flow metrics.
+Further, metrics _interact_ when they _are composed as mathematical functions_. The dynamics of these composite processes can also be derived deterministically from the dynamics of the input processes. So both the mathematical definition of a process as a function over sample paths, and its dynamics play important roles in our ability to reason about flow using sample path flow metrics.
 
 Unless otherwise stated, event-indexed processes are the default throughout. Calendar-indexed views will be introduced later, when we turn to reporting and aggregation over _event-indexed metrics_. The next section formalizes this shift from flow analysis as statistical inference over distributions to the study of deterministic dynamics along realized sample paths.
 
 
 ## Flow Dynamics and Flow Geometry
 
-A dynamic model describes how a flow process evolves over time. It specifies the _causal mechanisms_: how arrivals, departures, and other exogenous inputs change process state, and how those changes update derived quantities along the sample path.[^-proximate-causality]
+In the previous section, we defined a process as a mapping from an index set to a set of states. _Dynamics_ specify the rules that govern _how_ the states change: what the state variables are, what events or inputs affect them, and the update laws that map current state to the next state. We can analyze processes without knowing the dynamics, but precise reasoning about cause and effect becomes much simpler once we have one in place.
 
-[^-proximate-causality]: The type of causal reasoning we do here should not be confused with root cause analysis. The causal links here are between measurements over a sample path and the events on the sample path. The events themselves come from arrival-departure processes that we treat as a black box. The causal model establishes a proximate causal chain that starts with the events and ends with the measurements. At this point any further analysis of cause and effect needs more information than this model is able to provide. The key point, though, is that the simple arrival-departure model can be refined and composed to build more sophisticated models of larger systems. Additional information and context can be added to aid analysis. The machinery here is a reliable building block for rigorous causal analysis of processes in larger systems. Those applications are not in the scope of what we will describe here. The focus is on precisely defining the proximate causal relationships between flow metrics and events on the sample path.
+The machinery of sample path analysis and event-indexed processes allows us to specify the dynamics of the arrival–departure process: how arrivals, departures, and other exogenous inputs change process state, and how those changes update derived processes along the sample path. This allows us to say unambiguously: given a sample path and the current state, what _caused_ the process to reach this state[^-proximate-causality].
 
-By contrast, process *geometry* describes the structural constraints on that evolution. Geometry does not tell us what will happen next or why; it tells us what *must* be true, regardless of how the process is driven. It encodes conservation laws, invariants, and deterministic relationships that bind the derived processes together.
+[^-proximate-causality]: The type of causal reasoning we do here should not be confused with root cause analysis. The causal links here are between measurements over a sample path and the events on the sample path. The events themselves come from arrival–departure processes that we treat as a black box. The causal model establishes a proximate causal chain that starts with the events and ends with the measurements. We cannot reason about cause-and-effect relationships beyond this without additional information. The key point, though, is that the simple arrival–departure model can be refined and composed to build more sophisticated models of larger systems. Additional information and context can be added to aid analysis. The machinery here is a reliable building block for rigorous causal analysis of processes in larger systems. Those applications are not in the scope of what we will describe here. The focus is on precisely defining the proximate causal relationships between flow metrics and events on the sample path.
 
-When we ask why a process is behaving a certain way, we need both perspectives. The dynamic model explains how particular inputs produce specific state transitions and feedback effects. The geometry explains how those transitions must propagate to maintain internal consistency across the state of the process and its derived quantities.
+Dynamics can often be interpreted geometrically: the update rules define the admissible directions of motion of the sample path in state space. When projected into that space, the process can only move along trajectories consistent with those rules. Visualizing the process geometry gives insights into process behavior that might not be apparent even when we know the rules of process evolution.
 
-Dynamics governs causal chains and loops. Geometry governs conservation and constraint. Together they determine the admissible trajectories of the process on its sample path.
+But there is a deeper sense in which process geometry matters: the observed behavior of sample path trajectories is often constrained by structural rules and invariants, and these too have clear geometric interpretations. In the case of arrival–departure processes, we will see that Little’s Law follows from such a structural invariant that constrains how derived processes such as arrival rates, throughput, and lead time evolve.
 
-In the case of arrival–departure processes, we develop the dynamic model by extending the cumulative arrival and departure counts into a richer representation of process state. The finite form of Little’s Law — expressed as the *Presence Invariant* — provides the geometric structure. It defines the global constraint that binds counts, rates, and derived quantities into the relationships we need to reason about flow.
+Geometry does not tell us what will happen next or why; it tells us what *must* be true, regardless of the causal mechanism. It encodes conservation laws, invariants, and deterministic relationships that bind sample paths and derived processes together. When we ask why a process is behaving a certain way, we need both perspectives. Dynamics governs causal chains and loops. Geometry provides conservation laws and constraints. Together they determine the admissible trajectories of the process on its sample path.
 
-Taken together, these give us a fully deterministic measurement substrate for reasoning about flow. Conditioned on a realized sample path, we can answer unambiguously: how did the process evolve to reach its current state? That, in turn, is the foundation we need to reason about the consequences of the process being in that state. This includes economic consequences, but is not limited to them.
+We will develop the relationship between flow dynamics and geometry in arrival–departure processes carefully in the next two chapters. The results here are subtle and by no means obvious. Taken together, these give us a fully deterministic measurement substrate for reasoning about flow. Conditioned on a realized sample path, we can answer unambiguously: how did the process evolve to reach its current state? That, in turn, is the foundation we need to reason about the consequences, including economic ones, of the process being in that state.
 
-We begin with a bird's-eye view of the moving parts, without full technical detail, so that the overall arc is visible before we examine each piece. The metrics reference document develops each concept in full.
+## Presence
 
-### Flow Dynamics
+The final concept we will introduce is Presence. In the arrival–departure process, events are primary. They are assumed as given. But when we speak of flow, what is it that we are reasoning about? The Presence Calculus takes a position on this question. We call the underlying quantity *presence*.
+
+For a quantity to qualify as a presence it must satisfy certain technical conditions, detailed further in [kkumar2025]. Intuitively, it must be measurable at any point in time, and its accumulation over time must also be measurable. It is this accumulated quantity that we aim to manage when we speak of managing "flow." We treat that accumulation as operationally meaningful [^-flow].
+
+[^-flow]: This is a philosophical stance specific to the Presence Calculus. We _define_ "flow management" as the management of cumulative presence at its core. All the machinery we derive builds upon this premise.
+
+
+Even in the simple case of arrival–departure processes there are many possible ways to define presence. For the minimal model we have so far — where we only observe event timestamps and markers indicating arrival or departure — the simplest definition is the _imbalance_ between cumulative arrival counts and departure counts. In the next section we will show that arrival–departure imbalance satisfies the technical conditions.
+
+More importantly, it aligns with our intuitive understanding of flow. In software delivery contexts, imbalances between arrivals and departures are what we seek to minimize in order to improve flow. In customer retention processes, by contrast, we may seek to _maximize_ this imbalance — ideally maximizing the presence of customers within the process. In this way, presence forms a bridge between operational behavior and economic outcomes.
+
+Imbalance is only one definition of presence. But even in this minimal case, measuring _cumulative presence_ provides a unifying concept for reasoning about flow and flow metrics, their dynamics and geometry, and related notions such as stability and equilibrium.
+
+Let’s dig in.
+
+# Flow Dynamics
+
 We've already seen the core concepts involved in modeling metrics as dynamic processes in the cumulative arrival count $A(T)$ metric. We extend this idea to cumulative departure counts $D(T)$ and then derive a number of processes from there, each of which captures a higher-order notion of the "state" of the arrival-departure process.
 
 The chain of processes that model both the short-run and long-run dynamics of an arrival-departure process is shown in [@fig:flow-dynamics] below.[^-differential-equations]
@@ -293,17 +309,15 @@ Let's go through the individual metrics briefly in order, starting with cumulati
 
     *Dynamics*: It increases by 1 with every departure and remains unchanged otherwise.
 
-- **Instantaneous Presence — $N(t) = A(T) - D(T)$**: This metric measures _imbalance_ between cumulative arrival and departure counts at an instant. We call this the instantaneous presence. In general, presence is a quantity that represents the instantaneous state of some measurable quantity.[^-presence]
+- **Instantaneous Presence — $N(t) = A(T) - D(T)$**: This metric measures _imbalance_ between cumulative arrival and departure counts at an instant. We call this the instantaneous presence. In general, presence is a quantity that represents the instantaneous state of some measurable quantity.
 
     Since $A(T)$ and $D(T)$ represent cumulative states of the arrival-departure process, $N(t)$ encodes a higher-order state representing the imbalance between the two cumulative counts. Think of $N(t)$ as instantaneous WIP as you connect it to the familiar flow metrics.[^-wip]
 
      *Dynamics*: The value of $N(t)$ increases by 1 with every arrival, decreases by 1 with every departure, and remains constant in between.
 
-[^-presence]: Here we have chosen a particular notion of state, arrival-departure imbalance. It is one of the simplest notions of presence we can establish for an arrival-departure process. The Presence Calculus allows us to generalize this to much more general mathematical definitions of state. See [The Presence Calculus, A Gentle Introduction](https://docs.pcalc.org/articles/intro-to-presence-calculus/) for more general definitions and many more examples.
-
 [^-wip]: The reason we don't define it as such is that WIP is a specific *interpretation* that applies to specific domains. A more general concept here might be occupancy, but even this requires specific assumptions that are not necessary to reason about flow, so we will stick with the least restrictive definition of $N(t)$ as imbalance. Further, both WIP and occupancy are a type of presence, but not all presence is of this type. That is the key thing to remember.
 
-- **Cumulative Presence Mass — $H(T)=\int_0^T N(t)\,dt$**: This is accumulated presence over the interval $(0,T]$ (the area under $N(t)$, equivalently the area between $A(T)$ and $D(T)$). It is the key integrated quantity that carries process history in element-time units.
+- **Cumulative Presence — $H(T)=\int_0^T N(t)\,dt$**: This is accumulated presence over the interval $(0,T]$ (the area under $N(t)$, equivalently the area between $A(T)$ and $D(T)$). It is the key integrated quantity that carries process history in element-time units.
 
   *Dynamics*: $H(T)$ does not jump at arrivals or departures. Arrivals/departures change $N(t)$, which changes the **slope** of $H(T)$. Between events, $H(T)$ is linear with slope equal to the current $N(t)$ (flat when $N(t)=0$).
 
@@ -409,25 +423,5 @@ Next, [@fig:lt] shows $L(T)$, the first time-normalized metric.
 While it is not immediately obvious from the definition, $L(T)$ is a half-open moving average of $N(t)$ over the interval $[0,T)$. The derivation of this result is given in Appendix A of the Flow Metrics Reference. Understanding this relationship between $L(T)$ and $N(t)$ makes it easy to interpret its behavior. As we know, arrival and departure events change the trajectory of $N(t)$. The behavior of $L(T)$ is to seek the current value of $N(t)$: in between events, if the current value of $N(t)$ is larger than $L(T)$, then it increases; otherwise, it decreases. This means that $L(T)$, like all moving averages, smooths out transient states and emphasizes persistent states, or states that the process returns to often. The detailed reasoning for this can be found in the Flow Metrics Reference.
 
 Since the denominator is constantly increasing, the moving average tends to settle down provided the process remains bounded within a finite set of states — i.e., the maximum instantaneous presence is bounded and the time spent in states does not grow proportionally with the observation interval. The stabilization of $L(T)$ is one marker of a stable arrival–departure process, and for this reason $L(T)$ is one of the most important operational flow metrics. It is somewhat surprising, then, that none of the flow metrics tools in common use today explicitly measure or track this quantity.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # References

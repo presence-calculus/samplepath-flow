@@ -594,10 +594,16 @@ Kumar</em></a></p></p>
             <li><a href="#flow-dynamics-and-flow-geometry"
             id="toc-flow-dynamics-and-flow-geometry">3.3 Flow Dynamics
             and Flow Geometry</a></li>
-            <li><a href="#flow-geometry" id="toc-flow-geometry">3.4 Flow
+            <li><a href="#presence" id="toc-presence">3.4
+            Presence</a></li>
+            </ul></li>
+            <li><a href="#flow-dynamics" id="toc-flow-dynamics">4 Flow
+            Dynamics</a>
+            <ul>
+            <li><a href="#flow-geometry" id="toc-flow-geometry">4.2 Flow
             Geometry</a></li>
             </ul></li>
-            <li><a href="#references" id="toc-references">4
+            <li><a href="#references" id="toc-references">5
             References</a></li>
             </ul>
           </nav>
@@ -1256,7 +1262,7 @@ Kumar</em></a></p></p>
           instead. Each one of our sample path flow metrics is a
           deterministic <em>event-indexed process</em> over a sample
           path of a non-deterministic process.</p>
-          <p>Further, metrics <em>interact</em> when metrics <em>are
+          <p>Further, metrics <em>interact</em> when they <em>are
           composed as mathematical functions</em>. The dynamics of these
           composite processes can also be derived deterministically from
           the dynamics of the input processes. So both the mathematical
@@ -1272,48 +1278,96 @@ Kumar</em></a></p></p>
           realized sample paths.</p>
           <h2 id="flow-dynamics-and-flow-geometry">3.3 Flow Dynamics and
           Flow Geometry</h2>
-          <p>A dynamic model describes how a flow process evolves over
-          time. It specifies the <em>causal mechanisms</em>: how
-          arrivals, departures, and other exogenous inputs change
-          process state, and how those changes update derived quantities
-          along the sample path.<a href="#fn8" class="footnote-ref"
-          id="fnref8" role="doc-noteref"><sup>8</sup></a></p>
-          <p>By contrast, process <em>geometry</em> describes the
-          structural constraints on that evolution. Geometry does not
-          tell us what will happen next or why; it tells us what
-          <em>must</em> be true, regardless of how the process is
-          driven. It encodes conservation laws, invariants, and
-          deterministic relationships that bind the derived processes
-          together.</p>
-          <p>When we ask why a process is behaving a certain way, we
-          need both perspectives. The dynamic model explains how
-          particular inputs produce specific state transitions and
-          feedback effects. The geometry explains how those transitions
-          must propagate to maintain internal consistency across the
-          state of the process and its derived quantities.</p>
-          <p>Dynamics governs causal chains and loops. Geometry governs
-          conservation and constraint. Together they determine the
-          admissible trajectories of the process on its sample path.</p>
-          <p>In the case of arrival–departure processes, we develop the
-          dynamic model by extending the cumulative arrival and
-          departure counts into a richer representation of process
-          state. The finite form of Little’s Law — expressed as the
-          <em>Presence Invariant</em> — provides the geometric
-          structure. It defines the global constraint that binds counts,
-          rates, and derived quantities into the relationships we need
-          to reason about flow.</p>
-          <p>Taken together, these give us a fully deterministic
+          <p>In the previous section, we defined a process as a mapping
+          from an index set to a set of states. <em>Dynamics</em>
+          specify the rules that govern <em>how</em> the states change:
+          what the state variables are, what events or inputs affect
+          them, and the update laws that map current state to the next
+          state. We can analyze processes without knowing the dynamics,
+          but precise reasoning about cause and effect becomes much
+          simpler once we have one in place.</p>
+          <p>The machinery of sample path analysis and event-indexed
+          processes allows us to specify the dynamics of the
+          arrival–departure process: how arrivals, departures, and other
+          exogenous inputs change process state, and how those changes
+          update derived processes along the sample path. This allows us
+          to say unambiguously: given a sample path and the current
+          state, what <em>caused</em> the process to reach this state<a
+          href="#fn8" class="footnote-ref" id="fnref8"
+          role="doc-noteref"><sup>8</sup></a>.</p>
+          <p>Dynamics can often be interpreted geometrically: the update
+          rules define the admissible directions of motion of the sample
+          path in state space. When projected into that space, the
+          process can only move along trajectories consistent with those
+          rules. Visualizing the process geometry gives insights into
+          process behavior that might not be apparent even when we know
+          the rules of process evolution.</p>
+          <p>But there is a deeper sense in which process geometry
+          matters: the observed behavior of sample path trajectories is
+          often constrained by structural rules and invariants, and
+          these too have clear geometric interpretations. In the case of
+          arrival–departure processes, we will see that Little’s Law
+          follows from such a structural invariant that constrains how
+          derived processes such as arrival rates, throughput, and lead
+          time evolve.</p>
+          <p>Geometry does not tell us what will happen next or why; it
+          tells us what <em>must</em> be true, regardless of the causal
+          mechanism. It encodes conservation laws, invariants, and
+          deterministic relationships that bind sample paths and derived
+          processes together. When we ask why a process is behaving a
+          certain way, we need both perspectives. Dynamics governs
+          causal chains and loops. Geometry provides conservation laws
+          and constraints. Together they determine the admissible
+          trajectories of the process on its sample path.</p>
+          <p>We will develop the relationship between flow dynamics and
+          geometry in arrival–departure processes carefully in the next
+          two chapters. The results here are subtle and by no means
+          obvious. Taken together, these give us a fully deterministic
           measurement substrate for reasoning about flow. Conditioned on
           a realized sample path, we can answer unambiguously: how did
           the process evolve to reach its current state? That, in turn,
-          is the foundation we need to reason about the consequences of
-          the process being in that state. This includes economic
-          consequences, but is not limited to them.</p>
-          <p>We begin with a bird’s-eye view of the moving parts,
-          without full technical detail, so that the overall arc is
-          visible before we examine each piece. The metrics reference
-          document develops each concept in full.</p>
-          <h3 id="flow-dynamics">Flow Dynamics</h3>
+          is the foundation we need to reason about the consequences,
+          including economic ones, of the process being in that
+          state.</p>
+          <h2 id="presence">3.4 Presence</h2>
+          <p>The final concept we will introduce is Presence. In the
+          arrival–departure process, events are primary. They are
+          assumed as given. But when we speak of flow, what is it that
+          we are reasoning about? The Presence Calculus takes a position
+          on this question. We call the underlying quantity
+          <em>presence</em>.</p>
+          <p>For a quantity to qualify as a presence it must satisfy
+          certain technical conditions, detailed further in
+          [kkumar2025]. Intuitively, it must be measurable at any point
+          in time, and its accumulation over time must also be
+          measurable. It is this accumulated quantity that we aim to
+          manage when we speak of managing “flow.” We treat that
+          accumulation as operationally meaningful <a href="#fn9"
+          class="footnote-ref" id="fnref9"
+          role="doc-noteref"><sup>9</sup></a>.</p>
+          <p>Even in the simple case of arrival–departure processes
+          there are many possible ways to define presence. For the
+          minimal model we have so far — where we only observe event
+          timestamps and markers indicating arrival or departure — the
+          simplest definition is the <em>imbalance</em> between
+          cumulative arrival counts and departure counts. In the next
+          section we will show that arrival–departure imbalance
+          satisfies the technical conditions.</p>
+          <p>More importantly, it aligns with our intuitive
+          understanding of flow. In software delivery contexts,
+          imbalances between arrivals and departures are what we seek to
+          minimize in order to improve flow. In customer retention
+          processes, by contrast, we may seek to <em>maximize</em> this
+          imbalance — ideally maximizing the presence of customers
+          within the process. In this way, presence forms a bridge
+          between operational behavior and economic outcomes.</p>
+          <p>Imbalance is only one definition of presence. But even in
+          this minimal case, measuring <em>cumulative presence</em>
+          provides a unifying concept for reasoning about flow and flow
+          metrics, their dynamics and geometry, and related notions such
+          as stability and equilibrium.</p>
+          <p>Let’s dig in.</p>
+          <h1 id="flow-dynamics">4 Flow Dynamics</h1>
           <p>We’ve already seen the core concepts involved in modeling
           metrics as dynamic processes in the cumulative arrival count
           <span class="math inline">\(A(T)\)</span> metric. We extend
@@ -1323,8 +1377,8 @@ Kumar</em></a></p></p>
           notion of the “state” of the arrival-departure process.</p>
           <p>The chain of processes that model both the short-run and
           long-run dynamics of an arrival-departure process is shown in
-          Figure 7 below.<a href="#fn9" class="footnote-ref" id="fnref9"
-          role="doc-noteref"><sup>9</sup></a></p>
+          Figure 7 below.<a href="#fn10" class="footnote-ref"
+          id="fnref10" role="doc-noteref"><sup>10</sup></a></p>
           <figure id="fig:flow-dynamics">
           <img src="../../assets/flow-dynamics.png"
           alt="Figure 7: The Dynamics Model" />
@@ -1361,8 +1415,7 @@ Kumar</em></a></p></p>
           arrival and departure counts at an instant. We call this the
           instantaneous presence. In general, presence is a quantity
           that represents the instantaneous state of some measurable
-          quantity.<a href="#fn10" class="footnote-ref" id="fnref10"
-          role="doc-noteref"><sup>10</sup></a></p>
+          quantity.</p>
           <p>Since <span class="math inline">\(A(T)\)</span> and <span
           class="math inline">\(D(T)\)</span> represent cumulative
           states of the arrival-departure process, <span
@@ -1378,7 +1431,7 @@ Kumar</em></a></p></p>
           constant in between.</p></li>
           </ul>
           <ul>
-          <li><p><strong>Cumulative Presence Mass — <span
+          <li><p><strong>Cumulative Presence — <span
           class="math inline">\(H(T)=\int_0^T
           N(t)\,dt\)</span></strong>: This is accumulated presence over
           the interval <span class="math inline">\((0,T]\)</span> (the
@@ -1554,7 +1607,7 @@ Kumar</em></a></p></p>
           to <span class="math inline">\(L(T)\)</span> in order to
           <em>produce</em> that global state. We call this the principle
           of conservation of cumulative presence.</p>
-          <h2 id="flow-geometry">3.4 Flow Geometry</h2>
+          <h2 id="flow-geometry">4.2 Flow Geometry</h2>
           <p>The Presence Calculus and sample path analysis give a
           mathematically rigorous and principled approach to reasoning
           about flow geometry and clearly show how flow dynamics are
@@ -1788,7 +1841,7 @@ Kumar</em></a></p></p>
           surprising, then, that none of the flow metrics tools in
           common use today explicitly measure or track this
           quantity.</p>
-          <h1 class="unnumbered" id="references">4 References</h1>
+          <h1 class="unnumbered" id="references">5 References</h1>
           <div id="refs" class="references csl-bib-body"
           data-entry-spacing="0" role="list">
           <div id="ref-poppendieck2003" class="csl-entry"
@@ -1888,38 +1941,34 @@ Kumar</em></a></p></p>
           not be confused with root cause analysis. The causal links
           here are between measurements over a sample path and the
           events on the sample path. The events themselves come from
-          arrival-departure processes that we treat as a black box. The
+          arrival–departure processes that we treat as a black box. The
           causal model establishes a proximate causal chain that starts
-          with the events and ends with the measurements. At this point
-          any further analysis of cause and effect needs more
-          information than this model is able to provide. The key point,
-          though, is that the simple arrival-departure model can be
-          refined and composed to build more sophisticated models of
-          larger systems. Additional information and context can be
-          added to aid analysis. The machinery here is a reliable
-          building block for rigorous causal analysis of processes in
-          larger systems. Those applications are not in the scope of
-          what we will describe here. The focus is on precisely defining
-          the proximate causal relationships between flow metrics and
-          events on the sample path.<a href="#fnref8"
+          with the events and ends with the measurements. We cannot
+          reason about cause-and-effect relationships beyond this
+          without additional information. The key point, though, is that
+          the simple arrival–departure model can be refined and composed
+          to build more sophisticated models of larger systems.
+          Additional information and context can be added to aid
+          analysis. The machinery here is a reliable building block for
+          rigorous causal analysis of processes in larger systems. Those
+          applications are not in the scope of what we will describe
+          here. The focus is on precisely defining the proximate causal
+          relationships between flow metrics and events on the sample
+          path.<a href="#fnref8" class="footnote-back"
+          role="doc-backlink">↩︎</a></p></li>
+          <li id="fn9"><p>This is a philosophical stance specific to the
+          Presence Calculus. We <em>define</em> “flow management” as the
+          management of cumulative presence at its core. All the
+          machinery we derive builds upon this premise.<a href="#fnref9"
           class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-          <li id="fn9"><p>The formal way to describe such models is as a
-          system of difference or differential equations, and this is
+          <li id="fn10"><p>The formal way to describe such models is as
+          a system of difference or differential equations, and this is
           possible here as well. But we are more interested in
           explaining the underlying concepts intuitively, so we will opt
           for plain English here. The metrics reference has a more
           technical treatment with precise mathematical definitions of
-          the concepts involved.<a href="#fnref9" class="footnote-back"
+          the concepts involved.<a href="#fnref10" class="footnote-back"
           role="doc-backlink">↩︎</a></p></li>
-          <li id="fn10"><p>Here we have chosen a particular notion of
-          state, arrival-departure imbalance. It is one of the simplest
-          notions of presence we can establish for an arrival-departure
-          process. The Presence Calculus allows us to generalize this to
-          much more general mathematical definitions of state. See <a
-          href="https://docs.pcalc.org/articles/intro-to-presence-calculus/">The
-          Presence Calculus, A Gentle Introduction</a> for more general
-          definitions and many more examples.<a href="#fnref10"
-          class="footnote-back" role="doc-backlink">↩︎</a></p></li>
           <li id="fn11"><p>The reason we don’t define it as such is that
           WIP is a specific <em>interpretation</em> that applies to
           specific domains. A more general concept here might be
