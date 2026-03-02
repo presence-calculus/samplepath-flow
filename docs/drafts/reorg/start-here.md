@@ -370,7 +370,9 @@ We'll note a few points here:
 - The vertical _distance_ between the two paths at any time $t$ gives the value of $N(t)$.
 - The shaded area between the curves over a time interval $[0,T)$ gives the value of $H(T)$.
 
-Note that the last two properties follow directly from the definitions of the metrics and the fact that the path geometry of $A(T)$ and $D(T)$ reflects the true values of these metrics. By contrast, consider the standard construction of the CFD from calendar-indexed paths which is used in every existing flow metrics tool today. This is shown in [@fig:calendar-cfd] using daily and weekly sampling for the same underlying sample path from which we constructed [@fig:cfd].
+Note that the last two properties follow directly from the definitions of the metrics and the fact that the path geometry of $A(T)$ and $D(T)$ reflects the true values of these metrics.
+
+By contrast, consider the standard construction of the CFD from calendar-indexed paths which is used in every existing flow metrics tool today. This is shown in [@fig:calendar-cfd] using daily and weekly sampling for the same underlying sample path from which we constructed [@fig:cfd].
 
 ![The Calendar Indexed CFD]($document-root/assets/calendar-indexed-cfd.png){#fig:calendar-cfd}
 
@@ -384,7 +386,31 @@ Flow geometry thus becomes more than a visualization artifact. Extending beyond 
 
 This becomes particularly important as we move beyond $N(t)$ and $H(T)$ and consider time-normalized metrics such as moving averages ($L(T)$), arrival and departure rates, and process times. Contrary to common practice, these cannot in general be read directly from the CFD geometry without imposing strong assumptions about the underlying arrival–departure process (for example, piecewise stationarity, uniform event spacing, or strict arrival/departure ordering). To represent their exact geometric relationships, we require visualizations that extend beyond a simple two-dimensional projection of the input counting processes.
 
-This is what we will show below as we introduce the remaining flow metrics. The correct way to think about their relationship to the CFD is that their admissible values are constrained by the shape of the CFD, even though they are not themselves directly readable from it.
+Let's begin by charting the paths for $N(t)$, $H(T)$, and $L(T)$. These allow us to visualize the interplay between flow dynamics and flow geometry much more clearly than the CFD.
+
+![$N(t)$: Instantaneous Presence]($document-root/assets/Nt.png){#fig:nt}
+
+[@fig:nt] shows the event-indexed path geometry of $N(t)$, illustrating that it increments by 1 at arrivals, decrements by 1 at departures, and stays constant in between.
+
+Equally important, this visualization clearly shows the relationship between $N(t)$ and $H(T)$. The height of each rectangle between events represents a state, and the width represents the time the process has spent in that state. The _area_ under the $N(t)$ curve, obtained by summing the areas of these rectangles, is precisely what we calculate as $H(T)$. This is the same area represented under the CFD in [@fig:cfd].
+
+Each rectangle contributes an area proportional to the time spent in that state, which is why we call cumulative presence the time-weighted sum of instantaneous presence. [@fig:ht] shows the event-indexed path geometry of this quantity.
+
+![$H(T)$: Cumulative Presence]($document-root/assets/ht.png){#fig:ht}
+
+This path visualizes the salient dynamics of $H(T)$: arrival and departure events change the _trajectory_ of the path by changing the _rate_ at which presence accumulates, which translates geometrically to the _slope_ of the line between events. The slope increases by 1 at each arrival and decreases by 1 at each departure. In between events, the _slope_ of the line is exactly the value of $N(t)$ at that point in time.
+
+$N(t)$ and $H(T)$ decompose the two-dimensional geometry of the CFD into its component parts in a way that makes it easier to reason visually about the impact of instantaneous and global state on the behavior of the underlying arrival–departure process.
+
+Next, [@fig:lt] shows $L(T)$, the first time-normalized metric.
+
+![$L(T)$ — Time Average of Presence]($document-root/assets/lt.png){#fig:lt}
+
+While it is not immediately obvious from the definition, $L(T)$ is a half-open moving average of $N(t)$ over the interval $[0,T)$. The derivation of this result is given in Appendix A of the Flow Metrics Reference. Understanding this relationship between $L(T)$ and $N(t)$ makes it easy to interpret its behavior. As we know, arrival and departure events change the trajectory of $N(t)$. The behavior of $L(T)$ is to seek the current value of $N(t)$: in between events, if the current value of $N(t)$ is larger than $L(T)$, then it increases; otherwise, it decreases. This means that $L(T)$, like all moving averages, smooths out transient states and emphasizes persistent states, or states that the process returns to often. The detailed reasoning for this can be found in the Flow Metrics Reference.
+
+Since the denominator is constantly increasing, the moving average tends to settle down provided the process remains bounded within a finite set of states — i.e., the maximum instantaneous presence is bounded and the time spent in states does not grow proportionally with the observation interval. The stabilization of $L(T)$ is one marker of a stable arrival–departure process, and for this reason $L(T)$ is one of the most important operational flow metrics. It is somewhat surprising, then, that none of the flow metrics tools in common use today explicitly measure or track this quantity.
+
+
 
 
 

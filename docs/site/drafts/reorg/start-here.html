@@ -1633,11 +1633,12 @@ Kumar</em></a></p></p>
           definitions of the metrics and the fact that the path geometry
           of <span class="math inline">\(A(T)\)</span> and <span
           class="math inline">\(D(T)\)</span> reflects the true values
-          of these metrics. By contrast, consider the standard
-          construction of the CFD from calendar-indexed paths which is
-          used in every existing flow metrics tool today. This is shown
-          in Figure 9 using daily and weekly sampling for the same
-          underlying sample path from which we constructed Figure 8.</p>
+          of these metrics.</p>
+          <p>By contrast, consider the standard construction of the CFD
+          from calendar-indexed paths which is used in every existing
+          flow metrics tool today. This is shown in Figure 9 using daily
+          and weekly sampling for the same underlying sample path from
+          which we constructed Figure 8.</p>
           <figure id="fig:calendar-cfd">
           <img src="../../assets/calendar-indexed-cfd.png"
           alt="Figure 9: The Calendar Indexed CFD" />
@@ -1691,11 +1692,102 @@ Kumar</em></a></p></p>
           geometric relationships, we require visualizations that extend
           beyond a simple two-dimensional projection of the input
           counting processes.</p>
-          <p>This is what we will show below as we introduce the
-          remaining flow metrics. The correct way to think about their
-          relationship to the CFD is that their admissible values are
-          constrained by the shape of the CFD, even though they are not
-          themselves directly readable from it.</p>
+          <p>Let’s begin by charting the paths for <span
+          class="math inline">\(N(t)\)</span>, <span
+          class="math inline">\(H(T)\)</span>, and <span
+          class="math inline">\(L(T)\)</span>. These allow us to
+          visualize the interplay between flow dynamics and flow
+          geometry much more clearly than the CFD.</p>
+          <figure id="fig:nt">
+          <img src="../../assets/Nt.png"
+          alt="Figure 10: N(t): Instantaneous Presence" />
+          <figcaption aria-hidden="true">Figure 10: <span
+          class="math inline">\(N(t)\)</span>: Instantaneous
+          Presence</figcaption>
+          </figure>
+          <p>Figure 10 shows the event-indexed path geometry of <span
+          class="math inline">\(N(t)\)</span>, illustrating that it
+          increments by 1 at arrivals, decrements by 1 at departures,
+          and stays constant in between.</p>
+          <p>Equally important, this visualization clearly shows the
+          relationship between <span class="math inline">\(N(t)\)</span>
+          and <span class="math inline">\(H(T)\)</span>. The height of
+          each rectangle between events represents a state, and the
+          width represents the time the process has spent in that state.
+          The <em>area</em> under the <span
+          class="math inline">\(N(t)\)</span> curve, obtained by summing
+          the areas of these rectangles, is precisely what we calculate
+          as <span class="math inline">\(H(T)\)</span>. This is the same
+          area represented under the CFD in Figure 8.</p>
+          <p>Each rectangle contributes an area proportional to the time
+          spent in that state, which is why we call cumulative presence
+          the time-weighted sum of instantaneous presence. Figure 11
+          shows the event-indexed path geometry of this quantity.</p>
+          <figure id="fig:ht">
+          <img src="../../assets/ht.png"
+          alt="Figure 11: H(T): Cumulative Presence" />
+          <figcaption aria-hidden="true">Figure 11: <span
+          class="math inline">\(H(T)\)</span>: Cumulative
+          Presence</figcaption>
+          </figure>
+          <p>This path visualizes the salient dynamics of <span
+          class="math inline">\(H(T)\)</span>: arrival and departure
+          events change the <em>trajectory</em> of the path by changing
+          the <em>rate</em> at which presence accumulates, which
+          translates geometrically to the <em>slope</em> of the line
+          between events. The slope increases by 1 at each arrival and
+          decreases by 1 at each departure. In between events, the
+          <em>slope</em> of the line is exactly the value of <span
+          class="math inline">\(N(t)\)</span> at that point in time.</p>
+          <p><span class="math inline">\(N(t)\)</span> and <span
+          class="math inline">\(H(T)\)</span> decompose the
+          two-dimensional geometry of the CFD into its component parts
+          in a way that makes it easier to reason visually about the
+          impact of instantaneous and global state on the behavior of
+          the underlying arrival–departure process.</p>
+          <p>Next, Figure 12 shows <span
+          class="math inline">\(L(T)\)</span>, the first time-normalized
+          metric.</p>
+          <figure id="fig:lt">
+          <img src="../../assets/lt.png"
+          alt="Figure 12: L(T) — Time Average of Presence" />
+          <figcaption aria-hidden="true">Figure 12: <span
+          class="math inline">\(L(T)\)</span> — Time Average of
+          Presence</figcaption>
+          </figure>
+          <p>While it is not immediately obvious from the definition,
+          <span class="math inline">\(L(T)\)</span> is a half-open
+          moving average of <span class="math inline">\(N(t)\)</span>
+          over the interval <span class="math inline">\([0,T)\)</span>.
+          The derivation of this result is given in Appendix A of the
+          Flow Metrics Reference. Understanding this relationship
+          between <span class="math inline">\(L(T)\)</span> and <span
+          class="math inline">\(N(t)\)</span> makes it easy to interpret
+          its behavior. As we know, arrival and departure events change
+          the trajectory of <span class="math inline">\(N(t)\)</span>.
+          The behavior of <span class="math inline">\(L(T)\)</span> is
+          to seek the current value of <span
+          class="math inline">\(N(t)\)</span>: in between events, if the
+          current value of <span class="math inline">\(N(t)\)</span> is
+          larger than <span class="math inline">\(L(T)\)</span>, then it
+          increases; otherwise, it decreases. This means that <span
+          class="math inline">\(L(T)\)</span>, like all moving averages,
+          smooths out transient states and emphasizes persistent states,
+          or states that the process returns to often. The detailed
+          reasoning for this can be found in the Flow Metrics
+          Reference.</p>
+          <p>Since the denominator is constantly increasing, the moving
+          average tends to settle down provided the process remains
+          bounded within a finite set of states — i.e., the maximum
+          instantaneous presence is bounded and the time spent in states
+          does not grow proportionally with the observation interval.
+          The stabilization of <span class="math inline">\(L(T)\)</span>
+          is one marker of a stable arrival–departure process, and for
+          this reason <span class="math inline">\(L(T)\)</span> is one
+          of the most important operational flow metrics. It is somewhat
+          surprising, then, that none of the flow metrics tools in
+          common use today explicitly measure or track this
+          quantity.</p>
           <h1 class="unnumbered" id="references">4 References</h1>
           <div id="refs" class="references csl-bib-body"
           data-entry-spacing="0" role="list">
