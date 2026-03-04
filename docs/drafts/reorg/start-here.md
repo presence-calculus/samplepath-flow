@@ -303,7 +303,7 @@ The chain of processes that model both the short-run and long-run dynamics of pr
 
 ![Presence Accumulation Dynamics]($document-root/assets/presence-accumulation.png){#fig:presence-accumulation}
 
-In [@fig:presence-accumulation] each oval represents a _measurement_ that models a specific aspect of presence accumulation. Each of these measurements is a process under our definitions. Each process depends on one or more input processes, and the dynamics specify how these processes change over time. The key property that we will derive here is that changes in every process are traceable back to the events on the sample path. This is not true of every dynamic model, but it is possible because of the specific definition of presence and event indexed representation we have adopted here.
+In [@fig:presence-accumulation] each oval represents a _measurement_ that models a specific aspect of presence accumulation. Each of these measurements is a process under our definitions. Each process depends on one or more input processes, and the dynamics specify how these processes change over time. The key property that we will derive here is that changes in every process are traceable back to the events on the sample path. This is not true of every dynamic model, but it is possible because of the specific definition of presence and event-indexed representation we have adopted here.
 
 Let's go through the individual processes briefly in order, starting with cumulative arrival count and cumulative departure count — the ones that are directly calculated from the sample path.
 
@@ -323,7 +323,7 @@ Let's go through the individual processes briefly in order, starting with cumula
 
 [^-wip]: The reason we don't define it as such is that WIP is a specific *interpretation* that applies to specific domains. A more general concept here might be occupancy, but even this requires specific assumptions that are not necessary to reason about flow, so we will stick with the least restrictive definition of $N(t)$ as imbalance. Further, both WIP and occupancy are a type of presence, but not all presence is of this type. That is the key thing to remember.
 
-- **Cumulative Presence — $H(T)=\int_0^T N(t)\,dt$**: This is accumulated presence over the interval $(0,T]$. It is calculated by takig the definite integral of the instantaneous state over time. This is a global state of the process that carries with it the entire history of the state transitions, weighted by the time the process has spent in each state. While this looks a bit abstract right now, we will see from the geometric intrepretation below, that this is actually a very straightforward concept to work with.
+- **Cumulative Presence — $H(T)=\int_0^T N(t)\,dt$**: This is accumulated presence over the interval $(0,T]$. It is calculated by taking the definite integral of the instantaneous state over time. This is a global state of the process that carries with it the entire history of the state transitions, weighted by the time the process has spent in each state. While this looks a bit abstract right now, we will see from the geometric interpretation below that this is actually a very straightforward concept to work with.
 
   *Dynamics*: $H(T)$ does not jump at arrivals or departures. Arrivals/departures change $N(t)$, which changes the **slope** of $H(T)$. Between events, $H(T)$ is linear with slope equal to the current $N(t)$ (flat when $N(t)=0$).
 
@@ -394,7 +394,7 @@ This becomes particularly important as we move beyond $N(t)$ and $H(T)$ and cons
 
 Let's begin by charting the paths for $N(t)$, $H(T)$, and $L(T)$. These allow us to visualize the interplay between flow dynamics and flow geometry much more clearly than the CFD.
 
-## The Geometry of $N(t)$.
+## The Geometry of $N(t)$
 
 ![$N(t)$: Instantaneous Presence]($document-root/assets/Nt.png){#fig:nt}
 
@@ -412,10 +412,38 @@ This path visualizes the salient dynamics of $H(T)$: arrival and departure event
 
 $N(t)$ and $H(T)$ decompose the two-dimensional geometry of the CFD into its component parts in a way that makes it easier to reason visually about the impact of instantaneous and global state on the behavior of the underlying arrival–departure process.
 
-The chain of processes that lead to $H(T)$ are unnormalized metrics, measured and monitored on a real timescale.
-We now turn to the sample path analogues of the familiar flow metrics like throughput, cycle time and average WIP and derive them precisely in terms of measurements over the accumulated presence $H(T)$.
 
-# Flow Metrics
+# Flow Metrics and Little's Law
+
+We now turn to the presence calculus analogues of the familiar flow metrics such as throughput, cycle time, and average WIP. These give us ways to talk about rates, durations, levels, and other key process characteristics we measure when reasoning about flow.
+
+Since we spoke of "presence-calculus analogues", it is worth discussing why there might be a difference between these and the "industry-standard" definitions of these terms. The key difference is that the industry-standard approach measures properties of *items*, treating flow metrics as aggregates of item-level measurements. The presence calculus instead derives quantities such as throughput and process time as time-normalized factorizations of *cumulative presence* $H(T)$.
+
+In the standard approach, for example, we report throughput by picking a reporting interval, counting the number of items that departed in that period, and dividing it by the length of the interval. Over that same interval we measure the time between arrival and departure of each item that departed and divide it by the number of departures to compute the average time in the process, variously called lead time, cycle time, or process time depending on the definition of the arrival and departure boundaries. We then use distributional properties—averages, percentiles, and related statistics—of these item-level values to measure flow.
+
+These measurements are useful data points for reporting purposes, but they do not let you reason directly about _why_ those numbers are the way they are. You could take one set of measurements and then take another one a few minutes later and obtain a completely different set of numbers depending on which items happened to complete in between the two measurements. You could note that fact, but those observations alone do not reveal the underlying process dynamics that produced those results.
+
+By contrast, the chain of processes in [@fig:presence-accumulation] that lead to $H(T)$ measure a much more fundamental process property: presence accumulation. This assumes no knowledge of items. Since all we have available in the input sample path are arrival and departure timestamps, we could not calculate item-level statistics _even if we wanted to_ [^-discipline]. We'll maintain this posture as we derive the presence calculus analogues of the standard flow metrics.
+
+Further, cumulative presence is measured and monitored on a real timescale. The key new element we introduce with flow metrics is _time normalization_. Rates, process times, and similar quantities are derived as time-normalized factorizations of cumulative presence, measured consistently over a common observation interval. Several geometric constraints fall out as an unavoidable _consequence_ of this factorization, and they can be viewed as finite versions of Little's Law over the observation interval. We will call this the _Presence Invariant_ to highlight the fact that cumulative presence is indeed the fundamental property we must measure when reasoning about flow using flow metrics.
+
+This approach gives us an unambiguous basis to derive process-level flow metrics that capture both the short-run and long-run _dynamics_ of presence accumulation—the fundamental process characteristic we are measuring. The metrics themselves have precisely defined dynamics similar to those we developed for the core presence accumulation quantities. When we observe a change in any of these metrics, we can explain exactly why they changed and trace them back to the events that produced those changes. This is the fundamental advantage we gain by taking this approach.
+
+Best of all, when item-level correspondence between arrivals and departures is available, the traditional metrics can be recovered directly. Moreover, we have mathematically provable relationships between these process-level flow metrics and the familiar item-level flow metrics.
+
+All in all, the measurement techniques we show below are a drop-in _expansion_ of the flow metrics toolkit we have today. When item-level information is available, we can compute the familiar statistics as before for reporting purposes. When it is not, we still retain a rigorous basis for reasoning about rates and process times purely in terms of the process-level factors that determine flow.
+
+[^-discipline]: In practice, operational transaction logs typically *do* contain item-level identifiers, making it easy to compute these statistics when needed. The point of the construction here is methodological: by assuming we do *not* have item-level correspondence, we are forced to define quantities such as throughput and process time purely at the *process level*, independent of any particular notion of items. This gives us rigorous tools to measure and reason about changes in the process independently of the behavior of item-level distributions. As we will see, these item-level distributions are fully determined by the underlying process-level factorizations. If the goal is to measure the impact of process changes and improvements, the presence calculus takes the position that these process-level constructs are the primary quantities we should measure and manage.
+
+
+
+
+
+
+## Parking Lot
+
+In 1972, Dr. Shaler Stidham discovered a simple, yet profoundly important proof of Little's Law. The canonical proof of the Law provided by Dr. John Little nearly a decade earlier, was probabilistic in nature. I required that the arrival and departure process
+
 
 **Time-Average Presence — $L(T)=H(T)/T$**: This is the time-average of presence over $(0,T]$, i.e. the moving average of $N(t)$ over the observed prefix. It is the left-hand side quantity in the Presence Invariant.
 
