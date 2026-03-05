@@ -618,8 +618,13 @@ Kumar</em></a></p></p>
             id="toc-flow-metrics-and-littles-law">5 Flow Metrics and
             Little’s Law</a>
             <ul>
-            <li><a href="#parking-lot" id="toc-parking-lot">5.1 Parking
-            Lot</a></li>
+            <li><a href="#lt-time-average-of-presence"
+            id="toc-lt-time-average-of-presence">5.1 <span
+            class="math inline">\(L(T)\)</span> — Time Average of
+            Presence</a></li>
+            <li><a href="#the-presence-invariant"
+            id="toc-the-presence-invariant">5.2 The Presence
+            Invariant</a></li>
             </ul></li>
             <li><a href="#references" id="toc-references">6
             References</a></li>
@@ -1888,123 +1893,35 @@ Kumar</em></a></p></p>
           purposes. When it is not, we still retain a rigorous basis for
           reasoning about rates and process times purely in terms of the
           process-level factors that determine flow.</p>
-          <h2 id="parking-lot">5.1 Parking Lot</h2>
-          <p>In 1972, Dr. Shaler Stidham discovered a simple, yet
-          profoundly important proof of Little’s Law. The canonical
-          proof of the Law provided by Dr. John Little nearly a decade
-          earlier, was probabilistic in nature. I required that the
-          arrival and departure process</p>
-          <p><strong>Time-Average Presence — <span
-          class="math inline">\(L(T)=H(T)/T\)</span></strong>: This is
-          the time-average of presence over <span
-          class="math inline">\((0,T]\)</span>, i.e. the moving average
-          of <span class="math inline">\(N(t)\)</span> over the observed
-          prefix. It is the left-hand side quantity in the Presence
-          Invariant.</p>
-          <p><em>Dynamics</em>: <span
-          class="math inline">\(L(T)\)</span> is continuous at event
-          times (no jumps). Between events it adjusts toward the current
-          state: it rises when <span
-          class="math inline">\(N(t)&gt;L(T)\)</span> and falls when
-          <span class="math inline">\(N(t)&lt;L(T)\)</span>. Its
-          responsiveness decays over time (roughly at rate <span
-          class="math inline">\(1/T\)</span>), so transient fluctuations
-          are smoothed while persistent effects remain visible.</p>
-          <p><span class="math inline">\(L(T)\)</span> and the remaining
-          metrics we will derive are normalized by the length of the
-          observation window, giving us a basis to reason about both the
-          relative accumulation of presence over time, its drivers as
-          well as its effects.</p>
-          <table>
-          <colgroup>
-          <col style="width: 25%" />
-          <col style="width: 25%" />
-          <col style="width: 25%" />
-          <col style="width: 25%" />
-          </colgroup>
-          <thead>
-          <tr>
-          <th>Chart</th>
-          <th>Name</th>
-          <th>Formula</th>
-          <th>Units</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr>
-          <td><span class="math inline">\(L(T)\)</span></td>
-          <td>Time-Average Presence</td>
-          <td><span class="math inline">\(L(T)=H(T)/T\)</span></td>
-          <td>Elem</td>
-          </tr>
-          <tr>
-          <td><a href="#chart-08-arrival-rate-lambda"><span
-          class="math inline">\(\Lambda(T)\)</span></a></td>
-          <td>Arrival Rate</td>
-          <td><span
-          class="math inline">\(\Lambda(T)=A(T)/T\)</span></td>
-          <td>Elem/Time</td>
-          </tr>
-          <tr>
-          <td><a href="#chart-09-residence-w">w(T)</a></td>
-          <td>Residence Time per Arrival</td>
-          <td><span class="math inline">\(w(T)=H(T)/A(T)\)</span></td>
-          <td>Time</td>
-          </tr>
-          <tr>
-          <td><a href="#chart-12-departure-rate-theta"><span
-          class="math inline">\(\Theta(T)\)</span></a></td>
-          <td>Departure Rate (Throughput)</td>
-          <td><span class="math inline">\(\Theta(T)=D(T)/T\)</span></td>
-          <td>Elem/Time</td>
-          </tr>
-          <tr>
-          <td><a href="#chart-13-residence-w-prime">w’(T)</a></td>
-          <td>Residence Time per Departure</td>
-          <td><span
-          class="math inline">\(w&#39;(T)=H(T)/D(T)\)</span></td>
-          <td>Time</td>
-          </tr>
-          <tr>
-          <td><a href="#chart-10-arrival-invariant">Arrival
-          Invariant</a></td>
-          <td>Arrival-Side Invariant</td>
-          <td><span class="math inline">\(L(T)=\Lambda(T)\cdot
-          w(T)\)</span></td>
-          <td>Elem</td>
-          </tr>
-          <tr>
-          <td><a href="#chart-14-departure-invariant">Departure
-          Invariant</a></td>
-          <td>Departure-Side Invariant</td>
-          <td><span class="math inline">\(L(T)=\Theta(T)\cdot
-          w&#39;(T)\)</span></td>
-          <td>Elem</td>
-          </tr>
-          </tbody>
-          </table>
-          <p><span class="math inline">\(L(T)\)</span> is a half-open
-          moving average of instantaneous presence: the left endpoint is
-          fixed and the right endpoint varies continuously. This allows
-          us to distinguish between transient presence (process states
-          held for short periods of time) and stable presence (states
-          that persist or that the process returns to repeatedly over
-          its history). Its numerator is driven by arrival–departure
-          events. Its denominator brings in the effects of time
-          normalization. Time normalization is itself a causal mechanism
-          — one that shapes the dynamics of every remaining flow
-          metric.</p>
-          <p>Those dynamics are <em>constrained</em> by the finite
-          version of Little’s Law, which we call the Presence Invariant.
-          A given value of cumulative presence can be factored into
-          rates (arrivals, departures) and durations (process time). The
-          invariant constrains how these rates and durations must relate
-          to <span class="math inline">\(L(T)\)</span> in order to
-          <em>produce</em> that global state. We call this the principle
-          of conservation of cumulative presence.</p>
-          <p>Next, Figure 12 shows <span
-          class="math inline">\(L(T)\)</span>, the first time-normalized
-          metric.</p>
+          <h2 id="lt-time-average-of-presence">5.1 <span
+          class="math inline">\(L(T)\)</span> — Time Average of
+          Presence</h2>
+          <p>Recall that cumulative presence is defined as</p>
+          <p><span class="math display">\[
+          H(T) = \int_0^T N(t)\,dt
+          \]</span></p>
+          <p>The time average of instantaneous presence over the
+          interval <span class="math inline">\([0,T)\)</span> is</p>
+          <p><span class="math display">\[
+          L(T) = \frac{H(T)}{T} = \frac{1}{T} \int_0^T N(t)\,dt
+          \]</span></p>
+          <p><span class="math inline">\(L(T)\)</span> is the
+          time-normalized accumulation of instantaneous presence <span
+          class="math inline">\(N(t)\)</span>, i.e. the average
+          <em>level</em> of instantaneous presence during the
+          observation window <span class="math inline">\([0,T)\)</span>.
+          Checking units helps clarify the interpretation. Suppose the
+          units of <span class="math inline">\(N(t)\)</span> are
+          measured in <em>elements</em>. Then <span
+          class="math inline">\(H(T)\)</span> is measured in
+          element-time, while the units of <span
+          class="math inline">\(L(T)\)</span> are elements. This is why
+          we call <span class="math inline">\(L(T)\)</span> the time
+          average of instantaneous presence.</p>
+          <p>For the <span class="math inline">\(H(T)\)</span> chart in
+          Figure 11, the corresponding chart for <span
+          class="math inline">\(L(T)\)</span> is shown in Figure 12
+          below.</p>
           <figure id="fig:lt">
           <img src="../../assets/lt.png"
           alt="Figure 12: L(T) — Time Average of Presence" />
@@ -2012,39 +1929,58 @@ Kumar</em></a></p></p>
           class="math inline">\(L(T)\)</span> — Time Average of
           Presence</figcaption>
           </figure>
-          <p>While it is not immediately obvious from the definition,
-          <span class="math inline">\(L(T)\)</span> is a half-open
-          moving average of <span class="math inline">\(N(t)\)</span>
-          over the interval <span class="math inline">\([0,T)\)</span>.
-          The derivation of this result is given in Appendix A of the
-          Flow Metrics Reference. Understanding this relationship
-          between <span class="math inline">\(L(T)\)</span> and <span
-          class="math inline">\(N(t)\)</span> makes it easy to interpret
-          its behavior. As we know, arrival and departure events change
-          the trajectory of <span class="math inline">\(N(t)\)</span>.
-          The behavior of <span class="math inline">\(L(T)\)</span> is
-          to seek the current value of <span
-          class="math inline">\(N(t)\)</span>: in between events, if the
-          current value of <span class="math inline">\(N(t)\)</span> is
-          larger than <span class="math inline">\(L(T)\)</span>, then it
-          increases; otherwise, it decreases. This means that <span
-          class="math inline">\(L(T)\)</span>, like all moving averages,
-          smooths out transient states and emphasizes persistent states,
-          or states that the process returns to often. The detailed
-          reasoning for this can be found in the Flow Metrics
-          Reference.</p>
+          <p>Technically, <span class="math inline">\(L(T)\)</span> is a
+          half-open moving average of instantaneous presence: the left
+          endpoint is fixed and the right endpoint varies continuously.
+          Its numerator is driven by instantaneous imbalance in
+          arrival–departure counts, while its denominator introduces
+          time normalization.</p>
+          <p>Recall that <span class="math inline">\(H(T)\)</span>
+          encodes the time-weighted history of instantaneous presence of
+          the process: its value represents the sum of the values of the
+          instantaneous presence <span
+          class="math inline">\(N(t)\)</span>, weighted by the amount of
+          time the process spent in each state. Time normalization
+          therefore de-emphasizes transients (components of <span
+          class="math inline">\(H(T)\)</span> where process states were
+          held for short periods) and emphasizes persistent states
+          (states that persist or that the process returns to repeatedly
+          over its history).</p>
+          <p>The dynamics of <span class="math inline">\(L(T)\)</span>
+          follow a simple pattern. It is continuous at event times
+          (there are no jumps). Between events it moves toward the
+          current value of <span class="math inline">\(N(t)\)</span>: it
+          rises when <span class="math inline">\(N(t) &gt; L(T)\)</span>
+          and falls when <span class="math inline">\(N(t) &lt;
+          L(T)\)</span>. Its responsiveness decays over time (roughly at
+          rate <span class="math inline">\(1/T\)</span>) <a href="#fn13"
+          class="footnote-ref" id="fnref13"
+          role="doc-noteref"><sup>13</sup></a>. As a result, transient
+          states are smoothed while persistent states are emphasized.
+          This is the signature of a moving average.</p>
           <p>Since the denominator is constantly increasing, the moving
-          average tends to settle down provided the process remains
-          bounded within a finite set of states — i.e., the maximum
-          instantaneous presence is bounded and the time spent in states
-          does not grow proportionally with the observation interval.
-          The stabilization of <span class="math inline">\(L(T)\)</span>
-          is one marker of a stable arrival–departure process, and for
-          this reason <span class="math inline">\(L(T)\)</span> is one
-          of the most important operational flow metrics. It is somewhat
-          surprising, then, that none of the flow metrics tools in
-          common use today explicitly measure or track this
-          quantity.</p>
+          average tends to stabilize provided the process remains
+          bounded within a finite set of states — that is, the
+          instantaneous presence remains bounded and the time spent in
+          states does not grow proportionally with the observation
+          interval.</p>
+          <p>On the other hand, if cumulative presence grows
+          proportionally with the observation interval — for example
+          because the process spends increasing amounts of time in
+          higher presence states — the value of <span
+          class="math inline">\(L(T)\)</span> also grows without bound
+          and the process is unstable.</p>
+          <p>The stabilization of <span
+          class="math inline">\(L(T)\)</span> is one marker of a stable
+          arrival–departure process, and for this reason <span
+          class="math inline">\(L(T)\)</span> is one of the most
+          important operational flow metrics.</p>
+          <p>We will have much more to say about the behavior of <span
+          class="math inline">\(L(T)\)</span> as a key stability
+          diagnostic for arrival–departure processes.</p>
+          <h2 id="the-presence-invariant">5.2 The Presence
+          Invariant</h2>
+          <p>Time normalization</p>
           <h1 class="unnumbered" id="references">6 References</h1>
           <div id="refs" class="references csl-bib-body"
           data-entry-spacing="0" role="list">
@@ -2217,6 +2153,18 @@ Kumar</em></a></p></p>
           presence calculus takes the position that these process-level
           constructs are the primary quantities we should measure and
           manage.<a href="#fnref12" class="footnote-back"
+          role="doc-backlink">↩︎</a></p></li>
+          <li id="fn13"><p>These dynamics can be derived from the
+          relationship <span class="math display">\[
+            \frac{dL(T)}{dT} = \frac{N(T) - L(T)}{T}.
+            \]</span> This follows directly from differentiating <span
+          class="math inline">\(L(T)=H(T)/T\)</span> using the quotient
+          rule and the fact that <span
+          class="math inline">\(\frac{dH(T)}{dT}=N(T)\)</span>. The
+          expression is the classical sensitivity formula for a moving
+          average, from which the qualitative dynamics above follow. The
+          complete derivation of this formula is given in Appendix A of
+          the Metrics Reference.<a href="#fnref13" class="footnote-back"
           role="doc-backlink">↩︎</a></p></li>
           </ol>
           </section>

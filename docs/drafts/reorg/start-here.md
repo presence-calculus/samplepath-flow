@@ -436,44 +436,50 @@ All in all, the measurement techniques we show below are a drop-in _expansion_ o
 [^-discipline]: In practice, operational transaction logs typically *do* contain item-level identifiers, making it easy to compute these statistics when needed. The point of the construction here is methodological: by assuming we do *not* have item-level correspondence, we are forced to define quantities such as throughput and process time purely at the *process level*, independent of any particular notion of items. This gives us rigorous tools to measure and reason about changes in the process independently of the behavior of item-level distributions. As we will see, these item-level distributions are fully determined by the underlying process-level factorizations. If the goal is to measure the impact of process changes and improvements, the presence calculus takes the position that these process-level constructs are the primary quantities we should measure and manage.
 
 
+## $L(T)$ — Time Average of Presence
 
+Recall that cumulative presence is defined as
 
+$$
+H(T) = \int_0^T N(t)\,dt
+$$
 
+The time average of instantaneous presence over the interval $[0,T)$ is
 
-## Parking Lot
+$$
+L(T) = \frac{H(T)}{T} = \frac{1}{T} \int_0^T N(t)\,dt
+$$
 
-In 1972, Dr. Shaler Stidham discovered a simple, yet profoundly important proof of Little's Law. The canonical proof of the Law provided by Dr. John Little nearly a decade earlier, was probabilistic in nature. I required that the arrival and departure process
+$L(T)$ is the time-normalized accumulation of instantaneous presence $N(t)$, i.e. the average _level_ of instantaneous presence during the observation window $[0,T)$. Checking units helps clarify the interpretation. Suppose the units of $N(t)$ are measured in _elements_. Then $H(T)$ is measured in element-time, while the units of $L(T)$ are elements. This is why we call $L(T)$ the time average of instantaneous presence.
 
-
-**Time-Average Presence — $L(T)=H(T)/T$**: This is the time-average of presence over $(0,T]$, i.e. the moving average of $N(t)$ over the observed prefix. It is the left-hand side quantity in the Presence Invariant.
-
-  *Dynamics*: $L(T)$ is continuous at event times (no jumps). Between events it adjusts toward the current state: it rises when $N(t)>L(T)$ and falls when $N(t)<L(T)$. Its responsiveness decays over time (roughly at rate $1/T$), so transient fluctuations are smoothed while persistent effects remain visible.
-
-
-$L(T)$ and the remaining metrics we will derive are normalized by the length of the observation window, giving us a basis to reason about both the relative accumulation of presence over time, its drivers as well as its effects.
-
-| Chart | Name | Formula | Units |
-| --- | --- | --- | --- |
-| $L(T)$ | Time-Average Presence | $L(T)=H(T)/T$ | Elem |
-| [$\Lambda(T)$](#chart-08-arrival-rate-lambda) | Arrival Rate | $\Lambda(T)=A(T)/T$ | Elem/Time |
-| [w(T)](#chart-09-residence-w) | Residence Time per Arrival | $w(T)=H(T)/A(T)$ | Time |
-| [$\Theta(T)$](#chart-12-departure-rate-theta) | Departure Rate (Throughput) | $\Theta(T)=D(T)/T$ | Elem/Time |
-| [w'(T)](#chart-13-residence-w-prime) | Residence Time per Departure | $w'(T)=H(T)/D(T)$ | Time |
-| [Arrival Invariant](#chart-10-arrival-invariant) | Arrival-Side Invariant | $L(T)=\Lambda(T)\cdot w(T)$ | Elem |
-| [Departure Invariant](#chart-14-departure-invariant) | Departure-Side Invariant | $L(T)=\Theta(T)\cdot w'(T)$ | Elem |
-
-
-$L(T)$ is a half-open moving average of instantaneous presence: the left endpoint is fixed and the right endpoint varies continuously. This allows us to distinguish between transient presence (process states held for short periods of time) and stable presence (states that persist or that the process returns to repeatedly over its history). Its numerator is driven by arrival–departure events. Its denominator brings in the effects of time normalization. Time normalization is itself a causal mechanism — one that shapes the dynamics of every remaining flow metric.
-
-Those dynamics are _constrained_ by the finite version of Little's Law, which we call the Presence Invariant. A given value of cumulative presence can be factored into rates (arrivals, departures) and durations (process time). The invariant constrains how these rates and durations must relate to $L(T)$ in order to _produce_ that global state. We call this the principle of conservation of cumulative presence.
-
-Next, [@fig:lt] shows $L(T)$, the first time-normalized metric.
+For the $H(T)$ chart in [@fig:ht], the corresponding chart for $L(T)$ is shown in [@fig:lt] below.
 
 ![$L(T)$ — Time Average of Presence]($document-root/assets/lt.png){#fig:lt}
 
-While it is not immediately obvious from the definition, $L(T)$ is a half-open moving average of $N(t)$ over the interval $[0,T)$. The derivation of this result is given in Appendix A of the Flow Metrics Reference. Understanding this relationship between $L(T)$ and $N(t)$ makes it easy to interpret its behavior. As we know, arrival and departure events change the trajectory of $N(t)$. The behavior of $L(T)$ is to seek the current value of $N(t)$: in between events, if the current value of $N(t)$ is larger than $L(T)$, then it increases; otherwise, it decreases. This means that $L(T)$, like all moving averages, smooths out transient states and emphasizes persistent states, or states that the process returns to often. The detailed reasoning for this can be found in the Flow Metrics Reference.
+Technically, $L(T)$ is a half-open moving average of instantaneous presence: the left endpoint is fixed and the right endpoint varies continuously. Its numerator is driven by instantaneous imbalance in arrival–departure counts, while its denominator introduces time normalization.
 
-Since the denominator is constantly increasing, the moving average tends to settle down provided the process remains bounded within a finite set of states — i.e., the maximum instantaneous presence is bounded and the time spent in states does not grow proportionally with the observation interval. The stabilization of $L(T)$ is one marker of a stable arrival–departure process, and for this reason $L(T)$ is one of the most important operational flow metrics. It is somewhat surprising, then, that none of the flow metrics tools in common use today explicitly measure or track this quantity.
+Recall that $H(T)$ encodes the time-weighted history of instantaneous presence of the process: its value represents the sum of the values of the instantaneous presence $N(t)$, weighted by the amount of time the process spent in each state. Time normalization therefore de-emphasizes transients (components of $H(T)$ where process states were held for short periods) and emphasizes persistent states (states that persist or that the process returns to repeatedly over its history).
+
+The dynamics of $L(T)$ follow a simple pattern. It is continuous at event times (there are no jumps). Between events it moves toward the current value of $N(t)$: it rises when $N(t) > L(T)$ and falls when $N(t) < L(T)$. Its responsiveness decays over time (roughly at rate $1/T$) [^-sensitivity]. As a result, transient states are smoothed while persistent states are emphasized. This is the signature of a moving average.
+
+[^-sensitivity]: These dynamics can be derived from the relationship
+  $$
+  \frac{dL(T)}{dT} = \frac{N(T) - L(T)}{T}.
+  $$
+  This follows directly from differentiating $L(T)=H(T)/T$ using the quotient rule and the fact that $\frac{dH(T)}{dT}=N(T)$. The expression is the classical sensitivity formula for a moving average, from which the qualitative dynamics above follow. The complete derivation of this formula is given in Appendix A of the Metrics Reference.
+
+Since the denominator is constantly increasing, the moving average tends to stabilize provided the process remains bounded within a finite set of states — that is, the instantaneous presence remains bounded and the time spent in states does not grow proportionally with the observation interval.
+
+On the other hand, if cumulative presence grows proportionally with the observation interval — for example because the process spends increasing amounts of time in higher presence states — the value of $L(T)$ also grows without bound and the process is unstable.
+
+The stabilization of $L(T)$ is one marker of a stable arrival–departure process, and for this reason $L(T)$ is one of the most important operational flow metrics.
+
+We will have much more to say about the behavior of $L(T)$ as a key stability diagnostic for arrival–departure processes.
+
+## The Presence Invariant
+
+Time normalization
+
 
 
 # References
