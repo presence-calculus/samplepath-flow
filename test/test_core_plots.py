@@ -236,6 +236,85 @@ def test_render_Theta_passes_overlays():
     assert mock_render.call_args.kwargs["overlays"] == overlays
 
 
+def test_render_Theta_uses_analytic_curve_when_departures_available():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([1.0, 2.0])
+    analytic_times = [_t("2024-01-01 12:00:00")]
+    analytic_vals = np.array([1.5])
+    with (
+        patch(
+            "samplepath.plots.core.build_theta_curve",
+            return_value=(analytic_times, analytic_vals, []),
+        ),
+        patch("samplepath.plots.core.render_line_chart") as mock_render,
+    ):
+        core.ThetaPanel().render(
+            ax,
+            times,
+            values,
+            departures_vals=np.array([1.0, 2.0]),
+        )
+    assert mock_render.call_args.args[1] == analytic_times
+
+
+def test_render_Theta_draws_vertical_jumps_from_analytic_metadata():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([1.0, 2.0])
+    with (
+        patch(
+            "samplepath.plots.core.build_theta_curve",
+            return_value=(times, np.array([1.0, 2.0]), [(times[1], 1.0, 2.0)]),
+        ),
+        patch("samplepath.plots.core.render_line_chart"),
+    ):
+        core.ThetaPanel().render(
+            ax,
+            times,
+            values,
+            departures_vals=np.array([1.0, 2.0]),
+            scale=MINUTES,
+        )
+    assert np.allclose(ax.vlines.call_args.args[1:3], np.array([60.0, 120.0]))
+
+
+def test_render_Theta_calendar_mode_skips_analytic_curve():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([1.0, 2.0])
+    with (
+        patch("samplepath.plots.core.build_theta_curve") as mock_curve,
+        patch("samplepath.plots.core.render_line_chart") as mock_render,
+    ):
+        core.ThetaPanel(sampling_frequency="D").render(
+            ax,
+            times,
+            values,
+            departures_vals=np.array([1.0, 2.0]),
+        )
+    mock_curve.assert_not_called()
+    assert mock_render.call_args.args[1] == times
+
+
+def test_render_Theta_missing_departures_falls_back_to_original_polyline():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([1.0, 2.0])
+    with (
+        patch("samplepath.plots.core.build_theta_curve") as mock_curve,
+        patch("samplepath.plots.core.render_line_chart") as mock_render,
+    ):
+        core.ThetaPanel().render(
+            ax,
+            times,
+            values,
+            departures_vals=None,
+        )
+    mock_curve.assert_not_called()
+    assert mock_render.call_args.args[1] == times
+
+
 def test_render_w_prime_label():
     ax = MagicMock()
     times = [_t("2024-01-01")]
@@ -243,6 +322,15 @@ def test_render_w_prime_label():
     with patch("samplepath.plots.core.render_line_chart") as mock_render:
         core.WPrimePanel().render(ax, times, values)
     assert mock_render.call_args.kwargs["label"] == "w'(T) [hrs]"
+
+
+def test_render_w_prime_uses_blue_line_color():
+    ax = MagicMock()
+    times = [_t("2024-01-01")]
+    values = np.array([1.0])
+    with patch("samplepath.plots.core.render_line_chart") as mock_render:
+        core.WPrimePanel().render(ax, times, values)
+    assert mock_render.call_args.kwargs["color"] == "tab:blue"
 
 
 def test_render_w_prime_sets_ylabel():
@@ -423,6 +511,53 @@ def test_render_L_passes_overlays_with_default_color():
     ax.set_ylabel.assert_called_once_with("L(T)")
 
 
+def test_render_L_uses_analytic_curve_times_when_state_vectors_are_available():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([2.0, 2.0])
+    analytic_times = [_t("2024-01-01 12:00:00")]
+    analytic_vals = np.array([2.0])
+    with (
+        patch(
+            "samplepath.plots.core.build_L_curve",
+            return_value=(analytic_times, analytic_vals),
+        ),
+        patch("samplepath.plots.core.render_line_chart") as mock_render,
+    ):
+        core.LPanel().render(
+            ax,
+            times,
+            values,
+            H_vals=np.array([0.0, 172800.0]),
+            N_vals=np.array([2.0, 2.0]),
+        )
+    assert mock_render.call_args.args[1] == analytic_times
+
+
+def test_render_L_builds_event_overlays_from_event_indexed_points():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([2.0, 2.0])
+    with (
+        patch(
+            "samplepath.plots.core.build_L_curve",
+            return_value=([_t("2024-01-01 12:00:00")], np.array([2.0])),
+        ),
+        patch("samplepath.plots.core.build_event_overlays") as mock_overlays,
+        patch("samplepath.plots.core.render_line_chart"),
+    ):
+        core.LPanel(with_event_marks=True).render(
+            ax,
+            times,
+            values,
+            arrival_times=[times[0]],
+            departure_times=[times[1]],
+            H_vals=np.array([0.0, 172800.0]),
+            N_vals=np.array([2.0, 2.0]),
+        )
+    assert mock_overlays.call_args.args[0] == times
+
+
 def test_render_Lambda_passes_clip_options():
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
@@ -440,6 +575,85 @@ def test_render_Lambda_passes_clip_options():
     assert np.allclose(args[2], values * 3600.0)
     assert args[3:] == (99.0, 1.0, 1800.0)
     ax.set_ylabel.assert_called_once_with("Λ(T) [1/hr]")
+
+
+def test_render_Lambda_uses_analytic_curve_when_arrivals_available():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([1.0, 2.0])
+    analytic_times = [_t("2024-01-01 12:00:00")]
+    analytic_vals = np.array([1.5])
+    with (
+        patch(
+            "samplepath.plots.core.build_lambda_curve",
+            return_value=(analytic_times, analytic_vals, []),
+        ),
+        patch("samplepath.plots.core.render_line_chart") as mock_line,
+    ):
+        core.LambdaPanel().render(
+            ax,
+            times,
+            values,
+            arrivals_vals=np.array([1.0, 2.0]),
+        )
+    assert mock_line.call_args.args[1] == analytic_times
+
+
+def test_render_Lambda_draws_vertical_jumps_from_analytic_metadata():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([1.0, 2.0])
+    with (
+        patch(
+            "samplepath.plots.core.build_lambda_curve",
+            return_value=(times, np.array([1.0, 2.0]), [(times[1], 1.0, 2.0)]),
+        ),
+        patch("samplepath.plots.core.render_line_chart"),
+    ):
+        core.LambdaPanel().render(
+            ax,
+            times,
+            values,
+            arrivals_vals=np.array([1.0, 2.0]),
+            scale=MINUTES,
+        )
+    assert np.allclose(ax.vlines.call_args.args[1:3], np.array([60.0, 120.0]))
+
+
+def test_render_Lambda_calendar_mode_skips_analytic_curve():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([1.0, 2.0])
+    with (
+        patch("samplepath.plots.core.build_lambda_curve") as mock_curve,
+        patch("samplepath.plots.core.render_line_chart") as mock_line,
+    ):
+        core.LambdaPanel(sampling_frequency="D").render(
+            ax,
+            times,
+            values,
+            arrivals_vals=np.array([1.0, 2.0]),
+        )
+    mock_curve.assert_not_called()
+    assert mock_line.call_args.args[1] == times
+
+
+def test_render_Lambda_missing_arrivals_falls_back_to_original_polyline():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([1.0, 2.0])
+    with (
+        patch("samplepath.plots.core.build_lambda_curve") as mock_curve,
+        patch("samplepath.plots.core.render_line_chart") as mock_line,
+    ):
+        core.LambdaPanel().render(
+            ax,
+            times,
+            values,
+            arrivals_vals=None,
+        )
+    mock_curve.assert_not_called()
+    assert mock_line.call_args.args[1] == times
 
 
 def test_render_w_sets_defaults():
@@ -470,6 +684,138 @@ def test_render_w_scales_duration_values():
         core.WPanel().render(ax, times, values, scale=MINUTES)
     assert mock_line.call_args.kwargs["label"] == "w(T) [min]"
     assert np.allclose(mock_line.call_args.args[2], values / 60.0)
+
+
+def test_render_w_uses_analytic_curve_when_state_vectors_are_available():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([1.0, 2.0])
+    analytic_times = [_t("2024-01-01 12:00:00")]
+    with (
+        patch(
+            "samplepath.plots.core.build_w_curve",
+            return_value=(analytic_times, np.array([1.5]), []),
+        ),
+        patch("samplepath.plots.core.render_line_chart") as mock_line,
+    ):
+        core.WPanel().render(
+            ax,
+            times,
+            values,
+            H_vals=np.array([0.0, 86400.0]),
+            N_vals=np.array([1.0, 1.0]),
+            arrivals_vals=np.array([1.0, 2.0]),
+        )
+    assert mock_line.call_args.args[1] == analytic_times
+
+
+def test_render_w_draws_vertical_jumps_from_analytic_metadata():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([120.0, 120.0])
+    with (
+        patch(
+            "samplepath.plots.core.build_w_curve",
+            return_value=(times, np.array([120.0, 120.0]), [(times[1], 120.0, 240.0)]),
+        ),
+        patch("samplepath.plots.core.render_line_chart"),
+    ):
+        core.WPanel().render(
+            ax,
+            times,
+            values,
+            H_vals=np.array([0.0, 86400.0]),
+            N_vals=np.array([1.0, 1.0]),
+            arrivals_vals=np.array([1.0, 2.0]),
+            scale=MINUTES,
+        )
+    assert np.allclose(ax.vlines.call_args.args[1:3], np.array([2.0, 4.0]))
+
+
+def test_render_w_calendar_mode_skips_analytic_curve():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([1.0, 2.0])
+    with (
+        patch("samplepath.plots.core.build_w_curve") as mock_curve,
+        patch("samplepath.plots.core.render_line_chart") as mock_line,
+    ):
+        core.WPanel(sampling_frequency="D").render(
+            ax,
+            times,
+            values,
+            H_vals=np.array([0.0, 86400.0]),
+            N_vals=np.array([1.0, 1.0]),
+            arrivals_vals=np.array([1.0, 2.0]),
+        )
+    mock_curve.assert_not_called()
+    assert mock_line.call_args.args[1] == times
+
+
+def test_render_w_prime_uses_analytic_curve_when_state_vectors_are_available():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([1.0, 2.0])
+    analytic_times = [_t("2024-01-01 12:00:00")]
+    with (
+        patch(
+            "samplepath.plots.core.build_w_prime_curve",
+            return_value=(analytic_times, np.array([1.5]), []),
+        ),
+        patch("samplepath.plots.core.render_line_chart") as mock_line,
+    ):
+        core.WPrimePanel().render(
+            ax,
+            times,
+            values,
+            H_vals=np.array([0.0, 86400.0]),
+            N_vals=np.array([1.0, 1.0]),
+            departures_vals=np.array([1.0, 2.0]),
+        )
+    assert mock_line.call_args.args[1] == analytic_times
+
+
+def test_render_w_prime_draws_vertical_jumps_from_analytic_metadata():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([120.0, 120.0])
+    with (
+        patch(
+            "samplepath.plots.core.build_w_prime_curve",
+            return_value=(times, np.array([120.0, 120.0]), [(times[1], 120.0, 240.0)]),
+        ),
+        patch("samplepath.plots.core.render_line_chart"),
+    ):
+        core.WPrimePanel().render(
+            ax,
+            times,
+            values,
+            H_vals=np.array([0.0, 86400.0]),
+            N_vals=np.array([1.0, 1.0]),
+            departures_vals=np.array([1.0, 2.0]),
+            scale=MINUTES,
+        )
+    assert np.allclose(ax.vlines.call_args.args[1:3], np.array([2.0, 4.0]))
+
+
+def test_render_w_prime_calendar_mode_skips_analytic_curve():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([1.0, 2.0])
+    with (
+        patch("samplepath.plots.core.build_w_prime_curve") as mock_curve,
+        patch("samplepath.plots.core.render_line_chart") as mock_line,
+    ):
+        core.WPrimePanel(sampling_frequency="D").render(
+            ax,
+            times,
+            values,
+            H_vals=np.array([0.0, 86400.0]),
+            N_vals=np.array([1.0, 1.0]),
+            departures_vals=np.array([1.0, 2.0]),
+        )
+    mock_curve.assert_not_called()
+    assert mock_line.call_args.args[1] == times
 
 
 def test_render_sojourn_sets_defaults():
@@ -896,6 +1242,65 @@ def test_plot_single_panel_L_calls_renderer():
     mock_render.assert_called_once()
 
 
+def test_plot_single_panel_L_passes_H_to_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.LPanel.render") as mock_render,
+    ):
+        core.LPanel().plot(metrics, None, chart_config, "/tmp/out")
+    assert np.allclose(mock_render.call_args.kwargs["H_vals"], metrics.H)
+    assert np.allclose(mock_render.call_args.kwargs["N_vals"], metrics.N)
+
+
+def test_render_L_calendar_mode_skips_analytic_curve_even_with_state_vectors():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([2.0, 2.0])
+    with (
+        patch("samplepath.plots.core.build_L_curve") as mock_curve,
+        patch("samplepath.plots.core.render_line_chart") as mock_render,
+    ):
+        core.LPanel(sampling_frequency="D").render(
+            ax,
+            times,
+            values,
+            H_vals=np.array([0.0, 172800.0]),
+            N_vals=np.array([2.0, 2.0]),
+        )
+    mock_curve.assert_not_called()
+    assert mock_render.call_args.args[1] == times
+    assert np.allclose(mock_render.call_args.args[2], values)
+
+
+def test_render_L_missing_state_vectors_falls_back_to_original_polyline():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([2.0, 2.0])
+    with (
+        patch("samplepath.plots.core.build_L_curve") as mock_curve,
+        patch("samplepath.plots.core.render_line_chart") as mock_render,
+    ):
+        core.LPanel().render(
+            ax,
+            times,
+            values,
+            H_vals=None,
+            N_vals=np.array([2.0, 2.0]),
+        )
+    mock_curve.assert_not_called()
+    assert mock_render.call_args.args[1] == times
+    assert np.allclose(mock_render.call_args.args[2], values)
+
+
 def test_plot_single_panel_Lambda_calls_renderer():
     fig = MagicMock()
     ax = MagicMock()
@@ -915,6 +1320,24 @@ def test_plot_single_panel_Lambda_calls_renderer():
     mock_render.assert_called_once()
 
 
+def test_plot_single_panel_Lambda_passes_arrivals_to_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.LambdaPanel.render") as mock_render,
+    ):
+        core.LambdaPanel().plot(metrics, None, chart_config, "/tmp/out")
+    assert np.allclose(mock_render.call_args.kwargs["arrivals_vals"], metrics.Arrivals)
+
+
 def test_plot_single_panel_w_calls_renderer():
     fig = MagicMock()
     ax = MagicMock()
@@ -932,6 +1355,63 @@ def test_plot_single_panel_w_calls_renderer():
     ):
         core.WPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
     mock_render.assert_called_once()
+
+
+def test_plot_single_panel_w_passes_state_vectors_to_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.WPanel.render") as mock_render,
+    ):
+        core.WPanel().plot(metrics, None, chart_config, "/tmp/out")
+    kwargs = mock_render.call_args.kwargs
+    assert np.allclose(kwargs["H_vals"], metrics.H)
+
+
+def test_plot_single_panel_w_passes_N_to_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.WPanel.render") as mock_render,
+    ):
+        core.WPanel().plot(metrics, None, chart_config, "/tmp/out")
+    kwargs = mock_render.call_args.kwargs
+    assert np.allclose(kwargs["N_vals"], metrics.N)
+
+
+def test_plot_single_panel_w_passes_arrivals_to_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.WPanel.render") as mock_render,
+    ):
+        core.WPanel().plot(metrics, None, chart_config, "/tmp/out")
+    kwargs = mock_render.call_args.kwargs
+    assert np.allclose(kwargs["arrivals_vals"], metrics.Arrivals)
 
 
 def test_plot_single_panel_H_calls_renderer():
@@ -972,6 +1452,26 @@ def test_plot_single_panel_Theta_calls_renderer():
     mock_render.assert_called_once()
 
 
+def test_plot_single_panel_Theta_passes_departures_to_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.ThetaPanel.render") as mock_render,
+    ):
+        core.ThetaPanel().plot(metrics, None, chart_config, "/tmp/out")
+    assert np.allclose(
+        mock_render.call_args.kwargs["departures_vals"], metrics.Departures
+    )
+
+
 def test_plot_single_panel_w_prime_calls_renderer():
     fig = MagicMock()
     ax = MagicMock()
@@ -989,6 +1489,63 @@ def test_plot_single_panel_w_prime_calls_renderer():
     ):
         core.WPrimePanel().plot(metrics, filter_result, chart_config, "/tmp/out")
     mock_render.assert_called_once()
+
+
+def test_plot_single_panel_w_prime_passes_state_vectors_to_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.WPrimePanel.render") as mock_render,
+    ):
+        core.WPrimePanel().plot(metrics, None, chart_config, "/tmp/out")
+    kwargs = mock_render.call_args.kwargs
+    assert np.allclose(kwargs["H_vals"], metrics.H)
+
+
+def test_plot_single_panel_w_prime_passes_N_to_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.WPrimePanel.render") as mock_render,
+    ):
+        core.WPrimePanel().plot(metrics, None, chart_config, "/tmp/out")
+    kwargs = mock_render.call_args.kwargs
+    assert np.allclose(kwargs["N_vals"], metrics.N)
+
+
+def test_plot_single_panel_w_prime_passes_departures_to_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.WPrimePanel.render") as mock_render,
+    ):
+        core.WPrimePanel().plot(metrics, None, chart_config, "/tmp/out")
+    kwargs = mock_render.call_args.kwargs
+    assert np.allclose(kwargs["departures_vals"], metrics.Departures)
 
 
 def test_plot_single_panel_sojourn_calls_renderer():
@@ -1145,6 +1702,33 @@ def test_plot_core_stack_calls_all_renderers():
     mock_L.assert_called_once()
     mock_Lam.assert_called_once()
     mock_w.assert_called_once()
+
+
+def test_plot_core_stack_passes_w_H_state_to_renderer():
+    fig = MagicMock()
+    axes = np.array([object() for _ in range(4)], dtype=object)
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, axes, "out.png"
+
+    with (
+        patch("samplepath.plots.core.layout_context", side_effect=fake_context),
+        patch("samplepath.plots.core.NPanel.render"),
+        patch("samplepath.plots.core.LPanel.render"),
+        patch("samplepath.plots.core.LambdaPanel.render"),
+        patch("samplepath.plots.core.WPanel.render") as mock_w,
+    ):
+        core.plot_core_stack(
+            metrics,
+            filter_result,
+            chart_config,
+            "/tmp/out",
+        )
+    assert np.allclose(mock_w.call_args.kwargs["H_vals"], metrics.H)
 
 
 def test_plot_core_stack_applies_layout_and_caption():
@@ -2785,6 +3369,14 @@ def test_plot_departure_flow_metrics_stack_calls_Theta_render():
 def test_plot_departure_flow_metrics_stack_calls_w_prime_render():
     mocks = _call_departure_flow_metrics_stack_with_mocks()
     mocks["w_prime"].assert_called_once()
+
+
+def test_plot_departure_flow_metrics_stack_passes_w_prime_H_state_to_renderer():
+    mocks = _call_departure_flow_metrics_stack_with_mocks()
+    assert np.allclose(
+        mocks["w_prime"].call_args.kwargs["H_vals"],
+        _metrics_fixture().H,
+    )
 
 
 def test_plot_departure_flow_metrics_stack_out_path_is_none():

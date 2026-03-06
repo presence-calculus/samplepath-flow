@@ -14,6 +14,12 @@ from samplepath.metrics import (
     FlowMetricsResult,
     MetricDerivations,
 )
+from samplepath.plots.analytic_curves import (
+    build_lambda_curve,
+    build_theta_curve,
+    build_w_curve,
+    build_w_prime_curve,
+)
 from samplepath.plots.chart_config import ChartConfig, ColorConfig
 from samplepath.plots.core import CFDPanel
 from samplepath.plots.figure_context import (
@@ -53,20 +59,80 @@ class ProcessTimeConvergencePanel:
         w_prime_vals: np.ndarray,
         w_star_vals: np.ndarray,
         *,
+        H_vals: Optional[np.ndarray] = None,
+        N_vals: Optional[np.ndarray] = None,
+        arrivals_cum: Optional[np.ndarray] = None,
+        departures_cum: Optional[np.ndarray] = None,
         arrival_times: Optional[List[pd.Timestamp]] = None,
         departure_times: Optional[List[pd.Timestamp]] = None,
         scale: Optional[DurationScale] = None,
     ) -> None:
         duration_scale = scale or HOURS
-        w_scaled = np.asarray(w_vals, dtype=float) / duration_scale.divisor
-        w_prime_scaled = np.asarray(w_prime_vals, dtype=float) / duration_scale.divisor
+        w_scaled_events = np.asarray(w_vals, dtype=float) / duration_scale.divisor
+        w_prime_scaled_events = (
+            np.asarray(w_prime_vals, dtype=float) / duration_scale.divisor
+        )
+        w_scaled = w_scaled_events
+        w_prime_scaled = w_prime_scaled_events
+        w_times = times
+        w_prime_times = times
+        w_jumps_scaled: List[Tuple[pd.Timestamp, float, float]] = []
+        w_prime_jumps_scaled: List[Tuple[pd.Timestamp, float, float]] = []
+        if (
+            self.sampling_frequency is None
+            and H_vals is not None
+            and N_vals is not None
+            and arrivals_cum is not None
+            and len(times) == len(H_vals) == len(N_vals) == len(arrivals_cum)
+        ):
+            w_curve_times, w_curve_vals, w_jumps = build_w_curve(
+                times,
+                H_vals,
+                N_vals,
+                arrivals_cum,
+            )
+            if w_curve_times:
+                w_times = w_curve_times
+                w_scaled = w_curve_vals / duration_scale.divisor
+            w_jumps_scaled = [
+                (
+                    jump_time,
+                    left / duration_scale.divisor,
+                    right / duration_scale.divisor,
+                )
+                for jump_time, left, right in w_jumps
+            ]
+        if (
+            self.sampling_frequency is None
+            and H_vals is not None
+            and N_vals is not None
+            and departures_cum is not None
+            and len(times) == len(H_vals) == len(N_vals) == len(departures_cum)
+        ):
+            wp_curve_times, wp_curve_vals, wp_jumps = build_w_prime_curve(
+                times,
+                H_vals,
+                N_vals,
+                departures_cum,
+            )
+            if wp_curve_times:
+                w_prime_times = wp_curve_times
+                w_prime_scaled = wp_curve_vals / duration_scale.divisor
+            w_prime_jumps_scaled = [
+                (
+                    jump_time,
+                    left / duration_scale.divisor,
+                    right / duration_scale.divisor,
+                )
+                for jump_time, left, right in wp_jumps
+            ]
         w_star_scaled = np.asarray(w_star_vals, dtype=float) / duration_scale.divisor
         arrivals = arrival_times or []
         departures = departure_times or []
         w_overlays = (
             build_event_overlays(
                 times,
-                w_scaled,
+                w_scaled_events,
                 arrivals,
                 [],
                 drop_lines_for_arrivals=True,
@@ -78,7 +144,7 @@ class ProcessTimeConvergencePanel:
         w_prime_overlays = (
             build_event_overlays(
                 times,
-                w_prime_scaled,
+                w_prime_scaled_events,
                 [],
                 departures,
                 drop_lines_for_arrivals=False,
@@ -101,22 +167,40 @@ class ProcessTimeConvergencePanel:
         )
         render_line_chart(
             ax,
-            times,
+            w_times,
             w_scaled,
             label=f"w(T) [{duration_scale.label}]",
             color="tab:blue",
             overlays=w_overlays,
             sampling_frequency=self.sampling_frequency,
         )
+        for jump_time, left, right in w_jumps_scaled:
+            ax.vlines(
+                jump_time,
+                left,
+                right,
+                colors="tab:blue",
+                linewidth=1.2,
+                alpha=0.9,
+            )
         render_line_chart(
             ax,
-            times,
+            w_prime_times,
             w_prime_scaled,
             label=f"w'(T) [{duration_scale.label}]",
             color="tab:orange",
             overlays=w_prime_overlays,
             sampling_frequency=self.sampling_frequency,
         )
+        for jump_time, left, right in w_prime_jumps_scaled:
+            ax.vlines(
+                jump_time,
+                left,
+                right,
+                colors="tab:orange",
+                linewidth=1.2,
+                alpha=0.9,
+            )
         render_line_chart(
             ax,
             times,
@@ -163,6 +247,10 @@ class ProcessTimeConvergencePanel:
                 metrics.w,
                 metrics.w_prime,
                 empirical_metrics.W_star,
+                H_vals=metrics.H,
+                N_vals=metrics.N,
+                arrivals_cum=metrics.Arrivals,
+                departures_cum=metrics.Departures,
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
                 scale=scale,
@@ -186,17 +274,77 @@ class SojournVsResidenceTimeScatterPanel:
         departure_times: List[pd.Timestamp],
         sojourn_vals: np.ndarray,
         *,
+        H_vals: Optional[np.ndarray] = None,
+        N_vals: Optional[np.ndarray] = None,
+        arrivals_cum: Optional[np.ndarray] = None,
+        departures_cum: Optional[np.ndarray] = None,
         scale: Optional[DurationScale] = None,
     ) -> None:
         duration_scale = scale or HOURS
-        w_scaled = np.asarray(w_vals, dtype=float) / duration_scale.divisor
-        w_prime_scaled = np.asarray(w_prime_vals, dtype=float) / duration_scale.divisor
+        w_scaled_events = np.asarray(w_vals, dtype=float) / duration_scale.divisor
+        w_prime_scaled_events = (
+            np.asarray(w_prime_vals, dtype=float) / duration_scale.divisor
+        )
+        w_scaled = w_scaled_events
+        w_prime_scaled = w_prime_scaled_events
+        w_times = times
+        w_prime_times = times
+        w_jumps_scaled: List[Tuple[pd.Timestamp, float, float]] = []
+        w_prime_jumps_scaled: List[Tuple[pd.Timestamp, float, float]] = []
+        if (
+            self.sampling_frequency is None
+            and H_vals is not None
+            and N_vals is not None
+            and arrivals_cum is not None
+            and len(times) == len(H_vals) == len(N_vals) == len(arrivals_cum)
+        ):
+            w_curve_times, w_curve_vals, w_jumps = build_w_curve(
+                times,
+                H_vals,
+                N_vals,
+                arrivals_cum,
+            )
+            if w_curve_times:
+                w_times = w_curve_times
+                w_scaled = w_curve_vals / duration_scale.divisor
+            w_jumps_scaled = [
+                (
+                    jump_time,
+                    left / duration_scale.divisor,
+                    right / duration_scale.divisor,
+                )
+                for jump_time, left, right in w_jumps
+            ]
+        if (
+            self.sampling_frequency is None
+            and H_vals is not None
+            and N_vals is not None
+            and departures_cum is not None
+            and len(times) == len(H_vals) == len(N_vals) == len(departures_cum)
+        ):
+            wp_curve_times, wp_curve_vals, wp_jumps = build_w_prime_curve(
+                times,
+                H_vals,
+                N_vals,
+                departures_cum,
+            )
+            if wp_curve_times:
+                w_prime_times = wp_curve_times
+                w_prime_scaled = wp_curve_vals / duration_scale.divisor
+            w_prime_jumps_scaled = [
+                (
+                    jump_time,
+                    left / duration_scale.divisor,
+                    right / duration_scale.divisor,
+                )
+                for jump_time, left, right in wp_jumps
+            ]
         sojourn_scaled = np.asarray(sojourn_vals, dtype=float) / duration_scale.divisor
         departures = departure_times or []
         w_overlays = (
             build_event_overlays(
                 times,
-                w_scaled,
+                w_scaled_events,
                 [],
                 departures,
                 drop_lines_for_arrivals=False,
@@ -208,7 +356,7 @@ class SojournVsResidenceTimeScatterPanel:
         w_prime_overlays = (
             build_event_overlays(
                 times,
-                w_prime_scaled,
+                w_prime_scaled_events,
                 [],
                 departures,
                 drop_lines_for_arrivals=False,
@@ -226,22 +374,40 @@ class SojournVsResidenceTimeScatterPanel:
         )
         render_line_chart(
             ax,
-            times,
+            w_times,
             w_scaled,
             label=f"w(T) [{duration_scale.label}]",
             color="tab:blue",
             overlays=w_overlays,
             sampling_frequency=self.sampling_frequency,
         )
+        for jump_time, left, right in w_jumps_scaled:
+            ax.vlines(
+                jump_time,
+                left,
+                right,
+                colors="tab:blue",
+                linewidth=1.2,
+                alpha=0.9,
+            )
         render_line_chart(
             ax,
-            times,
+            w_prime_times,
             w_prime_scaled,
             label=f"w'(T) [{duration_scale.label}]",
             color="tab:orange",
             overlays=w_prime_overlays,
             sampling_frequency=self.sampling_frequency,
         )
+        for jump_time, left, right in w_prime_jumps_scaled:
+            ax.vlines(
+                jump_time,
+                left,
+                right,
+                colors="tab:orange",
+                linewidth=1.2,
+                alpha=0.9,
+            )
         if self.show_title:
             ax.set_title(self.title)
         ax.set_ylabel(f"Duration [{duration_scale.label}]")
@@ -280,6 +446,10 @@ class SojournVsResidenceTimeScatterPanel:
                 metrics.w_prime,
                 metrics.departure_times,
                 empirical_metrics.sojourn_vals,
+                H_vals=metrics.H,
+                N_vals=metrics.N,
+                arrivals_cum=metrics.Arrivals,
+                departures_cum=metrics.Departures,
                 scale=scale,
             )
         return resolved_out_path
@@ -300,6 +470,7 @@ class ArrivalDepartureRateConvergencePanel:
         departures_cum: np.ndarray,
         lambda_cum_rate: np.ndarray,
         *,
+        arrivals_cum: Optional[np.ndarray] = None,
         arrival_times: Optional[List[pd.Timestamp]] = None,
         departure_times: Optional[List[pd.Timestamp]] = None,
         lambda_pctl_upper: Optional[float] = None,
@@ -321,11 +492,29 @@ class ArrivalDepartureRateConvergencePanel:
             theta_rate = np.where(
                 elapsed_seconds > 0.0, departures_cum / elapsed_seconds, np.nan
             )
-        lambda_rate_scaled = (
+        lambda_rate_scaled_events = (
             np.asarray(lambda_cum_rate, dtype=float) * duration_scale.divisor
         )
-        theta_rate_scaled = np.asarray(theta_rate, dtype=float) * duration_scale.divisor
-
+        lambda_rate_scaled = lambda_rate_scaled_events
+        lambda_times = times
+        lambda_jumps_scaled: List[Tuple[pd.Timestamp, float, float]] = []
+        if (
+            self.sampling_frequency is None
+            and arrivals_cum is not None
+            and len(times) == len(arrivals_cum)
+        ):
+            lam_times, lam_vals, lam_jumps = build_lambda_curve(times, arrivals_cum)
+            if lam_times:
+                lambda_times = lam_times
+                lambda_rate_scaled = lam_vals * duration_scale.divisor
+            lambda_jumps_scaled = [
+                (
+                    jump_time,
+                    left * duration_scale.divisor,
+                    right * duration_scale.divisor,
+                )
+                for jump_time, left, right in lam_jumps
+            ]
         last_dep_idx = -1
         if len(departures_cum) > 0:
             dep_vals = np.asarray(departures_cum, dtype=float)
@@ -335,6 +524,27 @@ class ArrivalDepartureRateConvergencePanel:
 
         if last_dep_idx >= 0 and last_dep_idx + 1 < n:
             theta_rate[last_dep_idx + 1 :] = np.nan
+        theta_rate_scaled_events = (
+            np.asarray(theta_rate, dtype=float) * duration_scale.divisor
+        )
+        theta_rate_scaled = theta_rate_scaled_events
+        theta_times = times
+        theta_jumps_scaled: List[Tuple[pd.Timestamp, float, float]] = []
+        if self.sampling_frequency is None and len(times) == len(departures_cum):
+            theta_curve_times, theta_curve_vals, theta_jumps = build_theta_curve(
+                times, departures_cum
+            )
+            if theta_curve_times:
+                theta_times = theta_curve_times
+                theta_rate_scaled = theta_curve_vals * duration_scale.divisor
+            theta_jumps_scaled = [
+                (
+                    jump_time,
+                    left * duration_scale.divisor,
+                    right * duration_scale.divisor,
+                )
+                for jump_time, left, right in theta_jumps
+            ]
 
         lambda_label = "Λ(T)- Cumulative Arrival Rate"
         theta_label = "θ(T) - Cumulative Departure Rate "
@@ -349,7 +559,7 @@ class ArrivalDepartureRateConvergencePanel:
         overlays_lambda = (
             build_event_overlays(
                 times,
-                lambda_rate_scaled,
+                lambda_rate_scaled_events,
                 arrival_times or [],
                 [],
                 drop_lines_for_arrivals=True,
@@ -361,7 +571,7 @@ class ArrivalDepartureRateConvergencePanel:
         overlays_theta = (
             build_event_overlays(
                 times,
-                theta_rate_scaled,
+                theta_rate_scaled_events,
                 [],
                 departure_times or [],
                 drop_lines_for_arrivals=False,
@@ -372,29 +582,49 @@ class ArrivalDepartureRateConvergencePanel:
         )
         render_line_chart(
             ax,
-            times,
+            lambda_times,
             lambda_rate_scaled,
             label=f"{lambda_label} [{duration_scale.rate_label}]",
             color="tab:blue",
             overlays=overlays_lambda,
             sampling_frequency=self.sampling_frequency,
         )
+        if self.sampling_frequency is None and lambda_jumps_scaled:
+            for jump_time, y0, y1 in lambda_jumps_scaled:
+                ax.vlines(
+                    jump_time,
+                    y0,
+                    y1,
+                    colors="tab:blue",
+                    linewidth=1.2,
+                    alpha=0.9,
+                )
         render_line_chart(
             ax,
-            times,
+            theta_times,
             theta_rate_scaled,
             label=f"{theta_label} [{duration_scale.rate_label}]",
             color="tab:orange",
             overlays=overlays_theta,
             sampling_frequency=self.sampling_frequency,
         )
+        if self.sampling_frequency is None and theta_jumps_scaled:
+            for jump_time, y0, y1 in theta_jumps_scaled:
+                ax.vlines(
+                    jump_time,
+                    y0,
+                    y1,
+                    colors="tab:orange",
+                    linewidth=1.2,
+                    alpha=0.9,
+                )
         if self.show_title:
             ax.set_title(self.title)
         ax.set_ylabel(f"Rate [{duration_scale.rate_label}]")
         ax.legend(loc="best")
         _clip_axis_to_percentile(
             ax,
-            times,
+            lambda_times,
             lambda_rate_scaled,
             upper_p=lambda_pctl_upper,
             lower_p=lambda_pctl_lower,
@@ -431,6 +661,7 @@ class ArrivalDepartureRateConvergencePanel:
                 metrics.times,
                 metrics.Departures,
                 metrics.Lambda,
+                arrivals_cum=metrics.Arrivals,
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
                 lambda_pctl_upper=chart_config.lambda_pctl_upper,
@@ -456,6 +687,7 @@ class CumulativeArrivalRateConvergencePanel:
         lam_vals: np.ndarray,
         lam_star: np.ndarray,
         *,
+        arrivals_cum: Optional[np.ndarray] = None,
         arrival_times: Optional[List[pd.Timestamp]] = None,
         lambda_pctl_upper: Optional[float] = None,
         lambda_pctl_lower: Optional[float] = None,
@@ -463,7 +695,31 @@ class CumulativeArrivalRateConvergencePanel:
         scale: Optional[DurationScale] = None,
     ) -> None:
         duration_scale = scale or HOURS
-        lam_vals_scaled = np.asarray(lam_vals, dtype=float) * duration_scale.divisor
+        lam_vals_scaled_events = (
+            np.asarray(lam_vals, dtype=float) * duration_scale.divisor
+        )
+        lam_vals_scaled = lam_vals_scaled_events
+        lam_times = times
+        lam_jumps_scaled: List[Tuple[pd.Timestamp, float, float]] = []
+        if (
+            self.sampling_frequency is None
+            and arrivals_cum is not None
+            and len(times) == len(arrivals_cum)
+        ):
+            lam_curve_times, lam_curve_vals, lam_jumps = build_lambda_curve(
+                times, arrivals_cum
+            )
+            if lam_curve_times:
+                lam_times = lam_curve_times
+                lam_vals_scaled = lam_curve_vals * duration_scale.divisor
+            lam_jumps_scaled = [
+                (
+                    jump_time,
+                    left * duration_scale.divisor,
+                    right * duration_scale.divisor,
+                )
+                for jump_time, left, right in lam_jumps
+            ]
         lam_star_scaled = np.asarray(lam_star, dtype=float) * duration_scale.divisor
         lambda_label = "Λ(T) - Cumulative Arrival Rate"
         if self.show_derivations:
@@ -473,7 +729,7 @@ class CumulativeArrivalRateConvergencePanel:
         overlays = (
             build_event_overlays(
                 times,
-                lam_vals_scaled,
+                lam_vals_scaled_events,
                 arrival_times or [],
                 [],
                 drop_lines_for_arrivals=True,
@@ -484,13 +740,23 @@ class CumulativeArrivalRateConvergencePanel:
         )
         render_line_chart(
             ax,
-            times,
+            lam_times,
             lam_vals_scaled,
             label=f"{lambda_label} [{duration_scale.rate_label}]",
             color="tab:blue",
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
         )
+        if self.sampling_frequency is None and lam_jumps_scaled:
+            for jump_time, y0, y1 in lam_jumps_scaled:
+                ax.vlines(
+                    jump_time,
+                    y0,
+                    y1,
+                    colors="tab:blue",
+                    linewidth=1.2,
+                    alpha=0.9,
+                )
         render_line_chart(
             ax,
             times,
@@ -505,7 +771,7 @@ class CumulativeArrivalRateConvergencePanel:
         ax.legend()
         _clip_axis_to_percentile(
             ax,
-            times,
+            lam_times,
             lam_vals_scaled,
             upper_p=lambda_pctl_upper,
             lower_p=lambda_pctl_lower,
@@ -543,6 +809,7 @@ class CumulativeArrivalRateConvergencePanel:
                 metrics.times,
                 metrics.Lambda,
                 empirical_metrics.lam_star,
+                arrivals_cum=metrics.Arrivals,
                 arrival_times=metrics.arrival_times,
                 lambda_pctl_upper=chart_config.lambda_pctl_upper,
                 lambda_pctl_lower=chart_config.lambda_pctl_lower,
@@ -753,6 +1020,7 @@ def plot_arrival_departure_equilibrium_stack(
             metrics.times,
             metrics.Departures,
             metrics.Lambda,
+            arrivals_cum=metrics.Arrivals,
             arrival_times=metrics.arrival_times,
             departure_times=metrics.departure_times,
             lambda_pctl_upper=chart_config.lambda_pctl_upper,
@@ -805,6 +1073,10 @@ def plot_process_time_convergence_stack(
             metrics.w,
             metrics.w_prime,
             empirical_metrics.W_star,
+            H_vals=metrics.H,
+            N_vals=metrics.N,
+            arrivals_cum=metrics.Arrivals,
+            departures_cum=metrics.Departures,
             arrival_times=metrics.arrival_times,
             departure_times=metrics.departure_times,
             scale=scale,
@@ -819,6 +1091,10 @@ def plot_process_time_convergence_stack(
             metrics.w_prime,
             metrics.departure_times,
             empirical_metrics.sojourn_vals,
+            H_vals=metrics.H,
+            N_vals=metrics.N,
+            arrivals_cum=metrics.Arrivals,
+            departures_cum=metrics.Departures,
             scale=scale,
         )
     return resolved_out_path

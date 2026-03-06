@@ -12,6 +12,7 @@ from samplepath.metrics import ElementWiseEmpiricalMetrics
 from samplepath.plots.chart_config import ChartConfig
 from samplepath.plots.convergence import (
     ArrivalDepartureRateConvergencePanel,
+    CumulativeArrivalRateConvergencePanel,
     ProcessTimeConvergencePanel,
     SamplePathConvergencePanel,
     SojournVsResidenceTimeScatterPanel,
@@ -40,6 +41,7 @@ def test_arrival_departure_rate_panel_clips_lambda():
             times,
             departures,
             lambda_rate,
+            arrivals_cum=np.array([1.0, 2.0]),
             lambda_pctl_upper=99.0,
             lambda_pctl_lower=1.0,
             lambda_warmup_seconds=1800.0,
@@ -159,6 +161,12 @@ def test_plot_arrival_departure_equilibrium_stack_calls_rate_panel():
     assert mock_rate.call_count == 1
 
 
+def test_plot_arrival_departure_equilibrium_stack_passes_arrivals_to_rate_panel():
+    _, _, mock_rate = _call_plot_arrival_departure_equilibrium_stack_with_mocks()
+    _, kwargs = mock_rate.call_args
+    assert np.array_equal(kwargs["arrivals_cum"], np.array([1.0]))
+
+
 def test_sample_path_convergence_panel_render_scores_points():
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
@@ -248,6 +256,62 @@ def test_process_time_convergence_panel_scales_values():
     assert np.allclose(first_call.args[2], w_vals / 60.0)
 
 
+def test_process_time_convergence_panel_uses_analytic_w_curve_when_available():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    with (
+        patch(
+            "samplepath.plots.convergence.build_w_curve",
+            return_value=([_t("2024-01-01 12:00:00")], np.array([1.2]), []),
+        ),
+        patch(
+            "samplepath.plots.convergence.build_w_prime_curve",
+            return_value=(times, np.array([2.0, 2.0]), []),
+        ),
+        patch("samplepath.plots.convergence.render_line_chart") as mock_render,
+    ):
+        ProcessTimeConvergencePanel().render(
+            ax,
+            times,
+            np.array([1.0, 1.0]),
+            np.array([2.0, 2.0]),
+            np.array([3.0, 3.0]),
+            H_vals=np.array([0.0, 86400.0]),
+            N_vals=np.array([1.0, 1.0]),
+            arrivals_cum=np.array([1.0, 2.0]),
+            departures_cum=np.array([1.0, 1.0]),
+        )
+    assert mock_render.call_args_list[0].args[1] == [_t("2024-01-01 12:00:00")]
+
+
+def test_process_time_convergence_panel_uses_analytic_w_prime_curve_when_available():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    with (
+        patch(
+            "samplepath.plots.convergence.build_w_curve",
+            return_value=(times, np.array([1.0, 1.0]), []),
+        ),
+        patch(
+            "samplepath.plots.convergence.build_w_prime_curve",
+            return_value=([_t("2024-01-01 12:00:00")], np.array([2.2]), []),
+        ),
+        patch("samplepath.plots.convergence.render_line_chart") as mock_render,
+    ):
+        ProcessTimeConvergencePanel().render(
+            ax,
+            times,
+            np.array([1.0, 1.0]),
+            np.array([2.0, 2.0]),
+            np.array([3.0, 3.0]),
+            H_vals=np.array([0.0, 86400.0]),
+            N_vals=np.array([1.0, 1.0]),
+            arrivals_cum=np.array([1.0, 2.0]),
+            departures_cum=np.array([1.0, 2.0]),
+        )
+    assert mock_render.call_args_list[1].args[1] == [_t("2024-01-01 12:00:00")]
+
+
 def test_process_time_convergence_panel_plot_calls_renderer():
     fig = MagicMock()
     ax = MagicMock()
@@ -255,6 +319,10 @@ def test_process_time_convergence_panel_plot_calls_renderer():
         times=[_t("2024-01-01")],
         w=np.array([1.0]),
         w_prime=np.array([2.0]),
+        H=np.array([3.0]),
+        N=np.array([1.0]),
+        Arrivals=np.array([1.0]),
+        Departures=np.array([0.0]),
         arrival_times=[_t("2024-01-01")],
         departure_times=[_t("2024-01-01")],
         freq="D",
@@ -289,6 +357,49 @@ def test_process_time_convergence_panel_plot_calls_renderer():
         )
     assert written == "out.png"
     mock_render.assert_called_once()
+
+
+def test_process_time_convergence_panel_plot_passes_state_vectors_to_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = SimpleNamespace(
+        times=[_t("2024-01-01")],
+        w=np.array([1.0]),
+        w_prime=np.array([2.0]),
+        H=np.array([3.0]),
+        N=np.array([1.0]),
+        Arrivals=np.array([1.0]),
+        Departures=np.array([0.0]),
+        arrival_times=[_t("2024-01-01")],
+        departure_times=[_t("2024-01-01")],
+        freq="D",
+    )
+    empirical_metrics = ElementWiseEmpiricalMetrics(
+        times=metrics.times,
+        W_star=np.array([3.0]),
+        lam_star=np.array([0.5]),
+        sojourn_vals=np.array([2.0]),
+        residence_time_vals=np.array([1.0]),
+        residence_completed=np.array([True]),
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    chart_config = ChartConfig()
+
+    @contextmanager
+    def fake_context(out_path=None, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.convergence.figure_context", side_effect=fake_context),
+        patch(
+            "samplepath.plots.convergence.ProcessTimeConvergencePanel.render"
+        ) as mock_render,
+    ):
+        ProcessTimeConvergencePanel().plot(
+            metrics, empirical_metrics, filter_result, chart_config, "/tmp/out"
+        )
+    kwargs = mock_render.call_args.kwargs
+    assert np.allclose(kwargs["H_vals"], metrics.H)
 
 
 def test_sojourn_time_scatter_panel_overlays_drop_lines():
@@ -339,6 +450,10 @@ def test_arrival_departure_rate_panel_scales_rates():
     departures = np.array([0.0, 1.0])
     lambda_rate = np.array([0.5, 0.75])
     with (
+        patch(
+            "samplepath.plots.convergence.build_lambda_curve",
+            return_value=(times, np.array([0.5, 0.75]), []),
+        ),
         patch("samplepath.plots.convergence.render_line_chart") as mock_render,
         patch("samplepath.plots.convergence._clip_axis_to_percentile"),
     ):
@@ -347,11 +462,196 @@ def test_arrival_departure_rate_panel_scales_rates():
             times,
             departures,
             lambda_rate,
+            arrivals_cum=np.array([1.0, 2.0]),
             scale=MINUTES,
         )
     first_call = mock_render.call_args_list[0]
     assert "1/min" in first_call.kwargs["label"]
     assert np.allclose(first_call.args[2], lambda_rate * 60.0)
+
+
+def test_arrival_departure_rate_panel_uses_analytic_lambda_curve_when_available():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    departures = np.array([0.0, 1.0])
+    lambda_rate = np.array([0.5, 0.75])
+    analytic_times = [_t("2024-01-01 12:00:00")]
+    with (
+        patch(
+            "samplepath.plots.convergence.build_lambda_curve",
+            return_value=(analytic_times, np.array([0.6]), []),
+        ),
+        patch("samplepath.plots.convergence.render_line_chart") as mock_render,
+        patch("samplepath.plots.convergence._clip_axis_to_percentile"),
+    ):
+        ArrivalDepartureRateConvergencePanel().render(
+            ax,
+            times,
+            departures,
+            lambda_rate,
+            arrivals_cum=np.array([1.0, 2.0]),
+        )
+    assert mock_render.call_args_list[0].args[1] == analytic_times
+
+
+def test_arrival_departure_rate_panel_calendar_mode_skips_analytic_lambda_curve():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    departures = np.array([0.0, 1.0])
+    lambda_rate = np.array([0.5, 0.75])
+    with (
+        patch("samplepath.plots.convergence.build_lambda_curve") as mock_curve,
+        patch("samplepath.plots.convergence.render_line_chart"),
+        patch("samplepath.plots.convergence._clip_axis_to_percentile"),
+    ):
+        ArrivalDepartureRateConvergencePanel(sampling_frequency="D").render(
+            ax,
+            times,
+            departures,
+            lambda_rate,
+            arrivals_cum=np.array([1.0, 2.0]),
+        )
+    mock_curve.assert_not_called()
+
+
+def test_arrival_departure_rate_panel_overlays_use_event_indexed_lambda_values():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    departures = np.array([0.0, 1.0])
+    lambda_rate = np.array([0.5, 0.75])
+    with (
+        patch(
+            "samplepath.plots.convergence.build_lambda_curve",
+            return_value=([_t("2024-01-01 12:00:00")], np.array([0.6]), []),
+        ),
+        patch(
+            "samplepath.plots.convergence.build_event_overlays",
+            return_value=["overlay"],
+        ) as mock_overlays,
+        patch("samplepath.plots.convergence.render_line_chart"),
+        patch("samplepath.plots.convergence._clip_axis_to_percentile"),
+    ):
+        ArrivalDepartureRateConvergencePanel(with_event_marks=True).render(
+            ax,
+            times,
+            departures,
+            lambda_rate,
+            arrivals_cum=np.array([1.0, 2.0]),
+            arrival_times=times,
+            scale=MINUTES,
+        )
+    first_overlay_values = mock_overlays.call_args_list[0].args[1]
+    assert np.allclose(first_overlay_values, lambda_rate * 60.0)
+
+
+def test_arrival_departure_rate_panel_uses_analytic_theta_curve_when_available():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    departures = np.array([0.0, 1.0])
+    lambda_rate = np.array([0.5, 0.75])
+    theta_times = [_t("2024-01-01 12:00:00")]
+    with (
+        patch(
+            "samplepath.plots.convergence.build_lambda_curve",
+            return_value=(times, np.array([0.5, 0.75]), []),
+        ),
+        patch(
+            "samplepath.plots.convergence.build_theta_curve",
+            return_value=(theta_times, np.array([0.2]), []),
+        ),
+        patch("samplepath.plots.convergence.render_line_chart") as mock_render,
+        patch("samplepath.plots.convergence._clip_axis_to_percentile"),
+    ):
+        ArrivalDepartureRateConvergencePanel().render(
+            ax,
+            times,
+            departures,
+            lambda_rate,
+            arrivals_cum=np.array([1.0, 2.0]),
+        )
+    assert mock_render.call_args_list[1].args[1] == theta_times
+
+
+def test_arrival_departure_rate_panel_calendar_mode_skips_analytic_theta_curve():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    departures = np.array([0.0, 1.0])
+    lambda_rate = np.array([0.5, 0.75])
+    with (
+        patch("samplepath.plots.convergence.build_theta_curve") as mock_curve,
+        patch("samplepath.plots.convergence.render_line_chart"),
+        patch("samplepath.plots.convergence._clip_axis_to_percentile"),
+    ):
+        ArrivalDepartureRateConvergencePanel(sampling_frequency="D").render(
+            ax,
+            times,
+            departures,
+            lambda_rate,
+            arrivals_cum=np.array([1.0, 2.0]),
+        )
+    mock_curve.assert_not_called()
+
+
+def test_arrival_departure_rate_panel_overlays_use_event_indexed_theta_values():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    departures = np.array([0.0, 1.0])
+    lambda_rate = np.array([0.5, 0.75])
+    with (
+        patch(
+            "samplepath.plots.convergence.build_theta_curve",
+            return_value=([_t("2024-01-01 12:00:00")], np.array([0.2]), []),
+        ),
+        patch(
+            "samplepath.plots.convergence.build_event_overlays",
+            return_value=["overlay"],
+        ) as mock_overlays,
+        patch("samplepath.plots.convergence.render_line_chart"),
+        patch("samplepath.plots.convergence._clip_axis_to_percentile"),
+    ):
+        ArrivalDepartureRateConvergencePanel(with_event_marks=True).render(
+            ax,
+            times,
+            departures,
+            lambda_rate,
+            arrivals_cum=np.array([1.0, 2.0]),
+            departure_times=times,
+            scale=MINUTES,
+        )
+    second_overlay_values = mock_overlays.call_args_list[1].args[1]
+    assert np.isnan(second_overlay_values[0]) and np.isclose(
+        second_overlay_values[1], (1.0 / 86400.0) * 60.0
+    )
+
+
+def test_cumulative_arrival_rate_panel_overlays_use_event_indexed_lambda_values():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    lam_vals = np.array([0.5, 0.75])
+    lam_star = np.array([0.6, 0.8])
+    with (
+        patch(
+            "samplepath.plots.convergence.build_lambda_curve",
+            return_value=([_t("2024-01-01 12:00:00")], np.array([0.6]), []),
+        ),
+        patch(
+            "samplepath.plots.convergence.build_event_overlays",
+            return_value=["overlay"],
+        ) as mock_overlays,
+        patch("samplepath.plots.convergence.render_line_chart"),
+        patch("samplepath.plots.convergence._clip_axis_to_percentile"),
+    ):
+        CumulativeArrivalRateConvergencePanel(with_event_marks=True).render(
+            ax,
+            times,
+            lam_vals,
+            lam_star,
+            arrivals_cum=np.array([1.0, 2.0]),
+            arrival_times=times,
+            scale=MINUTES,
+        )
+    overlay_values = mock_overlays.call_args.args[1]
+    assert np.allclose(overlay_values, lam_vals * 60.0)
 
 
 def test_sojourn_time_scatter_panel_plot_calls_renderer():
@@ -361,6 +661,10 @@ def test_sojourn_time_scatter_panel_plot_calls_renderer():
         times=[_t("2024-01-01")],
         w=np.array([1.0]),
         w_prime=np.array([2.0]),
+        H=np.array([3.0]),
+        N=np.array([1.0]),
+        Arrivals=np.array([1.0]),
+        Departures=np.array([0.0]),
         departure_times=[_t("2024-01-02")],
         freq="D",
     )
@@ -396,6 +700,48 @@ def test_sojourn_time_scatter_panel_plot_calls_renderer():
     mock_render.assert_called_once()
 
 
+def test_sojourn_time_scatter_panel_plot_passes_state_vectors_to_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = SimpleNamespace(
+        times=[_t("2024-01-01")],
+        w=np.array([1.0]),
+        w_prime=np.array([2.0]),
+        H=np.array([3.0]),
+        N=np.array([1.0]),
+        Arrivals=np.array([1.0]),
+        Departures=np.array([0.0]),
+        departure_times=[_t("2024-01-02")],
+        freq="D",
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    chart_config = ChartConfig()
+    empirical_metrics = ElementWiseEmpiricalMetrics(
+        times=metrics.times,
+        W_star=np.array([3.0]),
+        lam_star=np.array([0.5]),
+        sojourn_vals=np.array([4.0]),
+        residence_time_vals=np.array([1.0]),
+        residence_completed=np.array([True]),
+    )
+
+    @contextmanager
+    def fake_context(out_path=None, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.convergence.figure_context", side_effect=fake_context),
+        patch(
+            "samplepath.plots.convergence.SojournVsResidenceTimeScatterPanel.render"
+        ) as mock_render,
+    ):
+        SojournVsResidenceTimeScatterPanel().plot(
+            metrics, empirical_metrics, filter_result, chart_config, "/tmp/out"
+        )
+    kwargs = mock_render.call_args.kwargs
+    assert np.allclose(kwargs["H_vals"], metrics.H)
+
+
 def test_process_time_convergence_stack_calls_panel_renderers():
     fig = MagicMock()
     axes = np.array([object() for _ in range(2)], dtype=object)
@@ -403,6 +749,10 @@ def test_process_time_convergence_stack_calls_panel_renderers():
         times=[_t("2024-01-01")],
         w=np.array([1.0]),
         w_prime=np.array([2.0]),
+        H=np.array([3.0]),
+        N=np.array([1.0]),
+        Arrivals=np.array([1.0]),
+        Departures=np.array([0.0]),
         arrival_times=[_t("2024-01-01")],
         departure_times=[_t("2024-01-02")],
         freq="D",
@@ -437,6 +787,51 @@ def test_process_time_convergence_stack_calls_panel_renderers():
     assert written == "out.png"
     mock_top.assert_called_once()
     mock_bottom.assert_called_once()
+
+
+def test_process_time_convergence_stack_passes_state_vectors_to_renderers():
+    fig = MagicMock()
+    axes = np.array([object() for _ in range(2)], dtype=object)
+    metrics = SimpleNamespace(
+        times=[_t("2024-01-01")],
+        w=np.array([1.0]),
+        w_prime=np.array([2.0]),
+        H=np.array([3.0]),
+        N=np.array([1.0]),
+        Arrivals=np.array([1.0]),
+        Departures=np.array([0.0]),
+        arrival_times=[_t("2024-01-01")],
+        departure_times=[_t("2024-01-02")],
+        freq="D",
+    )
+    empirical_metrics = ElementWiseEmpiricalMetrics(
+        times=metrics.times,
+        W_star=np.array([3.0]),
+        lam_star=np.array([0.5]),
+        sojourn_vals=np.array([4.0]),
+        residence_time_vals=np.array([1.0]),
+        residence_completed=np.array([True]),
+    )
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+    chart_config = ChartConfig(with_event_marks=True)
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, axes, "out.png"
+
+    with (
+        patch("samplepath.plots.convergence.layout_context", side_effect=fake_context),
+        patch(
+            "samplepath.plots.convergence.ProcessTimeConvergencePanel.render"
+        ) as mock_top,
+        patch(
+            "samplepath.plots.convergence.SojournVsResidenceTimeScatterPanel.render"
+        ) as mock_bottom,
+    ):
+        plot_process_time_convergence_stack(
+            filter_result, metrics, empirical_metrics, chart_config, "/tmp/out"
+        )
+    assert np.allclose(mock_top.call_args.kwargs["H_vals"], metrics.H)
 
 
 def _call_plot_convergence_charts_with_process_panel():

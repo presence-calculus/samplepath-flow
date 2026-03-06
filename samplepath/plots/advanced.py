@@ -15,6 +15,7 @@ from samplepath.metrics import (
     FlowMetricsResult,
     compute_elementwise_empirical_metrics,
 )
+from samplepath.plots.analytic_curves import build_lambda_curve
 from samplepath.plots.chart_config import ChartConfig
 from samplepath.plots.helpers import (
     _clip_axis_to_percentile,
@@ -280,12 +281,24 @@ def draw_dynamic_convergence_panel_with_errors(
     lambda_warmup_seconds: Optional[float] = None,
     scale: Optional[DurationScale] = None,
     grid_lines: bool = True,
+    arrivals_cum: Optional[np.ndarray] = None,
+    sampling_frequency: Optional[str] = None,
 ) -> None:
     fig, axes = plt.subplots(3, 1, figsize=(12, 9.2), sharex=True)
     duration_scale = scale or HOURS
     w_scaled = np.asarray(w_vals, dtype=float) / duration_scale.divisor
     W_star_scaled = np.asarray(W_star, dtype=float) / duration_scale.divisor
     lam_scaled = np.asarray(lam_vals, dtype=float) * duration_scale.divisor
+    lam_times = times
+    if (
+        sampling_frequency is None
+        and arrivals_cum is not None
+        and len(times) == len(arrivals_cum)
+    ):
+        lam_curve_times, lam_curve_vals, _ = build_lambda_curve(times, arrivals_cum)
+        if lam_curve_times:
+            lam_times = lam_curve_times
+            lam_scaled = lam_curve_vals * duration_scale.divisor
     lam_star_scaled = np.asarray(lam_star, dtype=float) * duration_scale.divisor
 
     axes[0].plot(times, w_scaled, label=f"w(T) [{duration_scale.label}]")
@@ -299,7 +312,7 @@ def draw_dynamic_convergence_panel_with_errors(
     axes[0].set_ylabel(duration_scale.label)
     axes[0].legend()
 
-    axes[1].plot(times, lam_scaled, label=f"Λ(T) [{duration_scale.rate_label}]")
+    axes[1].plot(lam_times, lam_scaled, label=f"Λ(T) [{duration_scale.rate_label}]")
     axes[1].plot(
         times,
         lam_star_scaled,
@@ -311,7 +324,7 @@ def draw_dynamic_convergence_panel_with_errors(
     axes[1].legend()
     _clip_axis_to_percentile(
         axes[1],
-        times,
+        lam_times,
         lam_scaled,
         upper_p=lambda_pctl_upper,
         lower_p=lambda_pctl_lower,
@@ -363,6 +376,8 @@ def draw_dynamic_convergence_panel_with_errors_and_endeffects(
     lambda_warmup_seconds: Optional[float] = None,
     scale: Optional[DurationScale] = None,
     grid_lines: bool = True,
+    arrivals_cum: Optional[np.ndarray] = None,
+    sampling_frequency: Optional[str] = None,
 ) -> None:
     """Four-row dynamic convergence view with end-effect metrics."""
     fig, axes = plt.subplots(4, 1, figsize=(12, 12), sharex=True)
@@ -370,6 +385,16 @@ def draw_dynamic_convergence_panel_with_errors_and_endeffects(
     w_scaled = np.asarray(w_vals, dtype=float) / duration_scale.divisor
     W_star_scaled = np.asarray(W_star, dtype=float) / duration_scale.divisor
     lam_scaled = np.asarray(lam_vals, dtype=float) * duration_scale.divisor
+    lam_times = times
+    if (
+        sampling_frequency is None
+        and arrivals_cum is not None
+        and len(times) == len(arrivals_cum)
+    ):
+        lam_curve_times, lam_curve_vals, _ = build_lambda_curve(times, arrivals_cum)
+        if lam_curve_times:
+            lam_times = lam_curve_times
+            lam_scaled = lam_curve_vals * duration_scale.divisor
     lam_star_scaled = np.asarray(lam_star, dtype=float) * duration_scale.divisor
 
     axes[0].plot(times, w_scaled, label=f"w(T) [{duration_scale.label}]")
@@ -383,7 +408,7 @@ def draw_dynamic_convergence_panel_with_errors_and_endeffects(
     axes[0].set_ylabel(duration_scale.label)
     axes[0].legend()
 
-    axes[1].plot(times, lam_scaled, label=f"Λ(T) [{duration_scale.rate_label}]")
+    axes[1].plot(lam_times, lam_scaled, label=f"Λ(T) [{duration_scale.rate_label}]")
     axes[1].plot(
         times,
         lam_star_scaled,
@@ -395,7 +420,7 @@ def draw_dynamic_convergence_panel_with_errors_and_endeffects(
     axes[1].legend()
     _clip_axis_to_percentile(
         axes[1],
-        times,
+        lam_times,
         lam_scaled,
         upper_p=lambda_pctl_upper,
         lower_p=lambda_pctl_lower,
@@ -481,6 +506,8 @@ def plot_residence_time_convergence_error_charts(
         lambda_warmup_seconds=lambda_warmup_seconds,
         scale=scale,
         grid_lines=chart_config.grid_lines,
+        arrivals_cum=metrics.Arrivals,
+        sampling_frequency=metrics.freq,
     )
     written.append(ts_conv_dyn3)
 
@@ -509,6 +536,8 @@ def plot_residence_time_convergence_error_charts(
         lambda_warmup_seconds=lambda_warmup_seconds,
         scale=scale,
         grid_lines=chart_config.grid_lines,
+        arrivals_cum=metrics.Arrivals,
+        sampling_frequency=metrics.freq,
     )
     written.append(ts_conv_dyn4)
     return written

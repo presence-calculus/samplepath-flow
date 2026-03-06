@@ -11,7 +11,7 @@ path is validated.
 """
 
 from dataclasses import dataclass
-from typing import List, Optional, Sequence
+from typing import List, Optional, Sequence, Tuple
 
 from matplotlib import colors as mcolors, pyplot as plt
 from matplotlib.lines import Line2D
@@ -23,6 +23,13 @@ from samplepath.metrics import (
     ElementWiseEmpiricalMetrics,
     FlowMetricsResult,
     MetricDerivations,
+)
+from samplepath.plots.analytic_curves import (
+    build_L_curve,
+    build_lambda_curve,
+    build_theta_curve,
+    build_w_curve,
+    build_w_prime_curve,
 )
 from samplepath.plots.chart_config import ChartConfig, ColorConfig
 from samplepath.plots.figure_context import (
@@ -165,7 +172,27 @@ class LPanel:
         *,
         arrival_times: Optional[List[pd.Timestamp]] = None,
         departure_times: Optional[List[pd.Timestamp]] = None,
+        H_vals: Optional[Sequence[float]] = None,
+        N_vals: Optional[Sequence[float]] = None,
     ) -> None:
+        line_times = times
+        line_vals: Sequence[float] = L_vals
+        if (
+            self.sampling_frequency is None
+            and H_vals is not None
+            and N_vals is not None
+            and len(times) == len(H_vals)
+            and len(times) == len(N_vals)
+        ):
+            analytic_times, analytic_vals = build_L_curve(
+                times,
+                H_vals,
+                N_vals,
+            )
+            if analytic_times:
+                line_times = analytic_times
+                line_vals = analytic_vals
+
         overlays = (
             build_event_overlays(
                 times,
@@ -179,8 +206,8 @@ class LPanel:
         )
         render_line_chart(
             ax,
-            times,
-            L_vals,
+            line_times,
+            line_vals,
             label="L(T)",
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
@@ -222,6 +249,8 @@ class LPanel:
                 metrics.L,
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
+                H_vals=metrics.H,
+                N_vals=metrics.N,
             )
         return resolved_out_path
 
@@ -242,10 +271,34 @@ class LambdaPanel:
         Lam_vals: Sequence[float],
         *,
         arrival_times: Optional[List[pd.Timestamp]] = None,
+        arrivals_vals: Optional[Sequence[float]] = None,
         scale: Optional[DurationScale] = None,
     ) -> None:
         duration_scale = scale or HOURS
         Lam_scaled = np.asarray(Lam_vals, dtype=float) * duration_scale.divisor
+        line_times = times
+        line_values: Sequence[float] = Lam_scaled
+        jumps_scaled: List[Tuple[pd.Timestamp, float, float]] = []
+        if (
+            self.sampling_frequency is None
+            and arrivals_vals is not None
+            and len(times) == len(arrivals_vals)
+        ):
+            analytic_times, analytic_vals, jumps = build_lambda_curve(
+                times,
+                arrivals_vals,
+            )
+            if analytic_times:
+                line_times = analytic_times
+                line_values = analytic_vals * duration_scale.divisor
+            jumps_scaled = [
+                (
+                    jump_time,
+                    left * duration_scale.divisor,
+                    right * duration_scale.divisor,
+                )
+                for jump_time, left, right in jumps
+            ]
         overlays = (
             build_event_overlays(
                 times,
@@ -261,19 +314,29 @@ class LambdaPanel:
         label = f"Λ(T) [{duration_scale.rate_label}]"
         render_line_chart(
             ax,
-            times,
-            Lam_scaled,
+            line_times,
+            line_values,
             label=label,
             color="tab:blue",
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
         )
+        if self.sampling_frequency is None and jumps_scaled:
+            for jump_time, y0, y1 in jumps_scaled:
+                ax.vlines(
+                    jump_time,
+                    y0,
+                    y1,
+                    colors="tab:blue",
+                    linewidth=1.2,
+                    alpha=0.9,
+                )
         opts = self.clip_opts or ClipOptions()
         if opts.pctl_upper is not None or opts.pctl_lower is not None:
             _clip_axis_to_percentile(
                 ax,
-                list(times),
-                Lam_scaled,
+                list(line_times),
+                line_values,
                 opts.pctl_upper,
                 opts.pctl_lower,
                 opts.warmup_seconds,
@@ -317,6 +380,7 @@ class LambdaPanel:
                 metrics.times,
                 metrics.Lambda,
                 arrival_times=metrics.arrival_times,
+                arrivals_vals=metrics.Arrivals,
                 scale=scale,
             )
         return resolved_out_path
@@ -337,15 +401,40 @@ class ThetaPanel:
         theta_vals: Sequence[float],
         *,
         departure_times: Optional[List[pd.Timestamp]] = None,
+        departures_vals: Optional[Sequence[float]] = None,
         scale: Optional[DurationScale] = None,
     ) -> None:
         duration_scale = scale or HOURS
-        theta_scaled = np.asarray(theta_vals, dtype=float) * duration_scale.divisor
+        theta_scaled_events = (
+            np.asarray(theta_vals, dtype=float) * duration_scale.divisor
+        )
+        theta_scaled = theta_scaled_events
+        theta_times = times
+        theta_jumps_scaled: List[Tuple[pd.Timestamp, float, float]] = []
+        if (
+            self.sampling_frequency is None
+            and departures_vals is not None
+            and len(times) == len(departures_vals)
+        ):
+            theta_curve_times, theta_curve_vals, theta_jumps = build_theta_curve(
+                times, departures_vals
+            )
+            if theta_curve_times:
+                theta_times = theta_curve_times
+                theta_scaled = theta_curve_vals * duration_scale.divisor
+            theta_jumps_scaled = [
+                (
+                    jump_time,
+                    left * duration_scale.divisor,
+                    right * duration_scale.divisor,
+                )
+                for jump_time, left, right in theta_jumps
+            ]
         label = f"Θ(T) [{duration_scale.rate_label}]"
         overlays = (
             build_event_overlays(
                 times,
-                theta_scaled,
+                theta_scaled_events,
                 [],
                 departure_times,
                 calendar_mode=self.sampling_frequency is not None,
@@ -355,12 +444,23 @@ class ThetaPanel:
         )
         render_line_chart(
             ax,
-            times,
+            theta_times,
             theta_scaled,
             label=label,
+            color="tab:blue",
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
         )
+        if self.sampling_frequency is None and theta_jumps_scaled:
+            for jump_time, y0, y1 in theta_jumps_scaled:
+                ax.vlines(
+                    jump_time,
+                    y0,
+                    y1,
+                    colors="tab:blue",
+                    linewidth=1.2,
+                    alpha=0.9,
+                )
         if self.show_title:
             ax.set_title(
                 construct_title(
@@ -400,6 +500,7 @@ class ThetaPanel:
                 metrics.times,
                 metrics.Theta,
                 departure_times=metrics.departure_times,
+                departures_vals=metrics.Departures,
                 scale=scale,
             )
         return resolved_out_path
@@ -419,17 +520,47 @@ class WPanel:
         times: Sequence[pd.Timestamp],
         w_vals: Sequence[float],
         *,
+        H_vals: Optional[Sequence[float]] = None,
+        N_vals: Optional[Sequence[float]] = None,
+        arrivals_vals: Optional[Sequence[float]] = None,
         arrival_times: Optional[List[pd.Timestamp]] = None,
         departure_times: Optional[List[pd.Timestamp]] = None,
         scale: Optional[DurationScale] = None,
     ) -> None:
         duration_scale = scale or HOURS
-        w_scaled = np.asarray(w_vals, dtype=float) / duration_scale.divisor
+        w_scaled_events = np.asarray(w_vals, dtype=float) / duration_scale.divisor
+        w_scaled = w_scaled_events
+        line_times = times
+        jump_segments_scaled: List[Tuple[pd.Timestamp, float, float]] = []
+        if (
+            self.sampling_frequency is None
+            and H_vals is not None
+            and N_vals is not None
+            and arrivals_vals is not None
+            and len(times) == len(H_vals) == len(N_vals) == len(arrivals_vals)
+        ):
+            analytic_times, analytic_vals, jumps = build_w_curve(
+                times,
+                H_vals,
+                N_vals,
+                arrivals_vals,
+            )
+            if analytic_times:
+                line_times = analytic_times
+                w_scaled = analytic_vals / duration_scale.divisor
+            jump_segments_scaled = [
+                (
+                    jump_time,
+                    left / duration_scale.divisor,
+                    right / duration_scale.divisor,
+                )
+                for jump_time, left, right in jumps
+            ]
         label = f"w(T) [{duration_scale.label}]"
         overlays = (
             build_event_overlays(
                 times,
-                w_scaled,
+                w_scaled_events,
                 arrival_times,
                 departure_times,
                 drop_lines_for_arrivals=True,
@@ -441,13 +572,22 @@ class WPanel:
         )
         render_line_chart(
             ax,
-            times,
+            line_times,
             w_scaled,
             label=label,
             color="tab:blue",
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
         )
+        for jump_time, left, right in jump_segments_scaled:
+            ax.vlines(
+                jump_time,
+                left,
+                right,
+                colors="tab:blue",
+                linewidth=1.2,
+                alpha=0.9,
+            )
         if self.show_title:
             ax.set_title(
                 construct_title(self.title, self.show_derivations, derivation_key="w")
@@ -484,6 +624,9 @@ class WPanel:
                 ax,
                 metrics.times,
                 metrics.w,
+                H_vals=metrics.H,
+                N_vals=metrics.N,
+                arrivals_vals=metrics.Arrivals,
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
                 scale=scale,
@@ -829,17 +972,49 @@ class WPrimePanel:
         times: Sequence[pd.Timestamp],
         w_prime_vals: Sequence[float],
         *,
+        H_vals: Optional[Sequence[float]] = None,
+        N_vals: Optional[Sequence[float]] = None,
+        departures_vals: Optional[Sequence[float]] = None,
         arrival_times: Optional[List[pd.Timestamp]] = None,
         departure_times: Optional[List[pd.Timestamp]] = None,
         scale: Optional[DurationScale] = None,
     ) -> None:
         duration_scale = scale or HOURS
-        w_prime_scaled = np.asarray(w_prime_vals, dtype=float) / duration_scale.divisor
+        w_prime_scaled_events = (
+            np.asarray(w_prime_vals, dtype=float) / duration_scale.divisor
+        )
+        w_prime_scaled = w_prime_scaled_events
+        line_times = times
+        jump_segments_scaled: List[Tuple[pd.Timestamp, float, float]] = []
+        if (
+            self.sampling_frequency is None
+            and H_vals is not None
+            and N_vals is not None
+            and departures_vals is not None
+            and len(times) == len(H_vals) == len(N_vals) == len(departures_vals)
+        ):
+            analytic_times, analytic_vals, jumps = build_w_prime_curve(
+                times,
+                H_vals,
+                N_vals,
+                departures_vals,
+            )
+            if analytic_times:
+                line_times = analytic_times
+                w_prime_scaled = analytic_vals / duration_scale.divisor
+            jump_segments_scaled = [
+                (
+                    jump_time,
+                    left / duration_scale.divisor,
+                    right / duration_scale.divisor,
+                )
+                for jump_time, left, right in jumps
+            ]
         label = f"w'(T) [{duration_scale.label}]"
         overlays = (
             build_event_overlays(
                 times,
-                w_prime_scaled,
+                w_prime_scaled_events,
                 arrival_times,
                 departure_times,
                 drop_lines_for_arrivals=False,
@@ -851,12 +1026,22 @@ class WPrimePanel:
         )
         render_line_chart(
             ax,
-            times,
+            line_times,
             w_prime_scaled,
             label=label,
+            color="tab:blue",
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
         )
+        for jump_time, left, right in jump_segments_scaled:
+            ax.vlines(
+                jump_time,
+                left,
+                right,
+                colors="tab:blue",
+                linewidth=1.2,
+                alpha=0.9,
+            )
         if self.show_title:
             ax.set_title(
                 construct_title(
@@ -895,6 +1080,9 @@ class WPrimePanel:
                 ax,
                 metrics.times,
                 metrics.w_prime,
+                H_vals=metrics.H,
+                N_vals=metrics.N,
+                departures_vals=metrics.Departures,
                 arrival_times=metrics.arrival_times,
                 departure_times=metrics.departure_times,
                 scale=scale,
@@ -1714,6 +1902,8 @@ def plot_core_stack(
             metrics.L,
             arrival_times=metrics.arrival_times,
             departure_times=metrics.departure_times,
+            H_vals=metrics.H,
+            N_vals=metrics.N,
         )
         LambdaPanel(
             show_derivations=chart_config.show_derivations,
@@ -1729,6 +1919,7 @@ def plot_core_stack(
             metrics.times,
             metrics.Lambda,
             arrival_times=metrics.arrival_times,
+            arrivals_vals=metrics.Arrivals,
             scale=scale,
         )
         WPanel(
@@ -1739,6 +1930,9 @@ def plot_core_stack(
             flat_axes[3],
             metrics.times,
             metrics.w,
+            H_vals=metrics.H,
+            N_vals=metrics.N,
+            arrivals_vals=metrics.Arrivals,
             arrival_times=metrics.arrival_times,
             departure_times=metrics.departure_times,
             scale=scale,
@@ -1822,6 +2016,8 @@ def plot_LT_derivation_stack(
             metrics.L,
             arrival_times=metrics.arrival_times,
             departure_times=metrics.departure_times,
+            H_vals=metrics.H,
+            N_vals=metrics.N,
         )
     return resolved_out_path
 
@@ -1879,6 +2075,8 @@ def plot_departure_flow_metrics_stack(
             metrics.L,
             arrival_times=metrics.arrival_times,
             departure_times=metrics.departure_times,
+            H_vals=metrics.H,
+            N_vals=metrics.N,
         )
         ThetaPanel(
             show_derivations=chart_config.show_derivations,
@@ -1889,6 +2087,7 @@ def plot_departure_flow_metrics_stack(
             metrics.times,
             metrics.Theta,
             departure_times=metrics.departure_times,
+            departures_vals=metrics.Departures,
             scale=scale,
         )
         WPrimePanel(
@@ -1899,6 +2098,9 @@ def plot_departure_flow_metrics_stack(
             flat_axes[3],
             metrics.times,
             metrics.w_prime,
+            H_vals=metrics.H,
+            N_vals=metrics.N,
+            departures_vals=metrics.Departures,
             arrival_times=metrics.arrival_times,
             departure_times=metrics.departure_times,
             scale=scale,
