@@ -256,6 +256,125 @@ class LPanel:
 
 
 @dataclass
+class NtLTPanel:
+    show_title: bool = True
+    title: str = "N(t) with L(T) — Half-open Moving Average"
+    show_derivations: bool = False
+    with_event_marks: bool = False
+    sampling_frequency: Optional[str] = None
+
+    def render(
+        self,
+        ax,
+        times: Sequence[pd.Timestamp],
+        N_vals: Sequence[float],
+        L_vals: Sequence[float],
+        *,
+        arrival_times: Optional[List[pd.Timestamp]] = None,
+        departure_times: Optional[List[pd.Timestamp]] = None,
+        H_vals: Optional[Sequence[float]] = None,
+    ) -> None:
+        line_times = times
+        line_vals: Sequence[float] = L_vals
+        if (
+            self.sampling_frequency is None
+            and H_vals is not None
+            and len(times) == len(H_vals)
+            and len(times) == len(N_vals)
+        ):
+            analytic_times, analytic_vals = build_L_curve(
+                times,
+                H_vals,
+                N_vals,
+            )
+            if analytic_times:
+                line_times = analytic_times
+                line_vals = analytic_vals
+
+        n_overlays = (
+            build_event_overlays(
+                times,
+                N_vals,
+                arrival_times,
+                departure_times,
+                calendar_mode=self.sampling_frequency is not None,
+            )
+            if self.with_event_marks
+            else None
+        )
+        l_overlays = (
+            build_event_overlays(
+                times,
+                L_vals,
+                arrival_times,
+                departure_times,
+                calendar_mode=self.sampling_frequency is not None,
+            )
+            if self.with_event_marks
+            else None
+        )
+
+        render_step_chart(
+            ax,
+            times,
+            N_vals,
+            label="N(t)",
+            fill=True,
+            fill_color="grey",
+            overlays=n_overlays,
+            sampling_frequency=self.sampling_frequency,
+        )
+        render_line_chart(
+            ax,
+            line_times,
+            line_vals,
+            label="L(T)",
+            color="dimgray",
+            overlays=l_overlays,
+            sampling_frequency=self.sampling_frequency,
+        )
+        if self.show_title:
+            ax.set_title(self.title)
+        ax.set_ylabel("N(t), L(T)")
+        ax.legend()
+
+    def plot(
+        self,
+        metrics: FlowMetricsResult,
+        filter_result: Optional[FilterResult],
+        chart_config: ChartConfig,
+        out_dir: str,
+    ) -> str:
+        unit = metrics.freq if metrics.freq else "timestamp"
+        caption = resolve_caption(filter_result)
+        with figure_context(
+            chart_config=chart_config,
+            nrows=1,
+            ncols=1,
+            caption=caption,
+            unit=unit,
+            out_dir=out_dir,
+            subdir="core/panels",
+            base_name="nt_moving_average_lt",
+        ) as (
+            _,
+            axes,
+            resolved_out_path,
+        ):
+            ax = _first_axis(axes)
+            self.render(
+                ax,
+                metrics.times,
+                metrics.N,
+                metrics.L,
+                arrival_times=metrics.arrival_times,
+                departure_times=metrics.departure_times,
+                H_vals=metrics.H,
+            )
+        return resolved_out_path
+
+
+@dataclass
 class LambdaPanel:
     show_title: bool = True
     title: str = "Λ(T) — Cumulative Arrival Rate"
@@ -2139,6 +2258,12 @@ def plot_core_flow_metrics_charts(
         sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
+    path_NtLT = NtLTPanel(
+        with_event_marks=chart_config.with_event_marks,
+        show_derivations=show_derivations,
+        sampling_frequency=chart_config.sampling_frequency,
+    ).plot(metrics, filter_result, chart_config, out_dir)
+
     path_Lam = LambdaPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
@@ -2224,6 +2349,7 @@ def plot_core_flow_metrics_charts(
     return [
         path_N,
         path_L,
+        path_NtLT,
         path_Lam,
         path_Theta,
         path_indicator,

@@ -1261,6 +1261,76 @@ def test_plot_single_panel_L_passes_H_to_renderer():
     assert np.allclose(mock_render.call_args.kwargs["N_vals"], metrics.N)
 
 
+def test_render_NtLT_renders_step_and_line():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    n_vals = np.array([1.0, 2.0])
+    l_vals = np.array([1.0, 1.5])
+    with (
+        patch("samplepath.plots.core.render_step_chart") as mock_step,
+        patch("samplepath.plots.core.render_line_chart") as mock_line,
+    ):
+        core.NtLTPanel().render(
+            ax,
+            times,
+            n_vals,
+            l_vals,
+            H_vals=np.array([0.0, 86400.0]),
+        )
+    assert mock_step.call_count == 1 and mock_line.call_count == 1
+
+
+def test_render_NtLT_uses_dark_grey_for_L_curve():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    n_vals = np.array([1.0, 2.0])
+    l_vals = np.array([1.0, 1.5])
+    with (
+        patch("samplepath.plots.core.render_step_chart"),
+        patch("samplepath.plots.core.render_line_chart") as mock_line,
+    ):
+        core.NtLTPanel().render(ax, times, n_vals, l_vals)
+    assert mock_line.call_args.kwargs["color"] == "dimgray"
+
+
+def test_plot_single_panel_NtLT_calls_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+    filter_result = SimpleNamespace(display="Filters: test", label="test")
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.NtLTPanel.render") as mock_render,
+    ):
+        core.NtLTPanel().plot(metrics, filter_result, chart_config, "/tmp/out")
+    mock_render.assert_called_once()
+
+
+def test_plot_single_panel_NtLT_passes_state_vectors_to_renderer():
+    fig = MagicMock()
+    ax = MagicMock()
+    metrics = _metrics_fixture()
+    chart_config = ChartConfig()
+
+    @contextmanager
+    def fake_context(*args, **kwargs):
+        yield fig, ax, "out.png"
+
+    with (
+        patch("samplepath.plots.core.figure_context", side_effect=fake_context),
+        patch("samplepath.plots.core.NtLTPanel.render") as mock_render,
+    ):
+        core.NtLTPanel().plot(metrics, None, chart_config, "/tmp/out")
+    args, kwargs = mock_render.call_args
+    assert np.allclose(kwargs["H_vals"], metrics.H) and np.allclose(args[2], metrics.N)
+
+
 def test_render_L_calendar_mode_skips_analytic_curve_even_with_state_vectors():
     ax = MagicMock()
     times = [_t("2024-01-01"), _t("2024-01-02")]
@@ -1959,6 +2029,9 @@ def test_core_driver_returns_expected_paths():
             out_dir, "core/panels", "time_average_N_L", chart_config.chart_format
         ),
         resolve_chart_path(
+            out_dir, "core/panels", "nt_moving_average_lt", chart_config.chart_format
+        ),
+        resolve_chart_path(
             out_dir,
             "core/panels",
             "cumulative_arrival_rate_Lambda",
@@ -2057,6 +2130,7 @@ def test_core_driver_returns_expected_paths():
         ) as mock_departure_stack,
         patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
         patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
+        patch("samplepath.plots.core.NtLTPanel.plot") as mock_plot_ntlt,
         patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
         patch("samplepath.plots.core.ThetaPanel.plot") as mock_plot_Theta,
         patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
@@ -2077,32 +2151,34 @@ def test_core_driver_returns_expected_paths():
         patch("samplepath.plots.core.ArrivalsPanel.plot") as mock_plot_A,
         patch("samplepath.plots.core.DeparturesPanel.plot") as mock_plot_D,
     ):
-        mock_stack.return_value = expected[17]
-        mock_lt_stack.return_value = expected[18]
-        mock_departure_stack.return_value = expected[19]
+        mock_stack.return_value = expected[18]
+        mock_lt_stack.return_value = expected[19]
+        mock_departure_stack.return_value = expected[20]
         mock_plot_N.return_value = expected[0]
         mock_plot_L.return_value = expected[1]
-        mock_plot_Lam.return_value = expected[2]
-        mock_plot_Theta.return_value = expected[3]
-        mock_plot_indicator.return_value = expected[4]
-        mock_plot_flow_cloud.return_value = expected[5]
-        mock_plot_A.return_value = expected[6]
-        mock_plot_D.return_value = expected[7]
-        mock_plot_w.return_value = expected[8]
-        mock_plot_w_star.return_value = expected[9]
-        mock_plot_sojourn_scatter.return_value = expected[10]
-        mock_plot_residence_scatter.return_value = expected[11]
-        mock_plot_w_prime.return_value = expected[12]
-        mock_plot_H.return_value = expected[13]
-        mock_plot_CFD.return_value = expected[14]
-        mock_plot_llw.return_value = expected[15]
-        mock_plot_ltheta.return_value = expected[16]
+        mock_plot_ntlt.return_value = expected[2]
+        mock_plot_Lam.return_value = expected[3]
+        mock_plot_Theta.return_value = expected[4]
+        mock_plot_indicator.return_value = expected[5]
+        mock_plot_flow_cloud.return_value = expected[6]
+        mock_plot_A.return_value = expected[7]
+        mock_plot_D.return_value = expected[8]
+        mock_plot_w.return_value = expected[9]
+        mock_plot_w_star.return_value = expected[10]
+        mock_plot_sojourn_scatter.return_value = expected[11]
+        mock_plot_residence_scatter.return_value = expected[12]
+        mock_plot_w_prime.return_value = expected[13]
+        mock_plot_H.return_value = expected[14]
+        mock_plot_CFD.return_value = expected[15]
+        mock_plot_llw.return_value = expected[16]
+        mock_plot_ltheta.return_value = expected[17]
         written = core.plot_core_flow_metrics_charts(
             metrics, empirical_metrics, filter_result, chart_config, out_dir
         )
     assert written == expected
     mock_plot_N.assert_called_once()
     mock_plot_L.assert_called_once()
+    mock_plot_ntlt.assert_called_once()
     mock_plot_Lam.assert_called_once()
     mock_plot_Theta.assert_called_once()
     mock_plot_w.assert_called_once()
@@ -2140,6 +2216,7 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
         patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
         patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
+        patch("samplepath.plots.core.NtLTPanel.plot") as mock_plot_ntlt,
         patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
         patch("samplepath.plots.core.ThetaPanel.plot") as mock_plot_Theta,
         patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
@@ -2166,6 +2243,7 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
     mock_stack.assert_called_once_with(metrics, filter_result, chart_config, out_dir)
     mock_plot_N.assert_called_once()
     mock_plot_L.assert_called_once()
+    mock_plot_ntlt.assert_called_once()
     mock_plot_Lam.assert_called_once()
     mock_plot_Theta.assert_called_once()
     mock_plot_w.assert_called_once()
@@ -2195,6 +2273,7 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w():
         patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
         patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
+        patch("samplepath.plots.core.NtLTPanel.plot"),
         patch("samplepath.plots.core.HPanel.plot"),
         patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
         patch("samplepath.plots.core.LLWPanel"),
@@ -2252,6 +2331,7 @@ def test_core_driver_passes_show_derivations_to_CFD():
         patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
         patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
+        patch("samplepath.plots.core.NtLTPanel.plot"),
         patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
         patch("samplepath.plots.core.ThetaPanel.plot") as mock_plot_Theta,
         patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
@@ -2297,6 +2377,7 @@ def test_core_driver_uses_metrics_freq_for_unit():
     ):
         with (
             patch("samplepath.plots.core.LPanel.plot"),
+            patch("samplepath.plots.core.NtLTPanel.plot"),
             patch("samplepath.plots.core.LambdaPanel.plot"),
             patch("samplepath.plots.core.ThetaPanel.plot"),
             patch("samplepath.plots.core.WPanel.plot"),
@@ -2405,6 +2486,7 @@ def test_core_driver_calls_plot_H_under_core_dir():
         with (
             patch("samplepath.plots.core.NPanel.plot"),
             patch("samplepath.plots.core.LPanel.plot"),
+            patch("samplepath.plots.core.NtLTPanel.plot"),
             patch("samplepath.plots.core.LambdaPanel.plot"),
             patch("samplepath.plots.core.ThetaPanel.plot"),
             patch("samplepath.plots.core.WPanel.plot"),
@@ -2451,6 +2533,7 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
         patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.NPanel.plot"),
         patch("samplepath.plots.core.LPanel.plot"),
+        patch("samplepath.plots.core.NtLTPanel.plot"),
         patch("samplepath.plots.core.LambdaPanel.plot"),
         patch("samplepath.plots.core.ThetaPanel.plot"),
         patch("samplepath.plots.core.WPanel.plot"),
@@ -2491,6 +2574,7 @@ def test_core_driver_passes_event_marks_to_CFD():
         patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.NPanel.plot"),
         patch("samplepath.plots.core.LPanel.plot"),
+        patch("samplepath.plots.core.NtLTPanel.plot"),
         patch("samplepath.plots.core.LambdaPanel.plot"),
         patch("samplepath.plots.core.ThetaPanel.plot"),
         patch("samplepath.plots.core.WPanel.plot"),
@@ -2531,6 +2615,7 @@ def test_core_driver_passes_event_marks_to_departure_invariant():
         patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.NPanel.plot"),
         patch("samplepath.plots.core.LPanel.plot"),
+        patch("samplepath.plots.core.NtLTPanel.plot"),
         patch("samplepath.plots.core.LambdaPanel.plot"),
         patch("samplepath.plots.core.ThetaPanel.plot"),
         patch("samplepath.plots.core.WPanel.plot"),
@@ -3054,6 +3139,7 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
         with (
             patch("samplepath.plots.core.NPanel.plot"),
             patch("samplepath.plots.core.LPanel.plot"),
+            patch("samplepath.plots.core.NtLTPanel.plot"),
             patch("samplepath.plots.core.LambdaPanel.plot"),
             patch("samplepath.plots.core.ThetaPanel.plot"),
             patch("samplepath.plots.core.WPanel.plot"),
@@ -3099,6 +3185,7 @@ def test_core_driver_calls_departure_invariant_plot_under_core_dir():
         with (
             patch("samplepath.plots.core.NPanel.plot"),
             patch("samplepath.plots.core.LPanel.plot"),
+            patch("samplepath.plots.core.NtLTPanel.plot"),
             patch("samplepath.plots.core.LambdaPanel.plot"),
             patch("samplepath.plots.core.ThetaPanel.plot"),
             patch("samplepath.plots.core.WPanel.plot"),
@@ -3132,6 +3219,7 @@ def test_core_driver_omits_caption_when_label_empty():
         patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
         patch("samplepath.plots.core.NPanel.plot"),
         patch("samplepath.plots.core.LPanel.plot"),
+        patch("samplepath.plots.core.NtLTPanel.plot"),
         patch("samplepath.plots.core.LambdaPanel.plot"),
         patch("samplepath.plots.core.ThetaPanel.plot"),
         patch("samplepath.plots.core.WPanel.plot"),
