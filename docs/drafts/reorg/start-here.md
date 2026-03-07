@@ -86,7 +86,7 @@ In a sense, an arrival/departure process is to flow analysis what a single-celle
 
 ## Process Model for Sample Path Analysis
 
-The process model we use for sample path analysis is a bit different from the standard arrival-departure model above. It is strictly more general and has fewer assumptions, but the differences are also more fundamental than that.
+The process model we use for sample path analysis is a bit different from the standard arrival-departure model we use in the software industry. It is strictly more general and has fewer assumptions, but the differences are also more fundamental than that.
 
 Formally, the domain of analysis consists of processes described by a set of _events_ that denote beginnings and endings we can observe in time. We continue to call these arrival and departure events to preserve continuity with existing practice, but the key difference is that we analyze the process primarily through the event definitions themselves.
 
@@ -98,11 +98,11 @@ This may be surprising, because you may wonder how we can measure concepts such 
 
 To make this more intuitive, consider a record of births and deaths in a population. We can treat these as arrivals and departures. We are implicitly talking about people being born and dying, and we can measure population in units of people and lifespans in units of time, without needing explicit correspondence between a specific birth and a specific death, or a single integrated record of both.
 
-This reveals something important about flow and flow metrics: these are gestalt properties of a _process_, not simply properties derived by aggregating the experience of individual items traversing that process. Many of the most useful aspects of reasoning about flow for process improvement do not require that level of detail. We can go a long way without ever talking about items.
+This reveals something important about flow and flow metrics: these are gestalt properties of a _process_, not simply properties derived by aggregating the experience of individual items traversing that process. As we will soon see, we can go a long way without ever talking about items. Many of the most useful aspects of reasoning about flow for process improvement do not require that level of detail.
 
-That said, we do assume that arrival and departure events are _countable_, and that both counts are taken with respect to the same underlying set of discrete elements, even if those elements are never individually identified. This is a conservation assumption at the level of _counts_, not identities. It ensures that cumulative arrivals and departures remain structurally comparable. In this sense, the model presupposes an underlying set of elements without requiring correspondence or traceability between events and elements.
+That said, we do assume that arrival and departure events are _countable_, and that both counts are taken with respect to the same underlying set of discrete elements, even if those elements are never individually identified. This is a conservation assumption at the level of _counts_, not identities. It ensures that cumulative arrivals and departures remain structurally comparable. In this sense, the model presupposes an underlying set of elements. But we do not require correspondence or traceability between events and elements.
 
-One key insight from sample path analysis is that the quantities needed to analyze the structural behavior of a flow process are determined entirely by the events. Once arrival and departure _processes_ are defined, the core flow relationships follow from them, without requiring detailed knowledge of individual elements. This not only clarifies what must be measured to reason about flow (event structure), it also provides a more general framework that applies even in domains where the notion of discrete elements is less tangible.
+One key insight from sample path analysis is that the quantities needed to analyze the structural behavior of a flow process are determined entirely by the events. Once arrival and departure _processes_ are defined, the core flow relationships follow from them, without requiring detailed knowledge of individual elements. This not only clarifies what must be measured to reason about flow (event structure), it also provides a more general model that applies even in domains where the correspondence between elements and events is not known.
 
 ## What Is a Sample Path?
 
@@ -142,7 +142,7 @@ So the two approaches are complementary. Sample path analysis works under more l
 This is the perspective we exploit: structural properties of flow processes can be proven to hold along any sample path that satisfies verifiable conditions, without committing to probabilistic assumptions about the ensemble properties that hold across all sample paths.
 Since we generally don't have a probability distribution to work with, we will call the underlying process non-deterministic rather than stochastic.
 
-## The Sample Path of a Flow Process
+## The Sample Path of an Arrival-Departure Process
 
 We begin by specifying how non-determinism enters the model. Imagine we are observing arrivals and departures over time.
 We record:
@@ -178,7 +178,7 @@ The machinery that makes this possible is what we call sample path analysis.
 
 ## Where Distributions Matter
 
-Probability and statistics still matter, especially when we are reasoning about possible futures in prediction models. But they are not the starting point.
+Probability and statistics still matter, especially when we are reasoning about possible futures in prediction models. But they are not the starting point. More importantly, they are not necessary to _measure flow_.
 
 In current industry practice, flow measurement and analysis focus on producing item-level empirical distributions of metrics such as lead time and throughput. These are useful. They help quantitatively describe and characterize customer experience, tail risk, service levels, and a whole host of other operationally useful metrics.
 
@@ -191,12 +191,13 @@ If we want item-level distributions, we may extend the marked point process by e
 This establishes a hierarchy:
 
 1. Non-deterministic event structure.  
-2. Structural flow metrics derived from that structure.  
+2. Structural flow metrics derived from a single path over that structure.  
 3. Distributional summaries derived from explicit item pairing.
 
 Making this hierarchy explicit distinguishes sample path analysis from current practice and changes how these secondary artifacts, such as empirical distributions, should be interpreted, particularly in forecasting.
 
-This is not an intuitive shift, and some of the language and machinery we develop will be unfamiliar. The payoff is a set of techniques for reasoning about flow that do not depend on distributional assumptions, and whose core results hold unconditionally on every realized sample path.
+
+This is not an intuitive shift, and some of the language and machinery we develop will be unfamiliar. The payoff is a set of techniques for reasoning about flow that do not depend on distributional assumptions, and whose core results hold unconditionally on _every_ realized sample path.
 
 The remainder of this document, and the supporting material on this site, develops the details.
 
@@ -206,20 +207,22 @@ In this chapter we will cover the key concepts of sample path analysis of an arr
 
 ## Computing sample path flow metrics
 
-The previous chapters established that everything in our methods hinges on observing events on the sample path — in the case of flow processes, a marked point process — and analyzing the event structure as observations unfold along the time dimension.
+The previous chapters established that everything in our methods hinges on observing events on the sample path — in the case of flow processes, a marked point process — and analyzing the event structure as it unfolds along the time dimension.
 
 A good mental model for how we compute these metrics is as follows [^-mental-model]:
 
 [^-mental-model]: Even though this is not the way the underlying algorithms are necessarily implemented in the toolkit.
 
-- Starting from a fixed point in time, observe the sample path - the marked point process consisting of arrival and departure events - up to time $T$.
-- Compute a set of metrics that describe the _state_ of the process up to that point in time. These are finite-window quantities that are closely related to many of the metrics we measure today, but they are not the same quantities, and the differences matter.
-- Wait for the next event, record the event type, and extend the window by the elapsed time, giving an extended sample path that includes realized values of the next random element (timestamp and mark)[^-random-variables].
-- Recompute all metrics deterministically from their previous values and the incremental contribution of the new variables.
+- Starting from a fixed point in time, observe the sample path — the marked point process consisting of arrival and departure events — up to time $T$.
+- Compute a set of metrics that describe the _state_ of the process over that window. These are finite-window quantities that are closely related to many of the metrics we measure today, but they are not the same quantities, and the differences matter.
+- Wait for the next event, record the event type, and extend the observation window to include the elapsed time, giving an extended sample path that includes realized values of the next random element (timestamp and mark)[^-random-variables].
+- Recompute all metrics _deterministically_ from their previous values and the incremental contribution of the new event.
+
+The key aspect of this method is the fact that the _measurements we define are deterministic_, even though the underlying arrival–departure process is non-deterministic. In other words, all the measurable properties of a flow are deterministic even though the underlying drivers of that flow are non-deterministic. Taking measurements on a known prefix of a sample path means that the non-determinism in the process always lies outside the boundary of the measurements we make decisions on.
 
 [^-random-variables]: At each step we are observing the realized value of the next random element in some underlying non-deterministic process. Conditioned on the observed prefix, the structural flow quantities defined over that prefix are deterministic functionals of the prefix. This is what we mean when we say "randomness lives in the future."
 
-The fact that every flow metric in this model can be computed this way is not obvious. We have traditionally treated these metrics as statistics, averages and percentiles of distributions of item level measurements. This has its uses but it does not let us reason reliably about cause and effect given a set of measurements on the process. This is what sample path analysis provides. Provably correct causal _attribution_ makes sample path analysis a fundamentally different and more powerful analysis technique. It lets us trace changes in flow metrics back to the _contributions of individual events on the timeline_, and this, in turn, gives us tools to shape the _event structure_ so metrics move in the direction we want. This principle is at the heart of why this technique is worth learning.
+The fact that every flow metric in this model can be computed this way is not obvious. We have traditionally treated these metrics as statistics, averages and percentiles of distributions of item-level measurements. This has its uses but it does not let us reason reliably about cause and effect given a set of measurements on the process. This is what sample path analysis provides. Provably correct causal _attribution_ makes sample path analysis a fundamentally different and more powerful analytical technique. It lets us trace changes in flow metrics back to the _contributions of individual events on the timeline_, and this, in turn, gives us tools to shape the _event structure_ so metrics move in the direction we want. This principle is at the heart of why this technique is worth learning.
 
 ## Processes and Indexes
 
@@ -412,6 +415,21 @@ This path visualizes the salient dynamics of $H(T)$: arrival and departure event
 
 $N(t)$ and $H(T)$ decompose the two-dimensional geometry of the CFD into its component parts in a way that makes it easier to reason visually about the impact of instantaneous and global state on the behavior of the underlying arrival–departure process.
 
+## Presence Mass and Presence Density
+
+So far, we have used the terms instantaneous presence and cumulative presence to refer to $N(t)$ and $H(T)$. In geometric terms, these correspond to the vertical distance between the cumulative arrival and departure paths in the cumulative flow diagram, and the area swept out by this vertical distance over time as the arrival–departure process evolves.
+
+There is a deep connection between this geometric interpretation and measure theory that allows us to conceive of these geometric concepts in tangible, physical terms. As shown in [@fig:mass-density], we can view $H(T)$ as a measure over the product space of two measures: time and a counting measure induced by the arrival–departure process. In this product space, $H(T)$ represents the accumulation of counts over time. Equivalently, it can be viewed as a double integral over these two measures.
+
+![Presence Density and Mass]($document-root/assets/mass-density.png){#fig:mass-density}
+
+This interpretation is directly analogous to how density and mass are related in physics: mass is obtained by integrating density over a physical volume. In our case, the “volume” is the area swept out by the sample path, the density is the instantaneous presence $N(t)$, and the mass is the integrated density $H(T)$. The main difference is that these quantities are defined with respect to *time* as the principal dimension [^-radon-nikodym].
+
+[^-radon-nikodym]: More formally: $N(t)$ is the Radon–Nikodym derivative of the cumulative presence measure $H$ with respect to the time measure $dt$, i.e. $N(t)=\frac{dH}{dt}$, and cumulative presence $H(T)$ is obtained by integrating this density over time.
+
+This intuition will be formalized when we expand to more general forms of presence in the Presence Calculus [@kkumar2025]. There we will speak explicitly of *presence density functions* whose instantaneous superposition defines the presence density, and *presence mass* as the time-integrated density. These will become core concepts. The area under the sample path will become a true volume when we expand from a simple two-dimensional state to higher-dimensional states.
+
+For our purposes here, however, this physical intuition is sufficient. It allows us to think of presence mass as the quantity we manage when we “manage flow”, and the flow metrics we derive next can be understood as ways of measuring the *shape* of this presence mass.
 
 # Flow Metrics and Little's Law
 
