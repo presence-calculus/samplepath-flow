@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2025 Krishna Kumar
 # SPDX-License-Identifier: MIT
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 import os
 from types import SimpleNamespace
 from typing import Optional
@@ -10,6 +10,7 @@ from unittest.mock import MagicMock, patch
 from matplotlib import colors as mcolors
 import numpy as np
 import pandas as pd
+import pytest
 
 from samplepath.metrics import ElementWiseEmpiricalMetrics
 from samplepath.plots import core
@@ -1938,6 +1939,69 @@ def _empirical_metrics_fixture(
     )
 
 
+_CORE_DRIVER_STACK_TARGETS = (
+    ("plot_core_stack", "samplepath.plots.core.plot_core_stack"),
+    (
+        "plot_LT_derivation_stack",
+        "samplepath.plots.core.plot_LT_derivation_stack",
+    ),
+    (
+        "plot_departure_flow_metrics_stack",
+        "samplepath.plots.core.plot_departure_flow_metrics_stack",
+    ),
+)
+_CORE_DRIVER_PANEL_CLASS_TARGETS = (
+    ("NPanel", "samplepath.plots.core.NPanel"),
+    ("LPanel", "samplepath.plots.core.LPanel"),
+    ("NtLTPanel", "samplepath.plots.core.NtLTPanel"),
+    ("LambdaPanel", "samplepath.plots.core.LambdaPanel"),
+    ("ThetaPanel", "samplepath.plots.core.ThetaPanel"),
+    ("WPanel", "samplepath.plots.core.WPanel"),
+    ("SojournTimePanel", "samplepath.plots.core.SojournTimePanel"),
+    ("SojournTimeScatterPanel", "samplepath.plots.core.SojournTimeScatterPanel"),
+    ("ResidenceTimeScatterPanel", "samplepath.plots.core.ResidenceTimeScatterPanel"),
+    ("WPrimePanel", "samplepath.plots.core.WPrimePanel"),
+    ("HPanel", "samplepath.plots.core.HPanel"),
+    ("CFDPanel", "samplepath.plots.core.CFDPanel"),
+    ("LLWPanel", "samplepath.plots.core.LLWPanel"),
+    ("LThetaWPrimePanel", "samplepath.plots.core.LThetaWPrimePanel"),
+    ("EventIndicatorPanel", "samplepath.plots.core.EventIndicatorPanel"),
+    ("FlowCloudPanel", "samplepath.plots.core.FlowCloudPanel"),
+    ("ArrivalsPanel", "samplepath.plots.core.ArrivalsPanel"),
+    ("DeparturesPanel", "samplepath.plots.core.DeparturesPanel"),
+)
+
+
+@pytest.fixture
+def core_driver_patcher():
+    """Patch collaborators used by plot_core_flow_metrics_charts."""
+
+    @contextmanager
+    def _patch(*, class_panels: tuple[str, ...] = ()):
+        class_panel_set = set(class_panels)
+        known_panels = {
+            panel_name for panel_name, _ in _CORE_DRIVER_PANEL_CLASS_TARGETS
+        }
+        unknown_panels = class_panel_set - known_panels
+        if unknown_panels:
+            msg = f"Unknown core driver panel patch names: {sorted(unknown_panels)}"
+            raise ValueError(msg)
+        with ExitStack() as stack:
+            mocks = {}
+            for name, target in _CORE_DRIVER_STACK_TARGETS:
+                mocks[name] = stack.enter_context(patch(target))
+            for panel_name, class_target in _CORE_DRIVER_PANEL_CLASS_TARGETS:
+                target = (
+                    class_target
+                    if panel_name in class_panel_set
+                    else f"{class_target}.plot"
+                )
+                mocks[panel_name] = stack.enter_context(patch(target))
+            yield mocks
+
+    return _patch
+
+
 def _llw_metrics(
     *,
     times: list[pd.Timestamp],
@@ -2014,7 +2078,7 @@ def _fake_ltheta_context(fig, ax, *, caption: str, out_dir: str = "/tmp/out"):
     return _ctx
 
 
-def test_core_driver_returns_expected_paths():
+def test_core_driver_returns_expected_paths(core_driver_patcher):
     metrics = _metrics_fixture()
     empirical_metrics = _empirical_metrics_fixture(times=metrics.times)
     out_dir = "/tmp/out"
@@ -2122,83 +2186,55 @@ def test_core_driver_returns_expected_paths():
             out_dir, "core", "departure_flow_metrics", chart_config.chart_format
         ),
     ]
-    with (
-        patch("samplepath.plots.core.plot_core_stack") as mock_stack,
-        patch("samplepath.plots.core.plot_LT_derivation_stack") as mock_lt_stack,
-        patch(
-            "samplepath.plots.core.plot_departure_flow_metrics_stack"
-        ) as mock_departure_stack,
-        patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
-        patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
-        patch("samplepath.plots.core.NtLTPanel.plot") as mock_plot_ntlt,
-        patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
-        patch("samplepath.plots.core.ThetaPanel.plot") as mock_plot_Theta,
-        patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
-        patch("samplepath.plots.core.SojournTimePanel.plot") as mock_plot_w_star,
-        patch(
-            "samplepath.plots.core.SojournTimeScatterPanel.plot"
-        ) as mock_plot_sojourn_scatter,
-        patch(
-            "samplepath.plots.core.ResidenceTimeScatterPanel.plot"
-        ) as mock_plot_residence_scatter,
-        patch("samplepath.plots.core.WPrimePanel.plot") as mock_plot_w_prime,
-        patch("samplepath.plots.core.HPanel.plot") as mock_plot_H,
-        patch("samplepath.plots.core.CFDPanel.plot") as mock_plot_CFD,
-        patch("samplepath.plots.core.LLWPanel.plot") as mock_plot_llw,
-        patch("samplepath.plots.core.LThetaWPrimePanel.plot") as mock_plot_ltheta,
-        patch("samplepath.plots.core.EventIndicatorPanel.plot") as mock_plot_indicator,
-        patch("samplepath.plots.core.FlowCloudPanel.plot") as mock_plot_flow_cloud,
-        patch("samplepath.plots.core.ArrivalsPanel.plot") as mock_plot_A,
-        patch("samplepath.plots.core.DeparturesPanel.plot") as mock_plot_D,
-    ):
-        mock_stack.return_value = expected[18]
-        mock_lt_stack.return_value = expected[19]
-        mock_departure_stack.return_value = expected[20]
-        mock_plot_N.return_value = expected[0]
-        mock_plot_L.return_value = expected[1]
-        mock_plot_ntlt.return_value = expected[2]
-        mock_plot_Lam.return_value = expected[3]
-        mock_plot_Theta.return_value = expected[4]
-        mock_plot_indicator.return_value = expected[5]
-        mock_plot_flow_cloud.return_value = expected[6]
-        mock_plot_A.return_value = expected[7]
-        mock_plot_D.return_value = expected[8]
-        mock_plot_w.return_value = expected[9]
-        mock_plot_w_star.return_value = expected[10]
-        mock_plot_sojourn_scatter.return_value = expected[11]
-        mock_plot_residence_scatter.return_value = expected[12]
-        mock_plot_w_prime.return_value = expected[13]
-        mock_plot_H.return_value = expected[14]
-        mock_plot_CFD.return_value = expected[15]
-        mock_plot_llw.return_value = expected[16]
-        mock_plot_ltheta.return_value = expected[17]
+    with core_driver_patcher() as mocks:
+        mocks["plot_core_stack"].return_value = expected[18]
+        mocks["plot_LT_derivation_stack"].return_value = expected[19]
+        mocks["plot_departure_flow_metrics_stack"].return_value = expected[20]
+        mocks["NPanel"].return_value = expected[0]
+        mocks["LPanel"].return_value = expected[1]
+        mocks["NtLTPanel"].return_value = expected[2]
+        mocks["LambdaPanel"].return_value = expected[3]
+        mocks["ThetaPanel"].return_value = expected[4]
+        mocks["EventIndicatorPanel"].return_value = expected[5]
+        mocks["FlowCloudPanel"].return_value = expected[6]
+        mocks["ArrivalsPanel"].return_value = expected[7]
+        mocks["DeparturesPanel"].return_value = expected[8]
+        mocks["WPanel"].return_value = expected[9]
+        mocks["SojournTimePanel"].return_value = expected[10]
+        mocks["SojournTimeScatterPanel"].return_value = expected[11]
+        mocks["ResidenceTimeScatterPanel"].return_value = expected[12]
+        mocks["WPrimePanel"].return_value = expected[13]
+        mocks["HPanel"].return_value = expected[14]
+        mocks["CFDPanel"].return_value = expected[15]
+        mocks["LLWPanel"].return_value = expected[16]
+        mocks["LThetaWPrimePanel"].return_value = expected[17]
         written = core.plot_core_flow_metrics_charts(
             metrics, empirical_metrics, filter_result, chart_config, out_dir
         )
     assert written == expected
-    mock_plot_N.assert_called_once()
-    mock_plot_L.assert_called_once()
-    mock_plot_ntlt.assert_called_once()
-    mock_plot_Lam.assert_called_once()
-    mock_plot_Theta.assert_called_once()
-    mock_plot_w.assert_called_once()
-    mock_plot_w_star.assert_called_once()
-    mock_plot_sojourn_scatter.assert_called_once()
-    mock_plot_residence_scatter.assert_called_once()
-    mock_plot_w_prime.assert_called_once()
-    mock_plot_H.assert_called_once()
-    mock_plot_CFD.assert_called_once()
-    mock_plot_llw.assert_called_once()
-    mock_plot_ltheta.assert_called_once()
-    mock_plot_indicator.assert_called_once()
-    mock_plot_flow_cloud.assert_called_once()
-    mock_plot_A.assert_called_once()
-    mock_plot_D.assert_called_once()
-    mock_lt_stack.assert_called_once()
-    mock_departure_stack.assert_called_once()
+    mocks["NPanel"].assert_called_once()
+    mocks["LPanel"].assert_called_once()
+    mocks["NtLTPanel"].assert_called_once()
+    mocks["LambdaPanel"].assert_called_once()
+    mocks["ThetaPanel"].assert_called_once()
+    mocks["WPanel"].assert_called_once()
+    mocks["SojournTimePanel"].assert_called_once()
+    mocks["SojournTimeScatterPanel"].assert_called_once()
+    mocks["ResidenceTimeScatterPanel"].assert_called_once()
+    mocks["WPrimePanel"].assert_called_once()
+    mocks["HPanel"].assert_called_once()
+    mocks["CFDPanel"].assert_called_once()
+    mocks["LLWPanel"].assert_called_once()
+    mocks["LThetaWPrimePanel"].assert_called_once()
+    mocks["EventIndicatorPanel"].assert_called_once()
+    mocks["FlowCloudPanel"].assert_called_once()
+    mocks["ArrivalsPanel"].assert_called_once()
+    mocks["DeparturesPanel"].assert_called_once()
+    mocks["plot_LT_derivation_stack"].assert_called_once()
+    mocks["plot_departure_flow_metrics_stack"].assert_called_once()
 
 
-def test_core_driver_calls_plot_core_stack_with_expected_args():
+def test_core_driver_calls_plot_core_stack_with_expected_args(core_driver_patcher):
     metrics = _metrics_fixture()
     empirical_metrics = _empirical_metrics_fixture(times=metrics.times)
     out_dir = "/tmp/out"
@@ -2210,52 +2246,28 @@ def test_core_driver_calls_plot_core_stack_with_expected_args():
     )
     chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
-    with (
-        patch("samplepath.plots.core.plot_core_stack") as mock_stack,
-        patch("samplepath.plots.core.plot_LT_derivation_stack"),
-        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
-        patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
-        patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
-        patch("samplepath.plots.core.NtLTPanel.plot") as mock_plot_ntlt,
-        patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
-        patch("samplepath.plots.core.ThetaPanel.plot") as mock_plot_Theta,
-        patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
-        patch("samplepath.plots.core.SojournTimePanel.plot") as mock_plot_w_star,
-        patch(
-            "samplepath.plots.core.SojournTimeScatterPanel.plot"
-        ) as mock_plot_sojourn_scatter,
-        patch(
-            "samplepath.plots.core.ResidenceTimeScatterPanel.plot"
-        ) as mock_plot_residence_scatter,
-        patch("samplepath.plots.core.WPrimePanel.plot") as mock_plot_w_prime,
-        patch("samplepath.plots.core.HPanel.plot") as mock_plot_H,
-        patch("samplepath.plots.core.CFDPanel.plot") as mock_plot_CFD,
-        patch("samplepath.plots.core.LLWPanel.plot"),
-        patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
-        patch("samplepath.plots.core.EventIndicatorPanel.plot"),
-        patch("samplepath.plots.core.FlowCloudPanel.plot"),
-        patch("samplepath.plots.core.ArrivalsPanel.plot"),
-        patch("samplepath.plots.core.DeparturesPanel.plot"),
-    ):
+    with core_driver_patcher() as mocks:
         core.plot_core_flow_metrics_charts(
             metrics, empirical_metrics, filter_result, chart_config, out_dir
         )
-    mock_stack.assert_called_once_with(metrics, filter_result, chart_config, out_dir)
-    mock_plot_N.assert_called_once()
-    mock_plot_L.assert_called_once()
-    mock_plot_ntlt.assert_called_once()
-    mock_plot_Lam.assert_called_once()
-    mock_plot_Theta.assert_called_once()
-    mock_plot_w.assert_called_once()
-    mock_plot_w_star.assert_called_once()
-    mock_plot_sojourn_scatter.assert_called_once()
-    mock_plot_residence_scatter.assert_called_once()
-    mock_plot_w_prime.assert_called_once()
-    mock_plot_H.assert_called_once()
-    mock_plot_CFD.assert_called_once()
+    mocks["plot_core_stack"].assert_called_once_with(
+        metrics, filter_result, chart_config, out_dir
+    )
+    mocks["NPanel"].assert_called_once()
+    mocks["LPanel"].assert_called_once()
+    mocks["NtLTPanel"].assert_called_once()
+    mocks["LambdaPanel"].assert_called_once()
+    mocks["ThetaPanel"].assert_called_once()
+    mocks["WPanel"].assert_called_once()
+    mocks["SojournTimePanel"].assert_called_once()
+    mocks["SojournTimeScatterPanel"].assert_called_once()
+    mocks["ResidenceTimeScatterPanel"].assert_called_once()
+    mocks["WPrimePanel"].assert_called_once()
+    mocks["HPanel"].assert_called_once()
+    mocks["CFDPanel"].assert_called_once()
 
 
-def test_core_driver_passes_event_marks_to_Lambda_and_w():
+def test_core_driver_passes_event_marks_to_Lambda_and_w(core_driver_patcher):
     metrics = _metrics_fixture()
     empirical_metrics = _empirical_metrics_fixture(times=metrics.times)
     out_dir = "/tmp/out"
@@ -2267,53 +2279,40 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w():
     )
     chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
-    with (
-        patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_LT_derivation_stack"),
-        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
-        patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
-        patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
-        patch("samplepath.plots.core.NtLTPanel.plot"),
-        patch("samplepath.plots.core.HPanel.plot"),
-        patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
-        patch("samplepath.plots.core.LLWPanel"),
-        patch("samplepath.plots.core.LThetaWPrimePanel"),
-        patch("samplepath.plots.core.EventIndicatorPanel"),
-        patch("samplepath.plots.core.FlowCloudPanel"),
-        patch("samplepath.plots.core.ArrivalsPanel"),
-        patch("samplepath.plots.core.DeparturesPanel"),
-        patch("samplepath.plots.core.LambdaPanel") as mock_lam_cls,
-        patch("samplepath.plots.core.ThetaPanel") as mock_theta_cls,
-        patch("samplepath.plots.core.WPanel") as mock_w_cls,
-        patch("samplepath.plots.core.SojournTimePanel") as mock_w_star_cls,
-        patch(
-            "samplepath.plots.core.SojournTimeScatterPanel"
-        ) as mock_sojourn_scatter_cls,
-        patch(
-            "samplepath.plots.core.ResidenceTimeScatterPanel"
-        ) as mock_residence_scatter_cls,
-        patch("samplepath.plots.core.WPrimePanel") as mock_w_prime_cls,
-    ):
+    with core_driver_patcher(
+        class_panels=(
+            "LambdaPanel",
+            "ThetaPanel",
+            "WPanel",
+            "SojournTimePanel",
+            "SojournTimeScatterPanel",
+            "ResidenceTimeScatterPanel",
+            "WPrimePanel",
+            "CFDPanel",
+        )
+    ) as mocks:
         core.plot_core_flow_metrics_charts(
             metrics, empirical_metrics, filter_result, chart_config, out_dir
         )
-    assert mock_lam_cls.call_args.kwargs["with_event_marks"] is True
-    assert mock_theta_cls.call_args.kwargs["with_event_marks"] is True
-    assert mock_w_cls.call_args.kwargs["with_event_marks"] is True
-    assert mock_w_star_cls.call_args.kwargs["with_event_marks"] is True
-    assert mock_sojourn_scatter_cls.call_args.kwargs["with_event_marks"] is True
-    assert mock_residence_scatter_cls.call_args.kwargs["with_event_marks"] is True
-    assert mock_w_prime_cls.call_args.kwargs["with_event_marks"] is True
-    assert mock_cfd_cls.call_args.kwargs["with_event_marks"] is True
-    mock_plot_N.assert_called_once()
-    mock_plot_L.assert_called_once()
-    mock_lam_cls.assert_called_once()
-    mock_theta_cls.assert_called_once()
-    mock_w_cls.assert_called_once()
-    mock_w_prime_cls.assert_called_once()
+    assert mocks["LambdaPanel"].call_args.kwargs["with_event_marks"] is True
+    assert mocks["ThetaPanel"].call_args.kwargs["with_event_marks"] is True
+    assert mocks["WPanel"].call_args.kwargs["with_event_marks"] is True
+    assert mocks["SojournTimePanel"].call_args.kwargs["with_event_marks"] is True
+    assert mocks["SojournTimeScatterPanel"].call_args.kwargs["with_event_marks"] is True
+    assert (
+        mocks["ResidenceTimeScatterPanel"].call_args.kwargs["with_event_marks"] is True
+    )
+    assert mocks["WPrimePanel"].call_args.kwargs["with_event_marks"] is True
+    assert mocks["CFDPanel"].call_args.kwargs["with_event_marks"] is True
+    mocks["NPanel"].assert_called_once()
+    mocks["LPanel"].assert_called_once()
+    mocks["LambdaPanel"].assert_called_once()
+    mocks["ThetaPanel"].assert_called_once()
+    mocks["WPanel"].assert_called_once()
+    mocks["WPrimePanel"].assert_called_once()
 
 
-def test_core_driver_passes_show_derivations_to_CFD():
+def test_core_driver_passes_show_derivations_to_CFD(core_driver_patcher):
     metrics = _metrics_fixture()
     empirical_metrics = _empirical_metrics_fixture(times=metrics.times)
     out_dir = "/tmp/out"
@@ -2325,79 +2324,33 @@ def test_core_driver_passes_show_derivations_to_CFD():
     )
     chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
-    with (
-        patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_LT_derivation_stack"),
-        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
-        patch("samplepath.plots.core.NPanel.plot") as mock_plot_N,
-        patch("samplepath.plots.core.LPanel.plot") as mock_plot_L,
-        patch("samplepath.plots.core.NtLTPanel.plot"),
-        patch("samplepath.plots.core.LambdaPanel.plot") as mock_plot_Lam,
-        patch("samplepath.plots.core.ThetaPanel.plot") as mock_plot_Theta,
-        patch("samplepath.plots.core.WPanel.plot") as mock_plot_w,
-        patch("samplepath.plots.core.SojournTimePanel.plot") as mock_plot_w_star,
-        patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
-        patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
-        patch("samplepath.plots.core.WPrimePanel.plot") as mock_plot_w_prime,
-        patch("samplepath.plots.core.HPanel.plot") as mock_plot_H,
-        patch("samplepath.plots.core.LLWPanel.plot"),
-        patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
-        patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
-        patch("samplepath.plots.core.EventIndicatorPanel.plot"),
-        patch("samplepath.plots.core.FlowCloudPanel.plot"),
-        patch("samplepath.plots.core.ArrivalsPanel.plot"),
-        patch("samplepath.plots.core.DeparturesPanel.plot"),
-    ):
+    with core_driver_patcher(class_panels=("CFDPanel",)) as mocks:
         core.plot_core_flow_metrics_charts(
             metrics, empirical_metrics, filter_result, chart_config, out_dir
         )
-    assert mock_cfd_cls.call_args.kwargs["show_derivations"] is True
-    mock_plot_N.assert_called_once()
-    mock_plot_L.assert_called_once()
-    mock_plot_Lam.assert_called_once()
-    mock_plot_Theta.assert_called_once()
-    mock_plot_w.assert_called_once()
-    mock_plot_w_star.assert_called_once()
-    mock_plot_w_prime.assert_called_once()
-    mock_plot_H.assert_called_once()
+    assert mocks["CFDPanel"].call_args.kwargs["show_derivations"] is True
+    mocks["NPanel"].assert_called_once()
+    mocks["LPanel"].assert_called_once()
+    mocks["LambdaPanel"].assert_called_once()
+    mocks["ThetaPanel"].assert_called_once()
+    mocks["WPanel"].assert_called_once()
+    mocks["SojournTimePanel"].assert_called_once()
+    mocks["WPrimePanel"].assert_called_once()
+    mocks["HPanel"].assert_called_once()
 
 
-def test_core_driver_uses_metrics_freq_for_unit():
+def test_core_driver_uses_metrics_freq_for_unit(core_driver_patcher):
     metrics = _metrics_fixture(freq="W")
     empirical_metrics = _empirical_metrics_fixture(times=metrics.times)
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
     chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
-    with (
-        patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_LT_derivation_stack"),
-        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
-        patch("samplepath.plots.core.NPanel.plot") as mock_plot,
-    ):
-        with (
-            patch("samplepath.plots.core.LPanel.plot"),
-            patch("samplepath.plots.core.NtLTPanel.plot"),
-            patch("samplepath.plots.core.LambdaPanel.plot"),
-            patch("samplepath.plots.core.ThetaPanel.plot"),
-            patch("samplepath.plots.core.WPanel.plot"),
-            patch("samplepath.plots.core.SojournTimePanel.plot"),
-            patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
-            patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
-            patch("samplepath.plots.core.WPrimePanel.plot"),
-            patch("samplepath.plots.core.HPanel.plot"),
-            patch("samplepath.plots.core.CFDPanel.plot"),
-            patch("samplepath.plots.core.LLWPanel.plot"),
-            patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
-            patch("samplepath.plots.core.EventIndicatorPanel.plot"),
-            patch("samplepath.plots.core.FlowCloudPanel.plot"),
-            patch("samplepath.plots.core.ArrivalsPanel.plot"),
-            patch("samplepath.plots.core.DeparturesPanel.plot"),
-        ):
-            core.plot_core_flow_metrics_charts(
-                metrics, empirical_metrics, filter_result, chart_config, out_dir
-            )
-    assert mock_plot.call_args.args[2] == chart_config
+    with core_driver_patcher() as mocks:
+        core.plot_core_flow_metrics_charts(
+            metrics, empirical_metrics, filter_result, chart_config, out_dir
+        )
+    assert mocks["NPanel"].call_args.args[2] == chart_config
 
 
 def test_LambdaPanel_plot_falls_back_to_timestamp_unit():
@@ -2470,45 +2423,21 @@ def test_WPanel_plot_uses_filter_display_caption():
     assert ctx.call_args.kwargs["caption"] == "Filters: test"
 
 
-def test_core_driver_calls_plot_H_under_core_dir():
+def test_core_driver_calls_plot_H_under_core_dir(core_driver_patcher):
     metrics = _metrics_fixture()
     empirical_metrics = _empirical_metrics_fixture(times=metrics.times)
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
     chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
-    with (
-        patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_LT_derivation_stack"),
-        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
-        patch("samplepath.plots.core.HPanel.plot") as mock_plot,
-    ):
-        with (
-            patch("samplepath.plots.core.NPanel.plot"),
-            patch("samplepath.plots.core.LPanel.plot"),
-            patch("samplepath.plots.core.NtLTPanel.plot"),
-            patch("samplepath.plots.core.LambdaPanel.plot"),
-            patch("samplepath.plots.core.ThetaPanel.plot"),
-            patch("samplepath.plots.core.WPanel.plot"),
-            patch("samplepath.plots.core.SojournTimePanel.plot"),
-            patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
-            patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
-            patch("samplepath.plots.core.WPrimePanel.plot"),
-            patch("samplepath.plots.core.CFDPanel.plot"),
-            patch("samplepath.plots.core.LLWPanel.plot"),
-            patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
-            patch("samplepath.plots.core.EventIndicatorPanel.plot"),
-            patch("samplepath.plots.core.FlowCloudPanel.plot"),
-            patch("samplepath.plots.core.ArrivalsPanel.plot"),
-            patch("samplepath.plots.core.DeparturesPanel.plot"),
-        ):
-            core.plot_core_flow_metrics_charts(
-                metrics, empirical_metrics, filter_result, chart_config, out_dir
-            )
-    assert mock_plot.call_args.args[-1] == out_dir
+    with core_driver_patcher() as mocks:
+        core.plot_core_flow_metrics_charts(
+            metrics, empirical_metrics, filter_result, chart_config, out_dir
+        )
+    assert mocks["HPanel"].call_args.args[-1] == out_dir
 
 
-def test_core_driver_calls_plot_CFD_under_core_dir():
+def test_core_driver_calls_plot_CFD_under_core_dir(core_driver_patcher):
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=None, lambda_lower_pctl=None, lambda_warmup=0.0)
     chart_config = ChartConfig.init_from_args(args)
@@ -2527,36 +2456,14 @@ def test_core_driver_calls_plot_CFD_under_core_dir():
         freq=None,
     )
     empirical_metrics = _empirical_metrics_fixture(times=metrics.times)
-    with (
-        patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_LT_derivation_stack"),
-        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
-        patch("samplepath.plots.core.NPanel.plot"),
-        patch("samplepath.plots.core.LPanel.plot"),
-        patch("samplepath.plots.core.NtLTPanel.plot"),
-        patch("samplepath.plots.core.LambdaPanel.plot"),
-        patch("samplepath.plots.core.ThetaPanel.plot"),
-        patch("samplepath.plots.core.WPanel.plot"),
-        patch("samplepath.plots.core.SojournTimePanel.plot"),
-        patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
-        patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
-        patch("samplepath.plots.core.WPrimePanel.plot"),
-        patch("samplepath.plots.core.HPanel.plot"),
-        patch("samplepath.plots.core.LLWPanel.plot"),
-        patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
-        patch("samplepath.plots.core.CFDPanel.plot") as mock_plot,
-        patch("samplepath.plots.core.EventIndicatorPanel.plot"),
-        patch("samplepath.plots.core.FlowCloudPanel.plot"),
-        patch("samplepath.plots.core.ArrivalsPanel.plot"),
-        patch("samplepath.plots.core.DeparturesPanel.plot"),
-    ):
+    with core_driver_patcher() as mocks:
         core.plot_core_flow_metrics_charts(
             metrics, empirical_metrics, filter_result, chart_config, out_dir
         )
-    assert mock_plot.call_args.args[-1] == out_dir
+    assert mocks["CFDPanel"].call_args.args[-1] == out_dir
 
 
-def test_core_driver_passes_event_marks_to_CFD():
+def test_core_driver_passes_event_marks_to_CFD(core_driver_patcher):
     metrics = _metrics_fixture()
     empirical_metrics = _empirical_metrics_fixture(times=metrics.times)
     out_dir = "/tmp/out"
@@ -2568,36 +2475,14 @@ def test_core_driver_passes_event_marks_to_CFD():
     )
     chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
-    with (
-        patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_LT_derivation_stack"),
-        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
-        patch("samplepath.plots.core.NPanel.plot"),
-        patch("samplepath.plots.core.LPanel.plot"),
-        patch("samplepath.plots.core.NtLTPanel.plot"),
-        patch("samplepath.plots.core.LambdaPanel.plot"),
-        patch("samplepath.plots.core.ThetaPanel.plot"),
-        patch("samplepath.plots.core.WPanel.plot"),
-        patch("samplepath.plots.core.SojournTimePanel.plot"),
-        patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
-        patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
-        patch("samplepath.plots.core.WPrimePanel.plot"),
-        patch("samplepath.plots.core.HPanel.plot"),
-        patch("samplepath.plots.core.LLWPanel"),
-        patch("samplepath.plots.core.LThetaWPrimePanel"),
-        patch("samplepath.plots.core.CFDPanel") as mock_cfd_cls,
-        patch("samplepath.plots.core.EventIndicatorPanel"),
-        patch("samplepath.plots.core.FlowCloudPanel"),
-        patch("samplepath.plots.core.ArrivalsPanel"),
-        patch("samplepath.plots.core.DeparturesPanel"),
-    ):
+    with core_driver_patcher(class_panels=("CFDPanel",)) as mocks:
         core.plot_core_flow_metrics_charts(
             metrics, empirical_metrics, filter_result, chart_config, out_dir
         )
-    assert mock_cfd_cls.call_args.kwargs["with_event_marks"] is True
+    assert mocks["CFDPanel"].call_args.kwargs["with_event_marks"] is True
 
 
-def test_core_driver_passes_event_marks_to_departure_invariant():
+def test_core_driver_passes_event_marks_to_departure_invariant(core_driver_patcher):
     metrics = _metrics_fixture()
     empirical_metrics = _empirical_metrics_fixture(times=metrics.times)
     out_dir = "/tmp/out"
@@ -2609,33 +2494,11 @@ def test_core_driver_passes_event_marks_to_departure_invariant():
     )
     chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
-    with (
-        patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_LT_derivation_stack"),
-        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
-        patch("samplepath.plots.core.NPanel.plot"),
-        patch("samplepath.plots.core.LPanel.plot"),
-        patch("samplepath.plots.core.NtLTPanel.plot"),
-        patch("samplepath.plots.core.LambdaPanel.plot"),
-        patch("samplepath.plots.core.ThetaPanel.plot"),
-        patch("samplepath.plots.core.WPanel.plot"),
-        patch("samplepath.plots.core.SojournTimePanel.plot"),
-        patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
-        patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
-        patch("samplepath.plots.core.WPrimePanel.plot"),
-        patch("samplepath.plots.core.HPanel.plot"),
-        patch("samplepath.plots.core.CFDPanel.plot"),
-        patch("samplepath.plots.core.LLWPanel.plot"),
-        patch("samplepath.plots.core.LThetaWPrimePanel") as mock_panel,
-        patch("samplepath.plots.core.EventIndicatorPanel.plot"),
-        patch("samplepath.plots.core.FlowCloudPanel.plot"),
-        patch("samplepath.plots.core.ArrivalsPanel.plot"),
-        patch("samplepath.plots.core.DeparturesPanel.plot"),
-    ):
+    with core_driver_patcher(class_panels=("LThetaWPrimePanel",)) as mocks:
         core.plot_core_flow_metrics_charts(
             metrics, empirical_metrics, filter_result, chart_config, out_dir
         )
-    assert mock_panel.call_args.kwargs["with_event_marks"] is True
+    assert mocks["LThetaWPrimePanel"].call_args.kwargs["with_event_marks"] is True
 
 
 def test_LLWPanel_renders_invariant_chart():
@@ -3122,45 +2985,21 @@ def test_LLWPanel_departure_overrides_arrival_color():
     assert colors[0][:3] == mcolors.to_rgba(ColorConfig.departure_color)[:3]
 
 
-def test_core_driver_calls_invariant_plot_under_core_dir():
+def test_core_driver_calls_invariant_plot_under_core_dir(core_driver_patcher):
     metrics = _metrics_fixture()
     empirical_metrics = _empirical_metrics_fixture(times=metrics.times)
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
     chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
-    with (
-        patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_LT_derivation_stack"),
-        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
-        patch("samplepath.plots.core.LLWPanel") as mock_panel,
-        patch("samplepath.plots.core.LThetaWPrimePanel"),
-    ):
-        with (
-            patch("samplepath.plots.core.NPanel.plot"),
-            patch("samplepath.plots.core.LPanel.plot"),
-            patch("samplepath.plots.core.NtLTPanel.plot"),
-            patch("samplepath.plots.core.LambdaPanel.plot"),
-            patch("samplepath.plots.core.ThetaPanel.plot"),
-            patch("samplepath.plots.core.WPanel.plot"),
-            patch("samplepath.plots.core.SojournTimePanel.plot"),
-            patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
-            patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
-            patch("samplepath.plots.core.WPrimePanel.plot"),
-            patch("samplepath.plots.core.HPanel.plot"),
-            patch("samplepath.plots.core.CFDPanel.plot"),
-            patch("samplepath.plots.core.EventIndicatorPanel.plot"),
-            patch("samplepath.plots.core.FlowCloudPanel.plot"),
-            patch("samplepath.plots.core.ArrivalsPanel.plot"),
-            patch("samplepath.plots.core.DeparturesPanel.plot"),
-        ):
-            core.plot_core_flow_metrics_charts(
-                metrics, empirical_metrics, filter_result, chart_config, out_dir
-            )
-    mock_panel.assert_called_once_with(
+    with core_driver_patcher(class_panels=("LLWPanel",)) as mocks:
+        core.plot_core_flow_metrics_charts(
+            metrics, empirical_metrics, filter_result, chart_config, out_dir
+        )
+    mocks["LLWPanel"].assert_called_once_with(
         with_event_marks=False,
     )
-    mock_panel.return_value.plot.assert_called_once_with(
+    mocks["LLWPanel"].return_value.plot.assert_called_once_with(
         metrics,
         filter_result,
         chart_config,
@@ -3168,78 +3007,34 @@ def test_core_driver_calls_invariant_plot_under_core_dir():
     )
 
 
-def test_core_driver_calls_departure_invariant_plot_under_core_dir():
+def test_core_driver_calls_departure_invariant_plot_under_core_dir(core_driver_patcher):
     metrics = _metrics_fixture()
     empirical_metrics = _empirical_metrics_fixture(times=metrics.times)
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
     chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: test", label="test")
-    with (
-        patch("samplepath.plots.core.plot_core_stack"),
-        patch("samplepath.plots.core.plot_LT_derivation_stack"),
-        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
-        patch("samplepath.plots.core.LLWPanel"),
-        patch("samplepath.plots.core.LThetaWPrimePanel") as mock_panel,
-    ):
-        with (
-            patch("samplepath.plots.core.NPanel.plot"),
-            patch("samplepath.plots.core.LPanel.plot"),
-            patch("samplepath.plots.core.NtLTPanel.plot"),
-            patch("samplepath.plots.core.LambdaPanel.plot"),
-            patch("samplepath.plots.core.ThetaPanel.plot"),
-            patch("samplepath.plots.core.WPanel.plot"),
-            patch("samplepath.plots.core.SojournTimePanel.plot"),
-            patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
-            patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
-            patch("samplepath.plots.core.WPrimePanel.plot"),
-            patch("samplepath.plots.core.HPanel.plot"),
-            patch("samplepath.plots.core.CFDPanel.plot"),
-            patch("samplepath.plots.core.EventIndicatorPanel.plot"),
-            patch("samplepath.plots.core.FlowCloudPanel.plot"),
-            patch("samplepath.plots.core.ArrivalsPanel.plot"),
-            patch("samplepath.plots.core.DeparturesPanel.plot"),
-        ):
-            core.plot_core_flow_metrics_charts(
-                metrics, empirical_metrics, filter_result, chart_config, out_dir
-            )
-    assert mock_panel.call_args.kwargs["with_event_marks"] is False
+    with core_driver_patcher(class_panels=("LThetaWPrimePanel",)) as mocks:
+        core.plot_core_flow_metrics_charts(
+            metrics, empirical_metrics, filter_result, chart_config, out_dir
+        )
+    assert mocks["LThetaWPrimePanel"].call_args.kwargs["with_event_marks"] is False
 
 
-def test_core_driver_omits_caption_when_label_empty():
+def test_core_driver_omits_caption_when_label_empty(core_driver_patcher):
     metrics = _metrics_fixture()
     empirical_metrics = _empirical_metrics_fixture(times=metrics.times)
     out_dir = "/tmp/out"
     args = SimpleNamespace(lambda_pctl=99.0, lambda_lower_pctl=1.0, lambda_warmup=0.5)
     chart_config = ChartConfig.init_from_args(args)
     filter_result = SimpleNamespace(display="Filters: ", label="")
-    with (
-        patch("samplepath.plots.core.plot_core_stack") as mock_stack,
-        patch("samplepath.plots.core.plot_LT_derivation_stack"),
-        patch("samplepath.plots.core.plot_departure_flow_metrics_stack"),
-        patch("samplepath.plots.core.NPanel.plot"),
-        patch("samplepath.plots.core.LPanel.plot"),
-        patch("samplepath.plots.core.NtLTPanel.plot"),
-        patch("samplepath.plots.core.LambdaPanel.plot"),
-        patch("samplepath.plots.core.ThetaPanel.plot"),
-        patch("samplepath.plots.core.WPanel.plot"),
-        patch("samplepath.plots.core.SojournTimePanel.plot"),
-        patch("samplepath.plots.core.SojournTimeScatterPanel.plot"),
-        patch("samplepath.plots.core.ResidenceTimeScatterPanel.plot"),
-        patch("samplepath.plots.core.WPrimePanel.plot"),
-        patch("samplepath.plots.core.HPanel.plot"),
-        patch("samplepath.plots.core.CFDPanel.plot"),
-        patch("samplepath.plots.core.LLWPanel.plot"),
-        patch("samplepath.plots.core.LThetaWPrimePanel.plot"),
-        patch("samplepath.plots.core.EventIndicatorPanel.plot"),
-        patch("samplepath.plots.core.FlowCloudPanel.plot"),
-        patch("samplepath.plots.core.ArrivalsPanel.plot"),
-        patch("samplepath.plots.core.DeparturesPanel.plot"),
-    ):
+    with core_driver_patcher() as mocks:
         core.plot_core_flow_metrics_charts(
             metrics, empirical_metrics, filter_result, chart_config, out_dir
         )
-    mock_stack.assert_called_once_with(metrics, filter_result, chart_config, out_dir)
+    mocks["plot_core_stack"].assert_called_once_with(
+        metrics, filter_result, chart_config, out_dir
+    )
 
 
 def _call_LT_derivation_stack_with_mocks():
