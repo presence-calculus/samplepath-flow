@@ -569,9 +569,9 @@ Kumar</em></a></p></p>
             id="toc-arrival-departure-processes">2 Arrival-Departure
             Processes</a>
             <ul>
-            <li><a href="#flow-process-model-for-sample-path-analysis"
-            id="toc-flow-process-model-for-sample-path-analysis">2.1
-            Flow Process Model for Sample Path Analysis</a></li>
+            <li><a href="#process-model-for-sample-path-analysis"
+            id="toc-process-model-for-sample-path-analysis">2.1 Process
+            Model for Sample Path Analysis</a></li>
             <li><a href="#what-is-a-sample-path"
             id="toc-what-is-a-sample-path">2.2 What Is a Sample
             Path?</a></li>
@@ -722,13 +722,25 @@ Kumar</em></a></p></p>
           no reliable way to connect how and why adopting any of them
           improves business outcomes, and no systematic way to measure
           and prove they work in a given context.</p>
+          <p>All these complex, interdependent concerns are bundled into
+          an amorphous, underspecified concept called “flow.” Exactly
+          what “flow” is is never defined, but it is implied that
+          improving it will improve business outcomes. The causal
+          mechanisms that lead from one to the other are never
+          substantiated. Entire edifices — process frameworks,
+          measurement systems, tooling and theories — have been built up
+          in the industry over the last 15 years, without a closer
+          examination of the underlying premises, or theoretical
+          validity of their foundational assumptions. In this aspect,
+          “flow” is very much like that other overused but
+          underspecified concept, productivity.</p>
           <p>Our first objective in this document is to shore up those
-          foundations. Doing so reveals where current practices fit
-          within the broader mathematical context provided by a rigorous
-          theory of flow processes. It helps us understand where and
-          when certain approaches are appropriate, and whether a
-          particular improvement method is likely to be effective before
-          implementation.</p>
+          foundations in the case of “flow.” Doing so reveals where
+          current practices fit within the broader mathematical context
+          provided by a rigorous theory of stochastic processes. It
+          helps us understand where and when certain approaches are
+          appropriate, and whether a particular improvement method is
+          likely to be effective before implementation.</p>
           <p>Such claims require proof: first, that a real limitation
           exists in prevailing methods; second, that the proposed
           alternatives resolve it. This document lays out that case at a
@@ -737,7 +749,7 @@ Kumar</em></a></p></p>
           needed to validate these claims directly on your own data.</p>
           <p>None of the core mathematical ideas we rely on to make this
           case are new. Many were established decades ago in queueing
-          theory<a href="#fn2" class="footnote-ref" id="fnref2"
+          theory <a href="#fn2" class="footnote-ref" id="fnref2"
           role="doc-noteref"><sup>2</sup></a>. In particular, the sample
           path analysis techniques underlying this work trace to Shaler
           Stidham’s 1972 deterministic proof of <a
@@ -854,8 +866,8 @@ Kumar</em></a></p></p>
           complex configurations of these processes generalizes from
           this case. Understanding them well is the foundation of
           everything that follows.</p>
-          <h2 id="flow-process-model-for-sample-path-analysis">2.1 Flow
-          Process Model for Sample Path Analysis</h2>
+          <h2 id="process-model-for-sample-path-analysis">2.1 Process
+          Model for Sample Path Analysis</h2>
           <p>The process model we use for sample path analysis is a bit
           different from the standard arrival-departure model above. It
           is strictly more general and has fewer assumptions, but the
@@ -874,7 +886,7 @@ Kumar</em></a></p></p>
           Process</figcaption>
           </figure>
           <p>In particular, we do not require that the events in
-          Figure 1 are associated with well-defined items, or that
+          Figure 1 be associated with well-defined items, or that
           structural boundaries are fixed in advance. The only
           requirement is that, by observation, we can determine whether
           an event denotes a beginning or an ending. The primary unit of
@@ -900,25 +912,26 @@ Kumar</em></a></p></p>
           individual items traversing that process. Many of the most
           useful aspects of reasoning about flow for process improvement
           do not require that level of detail. We can go a long way
-          without ever talking about items <a href="#fn3"
-          class="footnote-ref" id="fnref3"
-          role="doc-noteref"><sup>3</sup></a>.</p>
-          <p>In fact, this is a major source of mismatches in how flow
-          is modeled and measured today. Most current methods measure
-          flow in terms of statistical aggregates of item behavior:
-          distributions of lead times, throughput, etc. We spend a great
-          deal of effort discussing item size, granularity, and
-          similarity. None of this is essential for defining the core
-          structural properties that drive process behavior.</p>
+          without ever talking about items.</p>
+          <p>That said, we do assume that arrival and departure events
+          are <em>countable</em>, and that both counts are taken with
+          respect to the same underlying set of discrete elements, even
+          if those elements are never individually identified. This is a
+          conservation assumption at the level of <em>counts</em>, not
+          identities. It ensures that cumulative arrivals and departures
+          remain structurally comparable. In this sense, the model
+          presupposes an underlying set of elements without requiring
+          correspondence or traceability between events and
+          elements.</p>
           <p>One key insight from sample path analysis is that the
           quantities needed to analyze the structural behavior of a flow
           process are determined entirely by the events. Once arrival
           and departure <em>processes</em> are defined, the core flow
           relationships follow from them, without requiring detailed
-          knowledge of individual items. This not only clarifies what
+          knowledge of individual elements. This not only clarifies what
           must be measured to reason about flow (event structure), it
           also provides a more general framework that applies even in
-          domains where the notion of discrete items is less
+          domains where the notion of discrete elements is less
           tangible.</p>
           <h2 id="what-is-a-sample-path">2.2 What Is a Sample Path?</h2>
           <p>The term comes from probability theory. A non-deterministic
@@ -1036,8 +1049,8 @@ Kumar</em></a></p></p>
           <p>Any observed history of a non-deterministic process is a
           common finite prefix of some infinite set of sample paths.
           Once we fix that prefix, any further non-determinism lies in
-          those possible futures<a href="#fn4" class="footnote-ref"
-          id="fnref4" role="doc-noteref"><sup>4</sup></a>. Once a finite
+          those possible futures<a href="#fn3" class="footnote-ref"
+          id="fnref3" role="doc-noteref"><sup>3</sup></a>. Once a finite
           prefix has been observed, every quantity we compute from it is
           determined by that prefix.</p>
           <p>In the case of the coin toss process, this can be
@@ -1064,9 +1077,9 @@ Kumar</em></a></p></p>
           assumptions or language when reasoning about <em>observed</em>
           flow. Specifically, the process of <em>measuring</em> flow
           does not introduce any non-determinism beyond what is already
-          encoded in the observed sample path <a href="#fn5"
-          class="footnote-ref" id="fnref5"
-          role="doc-noteref"><sup>5</sup></a>.</p>
+          encoded in the observed sample path <a href="#fn4"
+          class="footnote-ref" id="fnref4"
+          role="doc-noteref"><sup>4</sup></a>.</p>
           <p>The machinery that makes this possible is what we call
           sample path analysis.</p>
           <h2 id="where-distributions-matter">2.4 Where Distributions
@@ -1141,8 +1154,8 @@ Kumar</em></a></p></p>
           the event structure as observations unfold along the time
           dimension.</p>
           <p>A good mental model for how we compute these metrics is as
-          follows <a href="#fn6" class="footnote-ref" id="fnref6"
-          role="doc-noteref"><sup>6</sup></a>:</p>
+          follows <a href="#fn5" class="footnote-ref" id="fnref5"
+          role="doc-noteref"><sup>5</sup></a>:</p>
           <ul>
           <li>Starting from a fixed point in time, observe the sample
           path - the marked point process consisting of arrival and
@@ -1156,8 +1169,8 @@ Kumar</em></a></p></p>
           <li>Wait for the next event, record the event type, and extend
           the window by the elapsed time, giving an extended sample path
           that includes realized values of the next random element
-          (timestamp and mark)<a href="#fn7" class="footnote-ref"
-          id="fnref7" role="doc-noteref"><sup>7</sup></a>.</li>
+          (timestamp and mark)<a href="#fn6" class="footnote-ref"
+          id="fnref6" role="doc-noteref"><sup>6</sup></a>.</li>
           <li>Recompute all metrics deterministically from their
           previous values and the incremental contribution of the new
           variables.</li>
@@ -1317,8 +1330,8 @@ Kumar</em></a></p></p>
           update derived processes along the sample path. This allows us
           to say unambiguously: given a sample path and the current
           state, what <em>caused</em> the process to reach this state<a
-          href="#fn8" class="footnote-ref" id="fnref8"
-          role="doc-noteref"><sup>8</sup></a>.</p>
+          href="#fn7" class="footnote-ref" id="fnref7"
+          role="doc-noteref"><sup>7</sup></a>.</p>
           <p>Dynamics often have a direct geometric interpretation: the
           update rules define the admissible directions of motion of the
           sample path in state space. When projected onto a coordinate
@@ -1384,8 +1397,8 @@ Kumar</em></a></p></p>
           dynamics regardless of interpretation. The operational context
           then guides how these measurements are used to devise policies
           to manage accumulations and monitor them across different
-          timescales <a href="#fn9" class="footnote-ref" id="fnref9"
-          role="doc-noteref"><sup>9</sup></a> — maximizing desirable
+          timescales <a href="#fn8" class="footnote-ref" id="fnref8"
+          role="doc-noteref"><sup>8</sup></a> — maximizing desirable
           accumulations and minimizing undesirable ones.</p>
           <p>Even in the simple case of arrival–departure processes
           there are many possible ways to define presence. For the
@@ -1409,8 +1422,8 @@ Kumar</em></a></p></p>
           <p>By contrast, in customer retention processes we may seek to
           <em>sustain</em> this imbalance — where cumulative presence
           represents customer retention and the economic rewards it
-          brings <a href="#fn10" class="footnote-ref" id="fnref10"
-          role="doc-noteref"><sup>10</sup></a>. These broader
+          brings <a href="#fn9" class="footnote-ref" id="fnref9"
+          role="doc-noteref"><sup>9</sup></a>. These broader
           generalizations are beyond the scope of this document, but are
           covered more systematically in <span class="citation"
           data-cites="kkumar2025"><a href="#ref-kkumar2025"
@@ -1491,8 +1504,8 @@ Kumar</em></a></p></p>
           state representing the imbalance between the two cumulative
           counts. Think of <span class="math inline">\(N(t)\)</span> as
           instantaneous WIP as you connect it to the familiar flow
-          metrics.<a href="#fn11" class="footnote-ref" id="fnref11"
-          role="doc-noteref"><sup>11</sup></a></p>
+          metrics.<a href="#fn10" class="footnote-ref" id="fnref10"
+          role="doc-noteref"><sup>10</sup></a></p>
           <p><em>Dynamics</em>: The value of <span
           class="math inline">\(N(t)\)</span> increases by 1 with every
           arrival, decreases by 1 with every departure, and remains
@@ -1855,8 +1868,8 @@ Kumar</em></a></p></p>
           assumes no knowledge of items. Since all we have available in
           the input sample path are arrival and departure timestamps, we
           could not calculate item-level statistics <em>even if we
-          wanted to</em> <a href="#fn12" class="footnote-ref"
-          id="fnref12" role="doc-noteref"><sup>12</sup></a>. We’ll
+          wanted to</em> <a href="#fn11" class="footnote-ref"
+          id="fnref11" role="doc-noteref"><sup>11</sup></a>. We’ll
           maintain this posture as we derive the presence calculus
           analogues of the standard flow metrics.</p>
           <p>Further, cumulative presence is measured and monitored on a
@@ -1953,9 +1966,9 @@ Kumar</em></a></p></p>
           rises when <span class="math inline">\(N(t) &gt; L(T)\)</span>
           and falls when <span class="math inline">\(N(t) &lt;
           L(T)\)</span>. Its responsiveness decays over time (roughly at
-          rate <span class="math inline">\(1/T\)</span>) <a href="#fn13"
-          class="footnote-ref" id="fnref13"
-          role="doc-noteref"><sup>13</sup></a>. As a result, transient
+          rate <span class="math inline">\(1/T\)</span>) <a href="#fn12"
+          class="footnote-ref" id="fnref12"
+          role="doc-noteref"><sup>12</sup></a>. As a result, transient
           states are smoothed while persistent states are emphasized.
           This is the signature of a moving average.</p>
           <p>Since the denominator is constantly increasing, the moving
@@ -2044,46 +2057,30 @@ Kumar</em></a></p></p>
           in place, a rigorous foundation for managing operational
           queues emerges naturally.<a href="#fnref2"
           class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-          <li id="fn3"><p>That said, there are implicit conservation
-          assumptions. The elements that arrive are the ones that
-          depart; we do not create departures from nothing, nor do
-          elements disappear without departure if they have arrived. The
-          underlying conservation laws are what determine what we
-          perceive as flow, but they can be stated without requiring an
-          explicit pairing between individual arrivals and departures.
-          To avoid item-centric connotations, we use the term
-          <em>elements</em> to denote the units of a countable,
-          conserved set that provides the basis for counting beginning
-          and ending <em>events</em>. Quantities like WIP and throughput
-          are defined from the resulting <em>counting processes</em>,
-          not from any particular identity or pairing of elements,
-          provided the conservation assumptions are satisfied.<a
-          href="#fnref3" class="footnote-back"
-          role="doc-backlink">↩︎</a></p></li>
-          <li id="fn4"><p>There is an implicit qualifier in this claim:
+          <li id="fn3"><p>There is an implicit qualifier in this claim:
           we are assuming that the non-determinism we care about in our
           model is confined to the random variables under analysis.
           There are, of course, many other potential sources of
           non-determinism even in a single arrival/departure process,
-          including measurement errors.<a href="#fnref4"
+          including measurement errors.<a href="#fnref3"
           class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-          <li id="fn5"><p>Ensuring this means paying careful attention
+          <li id="fn4"><p>Ensuring this means paying careful attention
           to the impact of techniques such as sampling on flow
           measurement. This is a key point of departure in our methods
-          as well.<a href="#fnref5" class="footnote-back"
+          as well.<a href="#fnref4" class="footnote-back"
           role="doc-backlink">↩︎</a></p></li>
-          <li id="fn6"><p>Even though this is not the way the underlying
+          <li id="fn5"><p>Even though this is not the way the underlying
           algorithms are necessarily implemented in the toolkit.<a
-          href="#fnref6" class="footnote-back"
+          href="#fnref5" class="footnote-back"
           role="doc-backlink">↩︎</a></p></li>
-          <li id="fn7"><p>At each step we are observing the realized
+          <li id="fn6"><p>At each step we are observing the realized
           value of the next random element in some underlying
           non-deterministic process. Conditioned on the observed prefix,
           the structural flow quantities defined over that prefix are
           deterministic functionals of the prefix. This is what we mean
-          when we say “randomness lives in the future.”<a href="#fnref7"
+          when we say “randomness lives in the future.”<a href="#fnref6"
           class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-          <li id="fn8"><p>The type of causal reasoning we do here should
+          <li id="fn7"><p>The type of causal reasoning we do here should
           not be confused with root cause analysis. The causal links
           here are between measurements over a sample path and the
           events on the sample path. The events themselves come from
@@ -2100,19 +2097,19 @@ Kumar</em></a></p></p>
           applications are not in the scope of what we will describe
           here. The focus is on precisely defining the proximate causal
           relationships between flow metrics and events on the sample
-          path.<a href="#fnref8" class="footnote-back"
+          path.<a href="#fnref7" class="footnote-back"
           role="doc-backlink">↩︎</a></p></li>
-          <li id="fn9"><p>This is fundamentally a
+          <li id="fn8"><p>This is fundamentally a
           <em>generalization</em> of the intuitive notion of “managing
           flow by managing WIP.” The point of departure is that the
           Presence Calculus focuses attention on <em>managing the
           accumulation of WIP</em> rather than controlling the WIP level
           as the primary operational lever. It shifts attention from
           managing <em>items</em> to managing the <em>process</em> in
-          which the items flow.<a href="#fnref9" class="footnote-back"
+          which the items flow.<a href="#fnref8" class="footnote-back"
           role="doc-backlink">↩︎</a></p></li>
-          <li id="fn10"><p>In a larger systems analysis context,
-          presence is a unifying abstraction that lets us reason
+          <li id="fn9"><p>In a larger systems analysis context, presence
+          is a unifying abstraction that lets us reason
           deterministically about proximate cause-and-effect
           relationships between operational behavior and economic
           outcomes. Many operational decisions can be viewed as managing
@@ -2124,9 +2121,9 @@ Kumar</em></a></p></p>
           provides a unifying set of concepts and a consistent
           <em>vocabulary</em> for reasoning about operationally distinct
           quantities with different semantics operating on different
-          time scales.<a href="#fnref10" class="footnote-back"
+          time scales.<a href="#fnref9" class="footnote-back"
           role="doc-backlink">↩︎</a></p></li>
-          <li id="fn11"><p>The reason we don’t define it as such is that
+          <li id="fn10"><p>The reason we don’t define it as such is that
           WIP is a specific <em>interpretation</em> that applies to
           specific domains. A more general concept here might be
           occupancy, but even this requires specific assumptions that
@@ -2135,9 +2132,9 @@ Kumar</em></a></p></p>
           class="math inline">\(N(t)\)</span> as imbalance. Further,
           both WIP and occupancy are a type of presence, but not all
           presence is of this type. That is the key thing to remember.<a
-          href="#fnref11" class="footnote-back"
+          href="#fnref10" class="footnote-back"
           role="doc-backlink">↩︎</a></p></li>
-          <li id="fn12"><p>In practice, operational transaction logs
+          <li id="fn11"><p>In practice, operational transaction logs
           typically <em>do</em> contain item-level identifiers, making
           it easy to compute these statistics when needed. The point of
           the construction here is methodological: by assuming we do
@@ -2152,9 +2149,9 @@ Kumar</em></a></p></p>
           measure the impact of process changes and improvements, the
           presence calculus takes the position that these process-level
           constructs are the primary quantities we should measure and
-          manage.<a href="#fnref12" class="footnote-back"
+          manage.<a href="#fnref11" class="footnote-back"
           role="doc-backlink">↩︎</a></p></li>
-          <li id="fn13"><p>These dynamics can be derived from the
+          <li id="fn12"><p>These dynamics can be derived from the
           relationship <span class="math display">\[
             \frac{dL(T)}{dT} = \frac{N(T) - L(T)}{T}.
             \]</span> This follows directly from differentiating <span
@@ -2164,7 +2161,7 @@ Kumar</em></a></p></p>
           expression is the classical sensitivity formula for a moving
           average, from which the qualitative dynamics above follow. The
           complete derivation of this formula is given in Appendix A of
-          the Metrics Reference.<a href="#fnref13" class="footnote-back"
+          the Metrics Reference.<a href="#fnref12" class="footnote-back"
           role="doc-backlink">↩︎</a></p></li>
           </ol>
           </section>
