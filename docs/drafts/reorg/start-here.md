@@ -397,7 +397,7 @@ This becomes particularly important as we move beyond $N(t)$ and $H(T)$ and cons
 
 Let's begin by charting the paths for $N(t)$, $H(T)$, and $L(T)$. These allow us to visualize the interplay between flow dynamics and flow geometry much more clearly than the CFD.
 
-## The Geometry of $N(t)$
+## The Geometry of $N(t)$ {#sec:nt-geometry}
 
 ![$N(t)$: Instantaneous Presence]($document-root/assets/Nt.png){#fig:nt}
 
@@ -405,7 +405,7 @@ Let's begin by charting the paths for $N(t)$, $H(T)$, and $L(T)$. These allow us
 
 Equally important, this visualization clearly shows the relationship between $N(t)$ and $H(T)$. The height of each rectangle between events represents a state, and the width represents the time the process has spent in that state. The _area_ under the $N(t)$ curve, obtained by summing the areas of these rectangles, is precisely what we calculate as $H(T)$. This is the same area represented under the CFD in [@fig:cfd].
 
-## The Geometry of $H(T)$
+## The Geometry of $H(T)$ {#sec:ht-geometry}
 
 Each rectangle contributes an area proportional to the time spent in that state, which is why we call cumulative presence the time-weighted sum of instantaneous presence. [@fig:ht] shows the event-indexed path geometry of this quantity.
 
@@ -435,7 +435,7 @@ For our purposes here, however, this physical intuition is sufficient. It allows
 
 We now turn to the presence calculus analogues of the familiar flow metrics such as throughput, cycle time, and average WIP. These give us ways to talk about rates, durations, levels, and other key process characteristics we measure when reasoning about flow.
 
-Since we spoke of "presence-calculus analogues", it is worth discussing why there might be a difference between these and the "industry-standard" definitions of these terms. The key difference is that the industry-standard approach measures properties of *items*, treating flow metrics as aggregates of item-level measurements. The presence calculus instead derives quantities such as throughput and process time as time-normalized factorizations of *cumulative presence* $H(T)$.
+Since we spoke of "presence-calculus analogues", it is worth discussing why there might be a difference between these and the "industry-standard" definitions of these terms. The key difference is that the industry-standard approach measures properties of *items*, treating flow metrics as aggregates of item-level measurements. The presence calculus instead derives quantities such as throughput and process time as time-normalized _factorizations_ of cumulative presence $H(T)$.
 
 In the standard approach, for example, we report throughput by picking a reporting interval, counting the number of items that departed in that period, and dividing it by the length of the interval. Over that same interval we measure the time between arrival and departure of each item that departed and divide it by the number of departures to compute the average time in the process, variously called lead time, cycle time, or process time depending on the definition of the arrival and departure boundaries. We then use distributional properties—averages, percentiles, and related statistics—of these item-level values to measure flow.
 
@@ -453,6 +453,8 @@ All in all, the measurement techniques we show below are a drop-in _expansion_ o
 
 [^-discipline]: In practice, operational transaction logs typically *do* contain item-level identifiers, making it easy to compute these statistics when needed. The point of the construction here is methodological: by assuming we do *not* have item-level correspondence, we are forced to define quantities such as throughput and process time purely at the *process level*, independent of any particular notion of items. This gives us rigorous tools to measure and reason about changes in the process independently of the behavior of item-level distributions. As we will see, these item-level distributions are fully determined by the underlying process-level factorizations. If the goal is to measure the impact of process changes and improvements, the presence calculus takes the position that these process-level constructs are the primary quantities we should measure and manage.
 
+The first flow metric we will define is the presence calculus analogue of the metric commonly known as 'Average WIP': we call this Time Average of Presence, and the term means much more than simply taking an arithmetic average of WIP sampled at various points in time as many current flow metrics tools do.
+
 
 ## $L(T)$ — Time Average of Presence
 
@@ -465,34 +467,76 @@ $$
 The time average of instantaneous presence over the interval $[0,T)$ is
 
 $$
-L(T) = \frac{H(T)}{T} = \frac{1}{T} \int_0^T N(t)\,dt
+L(T) = \frac{H(T)}{T}
 $$
 
-$L(T)$ is the time-normalized accumulation of instantaneous presence $N(t)$, i.e. the average _level_ of instantaneous presence during the observation window $[0,T)$. Checking units helps clarify the interpretation. Suppose the units of $N(t)$ are measured in _elements_. Then $H(T)$ is measured in element-time, while the units of $L(T)$ are elements. This is why we call $L(T)$ the time average of instantaneous presence.
+$L(T)$ is a time-normalized measure of presence accumulation. Note that, as defined, both cumulative presence and the observation window grow continuously as time advances. $L(T)$ therefore measures the *average accumulation of presence* over the time the process has been observed. This is the literal interpretation of the definition above.
 
-For the $H(T)$ chart in [@fig:ht], the corresponding chart for $L(T)$ is shown in [@fig:lt] below.
+[@fig:ht-lt] shows the $H(T)$ chart in [@fig:ht], along with the corresponding chart for $L(T)$.
 
-![$L(T)$ — Time Average of Presence]($document-root/assets/lt.png){#fig:lt}
+![$L(T)$ — Time Average of Presence]($document-root/assets/ht-lt.png){#fig:ht-lt}
 
-Technically, $L(T)$ is a half-open moving average of instantaneous presence: the left endpoint is fixed and the right endpoint varies continuously. Its numerator is driven by instantaneous imbalance in arrival–departure counts, while its denominator introduces time normalization.
+We can see that even though $H(T)$ grows continuously over the interval, $L(T)$ tends to converge toward a stable value the longer we observe the process. There are three possible trajectories of $L(T)$, tied to the relative rates at which $H(T)$, the numerator, grows relative to $T$, the denominator.
 
-Recall that $H(T)$ encodes the time-weighted history of instantaneous presence of the process: its value represents the sum of the values of the instantaneous presence $N(t)$, weighted by the amount of time the process spent in each state. Time normalization therefore de-emphasizes transients (components of $H(T)$ where process states were held for short periods) and emphasizes persistent states (states that persist or that the process returns to repeatedly over its history).
+- When the numerator grows roughly at the same rate as the denominator [^-rate-stability], their ratio $L(T)$ settles to a stable value.
+- When it grows faster than the denominator, $L(T) \to \infty$.
+- When it grows slower than the denominator, $L(T) \to 0$.
 
-The dynamics of $L(T)$ follow a simple pattern. It is continuous at event times (there are no jumps). Between events it moves toward the current value of $N(t)$: it rises when $N(t) > L(T)$ and falls when $N(t) < L(T)$. Its responsiveness decays over time (roughly at rate $1/T$) [^-sensitivity]. As a result, transient states are smoothed while persistent states are emphasized. This is the signature of a moving average.
+[^-rate-stability]: The chapter on stability and convergence will define the meaning of “roughly the same”, “faster”, and “slower” more precisely.
 
-[^-sensitivity]: These dynamics can be derived from the relationship
-  $$
-  \frac{dL(T)}{dT} = \frac{N(T) - L(T)}{T}.
-  $$
-  This follows directly from differentiating $L(T)=H(T)/T$ using the quotient rule and the fact that $\frac{dH(T)}{dT}=N(T)$. The expression is the classical sensitivity formula for a moving average, from which the qualitative dynamics above follow. The complete derivation of this formula is given in Appendix A of the Metrics Reference.
+The behavior in [@fig:ht-lt] is the signature time-normalized behavior of what we will later call a *rate-stable* process. In many operational settings we want our processes to be rate-stable. Depending on our operational goals, however, any of these trajectories may be desirable. We will discuss this in more detail in later chapters.
 
-Since the denominator is constantly increasing, the moving average tends to stabilize provided the process remains bounded within a finite set of states — that is, the instantaneous presence remains bounded and the time spent in states does not grow proportionally with the observation interval.
 
-On the other hand, if cumulative presence grows proportionally with the observation interval — for example because the process spends increasing amounts of time in higher presence states — the value of $L(T)$ also grows without bound and the process is unstable.
+### The Dynamics of $L(T)$ {#sec:lt-dynamics}
 
-The stabilization of $L(T)$ is one marker of a stable arrival–departure process, and for this reason $L(T)$ is one of the most important operational flow metrics.
+There is a very intuitive connection between $L(T)$ and $N(t)$ the instantaneous presence, which makes it much simpler to reason about the dynamics of $L(T)$. It clearly explains why we can think of $L(T)$ as "Average WIP", and specifically, what kind of average it is if it is not simply an arithmetic average of sampled WIP.
 
-We will have much more to say about the behavior of $L(T)$ as a key stability diagnostic for arrival–departure processes.
+In [@sec:ht-geometry] we saw that $H(T)$ could be written as a time-weighted sum of the state history $N(t)$, where each state is weighted by the time the process has spent in that state. So in this sense, $L(T)$ is simply the time-weighted average of $N(t)$, which is why we call it the time average of (instantaneous) presence. This is precisely what we mean by "Average WIP" as well.
+
+But we have also noted that $L(T)$ is a function of time, so it is a specific type of average: a _half-open moving average_, taken over an interval where the left endpoint is fixed, and the right endpoint is continuously increasing. Time normalization has a specific interpretation here and it clearly explains the incremental dynamics of $L(T)$ very concretely.
+
+It can be shown [^-derivation] that the first derivative of $L(T)$, the change in $L(T)$ over time, is given by the formula
+
+$$
+\frac{dL(T)}{dT} = \frac{N(T) - L(T)}{T}.
+$$
+
+[^-derivation]: See Appendix A of the Metrics Reference for this derivation.
+
+This formula, which is the standard sensitivity formula for a cumulative average, clearly explains why $L(T)$ behaves as it does in [@fig:ht-lt].
+
+- If $N(T) > L(T)$ when $t=T$ then $L(T)$ *increases* and moves towards $N(T)$.
+- If $N(T) < L(T)$ when $t=T$ then $L(T)$ *decreases* and moves towards $N(T)$.
+
+This is the standard *seeking* behavior of the half-open moving average: it seeks the current value of the quantity it is averaging with a time lag. The sensitivity of this adjustment depends on the denominator, and since that denominator is continuously increasing, the sensitivity tends to $0$ as the observation window grows. This explains why $L(T)$ tends to converge toward a stable value over longer windows.
+
+But there is another, equally important impact of the time normalization: the *same* difference between $N(T)$ and $L(T)$ produces a *smaller* change in $L(T)$ as $T$ gets larger.
+
+This means that
+
+- It takes larger changes to change $L(T)$ the longer you observe the process.
+- The dynamics of $L(T)$ tend to smooth out short-lived changes and emphasize long-lived changes.
+
+This means that the stable value that $L(T)$ converges towards reflects the states that the process has spent the most time in. Since the process accumulates presence at a rate equal to its current instantaneous presence $N(t)$, this is also why we can say that the value of $L(T)$ represents the _average rate_ at which the process accumulates presence.
+
+![$L(T)$ as a moving average of $N(t)$]($document-root/assets/lt-moving-average.png){#fig:lt-moving-average}
+
+[@fig:lt-moving-average] shows all these dynamics at work very clearly. It shows the $N(t)$ path, the cumulative presence $H(T)$ (the shaded area), and $L(T)$ as a moving average of $N(t)$. The seeking behavior of $L(T)$ is evident in the early parts of the observation window, and the dampening effects of time normalization are evident in the later parts, as roughly the same differences between $N(t)$ and $L(T)$ in later observations trigger smaller changes in the value of $L(T)$. This is stabilization through time normalization at work.
+
+Finally we will note in [@fig:lt-moving-average] that $N(t)$ itself increases on arrival events and decreases on departure events. As always, these events are what drive the dynamics of $L(T)$. As $N(t)$ increases or decreases with arrival or departure events, the seeking and time normalization mechanisms in the moving average process kick in, causing $L(T)$ to respond deterministically.
+
+- At arrival or departure events, $L(T)$ changes trajectory as $N(t)$ changes.
+- In between events, $L(T)$ seeks the current value of $N(t)$, which remains constant between events, with decreasing sensitivity to the difference.
+
+This complete dynamic chain starting with events is shown in [@fig:lt-dynamics].
+
+![The Dynamics of $L(T)$]($document-root/assets/lt-dynamics.png){#fig:lt-dynamics}
+
+Here we can see both how events change the trajectory of the $L(T)$ path and how the seeking behavior of half-open moving averages governs the dynamics in between events.
+
+The key takeaway from this section, as we will keep emphasizing, is that the *behavior of flow metrics is deterministic once we have a fixed prefix of a sample path*, i.e., once we have an observed set of arrival-departure events, there is no additional non-determinism in _flow metrics themselves_.
+
+We have shown this for one flow metric so far. Now let's do the same for the most popular ones: throughput and process time.
 
 ## The Presence Invariant
 
