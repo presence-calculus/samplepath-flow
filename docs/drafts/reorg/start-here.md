@@ -277,7 +277,7 @@ We will develop the relationship between flow dynamics and geometry in arrival�
 
 The final concept we will introduce is Presence. In the arrival–departure process, events are primary. They are assumed as given. But when we speak of flow, what is it that we are managing? The Presence Calculus takes a specific philosophical stance. We call the underlying quantity *presence*. We _define_ "flow management" as the measurement and management of _cumulative presence_. All the machinery we derive builds upon this premise.
 
-For a quantity to qualify as a presence it must satisfy certain technical conditions, detailed further in [@kkumar2025]. Intuitively, it must be _measurable_ at any point in time, and its accumulation must also be measurable over time by mathematical integration. This yields a quantity that we call cumulative presence. We treat that quantity as operationally significant, and it is this accumulation that we aim to manage when we speak of managing "flow."
+For a quantity to qualify as a presence it must satisfy certain technical conditions, detailed further in [@kkumar2025-pc-intro]. Intuitively, it must be _measurable_ at any point in time, and its accumulation must also be measurable over time by mathematical integration. This yields a quantity that we call cumulative presence. We treat that quantity as operationally significant, and it is this accumulation that we aim to manage when we speak of managing "flow."
 
 This stance is somewhat at odds with conventional interpretations of flow as the uninterrupted movement of items through a process measured using throughput, process time, etc. The Presence Calculus does not privilege any particular type of accumulation as desirable or undesirable. There is no *a priori* notion of "good" versus "bad" flow; those are context-specific interpretations of accumulation patterns.
 
@@ -289,7 +289,7 @@ Even in the simple case of arrival–departure processes there are many possible
 
 In software delivery contexts, for example, imbalances between arrivals and departures are what we seek to minimize in order to improve the flow of _work_ through the process. Cumulative presence in this context corresponds to delay. If those delays have costs, we may define a derived cost measure as a presence and measure accumulated costs as cumulative presence. We may seek to minimize this cumulative presence, even if the underlying flow of work is not smooth or uninterrupted as a result. This represents a distinct accumulation process that interacts with the underlying arrival–departure process.
 
-By contrast, in customer retention processes we may seek to _sustain_ this imbalance — where cumulative presence represents customer retention and the economic rewards it brings [^-systems]. These broader generalizations are beyond the scope of this document, but are covered more systematically in [@kkumar2025].
+By contrast, in customer retention processes we may seek to _sustain_ this imbalance — where cumulative presence represents customer retention and the economic rewards it brings [^-systems]. These broader generalizations are beyond the scope of this document, but are covered more systematically in [@kkumar2025-pc-intro].
 
 [^-systems]: In a larger systems analysis context, presence is a unifying abstraction that lets us reason deterministically about proximate cause-and-effect relationships between operational behavior and economic outcomes. Many operational decisions can be viewed as managing accumulations of different kinds of presence within the system. Some need to be minimized; others need to be sustained and maximized. These accumulations must be managed consistently across different timescales using the modeling and measurement machinery of the Presence Calculus. It provides a unifying set of concepts and a consistent _vocabulary_ for reasoning about operationally distinct quantities with different semantics operating on different time scales.
 
@@ -425,9 +425,9 @@ There is a deep connection between this geometric interpretation and measure the
 
 This interpretation is directly analogous to how density and mass are related in physics: mass is obtained by integrating density over a physical volume. In our case, the “volume” is the area swept out by the sample path, the density is the instantaneous presence $N(t)$, and the mass is the integrated density $H(T)$. The main difference is that these quantities are defined with respect to *time* as the principal dimension [^-radon-nikodym].
 
-[^-radon-nikodym]: More formally: $N(t)$ is the Radon–Nikodym derivative of the cumulative presence measure $H$ with respect to the time measure $dt$, i.e. $N(t)=\frac{dH}{dt}$, and cumulative presence $H(T)$ is obtained by integrating this density over time.
+[^-radon-nikodym]: More formally: $N(t)$ is the [Radon–Nikodym derivative](https://en.wikipedia.org/wiki/Radon%E2%80%93Nikodym_theorem) of the cumulative presence measure $H$ with respect to the time measure $dt$, i.e. $N(t)=\frac{dH}{dt}$, and cumulative presence $H(T)$ is obtained by integrating this density over time.
 
-This intuition will be formalized when we expand to more general forms of presence in the Presence Calculus [@kkumar2025]. There we will speak explicitly of *presence density functions* whose instantaneous superposition defines the presence density, and *presence mass* as the time-integrated density. These will become core concepts. The area under the sample path will become a true volume when we expand from a simple two-dimensional state to higher-dimensional states.
+This intuition will be formalized when we expand to more general forms of presence in the Presence Calculus [@kkumar2025-pc-intro]. There we will speak explicitly of *presence density functions* whose instantaneous superposition defines the presence density, and *presence mass* as the time-integrated density. These will become core concepts. The area under the sample path will become a true volume when we expand from a simple two-dimensional state to higher-dimensional states.
 
 For our purposes here, however, this physical intuition is sufficient. It allows us to think of presence mass as the quantity we manage when we “manage flow”, and the flow metrics we derive next can be understood as ways of measuring the *shape* of this presence mass.
 
@@ -536,11 +536,125 @@ Here we can see both how events change the trajectory of the $L(T)$ path and how
 
 The key takeaway from this section, as we will keep emphasizing, is that the *behavior of flow metrics is deterministic once we have a fixed prefix of a sample path*, i.e., once we have an observed set of arrival-departure events, there is no additional non-determinism in _flow metrics themselves_.
 
-We have shown this for one flow metric so far. Now let's do the same for the most popular ones: throughput and process time.
+We have shown this for one flow metric so far. Now let's do the same for the most popular ones: arrival rate, throughput and process time.
 
 ## The Presence Invariant
 
-Time normalization
+In the last section we showed that the dynamics of $L(T)$ are driven by time normalization of $H(T)$, which in turn is determined by $A(T)$ and $D(T)$. Let us rewrite the expression for $L(T)$ in a way that makes the relationship between $L(T)$, $A(T)$ and $D(T)$ more explicit.
+
+The quantity $L(T)$ admits two natural factorizations, one along arrivals and one along departures.
+
+### The Arrival Factorization
+
+First, let us express it in terms of $A(T)$.
+
+$$
+L(T) = \frac{H(T)}{T} = \frac{A(T)}{T} \times \frac{H(T)}{A(T)}.
+$$
+
+Algebraically, this is simply a factorization of $L(T)$ into two components, one representing a rate and the other representing a duration (you can check units to verify this). Since this is just an algebraic transformation of $L(T)$, the relationship holds for any value of $T$ for which $A(T) > 0$.
+
+The first factor is called the _cumulative arrival rate_ and it is the time-normalized arrival count.
+
+$$
+\Lambda(T) = \frac{A(T)}{T}.
+$$
+
+The second factor is called the _residence time per arrival_
+
+$$
+w(T) = \frac{H(T)}{A(T)}.
+$$
+
+Putting these together we write
+
+$$
+L(T) = \Lambda(T)\, w(T).
+$$
+
+This factorization of $L(T)$ is what is commonly called the finite window version of Little's Law.
+
+### The Departure Factorization
+
+But there is nothing special about $A(T)$ in the derivation above. Since the step was purely algebraic, we could just as well replace $A(T)$ with $D(T)$, yielding a different factorization of $L(T)$.
+
+$$
+L(T) = \frac{H(T)}{T} = \frac{D(T)}{T} \times \frac{H(T)}{D(T)}.
+$$
+
+The first factor is called the _cumulative departure rate_ and it is the time-normalized departure count.  
+This quantity is the process _throughput_ over the observation window.
+
+$$
+\Theta(T) = \frac{D(T)}{T}.
+$$
+
+The second factor is called the _residence time per departure_
+
+$$
+w'(T) = \frac{H(T)}{D(T)}.
+$$
+
+Putting these together we write
+
+$$
+L(T) = \Theta(T)\, w'(T).
+$$
+
+### The Invariant
+
+We can now combine the two factorizations and write
+
+$$
+\Lambda(T)\, w(T) = L(T) = \Theta(T)\, w'(T).
+$$
+
+This equality holds for every observation horizon $T$ (whenever the denominators are defined). For reasons that will become clear shortly, we call this equality the *Presence Invariant*. It plays a role similar to a physical conservation law. The underlying conserved quantity is presence mass, $H(T)$.
+
+The quantities $L(T)$, $\Lambda(T)$, $\Theta(T)$, $w(T)$ and $w'(T)$ are simply different normalizations of that same accumulated presence mass along the time and count dimensions. Because they are all derived from the same underlying quantity, they are constrained to satisfy the invariant relationship above. While the familiar steady-state form of Little’s Law $L=\lambda W$ holds only in the limit under stability assumptions, the Presence Invariant holds exactly for every observation horizon $T$.
+
+We already know that the dynamics of $L(T)$ are completely determined by the dynamics of $A(T)$ and $D(T)$ together with time normalization. But the equality above tells us something new: it establishes a constraint between the various flow metrics — arrival rate, throughput, time-average presence, and residence times — that must hold *regardless* of the underlying event dynamics.
+
+We will see shortly that the same analytical techniques used to derive the deterministic rules governing the dynamics of $L(T)$, $A(T)$ and $D(T)$ can, when combined with the constraint imposed by the invariant, be used to derive corresponding deterministic rules for the remaining flow metrics.
+
+The deeper implication is that *there is no intrinsic randomness in the flow metrics themselves*. Their dynamics are deterministic consequences of the observed arrival and departure events on the sample path, tightly coupled by the constraint imposed by the conservation of presence mass.
+
+These results are particularly valuable in precisely those non-steady-state conditions where the steady-state form of Little’s Law provides little insight.
+
+### The dynamics of $\Lambda(T)$ and $\Theta(T)$
+
+### The dynamics of $w(T)$ and $w'(T)$
+
+
+
+It is a building block in the most formal proofs of the more familiar steady state version $L=\lambda W$. We have discussed the relationship between the finite version and the steady state version extensively in our series on Little's Law at The Polaris Flow Dispatch [@kkumar2025-littles-law; @kkumar2025-stability-1; @kkumar2025-stability-2].  The focus there was mainly on establishing the conditions under which flows stabilize and the impact of the limiting behavior of the factors on the stability of the process as a whole. We will revisit that question later when we look at stability in more detail.
+
+But here, we are going to explore a slightly different aspect of this factorization, it's role in cause-effect reasoning about flow dynamics, and its' implications on flow geometry. Practically speaking, this is much more useful, because real-world arrival-departure processes rarely operate at steady state equilibrium, and the techniques we show here are much more useful in reasoning about such processes when they operate far from equilibrium conditions.
+
+
+Both $\Lambda(T)$ and $w(T)$ play important roles in reasoning about flow dynamics. Of the two, the residence time, $w(T)$ is perhaps the more mysterious quantity and justifiably so. In [@kkumar2025-stability-1] we showed that residence time represents the partial slices of time spent by elements in the process and where the observation window introduces end-effects that obscure the true end-to-end sojourn time of elements. In stable processes, those end-effects vanish over the long run and the concepts of residence time and sojourn time become equivalent. This perspective is still very valuable, and is the reason that we call this quantity residence time.
+
+But in our current arrival-departure model, we explicitly avoid introducing element correspondences, instead focusing on what we can say about the _imbalances_ between arrival-departures as measured by the presence mass $H(T)$. In our model, we cant talk about "time spent by elements in the process" directly and can only rely on what we tell about the process from element counts.  So we need another way to interpret residence time in this context.
+
+Since $H(T)$ is measured along two dimensions, elements counts and time, we can think of the two factors as expressing the time normalized quantity in terms of these two constituent dimensions of presence mass. The arrival rate measures the time normalized arrival count along one dimension and residence time _measures_ the presence mass along the time dimension and their product is the time normalized presence mass.
+
+Mathematically we can see $w(T)$ represents a duration, but what kind of time is it?  The straightforward interpretation of $w(T)$ in this context is that it represents the amortized time attributable to each arrival over the observation horizon. Since $H(T)$ measures total accumulated presence mass, dividing by $A(T)$ distributes that accumulated presence mass along the time dimension across the arrivals observed up to time $T$.
+
+If you find the above definition unsatisfying you are not alone. Its seems like a somewhat artificial construct designed to make the math fit. But as we will soon see, amortization of presence mass is exactly the right way to think of it when explaining the cause and effect relationships between *changes* in the quantities in Little's Law. Residence time plays a critical role here, and as you'll see teasing out these nuances requires us to define different kinds of residence time depending upon how we factorize $L(T)$. This is why, rather than simply calling $w(T)$ residence time as we did in [@kkumar2025-littles=law] we use the more specific term residence time _per arrival._
+
+In fact, to understand the role Little's Law plays in flow dynamics,  we must examine relationship of the factorization above to a closely related factorization of  $L(T)$ with respect to departures. As we will see, viewing the same cumulative presence mass through its factorizations along arrivals and departures reveals two complementary ways of normalizing the same quantity, and in processes that operate far from equilibrium, the relationships between these views gives us valuable signals about the nature and degree of imbalance between arrivals and departures in the process, and how these changes in response to arrival and departure events.
+
+So without much further ado, lets derive the departure focused factorization of $L(T)$.
+
+
+
+
+
+
+
+
+The departure focused factorization of $L(T)$ is
+
 
 
 
