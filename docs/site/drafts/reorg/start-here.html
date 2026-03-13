@@ -2318,10 +2318,107 @@ Kumar</em></a></p></p>
           <p>These results are particularly valuable in precisely those
           non-steady-state conditions where the steady-state form of
           Little’s Law provides little insight.</p>
-          <h3 id="the-dynamics-of-lambdat-and-thetat">The dynamics of
+          <h3 id="the-dynamics-of-lambdat-and-thetat">The Dynamics of
           <span class="math inline">\(\Lambda(T)\)</span> and <span
           class="math inline">\(\Theta(T)\)</span></h3>
-          <h3 id="the-dynamics-of-wt-and-wt">The dynamics of <span
+          <p>The arrival rate and departure rate metrics have similar
+          and symmetric dynamics. From our discussion of the dynamics of
+          <span class="math inline">\(H(T)\)</span>, we can think of
+          arrivals as increasing the instantaneous presence <span
+          class="math inline">\(N(t)\)</span> and departures as
+          decreasing it. Because cumulative presence is defined as</p>
+          <p><span class="math display">\[
+          H(T) = \int_0^T N(t)\,dt,
+          \]</span></p>
+          <p>these changes in <span class="math inline">\(N(t)\)</span>
+          determine the rate at which presence mass accumulates in the
+          arrival–departure process.</p>
+          <p>The net presence mass that remains in the system over the
+          observation horizon is <span
+          class="math inline">\(H(T)\)</span>, and <span
+          class="math inline">\(L(T)\)</span> is its time-normalized
+          value. We can therefore think of the arrival and departure
+          rates as variables that control the evolution of <span
+          class="math inline">\(L(T)\)</span>.</p>
+          <p>Let us specify their dynamics. Figure 16 shows the
+          characteristic dynamics of <span
+          class="math inline">\(\Lambda(T)\)</span>.</p>
+          <figure id="fig:lambda">
+          <img src="../../assets/Lambda.png"
+          alt="Figure 16: Arrival Rate Dynamics" />
+          <figcaption aria-hidden="true">Figure 16: Arrival Rate
+          Dynamics</figcaption>
+          </figure>
+          <p>We can see that</p>
+          <ul>
+          <li>Arrivals cause <span
+          class="math inline">\(\Lambda(T)\)</span> to jump.</li>
+          <li>In between arrivals <span
+          class="math inline">\(\Lambda(T)\)</span> decays at the rate
+          <span class="math inline">\(\frac{1}{T}\)</span>. This is a
+          hyperbolic decay function. As <span
+          class="math inline">\(T\)</span> gets larger, the rate of
+          decay slows.</li>
+          </ul>
+          <p>Together, these two rules capture the entire dynamics of
+          <span class="math inline">\(\Lambda(T)\)</span>. What this
+          implies is that growth in the value of <span
+          class="math inline">\(\Lambda(T)\)</span> is driven directly
+          by how frequently arrival events occur, i.e., by the
+          inter-arrival times. This, in turn, can be read directly from
+          the marked point process. We have therefore established the
+          complete causal chain from the sample path to one of the
+          control variables governing the evolution of <span
+          class="math inline">\(L(T)\)</span>.</p>
+          <p>One of the fundamental sample-path results in El-Taha and
+          Stidham <span class="citation" data-cites="eltaha1999"><a
+          href="#ref-eltaha1999" role="doc-biblioref">[5]</a>, Lemma
+          1.1</span> is this: the arrival rate converges to a finite
+          limit <span class="math inline">\(\lambda\)</span> if and only
+          if the mean inter-arrival time converges to the value <span
+          class="math inline">\(\frac{1}{\lambda}\)</span>. This
+          relationship between event rates and inter-event times in
+          point processes is foundational to most proofs of convergence
+          and stability in queueing theory, including the sample-path
+          proof of Little’s Law. Here we see the mechanism that produces
+          this result directly in the dynamics of <span
+          class="math inline">\(\Lambda(T)\)</span>.</p>
+          <p>Another way to think of this is that, just like with <span
+          class="math inline">\(L(T)\)</span>, time normalization
+          smooths out transient spikes in arrivals. Short bursts of
+          arrivals can cause temporary upward jumps in <span
+          class="math inline">\(\Lambda(T)\)</span>, but for <span
+          class="math inline">\(\Lambda(T)\)</span> to remain elevated
+          or increase over long observation horizons, a high frequency
+          of arrivals must be sustained over time. Sustained arrival
+          activity raises the instantaneous presence <span
+          class="math inline">\(N(t)\)</span>, increasing the rate at
+          which presence mass accumulates in <span
+          class="math inline">\(H(T)\)</span>. This accumulation remains
+          visible in <span class="math inline">\(L(T)\)</span> despite
+          time normalization, <em>unless it is offset by departures
+          occurring at a commensurate rate.</em></p>
+          <p>Since the arrival and departure processes are simply point
+          processes, the internal dynamics of <span
+          class="math inline">\(Theta(T)\)</span> are identical to that
+          of <span class="math inline">\(\Lambda(T)\)</span> as shown in
+          Figure 17.</p>
+          <figure id="fig:theta">
+          <img src="../../assets/Theta.png"
+          alt="Figure 17: Departure Rate Dynamics" />
+          <figcaption aria-hidden="true">Figure 17: Departure Rate
+          Dynamics</figcaption>
+          </figure>
+          <p>We can see that</p>
+          <ul>
+          <li>Departures cause <span
+          class="math inline">\(\Theta(T)\)</span> to jump.</li>
+          <li>In between arrivals <span
+          class="math inline">\(\Theta(T)\)</span> decays hyperbolically
+          at the rate <span
+          class="math inline">\(\frac{1}{T}\)</span>.</li>
+          </ul>
+          <h3 id="the-dynamics-of-wt-and-wt">The Dynamics of <span
           class="math inline">\(w(T)\)</span> and <span
           class="math inline">\(w&#39;(T)\)</span></h3>
           <p>It is a building block in the most formal proofs of the

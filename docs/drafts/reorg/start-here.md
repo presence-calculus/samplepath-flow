@@ -621,9 +621,46 @@ The deeper implication is that *there is no intrinsic randomness in the flow met
 
 These results are particularly valuable in precisely those non-steady-state conditions where the steady-state form of Little’s Law provides little insight.
 
-### The dynamics of $\Lambda(T)$ and $\Theta(T)$
+### The Dynamics of $\Lambda(T)$ and $\Theta(T)$
 
-### The dynamics of $w(T)$ and $w'(T)$
+The arrival rate and departure rate metrics have similar and symmetric dynamics. From our discussion of the dynamics of $H(T)$, we can think of arrivals as increasing the instantaneous presence $N(t)$ and departures as decreasing it. Because cumulative presence is defined as
+
+$$
+H(T) = \int_0^T N(t)\,dt,
+$$
+
+these changes in $N(t)$ determine the rate at which presence mass accumulates in the arrival–departure process.
+
+The net presence mass that remains in the system over the observation horizon is $H(T)$, and $L(T)$ is its time-normalized value. We can therefore think of the arrival and departure rates as variables that control the evolution of $L(T)$.
+
+Let us specify their dynamics. [@fig:lambda] shows the characteristic dynamics of $\Lambda(T)$.
+
+![Arrival Rate Dynamics]($document-root/assets/Lambda.png){#fig:lambda}
+
+We can see that
+
+- Arrivals cause $\Lambda(T)$ to jump.
+- In between arrivals $\Lambda(T)$ decays at the rate $\frac{1}{T}$. This is a hyperbolic decay function. As $T$ gets larger, the rate of decay slows.
+
+Together, these two rules capture the entire dynamics of $\Lambda(T)$. What this implies is that growth in the value of $\Lambda(T)$ is driven directly by how frequently arrival events occur, i.e., by the inter-arrival times. This, in turn, can be read directly from the marked point process. We have therefore established the complete causal chain from the sample path to one of the control variables governing the evolution of $L(T)$.
+
+One of the fundamental sample-path results in El-Taha and Stidham [@eltaha1999, Lemma 1.1] is this: the arrival rate converges to a finite limit $\lambda$ if and only if the mean inter-arrival time converges to the value $\frac{1}{\lambda}$. This relationship between event rates and inter-event times in point processes is foundational to most proofs of convergence and stability in queueing theory, including the sample-path proof of Little's Law. Here we see the mechanism that produces this result directly in the dynamics of $\Lambda(T)$.
+
+Another way to think of this is that, just like with $L(T)$, time normalization smooths out transient spikes in arrivals. Short bursts of arrivals can cause temporary upward jumps in $\Lambda(T)$, but for $\Lambda(T)$ to remain elevated or increase over long observation horizons, a high frequency of arrivals must be sustained over time. Sustained arrival activity raises the instantaneous presence $N(t)$, increasing the rate at which presence mass accumulates in $H(T)$. This accumulation remains visible in $L(T)$ despite time normalization, _unless it is offset by departures occurring at a commensurate rate._
+
+Since the arrival and departure processes are simply point processes, the internal dynamics of $Theta(T)$ are identical to that of $\Lambda(T)$ as shown in [@fig:theta].
+
+![Departure Rate Dynamics]($document-root/assets/Theta.png){#fig:theta}
+
+We can see that
+
+- Departures cause $\Theta(T)$ to jump.
+- In between arrivals $\Theta(T)$ decays hyperbolically at the rate $\frac{1}{T}$.
+
+
+
+
+### The Dynamics of $w(T)$ and $w'(T)$
 
 
 
