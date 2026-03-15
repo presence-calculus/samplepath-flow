@@ -1,13 +1,12 @@
 ---
-ID: 38
-Task: Moving average interpretation of L(T)
-Branch: lt-moving-average
+ID: 39
+Task: Arrival/Departure Partitions of H(T)
+Branch: ht-arrival-departure-partitions.
 ---
 
-Create a new chart in core/panels. This chart should show L(T) overliad on the N(t) chart
-as a half-open moving average of N(t). It should use the existing conventions to render N(t) and L(T)
-but display them on a shared x and Y axis.
+Update the chart that shows N(t) with events to optionally show only arrival or departure events. When partitioning by arrivals only, color the grey areas of H(T) in arrival color and similarly for departure color.
 
-Call this the NtLTPanel and store the generated chart in core/panels/nt_moving_average_lt.png
+Generate both charts in addition to the existing charts when generating core panel.
 
-Implement test first.
+Arrival Partition should be called nt-arrival-partition.png
+Departure Partition should be called nt-departure-partition.png.

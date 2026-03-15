@@ -50,6 +50,50 @@ def test_render_N_passes_overlays_with_default_color():
     ax.set_ylabel.assert_called_once_with("N(t)")
 
 
+def test_render_N_arrival_partition_only_marks_arrivals():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([1.0, 2.0])
+    with (
+        patch("samplepath.plots.core.build_event_overlays") as mock_overlays,
+        patch("samplepath.plots.core.render_step_chart"),
+    ):
+        core.NPanel(
+            with_event_marks=True,
+            event_partition="arrival",
+            fill_color=ColorConfig.arrival_color,
+        ).render(
+            ax,
+            times,
+            values,
+            arrival_times=[times[0]],
+            departure_times=[times[1]],
+        )
+    assert mock_overlays.call_args.args[3] == []
+
+
+def test_render_N_departure_partition_uses_departure_fill_color():
+    ax = MagicMock()
+    times = [_t("2024-01-01"), _t("2024-01-02")]
+    values = np.array([1.0, 2.0])
+    with (
+        patch("samplepath.plots.core.build_event_overlays"),
+        patch("samplepath.plots.core.render_step_chart") as mock_render,
+    ):
+        core.NPanel(
+            with_event_marks=True,
+            event_partition="departure",
+            fill_color=ColorConfig.departure_color,
+        ).render(
+            ax,
+            times,
+            values,
+            arrival_times=[times[0]],
+            departure_times=[times[1]],
+        )
+    assert mock_render.call_args.kwargs["fill_color"] == ColorConfig.departure_color
+
+
 def test_render_N_no_title_when_suppressed():
     ax = MagicMock()
     times = [_t("2024-01-01")]
@@ -2090,6 +2134,12 @@ def test_core_driver_returns_expected_paths(core_driver_patcher):
             out_dir, "core/panels", "sample_path_N", chart_config.chart_format
         ),
         resolve_chart_path(
+            out_dir, "core/panels", "nt-arrival-partition", chart_config.chart_format
+        ),
+        resolve_chart_path(
+            out_dir, "core/panels", "nt-departure-partition", chart_config.chart_format
+        ),
+        resolve_chart_path(
             out_dir, "core/panels", "time_average_N_L", chart_config.chart_format
         ),
         resolve_chart_path(
@@ -2187,32 +2237,32 @@ def test_core_driver_returns_expected_paths(core_driver_patcher):
         ),
     ]
     with core_driver_patcher() as mocks:
-        mocks["plot_core_stack"].return_value = expected[18]
-        mocks["plot_LT_derivation_stack"].return_value = expected[19]
-        mocks["plot_departure_flow_metrics_stack"].return_value = expected[20]
-        mocks["NPanel"].return_value = expected[0]
-        mocks["LPanel"].return_value = expected[1]
-        mocks["NtLTPanel"].return_value = expected[2]
-        mocks["LambdaPanel"].return_value = expected[3]
-        mocks["ThetaPanel"].return_value = expected[4]
-        mocks["EventIndicatorPanel"].return_value = expected[5]
-        mocks["FlowCloudPanel"].return_value = expected[6]
-        mocks["ArrivalsPanel"].return_value = expected[7]
-        mocks["DeparturesPanel"].return_value = expected[8]
-        mocks["WPanel"].return_value = expected[9]
-        mocks["SojournTimePanel"].return_value = expected[10]
-        mocks["SojournTimeScatterPanel"].return_value = expected[11]
-        mocks["ResidenceTimeScatterPanel"].return_value = expected[12]
-        mocks["WPrimePanel"].return_value = expected[13]
-        mocks["HPanel"].return_value = expected[14]
-        mocks["CFDPanel"].return_value = expected[15]
-        mocks["LLWPanel"].return_value = expected[16]
-        mocks["LThetaWPrimePanel"].return_value = expected[17]
+        mocks["plot_core_stack"].return_value = expected[20]
+        mocks["plot_LT_derivation_stack"].return_value = expected[21]
+        mocks["plot_departure_flow_metrics_stack"].return_value = expected[22]
+        mocks["NPanel"].side_effect = [expected[0], expected[1], expected[2]]
+        mocks["LPanel"].return_value = expected[3]
+        mocks["NtLTPanel"].return_value = expected[4]
+        mocks["LambdaPanel"].return_value = expected[5]
+        mocks["ThetaPanel"].return_value = expected[6]
+        mocks["EventIndicatorPanel"].return_value = expected[7]
+        mocks["FlowCloudPanel"].return_value = expected[8]
+        mocks["ArrivalsPanel"].return_value = expected[9]
+        mocks["DeparturesPanel"].return_value = expected[10]
+        mocks["WPanel"].return_value = expected[11]
+        mocks["SojournTimePanel"].return_value = expected[12]
+        mocks["SojournTimeScatterPanel"].return_value = expected[13]
+        mocks["ResidenceTimeScatterPanel"].return_value = expected[14]
+        mocks["WPrimePanel"].return_value = expected[15]
+        mocks["HPanel"].return_value = expected[16]
+        mocks["CFDPanel"].return_value = expected[17]
+        mocks["LLWPanel"].return_value = expected[18]
+        mocks["LThetaWPrimePanel"].return_value = expected[19]
         written = core.plot_core_flow_metrics_charts(
             metrics, empirical_metrics, filter_result, chart_config, out_dir
         )
     assert written == expected
-    mocks["NPanel"].assert_called_once()
+    assert mocks["NPanel"].call_count == 3
     mocks["LPanel"].assert_called_once()
     mocks["NtLTPanel"].assert_called_once()
     mocks["LambdaPanel"].assert_called_once()
@@ -2253,7 +2303,7 @@ def test_core_driver_calls_plot_core_stack_with_expected_args(core_driver_patche
     mocks["plot_core_stack"].assert_called_once_with(
         metrics, filter_result, chart_config, out_dir
     )
-    mocks["NPanel"].assert_called_once()
+    assert mocks["NPanel"].call_count == 3
     mocks["LPanel"].assert_called_once()
     mocks["NtLTPanel"].assert_called_once()
     mocks["LambdaPanel"].assert_called_once()
@@ -2304,7 +2354,7 @@ def test_core_driver_passes_event_marks_to_Lambda_and_w(core_driver_patcher):
     )
     assert mocks["WPrimePanel"].call_args.kwargs["with_event_marks"] is True
     assert mocks["CFDPanel"].call_args.kwargs["with_event_marks"] is True
-    mocks["NPanel"].assert_called_once()
+    assert mocks["NPanel"].call_count == 3
     mocks["LPanel"].assert_called_once()
     mocks["LambdaPanel"].assert_called_once()
     mocks["ThetaPanel"].assert_called_once()
@@ -2329,7 +2379,7 @@ def test_core_driver_passes_show_derivations_to_CFD(core_driver_patcher):
             metrics, empirical_metrics, filter_result, chart_config, out_dir
         )
     assert mocks["CFDPanel"].call_args.kwargs["show_derivations"] is True
-    mocks["NPanel"].assert_called_once()
+    assert mocks["NPanel"].call_count == 3
     mocks["LPanel"].assert_called_once()
     mocks["LambdaPanel"].assert_called_once()
     mocks["ThetaPanel"].assert_called_once()

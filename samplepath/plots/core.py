@@ -84,6 +84,9 @@ class NPanel:
     show_derivations: bool = False
     with_event_marks: bool = False
     sampling_frequency: Optional[str] = None
+    fill_color: str = "grey"
+    event_partition: Optional[str] = None
+    base_name: str = "sample_path_N"
 
     def render(
         self,
@@ -94,12 +97,19 @@ class NPanel:
         arrival_times: Optional[List[pd.Timestamp]] = None,
         departure_times: Optional[List[pd.Timestamp]] = None,
     ) -> None:
+        overlay_arrival_times = arrival_times
+        overlay_departure_times = departure_times
+        if self.event_partition == "arrival":
+            overlay_departure_times = []
+        elif self.event_partition == "departure":
+            overlay_arrival_times = []
+
         overlays = (
             build_event_overlays(
                 times,
                 N_vals,
-                arrival_times,
-                departure_times,
+                overlay_arrival_times,
+                overlay_departure_times,
                 calendar_mode=self.sampling_frequency is not None,
             )
             if self.with_event_marks
@@ -111,7 +121,7 @@ class NPanel:
             N_vals,
             label="N(t)",
             fill=True,
-            fill_color="grey",
+            fill_color=self.fill_color,
             overlays=overlays,
             sampling_frequency=self.sampling_frequency,
         )
@@ -139,7 +149,7 @@ class NPanel:
             unit=unit,
             out_dir=out_dir,
             subdir="core/panels",
-            base_name="sample_path_N",
+            base_name=self.base_name,
         ) as (
             _,
             axes,
@@ -2252,6 +2262,24 @@ def plot_core_flow_metrics_charts(
         sampling_frequency=chart_config.sampling_frequency,
     ).plot(metrics, filter_result, chart_config, out_dir)
 
+    path_N_arrival_partition = NPanel(
+        with_event_marks=chart_config.with_event_marks,
+        show_derivations=show_derivations,
+        sampling_frequency=chart_config.sampling_frequency,
+        fill_color=ColorConfig.arrival_color,
+        event_partition="arrival",
+        base_name="nt-arrival-partition",
+    ).plot(metrics, filter_result, chart_config, out_dir)
+
+    path_N_departure_partition = NPanel(
+        with_event_marks=chart_config.with_event_marks,
+        show_derivations=show_derivations,
+        sampling_frequency=chart_config.sampling_frequency,
+        fill_color=ColorConfig.departure_color,
+        event_partition="departure",
+        base_name="nt-departure-partition",
+    ).plot(metrics, filter_result, chart_config, out_dir)
+
     path_L = LPanel(
         with_event_marks=chart_config.with_event_marks,
         show_derivations=show_derivations,
@@ -2348,6 +2376,8 @@ def plot_core_flow_metrics_charts(
 
     return [
         path_N,
+        path_N_arrival_partition,
+        path_N_departure_partition,
         path_L,
         path_NtLT,
         path_Lam,
