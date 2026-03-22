@@ -655,9 +655,17 @@ Since the arrival and departure processes are simply point processes, the intern
 We can see that
 
 - Departures cause $\Theta(T)$ to jump.
-- In between arrivals $\Theta(T)$ decays hyperbolically at the rate $\frac{1}{T}$.
+- In between departures $\Theta(T)$ decays hyperbolically at the rate $\frac{1}{T}$.
 
+The dynamics of both arrival and departure rates arise from their representation as ratios of cumulative counts to elapsed time, not from any assumption about the underlying mechanisms generating arrivals and departures. This is directly analogous to the dynamics of $L(T)$, which emerge from its interpretation as a half-open moving average.
 
+While these dynamics are symmetric under time normalization, they do not imply independence. The arrival and departure processes may interact in arbitrary ways, governed by internal system constraints that are not observable in the event structure alone. What these rules establish is that, regardless of how events are generated, the observed arrival and departure rates are constrained to evolve according to these time-normalized dynamics.
+
+All quantities in the presence invariant are obtained by normalizing the same conserved quantity $H(T)$ along different dimensions. Since $L(T)$ and the rate quantities have dynamics induced by time normalization, any dependencies between them must arise from their shared basis in the underlying arrival–departure process and the accumulated presence mass $H(T)$.
+
+These dependencies are directly expressed through $w(T)=H(T)/A(T)$ and $w'(T)=H(T)/D(T)$, which normalize accumulated presence mass across event counts. In this sense, $w(T)$ and $w'(T)$ act as the _conduit_ through which imbalances between arrivals and departures, as accumulated in $H(T)$ over time, become observable as durations.
+
+In short, the rates encode *marginal behavior of $H(T)$ under time normalization*, while $w(T)$ and $w'(T)$ encode the *cross-dimensional coupling* between state (presence) and duration. We now examine this mechanism more closely.
 
 
 ### The Dynamics of $w(T)$ and $w'(T)$

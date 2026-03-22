@@ -2413,11 +2413,52 @@ Kumar</em></a></p></p>
           <ul>
           <li>Departures cause <span
           class="math inline">\(\Theta(T)\)</span> to jump.</li>
-          <li>In between arrivals <span
+          <li>In between departures <span
           class="math inline">\(\Theta(T)\)</span> decays hyperbolically
           at the rate <span
           class="math inline">\(\frac{1}{T}\)</span>.</li>
           </ul>
+          <p>The dynamics of both arrival and departure rates arise from
+          their representation as ratios of cumulative counts to elapsed
+          time, not from any assumption about the underlying mechanisms
+          generating arrivals and departures. This is directly analogous
+          to the dynamics of <span class="math inline">\(L(T)\)</span>,
+          which emerge from its interpretation as a half-open moving
+          average.</p>
+          <p>While these dynamics are symmetric under time
+          normalization, they do not imply independence. The arrival and
+          departure processes may interact in arbitrary ways, governed
+          by internal system constraints that are not observable in the
+          event structure alone. What these rules establish is that,
+          regardless of how events are generated, the observed arrival
+          and departure rates are constrained to evolve according to
+          these time-normalized dynamics.</p>
+          <p>All quantities in the presence invariant are obtained by
+          normalizing the same conserved quantity <span
+          class="math inline">\(H(T)\)</span> along different
+          dimensions. Since <span class="math inline">\(L(T)\)</span>
+          and the rate quantities have dynamics induced by time
+          normalization, any dependencies between them must arise from
+          their shared basis in the underlying arrival–departure process
+          and the accumulated presence mass <span
+          class="math inline">\(H(T)\)</span>.</p>
+          <p>These dependencies are directly expressed through <span
+          class="math inline">\(w(T)=H(T)/A(T)\)</span> and <span
+          class="math inline">\(w&#39;(T)=H(T)/D(T)\)</span>, which
+          normalize accumulated presence mass across event counts. In
+          this sense, <span class="math inline">\(w(T)\)</span> and
+          <span class="math inline">\(w&#39;(T)\)</span> act as the
+          <em>conduit</em> through which imbalances between arrivals and
+          departures, as accumulated in <span
+          class="math inline">\(H(T)\)</span> over time, become
+          observable as durations.</p>
+          <p>In short, the rates encode <em>marginal behavior of <span
+          class="math inline">\(H(T)\)</span> under time
+          normalization</em>, while <span
+          class="math inline">\(w(T)\)</span> and <span
+          class="math inline">\(w&#39;(T)\)</span> encode the
+          <em>cross-dimensional coupling</em> between state (presence)
+          and duration. We now examine this mechanism more closely.</p>
           <h3 id="the-dynamics-of-wt-and-wt">The Dynamics of <span
           class="math inline">\(w(T)\)</span> and <span
           class="math inline">\(w&#39;(T)\)</span></h3>
