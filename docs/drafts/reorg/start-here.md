@@ -72,37 +72,59 @@ The generalization is beyond the scope of this document. It is the subject of [T
 
 # Arrival-Departure Processes
 
-All current flow-metric models are based on what we may call arrival-departure processes: discrete _items_ arrive at a system or process boundary and depart after some time. Flow metrics measure key properties of this process: the average time between arrival and departure of individual items over a period (lead time, cycle time, and related variants, depending on boundary definition), arrival and departure rates over the same period (throughput), and the number of items in the system at a point in time (instantaneous WIP) or on average over a period (average WIP).
+All current flow-metric models are based on what we may call arrival-departure processes: discrete *elements* (aka items) arrive at a system or process boundary and depart after some time. Flow metrics measure key properties of this process: arrival and departure rates over a period (throughput), and the number of elements in the process either at a point in time (instantaneous WIP) or averaged over a period (average WIP).
 
-In general, measuring these quantities accurately requires careful attention to system boundaries, definitions of arrivals and departures, definition of WIP, units of time measurement (for both reported metrics and observation windows), and the exact formulas for the metrics being reported.
+Process time is measured using the points in time where elements cross boundaries as start and end points: the time between arrival and departure of individual elements (lead time, cycle time, and related variants, depending on boundary definition), and the time since arrival for elements that have not yet departed (item age).
 
-If metrics are meant to represent underlying process behavior accurately, these details matter considerably. Current techniques and tools vary widely in rigor. Serious treatments, such as Anderson’s work in the Kanban community and methods introduced by Dan Vacanti, pay much closer attention to these details than many ad hoc implementations that treat these numbers as reporting artifacts.
+[@fig:element-boundary] shows this element-boundary model for arrival-departure processes.
 
-Even these stronger implementations, however, still face core methodological issues. In many cases, those issues are partially masked because the measurement techniques are paired with highly prescriptive methodologies that mitigate their impact. This makes the approaches fragile when used outside those methodological contexts, as they often are, and less suitable as general-purpose flow analysis techniques. This is particularly true when analyzing processes _before_ those methodological changes are adopted and comparing them to the state after adoption — precisely when measuring the impact of process changes matters most.
+## Element-Boundary Model
 
-Our methods aim to provide process-agnostic flow metrics derived from a formal definition of an arrival-departure process, robust under _any_ realization that conforms to that model, even when underlying processes operate in volatile and changing environments.
+![The Element-Boundary Model]($document-root/assets/element-boundary-model.png){#fig:element-boundary}
 
-In a sense, an arrival/departure process is to flow analysis what a single-celled organism is to biology. Simple enough to exhibit all the core principles involved, and rich enough to develop the full analytical machinery. We begin here because every structural property we need to study more complex configurations of these processes generalizes from this case. Understanding them well is the foundation of everything that follows.
+The standard approach to flow analysis under this model is to study the distributional properties of these element-wise metrics (averages, percentiles, etc.) over business-facing reporting periods (weeks, months, quarters), or aligned with some business process cadence (sprints, releases). The element-boundary model implicitly assumes that elements are the primary observable units, and that process behavior can be characterized using statistical distributions over observed element trajectories. This model is a direct port of measurement techniques used in production processes, and it has the benefit of being relatively intuitive to practitioners and managers.
 
-## Process Model for Sample Path Analysis
+When applied to _stable_ processes, these element-wise metrics have the added benefit that they map naturally to quantities that are governed by Little's Law. It is generally much simpler to assume stable processes are the default when the underlying processes are standardized repetitive tasks, with pre-determined process boundaries and routes. In many operational settings, process times can be bounded tightly a priori. Stability here means that time-normalized quantities (arrival rate, throughput, and average process time) converge or remain approximately constant as the observation horizon grows. Under these conditions, these quantities are well-approximated by Little’s Law.
 
-The process model we use for sample path analysis is a bit different from the standard arrival-departure model we use in the software industry. It is strictly more general and has fewer assumptions, but the differences are also more fundamental than that.
+If we can assume that an arrival-departure process is stable, the element-boundary model becomes considerably more powerful. Across a single boundary, it allows us to design policies that set arrival rates and WIP levels to achieve desired throughput and process time targets, and to reason about both individual processes and process networks using Little’s Law. In other words, stability allows us to design processes that meet business objectives using these metrics, rather than simply use them as reporting artifacts.
 
-Formally, the domain of analysis consists of processes described by a set of _events_ that denote beginnings and endings we can observe in time. We continue to call these arrival and departure events to preserve continuity with existing practice, but the key difference is that we analyze the process primarily through the event definitions themselves.
+But what if we cannot assume the arrival-departure process is stable?
 
-![A Flow Process]($document-root/assets/beginnings-endings.png){#fig:begin-end}
+This is the case in most collaborative knowledge work, including software development. Here we cannot always assume uniform elements, well-defined boundaries or routes, bounded process times, or stable arrival rates and process time distributions. It turns out it is simpler to reason about flow in these domains if we first recast them in terms of observable arrival and departure events, without requiring us to specify elements and boundaries. In other words, we address a more complex problem by simplifying the representation of the arrival-departure process, rather than attempting to model its full complexity directly.
 
-In particular, we do not require that the events in [@fig:begin-end] be associated with well-defined items, or that structural boundaries are fixed in advance. The only requirement is that, by observation, we can determine whether an event denotes a beginning or an ending. The primary unit of analysis in this ontology is the domain event. We also do not require explicit correspondence between arrivals and departures, for example by matching them through an item identifier.
+The process model we use in The Presence Calculus is therefore a bit different from the standard arrival-departure model we see in the software industry. It is more general in that it makes fewer assumptions about elements, boundaries, routes, and related structure.
 
-This may be surprising, because you may wonder how we can measure concepts such as lead time, cycle time, WIP, and throughput if we cannot identify items. That is precisely a clue that the generalization here runs deeper than simply changing the names of what we call events.
 
-To make this more intuitive, consider a record of births and deaths in a population. We can treat these as arrivals and departures. We are implicitly talking about people being born and dying, and we can measure population in units of people and lifespans in units of time, without needing explicit correspondence between a specific birth and a specific death, or a single integrated record of both.
+## Marked Point Processes
 
-This reveals something important about flow and flow metrics: these are gestalt properties of a _process_, not simply properties derived by aggregating the experience of individual items traversing that process. As we will soon see, we can go a long way without ever talking about items. Many of the most useful aspects of reasoning about flow for process improvement do not require that level of detail.
 
-That said, we do assume that arrival and departure events are _countable_, and that both counts are taken with respect to the same underlying set of discrete elements, even if those elements are never individually identified. This is a conservation assumption at the level of _counts_, not identities. It ensures that cumulative arrivals and departures remain structurally comparable. In this sense, the model presupposes an underlying set of elements. But we do not require correspondence or traceability between events and elements.
+![Arrival-Departure Marked Point Process]($document-root/assets/arrival-departure-process.png){#fig:arrival-departure-process}
 
-One key insight from sample path analysis is that the quantities needed to analyze the structural behavior of a flow process are determined entirely by the events. Once arrival and departure _processes_ are defined, the core flow relationships follow from them, without requiring detailed knowledge of individual elements. This not only clarifies what must be measured to reason about flow (event structure), it also provides a more general model that applies even in domains where the correspondence between elements and events is not known.
+Formally, in the Presence Calculus an arrival-departure process is represented simply as a sequence of timestamps with a mark indicating whether it is an arrival event or a departure event. Mathematically, this is called a marked point process.
+
+We do not require that the events in [@fig:arrival-departure-process] be associated with well-defined *items*, or that structural boundaries are fixed in advance. In particular, we do not require explicit correspondence between arrivals and departures, for example by matching them through an item identifier. Rather, we assume the weaker requirements that every departure is preceded by an arrival in time, and that for every observed departure event, there exists a corresponding arrival event, which we may or may not be able to observe. These weaker assumptions are more suitable for reasoning about flow in dynamic environments in which the internal mechanisms that generate these events may change over time and element trajectories may vary widely.
+
+To make this more intuitive, consider a record of births and deaths in a population. We can treat these as arrival and departure events. We are implicitly talking about people being born and dying, and we can measure population in units of people and lifespans in units of time, without needing explicit correspondence between a specific birth and a specific death, or a single integrated record of both.
+
+Restricting the model this way is not a limitation. Rather, it allows us to develop purely time- and event-based techniques to measure flow, without making assumptions about either the kind of things that are "flowing" or the nature of the underlying processes.
+
+In this model, "flow" and "flow metrics" are properties derived from the *state* of a process that evolves over time, not simply properties derived by aggregating experience statistics of individual items traversing that process. The Presence Calculus gives us the tools to suitably define and reason about process state in these processes without element-boundary assumptions.
+
+This is useful precisely because it lets us clearly separate flow analysis from the specific mechanisms that generate arrival and departure events. It allows us to measure flow and reason rigorously about process dynamics even when the underlying items, boundaries, and mechanisms that generate these events are changing continuously and the processes themselves are non-stationary. All we require is that there exists a stable notion of what constitutes an arrival or departure event in a domain, and that these events can be observed and recorded on a common timeline.
+
+One key insight from this approach is that once arrival and departure point processes are defined, the core flow relationships follow directly from them, and them alone. This not only clarifies what must be measured to reason about flow (event structure), it also provides a more general model that applies even in domains where the correspondence between elements and events is not known.
+
+In short, everything needed to analyze the dynamics of flow is determined entirely by the arrival and departure events.
+
+We make the weaker assumption that arrival and departure events are *countable* rather than the stronger requirement of a discrete set of elements. We assume that arrival and departure counts are expressed in compatible units. In this sense, even when the model indirectly presupposes an underlying set of elements, we do not require correspondence or traceability between events and elements. Rather, what we require is that arrival and departure *counts* are commensurate: we can reason reliably about flow in the process using arrival and departure counts alone. There are additional technical assumptions underlying this, which we will introduce explicitly in context. For now, the key point is that in the Presence Calculus, we are working with a simpler, more general time- and event-based representation of arrival-departure processes, rather than an element-boundary model.
+
+The element-boundary model remains important, but deriving flow principles from the strictly weaker assumptions of the Presence Calculus allows us to see precisely where element and boundary structure become necessary. In fact, we will see that in stable processes, these two models are equivalent in the sense that the metrics they produce agree on average, but in processes that operate far from stable equilibrium, the Presence Calculus model is a fundamentally superior tool for reasoning about flow.
+
+The marked point process representation that underpins the Presence Calculus is to flow analysis what a single-celled organism is to biology: simple enough to exhibit the core principles, yet rich enough to support the full analytical machinery. We begin here because every structural property needed to study more complex configurations, including element-boundary models, can be derived from this case. Understanding it well is the foundation for everything that follows.
+
+# Sample Path Analysis
+
+We now come to sample path analysis, the second main way in which our approach to measuring flow differs from current statistically based methods. The key point here is that this is a technique that lets us define _a deterministic measurement model over non-deterministic processes._ Let's define what this means.
 
 ## What Is a Sample Path?
 
@@ -619,7 +641,11 @@ We will see shortly that the same analytical techniques used to derive the deter
 
 The deeper implication is that *there is no intrinsic randomness in the flow metrics themselves*. Their dynamics are deterministic consequences of the observed arrival and departure events on the sample path, tightly coupled by the constraint imposed by the conservation of presence mass.
 
-These results are particularly valuable in precisely those non-steady-state conditions where the steady-state form of Little’s Law provides little insight.
+These results are particularly valuable in precisely those non-steady-state conditions where the steady-state form of Little’s Law provides little insight. [@fig:presence-invariant] shows the relationships between the processes that determine how flow metrics over a sample path behave as it evolves over time.
+
+![The Presence Invariant]($document-root/assets/presence-invariant.png){#fig:presence-invariant}
+
+In the sections below we will use these relationships to derive deterministic rules that explain how the metrics evolve in response to arrival and departure events. Together these rules provide a completely deterministic accounting of what we measure with flow metrics, free of any additional stochastic assumptions beyond that is what is already reified in the realized sample path.
 
 ### The Dynamics of $\Lambda(T)$ and $\Theta(T)$
 
