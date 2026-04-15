@@ -3,7 +3,8 @@ FROM mcr.microsoft.com/devcontainers/python:1-3.11-bookworm
 ARG PANDOC_VERSION=3.8.3
 ARG PANDOC_CROSSREF_VERSION=0.3.23
 
-RUN apt-get update \
+RUN rm -f /etc/apt/sources.list.d/yarn.list \
+    && apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
         xz-utils \
