@@ -268,6 +268,35 @@ uv run pytest                 # run tests
 uv run flow analyze examples/polaris/csv/work_tracking.csv --help  # run CLI from source
 ```
 
+### GitHub Codespaces
+
+The repository includes a `.devcontainer/` configuration for GitHub Codespaces. It is
+intended to support the full documentation workflow in a browser-based VS Code session,
+including Pandoc HTML generation and preview from an iPad.
+
+After creating a codespace for the repository:
+
+```bash
+bash .devcontainer/preview-docs.sh
+```
+
+That command rebuilds `docs/site` with Pandoc and starts a preview server on port
+`8000`. Codespaces forwards the port automatically so you can open the rendered HTML in
+the browser.
+
+The container also runs the project bootstrap automatically on first create:
+
+```bash
+uv sync --all-extras
+```
+
+Normal validation commands remain the same inside the codespace:
+
+```bash
+UV_CACHE_DIR=.uv-cache uv run pytest
+PRE_COMMIT_HOME=.pre-commit-cache pre-commit run --all-files
+```
+
 ______________________________________________________________________
 
 ## Package Layout

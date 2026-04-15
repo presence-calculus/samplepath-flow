@@ -8,6 +8,7 @@ __pycache__/
 # uv
 dist/
 *.egg-info/
+.uv-cache/
 .pre-commit-cache
 .mypy_cache/
 
@@ -58,6 +59,7 @@ charts
 .pre-commit/
 
 # local matplotlib cache
+.mplconfig/
 .matplotlib-cache/
 
 # --- OS junk ---
