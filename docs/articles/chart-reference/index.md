@@ -1,7 +1,7 @@
 ---
 title: <strong>Chart Reference</strong>
 author: |
-  <a href="https://github.com/presence-calculus/samplepath"><em>The Samplepath Analysis Toolkit</em></a>
+  <a href="https://github.com/presence-calculus/samplepath-flow"><em>The Samplepath Analysis Toolkit</em></a>
 
 document-root: ../..
 header-image: $document-root/articles/chart-reference/chart_reference_small/with-events/core/panels/arrival_departure_indicator_process.png
@@ -65,7 +65,7 @@ Given a realized sample path up to a fixed finite horizon, all measurements made
 
 ## Notation
 
-- Lower-case $t$ denotes *instantaneous* time.  
+- Lower-case $t$ denotes *instantaneous* time.
 - Upper-case $T$ denotes a *prefix horizon* of the observation interval, i.e. an interval $(0, T]$ with $0 < T \le T_{\max}$. We adopt half-open intervals by default: the interval excludes the left endpoint and includes the right endpoint.
 
 - For a fixed horizon $T$, the within-window time variable $t$ satisfies $0 < t \le T$.
@@ -288,7 +288,7 @@ Before turning to the formal derivation, consider the intuition. If the arrival 
 
 We call this quantity *Presence Mass* (or simply *Presence*). Formally, it is the area between the arrival and departure curves over the interval $(0,T]$. Intuitively, it measures both:
 
-- how many elements are present in the process (the vertical separation between the curves), and  
+- how many elements are present in the process (the vertical separation between the curves), and
 - for how long those elements remain present (the horizontal extent over time).
 
 Larger areas correspond to greater presence mass in the system; smaller areas correspond to less.
@@ -753,8 +753,8 @@ Thus no generality is lost by adopting the residence-time definition as the defa
 
 As we shall see, there are multiple consistent ways to amortize presence mass over events, each yielding different structural insight. In steady state, they coincide with classical definitions. Outside steady state, they retain meaning and preserve the invariant, whereas traditional completion-based averages do not.
 
-For a more intuitive and informal explanation of these ideas, see my articles in the *Polaris Flow Dispatch*:  
-[How long does it take](https://open.substack.com/pub/thepolarisflowdispatch/p/how-long-does-it-take)  
+For a more intuitive and informal explanation of these ideas, see my articles in the *Polaris Flow Dispatch*:
+[How long does it take](https://open.substack.com/pub/thepolarisflowdispatch/p/how-long-does-it-take)
 [What is residence time?](https://open.substack.com/pub/thepolarisflowdispatch/p/what-is-residence-time)
 
 
@@ -911,10 +911,10 @@ Thus $w'(T)$ grows continuously between completions and adjusts downward when ou
 
 The difference between $w(T)$ and $w'(T)$ reflects two complementary viewpoints:
 
-- Measuring process time against arrivals asks:  
+- Measuring process time against arrivals asks:
   *How much time exposure does each unit of incoming work generate?*
 
-- Measuring process time against departures asks:  
+- Measuring process time against departures asks:
   *How much accumulated time corresponds to each unit of completed output?*
 
 In stable regimes these perspectives coincide. In non-stationary settings they reveal different structural features — for example, when presence mass grows there is typically divergence between the two, reflecting imbalance between arrivals and departures. In the section on convergence, we will discuss the relationship between $w(T)$ and $w'(T)$.
@@ -1382,7 +1382,7 @@ $$
 
 Think of this as a quotient of two functions of $T$:
 
-- numerator: $H(T)$  
+- numerator: $H(T)$
 - denominator: $T$
 
 Differentiate using the quotient rule:
@@ -1395,7 +1395,7 @@ $$
 
 Now simplify the pieces:
 
-- $\frac{d}{dT}(T) = 1$  
+- $\frac{d}{dT}(T) = 1$
 - $\frac{dH}{dT} = N(t)$ (because $H(T) = \int_0^T N(t)\,dt$)
 
 Substitute both:
@@ -1437,7 +1437,7 @@ The behavior of $L(T)$ provides a deterministic sample-path analogue of the spec
 
 Because $L(T)$ is defined directly from the realized sample path — via integration and normalization — it distinguishes between finite disturbances and sustained structural effects *in terms of their long-horizon contribution to time-average presence*:
 
-- **Finite, localized disturbances**, whose influence decays as $1/T$, and  
+- **Finite, localized disturbances**, whose influence decays as $1/T$, and
 - **Sustained structural effects**, whose influence persists because they continuously contribute presence mass over time.
 
 This distinction does not rely on stationarity, ergodicity, or the existence of stable distributions. It operates directly on the observed prefix of the process and remains valid even in transient, unstable, or regime-shifting systems.

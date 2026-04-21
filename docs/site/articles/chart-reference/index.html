@@ -505,7 +505,7 @@
     }
 
   </style>
-  <script
+  <script defer=""
   src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
   type="text/javascript"></script>
 </head>
@@ -522,10 +522,10 @@
       </nav>
                   <header id="title-block-header">
         <h1 class="title"><strong>Chart Reference</strong></h1>
-
-        <p class="author"><p><a href="https://github.com/presence-calculus/samplepath"><em>The
+        
+        <p class="author"><p><a href="https://github.com/presence-calculus/samplepath-flow"><em>The
 Samplepath Analysis Toolkit</em></a></p></p>
-
+        
               </header>
                   <div class="header-image">
         <img src="../../articles/chart-reference/chart_reference_small/with-events/core/panels/arrival_departure_indicator_process.png" alt="Header image"/>
@@ -718,8 +718,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <h2 id="notation">2.2 Notation</h2>
           <ul>
           <li><p>Lower-case <span class="math inline">\(t\)</span>
-          denotes <em>instantaneous</em> time.<br />
-          </p></li>
+          denotes <em>instantaneous</em> time.</p></li>
           <li><p>Upper-case <span class="math inline">\(T\)</span>
           denotes a <em>prefix horizon</em> of the observation interval,
           i.e. an interval <span class="math inline">\((0, T]\)</span>
@@ -1166,8 +1165,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           both:</p>
           <ul>
           <li>how many elements are present in the process (the vertical
-          separation between the curves), and<br />
-          </li>
+          separation between the curves), and</li>
           <li>for how long those elements remain present (the horizontal
           extent over time).</li>
           </ul>
@@ -2039,12 +2037,10 @@ Samplepath Analysis Toolkit</em></a></p></p>
           meaning and preserve the invariant, whereas traditional
           completion-based averages do not.</p>
           <p>For a more intuitive and informal explanation of these
-          ideas, see my articles in the <em>Polaris Flow
-          Dispatch</em>:<br />
+          ideas, see my articles in the <em>Polaris Flow Dispatch</em>:
           <a
           href="https://open.substack.com/pub/thepolarisflowdispatch/p/how-long-does-it-take">How
-          long does it take</a><br />
-          <a
+          long does it take</a> <a
           href="https://open.substack.com/pub/thepolarisflowdispatch/p/what-is-residence-time">What
           is residence time?</a></p>
           <p><strong>Output file:</strong>
@@ -2283,12 +2279,12 @@ Samplepath Analysis Toolkit</em></a></p></p>
           class="math inline">\(w&#39;(T)\)</span> reflects two
           complementary viewpoints:</p>
           <ul>
-          <li><p>Measuring process time against arrivals asks:<br />
-          <em>How much time exposure does each unit of incoming work
+          <li><p>Measuring process time against arrivals asks: <em>How
+          much time exposure does each unit of incoming work
           generate?</em></p></li>
-          <li><p>Measuring process time against departures asks:<br />
-          <em>How much accumulated time corresponds to each unit of
-          completed output?</em></p></li>
+          <li><p>Measuring process time against departures asks: <em>How
+          much accumulated time corresponds to each unit of completed
+          output?</em></p></li>
           </ul>
           <p>In stable regimes these perspectives coincide. In
           non-stationary settings they reveal different structural
@@ -3087,8 +3083,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <p>Think of this as a quotient of two functions of <span
           class="math inline">\(T\)</span>:</p>
           <ul>
-          <li>numerator: <span class="math inline">\(H(T)\)</span><br />
-          </li>
+          <li>numerator: <span class="math inline">\(H(T)\)</span></li>
           <li>denominator: <span class="math inline">\(T\)</span></li>
           </ul>
           <p>Differentiate using the quotient rule:</p>
@@ -3101,8 +3096,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <p>Now simplify the pieces:</p>
           <ul>
           <li><span class="math inline">\(\frac{d}{dT}(T) =
-          1\)</span><br />
-          </li>
+          1\)</span></li>
           <li><span class="math inline">\(\frac{dH}{dT} = N(t)\)</span>
           (because <span class="math inline">\(H(T) = \int_0^T
           N(t)\,dt\)</span>)</li>
@@ -3152,8 +3146,7 @@ Samplepath Analysis Toolkit</em></a></p></p>
           <ul>
           <li><strong>Finite, localized disturbances</strong>, whose
           influence decays as <span class="math inline">\(1/T\)</span>,
-          and<br />
-          </li>
+          and</li>
           <li><strong>Sustained structural effects</strong>, whose
           influence persists because they continuously contribute
           presence mass over time.</li>
