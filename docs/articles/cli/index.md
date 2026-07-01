@@ -160,9 +160,13 @@ For metric semantics and why this remains a sub-sampled cumulative view, see
 
 ## Lambda Fine Tuning
 
-- `--lambda-pctl`: upper percentile clip for `Lambda(T)` chart axis
+- `--lambda-pctl`: upper percentile clip for `Lambda(T)` chart axis. Set this value to 99 to drop the top 1% of values that skew the rate scale visually.
+
 - `--lambda-lower-pctl`: optional lower percentile clip
 - `--lambda-warmup`: warmup hours excluded from percentile estimation
+
+These parameters also apply to visual display of Theta(T).
+
 
 ## Convergence Thresholds
 

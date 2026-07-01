@@ -796,13 +796,17 @@ Samplepath Analysis Toolkit</em></a></p></p>
           </ul>
           <h2 id="lambda-fine-tuning">7.4 Lambda Fine Tuning</h2>
           <ul>
-          <li><code>--lambda-pctl</code>: upper percentile clip for
-          <code>Lambda(T)</code> chart axis</li>
-          <li><code>--lambda-lower-pctl</code>: optional lower
-          percentile clip</li>
-          <li><code>--lambda-warmup</code>: warmup hours excluded from
-          percentile estimation</li>
+          <li><p><code>--lambda-pctl</code>: upper percentile clip for
+          <code>Lambda(T)</code> chart axis. Set this value to 99 to
+          drop the top 1% of values that skew the rate scale
+          visually.</p></li>
+          <li><p><code>--lambda-lower-pctl</code>: optional lower
+          percentile clip</p></li>
+          <li><p><code>--lambda-warmup</code>: warmup hours excluded
+          from percentile estimation</p></li>
           </ul>
+          <p>These parameters also apply to visual display of
+          Theta(T).</p>
           <h2 id="convergence-thresholds">7.5 Convergence
           Thresholds</h2>
           <ul>
