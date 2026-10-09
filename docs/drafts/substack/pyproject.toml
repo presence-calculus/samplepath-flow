@@ -1,0 +1,18 @@
+[project]
+name = "polaris-substack"
+version = "0.1.0"
+description = "Local authoring and publishing tools for The Polaris Flow Dispatch"
+requires-python = ">=3.11"
+dependencies = [
+    "python-substack==0.10.0",
+]
+
+[project.scripts]
+dispatch = "substack_cli:main"
+
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["substack_cli"]
