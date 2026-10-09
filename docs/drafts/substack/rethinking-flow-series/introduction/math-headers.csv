@@ -1,0 +1,4 @@
+Window,Arrivals,Arrival rate,Mean WIP
+10 days,20,2.0,4.5
+20 days,50,2.5,5.1
+30 days,66,2.2,4.8

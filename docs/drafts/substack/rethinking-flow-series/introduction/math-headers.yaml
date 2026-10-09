@@ -1,0 +1,18 @@
+title: LaTeX in table headers
+subtitle: Test of Greek letters, fractions, subscripts, and overbars
+note: Illustrative data only.
+columns:
+  Window:
+    label: '$T$'
+    width: 22%
+  Arrivals:
+    label: '$A(T)$'
+    width: 22%
+  Arrival rate:
+    label: '$\Lambda(T)=\frac{A(T)}{T}$'
+    width: 34%
+    decimals: 1
+  Mean WIP:
+    label: '$\bar{L}_{T}$'
+    width: 22%
+    decimals: 1
