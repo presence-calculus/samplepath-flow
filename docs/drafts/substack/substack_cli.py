@@ -1,6 +1,7 @@
 """Run the Substack CLI using the publication domain for authentication."""
 
 from html.parser import HTMLParser
+import json
 import os
 from pathlib import Path
 import sys
@@ -51,8 +52,55 @@ def split_front_matter(markdown: str) -> tuple[dict[str, Any], str]:
     return {}, markdown
 
 
+def math_document(document: Any, *, for_editor: bool) -> Any:
+    """Translate inline math between library and editor schemas without mutation."""
+    if isinstance(document, list):
+        return [math_document(item, for_editor=for_editor) for item in document]
+    if not isinstance(document, dict):
+        return document
+    result = {
+        key: math_document(value, for_editor=for_editor)
+        for key, value in document.items()
+    }
+    source_type = "latex" if for_editor else "inline_latex"
+    target_type = "inline_latex" if for_editor else "latex"
+    if result.get("type") == source_type:
+        result["type"] = target_type
+        attrs = dict(result.get("attrs", {}))
+        expression = attrs.get("persistentExpression", attrs.get("expression", ""))
+        attrs["persistentExpression"] = expression
+        if for_editor:
+            attrs.pop("expression", None)
+        else:
+            attrs["expression"] = expression
+        result["attrs"] = attrs
+    return result
+
+
+def math_payload(payload: dict, *, for_editor: bool) -> dict:
+    """Translate only draft_body, preserving the API's JSON-string representation."""
+    result = dict(payload)
+    body = result.get("draft_body")
+    if isinstance(body, str):
+        result["draft_body"] = json.dumps(
+            math_document(json.loads(body), for_editor=for_editor)
+        )
+    elif isinstance(body, dict):
+        result["draft_body"] = math_document(body, for_editor=for_editor)
+    return result
+
+
 class DispatchApi(Api):
     """Strip local metadata before either create or update sends the body."""
+
+    def post_draft(self, body) -> dict:
+        return super().post_draft(math_payload(body, for_editor=True))
+
+    def put_draft(self, draft, **kwargs) -> dict:
+        return super().put_draft(draft, **math_payload(kwargs, for_editor=True))
+
+    def get_draft(self, draft_id):
+        return math_payload(super().get_draft(draft_id), for_editor=False)
 
     def create_draft_from_markdown(
         self,
