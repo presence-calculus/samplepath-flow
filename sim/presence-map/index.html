@@ -45,6 +45,7 @@
             <select id="block-view" aria-label="Block view">
               <option value="full" selected>Full blocks</option>
               <option value="observed">Observed only</option>
+              <option value="contour">Contour</option>
             </select>
           </label>
           <label>Speed
@@ -67,7 +68,7 @@
       <div><dt>Present now <var>N(T)</var></dt><dd id="present">0</dd></div>
       <div><dt>Presence mass <var>H(T)</var></dt><dd id="mass">0.0 <small>block·s</small></dd></div>
     </dl>
-    <p class="geometry">Each block occupies one strip, from its arrival until its marked duration elapses. A vertical slice counts blocks present at that instant. The accumulated area is presence mass. <span id="block-colors">Blue shows observed presence. Green shows remaining duration.</span></p>
+    <p class="geometry">Each block occupies one strip, from its arrival until its marked duration elapses. A vertical slice counts blocks present at that instant. The accumulated area is presence mass. <span id="block-colors">Blue shows observed presence. Green shows remaining duration.</span> <span id="contour-colors" hidden>Solid blue shows observed presence. Dashed green shows remaining duration.</span></p>
     <p id="notice" class="notice" role="status" hidden></p>
   </main>
 

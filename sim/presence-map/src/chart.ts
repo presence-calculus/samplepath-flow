@@ -1,16 +1,19 @@
 import type { PresenceProcess } from "./process.js";
 
 export type View = { horizon: number; lanes: number };
-export type BlockView = "full" | "observed";
+export type BlockView = "full" | "observed" | "contour";
 export type Plot = { left: number; top: number; width: number; height: number };
 type Context = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+type OutlineBlock = { left: number; right: number; top: number; bottom: number; landed: boolean };
 const green = "#098478";
 const blue = "#264e80";
+const contourWidth = 2;
+const remainingDash = [4, 3];
 export const dropDuration = 0.35;
 
 export function fitView(process: PresenceProcess, t: number, count: number, mode: BlockView): View {
   let extent = t;
-  if (mode === "full") {
+  if (mode !== "observed") {
     for (let i = 0; i < count; i++) {
       extent = Math.max(extent, process.arrivals[i].end);
     }
@@ -24,7 +27,7 @@ export function fitView(process: PresenceProcess, t: number, count: number, mode
 
 export function plotBox(width: number, height: number, mode: BlockView): Plot {
   const left = width < 440 ? 42 : 61;
-  const top = mode === "full" ? 56 : 38;
+  const top = mode === "observed" ? 38 : 56;
   return { left, top, width: width - left - 22, height: height - top - 52 };
 }
 
@@ -43,7 +46,8 @@ export function renderChart(
   context: Context, process: PresenceProcess, t: number, view: View, width: number, height: number,
   options: { mode: BlockView; cursor?: number; reducedMotion?: boolean; stepDropAge?: number; title?: boolean },
 ) {
-  const fullBlocks = options.mode === "full";
+  const fullBlocks = options.mode !== "observed";
+  const contour = options.mode === "contour";
   const plot = plotBox(width, height, options.mode);
   const { left, top } = plot;
   const right = left + plot.width;
@@ -67,11 +71,23 @@ export function renderChart(
     let rightEdge = right;
     for (const [color, label] of labels.reverse()) {
       const labelX = rightEdge - context.measureText(label).width;
-      context.fillStyle = color;
-      context.fillRect(labelX - 14, 15, 9, 9);
+      if (contour) {
+        context.save();
+        context.strokeStyle = color;
+        context.lineWidth = contourWidth;
+        context.setLineDash(color === green ? remainingDash : []);
+        context.beginPath();
+        context.moveTo(labelX - 22, 19);
+        context.lineTo(labelX - 5, 19);
+        context.stroke();
+        context.restore();
+      } else {
+        context.fillStyle = color;
+        context.fillRect(labelX - 14, 15, 9, 9);
+      }
       context.fillStyle = "#52677e";
       context.fillText(label, labelX, 19);
-      rightEdge = labelX - 27;
+      rightEdge = labelX - (contour ? 32 : 27);
     }
   }
 
@@ -96,7 +112,7 @@ export function renderChart(
     context.lineTo(right, position);
     context.fillText(number(strip), left - 9, position - laneHeight / 2);
   }
-  context.strokeStyle = "#e4eaf2";
+  context.strokeStyle = contour ? "#eff3f8" : "#e4eaf2";
   context.stroke();
   context.strokeStyle = "#9eafc3";
   context.strokeRect(left, top, plot.width, plot.height);
@@ -107,11 +123,13 @@ export function renderChart(
 
   context.save();
   context.beginPath();
-  context.rect(left, top, plot.width, plot.height);
+  const plotPadding = contour ? contourWidth / 2 : 0;
+  context.rect(left - plotPadding, top - plotPadding, plot.width + 2 * plotPadding, plot.height + 2 * plotPadding);
   context.clip();
   const now = x(t);
   const barHeight = laneHeight - Math.min(1, laneHeight * 0.12);
   const drops: { center: number; left: number; width: number }[] = [];
+  const outlines: OutlineBlock[] = [];
 
   for (let i = 0; i < count; i++) {
     const event = process.arrivals[i];
@@ -124,6 +142,19 @@ export function renderChart(
       age = event.t === t ? options.stepDropAge : dropDuration;
     }
     const dropping = !options.reducedMotion && age < dropDuration;
+
+    if (contour) {
+      const stripTop = bottom - event.strip * laneHeight;
+      const blockTop = dropping ? top + (age / dropDuration) ** 2 * (stripTop - top) : stripTop;
+      outlines.push({
+        left: leftEdge,
+        right: x(event.end),
+        top: blockTop,
+        bottom: dropping ? blockTop + laneHeight : bottom - (event.strip - 1) * laneHeight,
+        landed: !dropping,
+      });
+      continue;
+    }
 
     if (fullBlocks) {
       const entryCenter = top + barHeight / 2;
@@ -166,6 +197,7 @@ export function renderChart(
     const dropHeight = Math.min(16, barHeight);
     context.fillRect(drop.left, drop.center - dropHeight / 2, drop.width, dropHeight);
   }
+  if (outlines.length) strokeContour(context, outlines, now, plot);
   context.beginPath();
   context.strokeStyle = "#185dcb";
   context.setLineDash([4, 4]);
@@ -192,4 +224,48 @@ export function renderChart(
   context.fillStyle = "#184d9b";
   context.textAlign = "center";
   context.fillText(nowLabel, labelX + labelWidth / 2, labelY + 10);
+}
+
+function strokeContour(context: Context, blocks: OutlineBlock[], now: number, plot: Plot) {
+  const path = new Path2D();
+  for (let start = 0; start < blocks.length;) {
+    // Consecutive arrivals occupy adjacent strips. Join only landed blocks with overlapping times.
+    let end = start + 1;
+    while (end < blocks.length && blocks[end - 1].landed && blocks[end].landed &&
+           blocks[end].left < blocks[end - 1].right) {
+      end++;
+    }
+
+    path.moveTo(blocks[start].left, blocks[start].bottom);
+    for (let i = start; i < end; i++) {
+      const block = blocks[i];
+      path.lineTo(block.right, block.bottom);
+      path.lineTo(block.right, block.top);
+    }
+    for (let i = end - 1; i >= start; i--) {
+      const block = blocks[i];
+      path.lineTo(block.left, block.top);
+      path.lineTo(block.left, block.bottom);
+    }
+    path.closePath();
+    start = end;
+  }
+
+  // Stroke the same perimeter on both sides, so the sweep adds no edge to the shape.
+  const padding = contourWidth / 2;
+  const sides = [
+    { left: plot.left - padding, right: now, color: blue, dash: [] },
+    { left: now, right: plot.left + plot.width + padding, color: green, dash: remainingDash },
+  ];
+  for (const side of sides) {
+    context.save();
+    context.beginPath();
+    context.rect(side.left, plot.top - padding, side.right - side.left, plot.height + 2 * padding);
+    context.clip();
+    context.strokeStyle = side.color;
+    context.lineWidth = contourWidth;
+    context.setLineDash(side.dash);
+    context.stroke(path);
+    context.restore();
+  }
 }

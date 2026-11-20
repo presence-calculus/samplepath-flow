@@ -173,8 +173,10 @@ reducedMotion.addEventListener("change", () => {
   dirty = true;
 });
 viewSelect.addEventListener("change", () => {
-  blockView = viewSelect.value === "observed" ? "observed" : "full";
+  const mode = viewSelect.value;
+  blockView = mode === "contour" || mode === "observed" ? mode : "full";
   element("block-colors").hidden = blockView !== "full";
+  element("contour-colors").hidden = blockView !== "contour";
   dirty = true;
 });
 
