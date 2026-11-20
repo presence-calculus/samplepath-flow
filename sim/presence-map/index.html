@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore a marked point process as a live presence map and export the result as a GIF.">
+  <meta name="theme-color" content="#f4f6f8">
+  <title>Presence Map Lab</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main>
+    <header class="intro">
+      <div>
+        <h1>Presence Map Lab</h1>
+        <p>Watch marked arrivals fall into strips and trace their presence through time.</p>
+      </div>
+      <div class="header-actions">
+        <button id="settings" type="button">Scenario</button>
+        <button id="share" type="button">Copy link</button>
+        <button id="export" class="primary" type="button">Export GIF</button>
+      </div>
+    </header>
+
+    <section class="board" aria-label="Live presence map">
+      <div class="board-head">
+        <div class="board-title">
+          <h2>Live map</h2>
+          <span id="source" class="source">Simulated arrivals</span>
+        </div>
+        <span id="run-status" class="status"><i></i> Running</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="map" aria-label="Presence map, with time on the horizontal axis and one strip per arrival on the vertical axis" role="img"></canvas>
+        <output id="tooltip" class="tooltip" hidden></output>
+      </div>
+      <div class="controls">
+        <div class="transport">
+          <button id="play" class="dark" type="button">Pause</button>
+          <button id="step" type="button" title="Advance to the next arrival">Next arrival</button>
+          <button id="reset" type="button">Reset</button>
+        </div>
+        <label class="speed">Speed
+          <select id="speed" aria-label="Playback speed">
+            <option value=".25">0.25×</option>
+            <option value=".5">0.5×</option>
+            <option value="1" selected>1×</option>
+            <option value="2">2×</option>
+            <option value="4">4×</option>
+            <option value="8">8×</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <dl class="metrics" aria-label="Current measurements">
+      <div><dt>Time <var>T</var></dt><dd id="time">0.0 <small>s</small></dd></div>
+      <div><dt>Arrivals <var>A(T)</var></dt><dd id="count">0</dd></div>
+      <div><dt>Present now <var>N(T)</var></dt><dd id="present">0</dd></div>
+      <div><dt>Presence mass <var>H(T)</var></dt><dd id="mass">0.0 <small>block·s</small></dd></div>
+    </dl>
+    <p class="geometry">Each block occupies one strip, from its arrival until its marked duration elapses. A vertical slice counts blocks present at that instant. The accumulated area is presence mass.</p>
+    <p id="notice" class="notice" role="status" hidden></p>
+  </main>
+
+  <dialog id="scenario-dialog">
+    <form id="scenario-form">
+      <h2>Scenario</h2>
+      <p>Use repeatable simulated arrivals or load your own marked event stream.</p>
+      <div class="fields">
+        <label>Seed <input id="seed" type="number" min="0" max="4294967295" step="1" required></label>
+        <label>Arrival rate (per second) <input id="rate" type="number" min=".05" max="20" step="any" required></label>
+        <label>Mean duration (seconds) <input id="duration" type="number" min=".1" max="300" step="any" required></label>
+      </div>
+      <div class="actions">
+        <button type="button" data-close="scenario-dialog">Close</button>
+        <button class="primary" type="submit">Run simulation</button>
+      </div>
+      <div class="import">
+        <label for="stream-file">Load marked points (JSON)</label>
+        <p>Use an array of objects sorted by arrival time. Times and durations are in seconds.</p>
+        <code>[{"t":0.5,"duration":3},{"t":2,"duration":1.5}]</code>
+        <input id="stream-file" type="file" accept=".json,application/json">
+      </div>
+      <p id="scenario-error" class="error" role="alert" hidden></p>
+    </form>
+  </dialog>
+
+  <dialog id="export-dialog">
+    <form id="export-form">
+      <h2>Export a GIF</h2>
+      <p>Choose a time interval. The GIF uses one fixed scale so the growth of the map is easy to see.</p>
+      <div class="fields export-fields">
+        <label>Start (seconds) <input id="gif-start" type="number" min="0" step="any" value="0" required></label>
+        <label>End (seconds) <input id="gif-end" type="number" min=".1" step="any" required></label>
+        <label>Width <select id="gif-width"><option value="640">640 px</option><option value="800" selected>800 px</option><option value="960">960 px</option></select></label>
+      </div>
+      <div id="gif-preview" class="preview" hidden><img id="gif-image" alt="Animated preview of the exported presence map"></div>
+      <p id="gif-status" role="status" hidden></p>
+      <div class="actions">
+        <button data-close="export-dialog" type="button">Close</button>
+        <a id="download" class="button primary" download="presence-map.gif" hidden>Download GIF</a>
+        <button id="make-gif" class="primary" type="submit">Make GIF</button>
+      </div>
+    </form>
+  </dialog>
+  <script type="module" src="./src/app.ts"></script>
+</body>
+</html>
