@@ -45,14 +45,15 @@ button:disabled { opacity: .52; cursor: default; }
 .board-head, .controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px; }
 .board-head { border-bottom: 1px solid var(--line); }
 .board-title { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 13px; }
-.source, .status, .speed { color: var(--muted); font-size: .875rem; }
+.source, .status, .view-controls { color: var(--muted); font-size: .875rem; }
 .status { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
 .status i { width: 8px; height: 8px; border-radius: 50%; background: #00806d; }
 .status.paused i { background: #818ea0; }
 .chart-wrap { position: relative; height: clamp(330px, 52vh, 560px); }
 canvas { width: 100%; height: 100%; display: block; }
-.controls { border-top: 1px solid var(--line); }
-.speed { display: flex; align-items: center; gap: 9px; white-space: nowrap; }
+.controls { border-top: 1px solid var(--line); flex-wrap: wrap; }
+.view-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.view-controls label { display: flex; align-items: center; gap: 9px; white-space: nowrap; }
 select { appearance: none; padding-right: 28px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='m1 1 4 4 4-4' fill='none' stroke='%2354657a'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; }
 .metrics { margin: 18px 0 14px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); background: var(--paper); border-radius: 11px; }
 .metrics > div { padding: 13px 18px 14px; min-width: 0; }

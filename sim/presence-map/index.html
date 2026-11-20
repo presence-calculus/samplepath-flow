@@ -40,16 +40,24 @@
           <button id="step" type="button" title="Advance to the next arrival">Next arrival</button>
           <button id="reset" type="button">Reset</button>
         </div>
-        <label class="speed">Speed
-          <select id="speed" aria-label="Playback speed">
-            <option value=".25">0.25×</option>
-            <option value=".5">0.5×</option>
-            <option value="1" selected>1×</option>
-            <option value="2">2×</option>
-            <option value="4">4×</option>
-            <option value="8">8×</option>
-          </select>
-        </label>
+        <div class="view-controls">
+          <label>View
+            <select id="block-view" aria-label="Block view">
+              <option value="full" selected>Full blocks</option>
+              <option value="observed">Observed only</option>
+            </select>
+          </label>
+          <label>Speed
+            <select id="speed" aria-label="Playback speed">
+              <option value=".25">0.25×</option>
+              <option value=".5">0.5×</option>
+              <option value="1" selected>1×</option>
+              <option value="2">2×</option>
+              <option value="4">4×</option>
+              <option value="8">8×</option>
+            </select>
+          </label>
+        </div>
       </div>
     </section>
 
@@ -59,7 +67,7 @@
       <div><dt>Present now <var>N(T)</var></dt><dd id="present">0</dd></div>
       <div><dt>Presence mass <var>H(T)</var></dt><dd id="mass">0.0 <small>block·s</small></dd></div>
     </dl>
-    <p class="geometry">Each block occupies one strip, from its arrival until its marked duration elapses. A vertical slice counts blocks present at that instant. The accumulated area is presence mass.</p>
+    <p class="geometry">Each block occupies one strip, from its arrival until its marked duration elapses. A vertical slice counts blocks present at that instant. The accumulated area is presence mass. <span id="block-colors">Blue shows observed presence. Green shows remaining duration.</span></p>
     <p id="notice" class="notice" role="status" hidden></p>
   </main>
 
@@ -89,7 +97,7 @@
   <dialog id="export-dialog">
     <form id="export-form">
       <h2>Export a GIF</h2>
-      <p>Choose a time interval. The GIF uses one fixed scale so the growth of the map is easy to see.</p>
+      <p>Choose a time interval. The GIF uses the selected block view and a fixed scale.</p>
       <div class="fields export-fields">
         <label>Start (seconds) <input id="gif-start" type="number" min="0" step="any" value="0" required></label>
         <label>End (seconds) <input id="gif-end" type="number" min=".1" step="any" required></label>

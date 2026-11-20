@@ -1,20 +1,31 @@
 import type { PresenceProcess } from "./process.js";
 
 export type View = { horizon: number; lanes: number };
+export type BlockView = "full" | "observed";
 export type Plot = { left: number; top: number; width: number; height: number };
 type Context = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+const green = "#098478";
+const blue = "#78a6dc";
+const dropDuration = 0.35;
 
-export function fitView(t: number, count: number): View {
-  const step = niceStep(Math.max(t, 10) / 8);
+export function fitView(process: PresenceProcess, t: number, count: number, mode: BlockView): View {
+  let extent = t;
+  if (mode === "full") {
+    for (let i = 0; i < count; i++) {
+      extent = Math.max(extent, process.arrivals[i].end);
+    }
+  }
+  const step = niceStep(Math.max(extent, 10) / 8);
   return {
-    horizon: Math.max(12, Math.ceil((t + step * 0.38) / step) * step),
+    horizon: Math.min(Number.MAX_VALUE, Math.max(12, Math.ceil((extent + step * 0.38) / step) * step)),
     lanes: Math.max(8, Math.ceil((count + 2) / 4) * 4),
   };
 }
 
-export function plotBox(width: number, height: number): Plot {
+export function plotBox(width: number, height: number, mode: BlockView): Plot {
   const left = width < 440 ? 42 : 61;
-  return { left, top: 38, width: width - left - 22, height: height - 90 };
+  const top = mode === "full" ? 56 : 38;
+  return { left, top, width: width - left - 22, height: height - top - 52 };
 }
 
 function niceStep(raw: number) {
@@ -30,9 +41,10 @@ export function number(value: number): string {
 
 export function renderChart(
   context: Context, process: PresenceProcess, t: number, view: View, width: number, height: number,
-  options: { cursor?: number; reducedMotion?: boolean; title?: boolean } = {},
+  options: { mode: BlockView; cursor?: number; reducedMotion?: boolean; title?: boolean },
 ) {
-  const plot = plotBox(width, height);
+  const fullBlocks = options.mode === "full";
+  const plot = plotBox(width, height, options.mode);
   const { left, top } = plot;
   const right = left + plot.width;
   const bottom = top + plot.height;
@@ -50,14 +62,17 @@ export function renderChart(
 
   if (width >= 435) {
     context.font = "12px system-ui, sans-serif";
-    context.fillStyle = "#098478";
-    context.fillRect(right - 149, 15, 9, 9);
-    context.fillStyle = "#52677e";
-    context.fillText("Present", right - 135, 19);
-    context.fillStyle = "#78a6dc";
-    context.fillRect(right - 77, 15, 9, 9);
-    context.fillStyle = "#52677e";
-    context.fillText("Departed", right - 63, 19);
+    const labels = fullBlocks ? [[blue, "Observed"], [green, "Remaining"]]
+      : [[green, "Present"], [blue, "Departed"]];
+    let rightEdge = right;
+    for (const [color, label] of labels.reverse()) {
+      const labelX = rightEdge - context.measureText(label).width;
+      context.fillStyle = color;
+      context.fillRect(labelX - 14, 15, 9, 9);
+      context.fillStyle = "#52677e";
+      context.fillText(label, labelX, 19);
+      rightEdge = labelX - 27;
+    }
   }
 
   context.fillStyle = "#52677e";
@@ -101,19 +116,40 @@ export function renderChart(
   for (let i = 0; i < count; i++) {
     const event = process.arrivals[i];
     const leftEdge = x(event.t);
-    const barWidth = x(Math.min(event.end, t)) - leftEdge;
+    const split = x(Math.min(event.end, t));
+    const barWidth = split - leftEdge;
     const center = bottom - (event.strip - 0.5) * laneHeight;
+    const age = t - event.t;
+    const dropping = !options.reducedMotion && age < dropDuration;
+
+    if (fullBlocks) {
+      const entryCenter = top + barHeight / 2;
+      const blockCenter = dropping
+        ? entryCenter + (age / dropDuration) ** 2 * (center - entryCenter)
+        : center;
+      const blockTop = blockCenter - barHeight / 2;
+      const remainingWidth = x(event.end) - split;
+      if (barWidth > 0) {
+        context.fillStyle = blue;
+        context.fillRect(leftEdge, blockTop, barWidth, barHeight);
+      }
+      if (remainingWidth > 0) {
+        context.fillStyle = green;
+        context.fillRect(split, blockTop, remainingWidth, barHeight);
+      }
+      continue;
+    }
+
     const active = t < event.end;
-    context.fillStyle = active ? "#098478" : "#78a6dc";
+    context.fillStyle = active ? green : blue;
     if (barWidth > 0) {
       context.fillRect(leftEdge, center - barHeight / 2, barWidth, barHeight);
     } else if (options.reducedMotion) {
       context.fillRect(leftEdge - 1, center - barHeight / 2, 2, barHeight);
     }
 
-    const age = t - event.t;
-    if (!options.reducedMotion && age < 0.35) {
-      const progress = age / 0.35;
+    if (dropping) {
+      const progress = age / dropDuration;
       const eased = progress * progress;
       drops.push({
         center: top + barHeight / 2 + eased * (center - top - barHeight / 2),
@@ -147,9 +183,10 @@ export function renderChart(
   context.font = "600 12px system-ui, sans-serif";
   const labelWidth = context.measureText(nowLabel).width + 14;
   const labelX = Math.min(right - labelWidth, Math.max(left, now - labelWidth / 2));
+  const labelY = fullBlocks ? top - 23 : top + 5;
   context.fillStyle = "#e9f1ff";
-  context.fillRect(labelX, top + 5, labelWidth, 20);
+  context.fillRect(labelX, labelY, labelWidth, 20);
   context.fillStyle = "#184d9b";
   context.textAlign = "center";
-  context.fillText(nowLabel, labelX + labelWidth / 2, top + 15);
+  context.fillText(nowLabel, labelX + labelWidth / 2, labelY + 10);
 }

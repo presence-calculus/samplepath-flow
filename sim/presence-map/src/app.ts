@@ -1,4 +1,4 @@
-import { fitView, number, plotBox, renderChart } from "./chart.js";
+import { fitView, number, plotBox, renderChart, type BlockView } from "./chart.js";
 import { defaultScenario, fromJson, PresenceProcess, simulation, type Scenario } from "./process.js";
 
 function element<T extends HTMLElement = HTMLElement>(id: string): T {
@@ -15,6 +15,7 @@ const play = element<HTMLButtonElement>("play");
 const next = element<HTMLButtonElement>("step");
 const source = element("source");
 const speed = element<HTMLSelectElement>("speed");
+const viewSelect = element<HTMLSelectElement>("block-view");
 const runStatus = element("run-status");
 const timeOutput = element("time").firstChild!;
 const countOutput = element("count");
@@ -25,6 +26,7 @@ const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 let scenario: Scenario = readScenario();
 let process = new PresenceProcess(scenario);
 let time = 0;
+let blockView: BlockView = "full";
 let running = !reducedMotion.matches;
 let previousFrame: number | undefined;
 let previousDraw = -Infinity;
@@ -83,8 +85,8 @@ function draw() {
 
   process.ensureAhead(time);
   const count = process.countAt(time);
-  const view = fitView(time, count);
-  const plot = plotBox(width, height);
+  const view = fitView(process, time, count, blockView);
+  const plot = plotBox(width, height, blockView);
   let slice: number | undefined;
   if (cursor && cursor.x >= plot.left && cursor.x <= plot.left + plot.width &&
       cursor.y >= plot.top && cursor.y <= plot.top + plot.height) {
@@ -92,6 +94,7 @@ function draw() {
     if (t <= time) slice = t;
   }
   renderChart(context, process, time, view, width, height, {
+    mode: blockView,
     cursor: slice,
     reducedMotion: reducedMotion.matches || !running && process.arrivals[count - 1]?.t === time,
   });
@@ -150,6 +153,11 @@ canvas.addEventListener("pointermove", event => {
 canvas.addEventListener("pointerleave", () => { cursor = undefined; dirty = true; });
 new ResizeObserver(() => { dirty = true; }).observe(canvas);
 reducedMotion.addEventListener("change", () => { dirty = true; });
+viewSelect.addEventListener("change", () => {
+  blockView = viewSelect.value === "observed" ? "observed" : "full";
+  element("block-colors").hidden = blockView !== "full";
+  dirty = true;
+});
 
 play.addEventListener("click", () => {
   running = !running;
@@ -298,7 +306,7 @@ element("export-form").addEventListener("submit", event => {
       gifStatus("GIF rendering could not start in this browser.");
       finish();
     };
-    worker.postMessage({ scenario, start, end, width });
+    worker.postMessage({ scenario, start, end, width, mode: blockView });
   } catch {
     gifStatus("GIF rendering could not start in this browser.");
     finish();
