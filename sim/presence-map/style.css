@@ -69,7 +69,12 @@ dialog::backdrop { background: #17294366; }
 dialog p { color: var(--muted); margin: 8px 0 14px; font-size: .93rem; }
 dialog .actions { justify-content: flex-end; margin-top: 16px; }
 .fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.scenario-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .fields label, .import label { display: grid; gap: 5px; font-size: .875rem; font-weight: 650; }
+.rate-field { grid-column: 1 / -1; margin-top: 4px; }
+.rate-label, .rate-limits { display: flex; justify-content: space-between; gap: 8px; }
+.rate-label output, .rate-limits { color: var(--muted); font-size: .875rem; font-variant-numeric: tabular-nums; }
+.rate-field input { display: block; width: 100%; min-height: 28px; margin: 2px 0 0; accent-color: var(--blue); }
 input[type="number"] { min-width: 0; width: 100%; padding: 7px 9px; border: 1px solid #cbd7e3; border-radius: 7px; background: var(--paper); }
 .import { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 16px; }
 .import p { margin: 4px 0 7px; }

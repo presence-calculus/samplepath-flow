@@ -16,6 +16,8 @@ const next = element<HTMLButtonElement>("step");
 const source = element("source");
 const speed = element<HTMLSelectElement>("speed");
 const viewSelect = element<HTMLSelectElement>("block-view");
+const rateInput = element<HTMLInputElement>("rate");
+const rateOutput = element<HTMLOutputElement>("rate-value");
 const runStatus = element("run-status");
 const timeOutput = element("time").firstChild!;
 const countOutput = element("count");
@@ -195,10 +197,22 @@ document.querySelectorAll<HTMLButtonElement>("[data-close]").forEach(button => {
   button.addEventListener("click", () => element<HTMLDialogElement>(button.dataset.close!).close());
 });
 
+function showRate() {
+  const text = `${rateInput.valueAsNumber} arrivals/s`;
+  rateOutput.value = text;
+  rateInput.setAttribute("aria-valuetext", text);
+}
+
+rateInput.addEventListener("input", () => {
+  rateInput.value = rateInput.valueAsNumber.toFixed(2);
+  showRate();
+});
+
 element("settings").addEventListener("click", () => {
   const settings = scenario.kind === "simulation" ? scenario : defaultScenario;
   element<HTMLInputElement>("seed").value = String(settings.seed);
-  element<HTMLInputElement>("rate").value = String(settings.rate);
+  rateInput.value = String(settings.rate);
+  showRate();
   element<HTMLInputElement>("duration").value = String(settings.mean);
   element("scenario-error").hidden = true;
   scenarioDialog.showModal();
@@ -215,7 +229,7 @@ element("scenario-form").addEventListener("submit", event => {
   try {
     useScenario(simulation(
       element<HTMLInputElement>("seed").valueAsNumber,
-      element<HTMLInputElement>("rate").valueAsNumber,
+      rateInput.valueAsNumber,
       element<HTMLInputElement>("duration").valueAsNumber,
     ));
   } catch (error) {

@@ -75,10 +75,17 @@
     <form id="scenario-form">
       <h2>Scenario</h2>
       <p>Use repeatable simulated arrivals or load your own marked event stream.</p>
-      <div class="fields">
+      <div class="fields scenario-fields">
         <label>Seed <input id="seed" type="number" min="0" max="4294967295" step="1" required></label>
-        <label>Arrival rate (per second) <input id="rate" type="number" min=".05" max="20" step="any" required></label>
         <label>Mean duration (seconds) <input id="duration" type="number" min=".1" max="300" step="any" required></label>
+        <div class="rate-field">
+          <div class="rate-label">
+            <label for="rate">Arrival rate</label>
+            <output id="rate-value" for="rate">1.15 arrivals/s</output>
+          </div>
+          <input id="rate" type="range" min="0.05" max="20" step="any" value="1.15">
+          <div class="rate-limits" aria-hidden="true"><span>0.05</span><span>20</span></div>
+        </div>
       </div>
       <div class="actions">
         <button type="button" data-close="scenario-dialog">Close</button>
