@@ -212,13 +212,17 @@ def publication_api(**kwargs: Any) -> Api:
 
 def main(argv: list[str] | None = None) -> int:
     """Load local settings and delegate arguments, errors, and prompts to the CLI."""
+    arguments = list(argv if argv is not None else sys.argv[1:])
+    if arguments and arguments[0] == "table":
+        from table_renderer import main as table_main
+
+        return table_main(arguments[1:])
     load_dotenv(Path(__file__).with_name(".env"))
     # Settings were loaded explicitly; prevent the CLI from finding a parent .env.
     os.environ["PYTHON_DOTENV_DISABLED"] = "1"
     original_api = cli.Api
     cli.Api = publication_api
     try:
-        arguments = list(argv if argv is not None else sys.argv[1:])
         try:
             arguments = metadata_arguments(arguments)
         except (OSError, ValueError) as exc:
