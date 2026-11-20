@@ -1,5 +1,6 @@
 export type MarkedPoint = { t: number; duration: number };
 export type Arrival = MarkedPoint & { strip: number; end: number };
+export type PresenceStep = { t: number; present: number };
 
 export type Simulation = { kind: "simulation"; seed: number; rate: number; mean: number };
 export type Scenario = Simulation | { kind: "file"; events: MarkedPoint[] };
@@ -46,6 +47,7 @@ export class PresenceProcess {
   readonly arrivals: Arrival[] = [];
   readonly scenario: Scenario;
   private readonly random: () => number;
+  private presenceHistory?: { arrivalCount: number; steps: PresenceStep[] };
 
   constructor(scenario: Scenario) {
     this.scenario = scenario;
@@ -88,6 +90,27 @@ export class PresenceProcess {
   nextAfter(t: number): Arrival | undefined {
     this.ensureAhead(t);
     return this.arrivals[this.countAt(t)];
+  }
+
+  presenceSteps(arrivalCount: number): readonly PresenceStep[] {
+    if (this.presenceHistory?.arrivalCount === arrivalCount) return this.presenceHistory.steps;
+
+    const changes = new Map<number, number>();
+    for (let i = 0; i < arrivalCount; i++) {
+      const { t, end } = this.arrivals[i];
+      changes.set(t, (changes.get(t) ?? 0) + 1);
+      changes.set(end, (changes.get(end) ?? 0) - 1);
+    }
+
+    const steps: PresenceStep[] = [];
+    let present = 0;
+    for (const [t, change] of [...changes].sort(([a], [b]) => a - b)) {
+      if (change === 0) continue;
+      present += change;
+      steps.push({ t, present });
+    }
+    this.presenceHistory = { arrivalCount, steps };
+    return steps;
   }
 
   measure(t: number, count = this.countAt(t)) {

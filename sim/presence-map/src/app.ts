@@ -16,6 +16,7 @@ const next = element<HTMLButtonElement>("step");
 const source = element("source");
 const speed = element<HTMLSelectElement>("speed");
 const viewSelect = element<HTMLSelectElement>("block-view");
+const showPresence = element<HTMLInputElement>("show-presence");
 const rateInput = element<HTMLInputElement>("rate");
 const rateOutput = element<HTMLOutputElement>("rate-value");
 const runStatus = element("run-status");
@@ -89,8 +90,9 @@ function draw(stepDropAge?: number) {
 
   process.ensureAhead(time);
   const count = process.countAt(time);
-  const view = fitView(process, time, count, blockView);
-  const plot = plotBox(width, height, blockView);
+  const presenceSteps = showPresence.checked ? process.presenceSteps(count) : undefined;
+  const view = fitView(process, time, count, blockView, presenceSteps);
+  const plot = plotBox(width, height, blockView, view);
   let slice: number | undefined;
   if (cursor && cursor.x >= plot.left && cursor.x <= plot.left + plot.width &&
       cursor.y >= plot.top && cursor.y <= plot.top + plot.height) {
@@ -100,6 +102,7 @@ function draw(stepDropAge?: number) {
   renderChart(context, process, time, view, width, height, {
     mode: blockView,
     cursor: slice,
+    presenceSteps,
     stepDropAge,
     reducedMotion: reducedMotion.matches ||
       (!running && stepDropAge === undefined && process.arrivals[count - 1]?.t === time),
@@ -117,11 +120,14 @@ function draw(stepDropAge?: number) {
 
   if (cursor && slice !== undefined) {
     const { present } = process.measure(slice);
-    const strip = Math.min(view.lanes, Math.floor((plot.top + plot.height - cursor.y) / plot.height * view.lanes) + 1);
-    const event = process.arrivals[strip - 1];
-    const detail = event && slice >= event.t && slice < event.end
-      ? `\nStrip ${strip} · ${number(event.t)}–${number(event.end)} s`
-      : "";
+    let detail = "";
+    if (cursor.y <= plot.baseline) {
+      const strip = Math.min(view.lanes, Math.floor((plot.baseline - cursor.y) / plot.laneHeight) + 1);
+      const event = process.arrivals[strip - 1];
+      if (event && slice >= event.t && slice < event.end) {
+        detail = `\nStrip ${strip} · ${number(event.t)}–${number(event.end)} s`;
+      }
+    }
     tooltip.textContent = `t = ${number(slice)} s · N(t) = ${present}${detail}`;
     tooltip.hidden = false;
     tooltip.style.left = `${Math.max(4, Math.min(cursor.x + 13, width - tooltip.offsetWidth - 6))}px`;
@@ -177,6 +183,10 @@ viewSelect.addEventListener("change", () => {
   blockView = mode === "contour" || mode === "observed" ? mode : "full";
   element("block-colors").hidden = blockView !== "full";
   element("contour-colors").hidden = blockView !== "contour";
+  dirty = true;
+});
+showPresence.addEventListener("change", () => {
+  element("presence-comparison").hidden = !showPresence.checked;
   dirty = true;
 });
 
@@ -341,7 +351,7 @@ element("export-form").addEventListener("submit", event => {
       gifStatus("GIF rendering could not start in this browser.");
       finish();
     };
-    worker.postMessage({ scenario, start, end, width, mode: blockView });
+    worker.postMessage({ scenario, start, end, width, mode: blockView, showPresence: showPresence.checked });
   } catch {
     gifStatus("GIF rendering could not start in this browser.");
     finish();
