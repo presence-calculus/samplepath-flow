@@ -1,4 +1,4 @@
-import { fitView, number, plotBox, renderChart, type BlockView } from "./chart.js";
+import { dropDuration, fitView, number, plotBox, renderChart, type BlockView } from "./chart.js";
 import { defaultScenario, fromJson, PresenceProcess, simulation, type Scenario } from "./process.js";
 
 function element<T extends HTMLElement = HTMLElement>(id: string): T {
@@ -28,6 +28,7 @@ let process = new PresenceProcess(scenario);
 let time = 0;
 let blockView: BlockView = "full";
 let running = !reducedMotion.matches;
+let stepDropStartedAt: number | undefined;
 let previousFrame: number | undefined;
 let previousDraw = -Infinity;
 let lastMetrics = -Infinity;
@@ -60,6 +61,7 @@ function syncControls() {
 function reset() {
   process = new PresenceProcess(scenario);
   time = 0;
+  stepDropStartedAt = undefined;
   syncControls();
 }
 
@@ -71,7 +73,7 @@ function useScenario(value: Scenario) {
   scenarioDialog.close();
 }
 
-function draw() {
+function draw(stepDropAge?: number) {
   const { width, height } = canvas.getBoundingClientRect();
   if (width < 1 || height < 1) return;
   const dpr = window.devicePixelRatio || 1;
@@ -96,7 +98,9 @@ function draw() {
   renderChart(context, process, time, view, width, height, {
     mode: blockView,
     cursor: slice,
-    reducedMotion: reducedMotion.matches || !running && process.arrivals[count - 1]?.t === time,
+    stepDropAge,
+    reducedMotion: reducedMotion.matches ||
+      (!running && stepDropAge === undefined && process.arrivals[count - 1]?.t === time),
   });
 
   if (performance.now() - lastMetrics > 100 || dirty) {
@@ -131,8 +135,18 @@ function tick(timestamp: number) {
     time += Math.min(0.1, (timestamp - previousFrame) / 1000) * Number(speed.value);
   }
   previousFrame = timestamp;
-  if (dirty || (running && timestamp - previousDraw >= 25)) {
-    draw();
+  let stepDropAge: number | undefined;
+  if (stepDropStartedAt !== undefined) {
+    const elapsed = Math.max(0, (timestamp - stepDropStartedAt) / 1000);
+    if (elapsed < dropDuration) {
+      stepDropAge = elapsed;
+    } else {
+      stepDropStartedAt = undefined;
+      dirty = true;
+    }
+  }
+  if (dirty || ((running || stepDropAge !== undefined) && timestamp - previousDraw >= 25)) {
+    draw(stepDropAge);
     previousDraw = timestamp;
   }
   requestAnimationFrame(tick);
@@ -152,7 +166,10 @@ canvas.addEventListener("pointermove", event => {
 });
 canvas.addEventListener("pointerleave", () => { cursor = undefined; dirty = true; });
 new ResizeObserver(() => { dirty = true; }).observe(canvas);
-reducedMotion.addEventListener("change", () => { dirty = true; });
+reducedMotion.addEventListener("change", () => {
+  if (reducedMotion.matches) stepDropStartedAt = undefined;
+  dirty = true;
+});
 viewSelect.addEventListener("change", () => {
   blockView = viewSelect.value === "observed" ? "observed" : "full";
   element("block-colors").hidden = blockView !== "full";
@@ -161,6 +178,7 @@ viewSelect.addEventListener("change", () => {
 
 play.addEventListener("click", () => {
   running = !running;
+  stepDropStartedAt = undefined;
   syncControls();
 });
 next.addEventListener("click", () => {
@@ -168,6 +186,7 @@ next.addEventListener("click", () => {
   if (!arrival) return;
   time = arrival.t;
   running = false;
+  stepDropStartedAt = reducedMotion.matches ? undefined : performance.now();
   syncControls();
 });
 element("reset").addEventListener("click", reset);

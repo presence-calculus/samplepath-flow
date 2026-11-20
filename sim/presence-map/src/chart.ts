@@ -6,7 +6,7 @@ export type Plot = { left: number; top: number; width: number; height: number };
 type Context = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 const green = "#098478";
 const blue = "#78a6dc";
-const dropDuration = 0.35;
+export const dropDuration = 0.35;
 
 export function fitView(process: PresenceProcess, t: number, count: number, mode: BlockView): View {
   let extent = t;
@@ -41,7 +41,7 @@ export function number(value: number): string {
 
 export function renderChart(
   context: Context, process: PresenceProcess, t: number, view: View, width: number, height: number,
-  options: { mode: BlockView; cursor?: number; reducedMotion?: boolean; title?: boolean },
+  options: { mode: BlockView; cursor?: number; reducedMotion?: boolean; stepDropAge?: number; title?: boolean },
 ) {
   const fullBlocks = options.mode === "full";
   const plot = plotBox(width, height, options.mode);
@@ -119,7 +119,10 @@ export function renderChart(
     const split = x(Math.min(event.end, t));
     const barWidth = split - leftEdge;
     const center = bottom - (event.strip - 0.5) * laneHeight;
-    const age = t - event.t;
+    let age = t - event.t;
+    if (options.stepDropAge !== undefined) {
+      age = event.t === t ? options.stepDropAge : dropDuration;
+    }
     const dropping = !options.reducedMotion && age < dropDuration;
 
     if (fullBlocks) {
