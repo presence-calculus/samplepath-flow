@@ -5,7 +5,7 @@ export type BlockView = "full" | "observed";
 export type Plot = { left: number; top: number; width: number; height: number };
 type Context = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 const green = "#098478";
-const blue = "#78a6dc";
+const blue = "#264e80";
 export const dropDuration = 0.35;
 
 export function fitView(process: PresenceProcess, t: number, count: number, mode: BlockView): View {
