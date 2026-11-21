@@ -1,0 +1,12 @@
+title: Where work is waiting
+subtitle: An illustrative WIP snapshot
+note: Illustrative data. Age is time since entering the stage.
+
+columns:
+  Stage:
+    width: 45%
+  WIP:
+    width: 20%
+  Median age (days):
+    width: 35%
+    decimals: 1
