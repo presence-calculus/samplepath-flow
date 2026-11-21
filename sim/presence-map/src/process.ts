@@ -1,5 +1,5 @@
 export type MarkedPoint = { t: number; duration: number };
-export type Arrival = MarkedPoint & { strip: number; end: number };
+export type Arrival = MarkedPoint & { strip: number; end: number; cumulativeSojourn: number };
 export type PresenceStep = { t: number; present: number };
 
 export type Simulation = { kind: "simulation"; seed: number; rate: number; mean: number };
@@ -43,6 +43,10 @@ function randomGenerator(seed: number) {
   };
 }
 
+function observedDuration(point: MarkedPoint, t: number): number {
+  return Math.min(t - point.t, point.duration);
+}
+
 export class PresenceProcess {
   readonly arrivals: Arrival[] = [];
   readonly scenario: Scenario;
@@ -60,7 +64,8 @@ export class PresenceProcess {
   }
 
   private append(point: MarkedPoint) {
-    this.arrivals.push({ ...point, end: point.t + point.duration, strip: this.arrivals.length + 1 });
+    const cumulativeSojourn = (this.arrivals.at(-1)?.cumulativeSojourn ?? 0) + point.duration;
+    this.arrivals.push({ ...point, end: point.t + point.duration, strip: this.arrivals.length + 1, cumulativeSojourn });
   }
 
   private generateNext() {
@@ -113,13 +118,23 @@ export class PresenceProcess {
     return steps;
   }
 
+  cumulativeObservedSojourns(t: number, count = this.countAt(t)): number[] {
+    const totals: number[] = [];
+    let observed = 0;
+    for (let i = 0; i < count; i++) {
+      observed += observedDuration(this.arrivals[i], t);
+      totals.push(observed);
+    }
+    return totals;
+  }
+
   measure(t: number, count = this.countAt(t)) {
     let present = 0;
     let mass = 0;
     for (let index = 0; index < count; index++) {
       const point = this.arrivals[index];
       if (t < point.end) present++;
-      mass += Math.min(t - point.t, point.duration);
+      mass += observedDuration(point, t);
     }
     return { present, mass };
   }

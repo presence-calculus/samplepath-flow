@@ -17,6 +17,7 @@ const source = element("source");
 const speed = element<HTMLSelectElement>("speed");
 const viewSelect = element<HTMLSelectElement>("block-view");
 const showPresence = element<HTMLInputElement>("show-presence");
+const showSojourn = element<HTMLInputElement>("show-sojourn");
 const rateInput = element<HTMLInputElement>("rate");
 const rateOutput = element<HTMLOutputElement>("rate-value");
 const runStatus = element("run-status");
@@ -91,18 +92,20 @@ function draw(stepDropAge?: number) {
   process.ensureAhead(time);
   const count = process.countAt(time);
   const presenceSteps = showPresence.checked ? process.presenceSteps(count) : undefined;
-  const view = fitView(process, time, count, blockView, presenceSteps);
+  const cumulativeObservedSojourns = showSojourn.checked ? process.cumulativeObservedSojourns(time, count) : undefined;
+  const view = fitView(process, time, count, blockView, presenceSteps, showSojourn.checked);
   const plot = plotBox(width, height, blockView, view);
   let slice: number | undefined;
-  if (cursor && cursor.x >= plot.left && cursor.x <= plot.left + plot.width &&
+  if (cursor && cursor.x >= plot.origin && cursor.x <= plot.left + plot.width &&
       cursor.y >= plot.top && cursor.y <= plot.top + plot.height) {
-    const t = (cursor.x - plot.left) / plot.width * view.horizon;
+    const t = (cursor.x - plot.origin) / plot.timeWidth * view.horizon;
     if (t <= time) slice = t;
   }
   renderChart(context, process, time, view, width, height, {
     mode: blockView,
     cursor: slice,
     presenceSteps,
+    cumulativeObservedSojourns,
     stepDropAge,
     reducedMotion: reducedMotion.matches ||
       (!running && stepDropAge === undefined && process.arrivals[count - 1]?.t === time),
@@ -118,17 +121,28 @@ function draw(stepDropAge?: number) {
     lastMetrics = performance.now();
   }
 
-  if (cursor && slice !== undefined) {
-    const { present } = process.measure(slice);
-    let detail = "";
-    if (cursor.y <= plot.baseline) {
-      const strip = Math.min(view.lanes, Math.floor((plot.baseline - cursor.y) / plot.laneHeight) + 1);
-      const event = process.arrivals[strip - 1];
+  let tooltipText = "";
+  if (cursor) {
+    const onStrip = cursor.y >= plot.top && cursor.y <= plot.baseline;
+    const strip = onStrip ? Math.min(view.lanes, Math.floor((plot.baseline - cursor.y) / plot.laneHeight) + 1) : 0;
+    const event = process.arrivals[strip - 1];
+    if (slice !== undefined) {
+      const { present } = process.measure(slice);
+      tooltipText = `t = ${number(slice)} s · N(t) = ${present}`;
       if (event && slice >= event.t && slice < event.end) {
-        detail = `\nStrip ${strip} · ${number(event.t)}–${number(event.end)} s`;
+        tooltipText += `\nStrip ${strip} · ${number(event.t)}–${number(event.end)} s`;
+      }
+    } else if (cumulativeObservedSojourns && event && event.t <= time && cursor.x >= plot.left && cursor.x < plot.origin) {
+      const duration = (plot.origin - cursor.x) / (plot.origin - plot.left) * view.sojournHorizon;
+      if (duration <= event.cumulativeSojourn) {
+        const observed = cumulativeObservedSojourns[strip - 1];
+        tooltipText = `Strip ${strip} · ${number(event.cumulativeSojourn)} s cumulative sojourn` +
+          `\n${number(observed)} s observed through this strip`;
       }
     }
-    tooltip.textContent = `t = ${number(slice)} s · N(t) = ${present}${detail}`;
+  }
+  if (cursor && tooltipText) {
+    tooltip.textContent = tooltipText;
     tooltip.hidden = false;
     tooltip.style.left = `${Math.max(4, Math.min(cursor.x + 13, width - tooltip.offsetWidth - 6))}px`;
     tooltip.style.top = `${Math.max(4, Math.min(cursor.y + 13, height - tooltip.offsetHeight - 6))}px`;
@@ -187,6 +201,10 @@ viewSelect.addEventListener("change", () => {
 });
 showPresence.addEventListener("change", () => {
   element("presence-comparison").hidden = !showPresence.checked;
+  dirty = true;
+});
+showSojourn.addEventListener("change", () => {
+  element("sojourn-comparison").hidden = !showSojourn.checked;
   dirty = true;
 });
 
@@ -351,7 +369,10 @@ element("export-form").addEventListener("submit", event => {
       gifStatus("GIF rendering could not start in this browser.");
       finish();
     };
-    worker.postMessage({ scenario, start, end, width, mode: blockView, showPresence: showPresence.checked });
+    worker.postMessage({
+      scenario, start, end, width, mode: blockView,
+      showPresence: showPresence.checked, showSojourn: showSojourn.checked,
+    });
   } catch {
     gifStatus("GIF rendering could not start in this browser.");
     finish();

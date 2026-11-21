@@ -59,6 +59,7 @@
             </select>
           </label>
           <label><input id="show-presence" type="checkbox"> Show −N(t)</label>
+          <label><input id="show-sojourn" type="checkbox"> Show W(t)</label>
         </div>
       </div>
     </section>
@@ -70,6 +71,7 @@
       <div><dt>Presence mass <var>H(T)</var></dt><dd id="mass">0.0 <small>block·s</small></dd></div>
     </dl>
     <p class="geometry">Each block occupies one strip, from its arrival until its marked duration elapses. A vertical slice counts blocks present at that instant. The accumulated area is presence mass. <span id="block-colors">Blue shows observed presence. Green shows remaining duration.</span> <span id="contour-colors" hidden>Solid blue shows observed presence. Dashed green shows remaining duration.</span> <span id="presence-comparison" hidden>The area below zero equals the observed presence mass above.</span></p>
+    <p id="sojourn-comparison" class="geometry" hidden>Left of zero, each bar adds up the sojourns through that strip. Blue shows time already observed, and green shows time remaining. The top blue bar shows total presence mass.</p>
     <p id="notice" class="notice" role="status" hidden></p>
   </main>
 
