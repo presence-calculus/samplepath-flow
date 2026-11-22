@@ -279,12 +279,14 @@ export function renderChart(
     const center = baseline - (event.strip - 0.5) * laneHeight;
     if (cumulativeObservedSojourns) {
       const fullStart = sojournX(event.cumulativeSojourn);
-      const observedStart = sojournX(cumulativeObservedSojourns[i]);
       const stripTop = center - laneHeight / 2;
       context.fillStyle = green;
       context.fillRect(fullStart, stripTop, origin - fullStart, laneHeight);
-      context.fillStyle = blue;
-      context.fillRect(observedStart, stripTop, origin - observedStart, laneHeight);
+      if (colorObserved) {
+        const observedStart = sojournX(cumulativeObservedSojourns[i]);
+        context.fillStyle = blue;
+        context.fillRect(observedStart, stripTop, origin - observedStart, laneHeight);
+      }
     }
     let age = t - event.t;
     if (options.stepDropAge !== undefined) {

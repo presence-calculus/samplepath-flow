@@ -229,6 +229,7 @@ reducedMotion.addEventListener("change", () => {
 });
 function syncColorNotes() {
   element("block-colors").hidden = blockView !== "full" || !colorObserved.checked;
+  element("sojourn-colors").hidden = !colorObserved.checked;
   const contourColors = element("contour-colors");
   contourColors.hidden = blockView !== "contour";
   contourColors.textContent = colorObserved.checked
