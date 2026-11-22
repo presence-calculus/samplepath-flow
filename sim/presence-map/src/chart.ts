@@ -75,13 +75,13 @@ export function number(value: number): string {
 export function renderChart(
   context: Context, process: PresenceProcess, t: number, view: View, width: number, height: number,
   options: {
-    mode: BlockView; cursor?: number; reducedMotion?: boolean; stepDropAge?: number;
+    mode: BlockView; colorObserved?: boolean; cursor?: number; reducedMotion?: boolean; stepDropAge?: number;
     title?: boolean; presenceSteps?: readonly PresenceStep[]; cumulativeObservedSojourns?: readonly number[];
   },
 ) {
   const fullBlocks = options.mode !== "observed";
   const contour = options.mode === "contour";
-  const { presenceSteps, cumulativeObservedSojourns } = options;
+  const { colorObserved = true, presenceSteps, cumulativeObservedSojourns } = options;
   const showSojourn = cumulativeObservedSojourns !== undefined;
   const compareAreas = Boolean(presenceSteps || showSojourn);
   const plot = plotBox(width, height, options.mode, view);
@@ -102,19 +102,23 @@ export function renderChart(
 
   if (width >= 435 || presenceSteps) {
     context.font = "12px system-ui, sans-serif";
-    const blockLabels = fullBlocks || showSojourn ? [[blue, "Observed"], [green, "Remaining"]]
-      : [[green, "Present"], [blue, "Departed"]];
-    const labels = width >= 435 ? blockLabels : [];
+    const labels: [color: string, label: string, dashed?: boolean][] = [];
+    if (width >= 435) {
+      if (contour) labels.push([colorObserved ? blue : green, "Observed"], [green, "Remaining", true]);
+      else if (!colorObserved) labels.push([green, fullBlocks ? "Full duration" : "Observed"]);
+      else if (fullBlocks) labels.push([blue, "Observed"], [green, "Remaining"]);
+      else labels.push([green, "Present"], [blue, "Departed"]);
+    }
     if (presenceSteps) labels.push([presenceColor, "−N(t)"]);
     let rightEdge = right;
-    for (const [color, label] of labels.reverse()) {
+    for (const [color, label, dashed] of labels.reverse()) {
       const labelX = rightEdge - context.measureText(label).width;
       const lineSample = contour || color === presenceColor;
       if (lineSample) {
         context.save();
         context.strokeStyle = color;
         context.lineWidth = contourWidth;
-        context.setLineDash(contour && color === green ? remainingDash : []);
+        context.setLineDash(dashed ? remainingDash : []);
         context.beginPath();
         context.moveTo(labelX - 22, 19);
         context.lineTo(labelX - 5, 19);
@@ -254,20 +258,21 @@ export function renderChart(
         ? entryCenter + easing * (center - entryCenter)
         : center;
       const blockTop = blockCenter - barHeight / 2;
-      const remainingWidth = x(event.end) - split;
-      if (barWidth > 0) {
+      const greenStart = colorObserved ? split : leftEdge;
+      const greenWidth = x(event.end) - greenStart;
+      if (colorObserved && barWidth > 0) {
         context.fillStyle = blue;
         context.fillRect(leftEdge, blockTop, barWidth, barHeight);
       }
-      if (remainingWidth > 0) {
+      if (greenWidth > 0) {
         context.fillStyle = green;
-        context.fillRect(split, blockTop, remainingWidth, barHeight);
+        context.fillRect(greenStart, blockTop, greenWidth, barHeight);
       }
       continue;
     }
 
     const active = t < event.end;
-    context.fillStyle = active && !showSojourn ? green : blue;
+    context.fillStyle = colorObserved && !active ? blue : green;
     if (barWidth > 0) {
       context.fillRect(leftEdge, center - barHeight / 2, barWidth, barHeight);
     } else if (options.reducedMotion && !compareAreas) {
@@ -282,9 +287,9 @@ export function renderChart(
       });
     }
   }
-  if (outlines.length) strokeContour(context, outlines, now, plot);
+  if (outlines.length) strokeContour(context, outlines, now, plot, colorObserved ? blue : green);
   context.save();
-  context.fillStyle = "#185dcb";
+  context.fillStyle = colorObserved ? "#185dcb" : green;
   context.strokeStyle = "#9eafc3";
   context.setLineDash([3, 3]);
   for (const drop of drops) {
@@ -354,7 +359,7 @@ function drawPresenceMirror(
   context.restore();
 }
 
-function strokeContour(context: Context, blocks: OutlineBlock[], now: number, plot: Plot) {
+function strokeContour(context: Context, blocks: OutlineBlock[], now: number, plot: Plot, observedColor: string) {
   const path = new Path2D();
   for (let start = 0; start < blocks.length;) {
     // Consecutive arrivals occupy adjacent strips. Join only landed blocks with overlapping times.
@@ -382,7 +387,7 @@ function strokeContour(context: Context, blocks: OutlineBlock[], now: number, pl
   // Stroke the same perimeter on both sides, so the sweep adds no edge to the shape.
   const padding = contourWidth / 2;
   const sides = [
-    { left: plot.origin - padding, right: now, color: blue, dash: [] },
+    { left: plot.origin - padding, right: now, color: observedColor, dash: [] },
     { left: now, right: plot.left + plot.width + padding, color: green, dash: remainingDash },
   ];
   for (const side of sides) {

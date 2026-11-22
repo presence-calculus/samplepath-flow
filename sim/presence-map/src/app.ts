@@ -16,6 +16,7 @@ const next = element<HTMLButtonElement>("step");
 const source = element("source");
 const speed = element<HTMLSelectElement>("speed");
 const viewSelect = element<HTMLSelectElement>("block-view");
+const colorObserved = element<HTMLInputElement>("color-observed");
 const showPresence = element<HTMLInputElement>("show-presence");
 const showSojourn = element<HTMLInputElement>("show-sojourn");
 const rateInput = element<HTMLInputElement>("rate");
@@ -103,6 +104,7 @@ function draw(stepDropAge?: number) {
   }
   renderChart(context, process, time, view, width, height, {
     mode: blockView,
+    colorObserved: colorObserved.checked,
     cursor: slice,
     presenceSteps,
     cumulativeObservedSojourns,
@@ -192,13 +194,22 @@ reducedMotion.addEventListener("change", () => {
   if (reducedMotion.matches) stepDropStartedAt = undefined;
   dirty = true;
 });
+function syncColorNotes() {
+  element("block-colors").hidden = blockView !== "full" || !colorObserved.checked;
+  const contourColors = element("contour-colors");
+  contourColors.hidden = blockView !== "contour";
+  contourColors.textContent = colorObserved.checked
+    ? "Solid blue shows observed presence. Dashed green shows remaining duration."
+    : "Solid strokes show observed presence. Dashed strokes show remaining duration.";
+  dirty = true;
+}
+
 viewSelect.addEventListener("change", () => {
   const mode = viewSelect.value;
   blockView = mode === "contour" || mode === "observed" ? mode : "full";
-  element("block-colors").hidden = blockView !== "full";
-  element("contour-colors").hidden = blockView !== "contour";
-  dirty = true;
+  syncColorNotes();
 });
+colorObserved.addEventListener("change", syncColorNotes);
 showPresence.addEventListener("change", () => {
   element("presence-comparison").hidden = !showPresence.checked;
   dirty = true;
@@ -370,7 +381,7 @@ element("export-form").addEventListener("submit", event => {
       finish();
     };
     worker.postMessage({
-      scenario, start, end, width, mode: blockView,
+      scenario, start, end, width, mode: blockView, colorObserved: colorObserved.checked,
       showPresence: showPresence.checked, showSojourn: showSojourn.checked,
     });
   } catch {
@@ -387,4 +398,5 @@ exportDialog.addEventListener("close", () => {
 });
 
 syncControls();
+syncColorNotes();
 requestAnimationFrame(tick);

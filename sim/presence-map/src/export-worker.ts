@@ -4,12 +4,12 @@ import { PresenceProcess, type Scenario } from "./process.js";
 
 type Request = {
   scenario: Scenario; start: number; end: number; width: number; mode: BlockView;
-  showPresence: boolean; showSojourn: boolean;
+  colorObserved: boolean; showPresence: boolean; showSojourn: boolean;
 };
 
 self.onmessage = (message: MessageEvent<Request>) => {
   try {
-    const { scenario, start, end, width, mode, showPresence, showSojourn } = message.data;
+    const { scenario, start, end, width, mode, colorObserved, showPresence, showSojourn } = message.data;
     const height = Math.round(width * 0.55);
     if (typeof OffscreenCanvas === "undefined") {
       throw new Error("GIF export requires a browser with OffscreenCanvas. Try a recent version of Chrome, Safari, or Firefox.");
@@ -31,7 +31,9 @@ self.onmessage = (message: MessageEvent<Request>) => {
       const next = Math.round((end - start) * (i + 1) / frames * 100);
       const delay = i === frames ? 90 : Math.max(2, next - elapsed);
       const cumulativeObservedSojourns = showSojourn ? replay.cumulativeObservedSojourns(t) : undefined;
-      renderChart(context, replay, t, view, width, height, { mode, title: true, presenceSteps, cumulativeObservedSojourns });
+      renderChart(context, replay, t, view, width, height, {
+        mode, colorObserved, title: true, presenceSteps, cumulativeObservedSojourns,
+      });
       encoder.addFrame(context.getImageData(0, 0, width, height).data, delay);
       if (i % 8 === 0) self.postMessage({ kind: "progress", percent: Math.round(i / frames * 100) });
     }
