@@ -46,7 +46,7 @@ export function fitView(
 export function plotBox(width: number, height: number, mode: BlockView, view: View): Plot {
   const left = width < 440 ? 42 : 61;
   const top = mode === "observed" ? 38 : 56;
-  const plotHeight = height - top - 52;
+  const plotHeight = height - top - 76;
   const laneHeight = plotHeight / (view.lanes + view.mirrorDepth);
   const baseline = top + plotHeight - view.mirrorDepth * laneHeight;
   const plotWidth = width - left - 22;
@@ -67,6 +67,10 @@ function niceStep(raw: number) {
 }
 
 const format = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+const timestampFormat = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
 export function number(value: number): string {
   return format.format(value);
@@ -193,7 +197,7 @@ export function renderChart(
   context.textAlign = "center";
   context.fillStyle = "#324b67";
   context.font = "600 13px system-ui, sans-serif";
-  context.fillText("Time (seconds)", origin + timeWidth / 2, height - 13);
+  context.fillText("Time (seconds)", origin + timeWidth / 2, bottom + 39);
   if (showSojourn) context.fillText("Cumulative sojourn (s)", (left + origin) / 2, baseline + 39);
 
   context.save();
@@ -318,16 +322,19 @@ export function renderChart(
   }
   context.restore();
 
-  const nowLabel = `T = ${number(t)} s`;
-  context.font = "600 12px system-ui, sans-serif";
-  const labelWidth = context.measureText(nowLabel).width + 14;
-  const labelX = Math.min(right - labelWidth, Math.max(origin, now - labelWidth / 2));
-  const labelY = fullBlocks ? top - 23 : top + 5;
+  const labelWidth = 124;
+  const labelX = right - labelWidth;
+  const labelY = height - 27;
   context.fillStyle = "#e9f1ff";
   context.fillRect(labelX, labelY, labelWidth, 20);
   context.fillStyle = "#184d9b";
-  context.textAlign = "center";
-  context.fillText(nowLabel, labelX + labelWidth / 2, labelY + 10);
+  context.font = "600 12px system-ui, sans-serif";
+  context.textAlign = "left";
+  context.fillText("T =", labelX + 7, labelY + 10);
+  context.textAlign = "right";
+  context.fillText("s", right - 7, labelY + 10);
+  context.font = "600 12px ui-monospace, monospace";
+  context.fillText(timestampFormat.format(t), right - 21, labelY + 10, 70);
 }
 
 function drawPresenceMirror(
