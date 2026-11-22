@@ -4,14 +4,14 @@ import { PresenceProcess, type Scenario } from "./process.js";
 
 type Request = {
   scenario: Scenario; start: number; end: number; width: number; animated?: boolean; mode: BlockView;
-  colorObserved: boolean; showPresence: boolean; showAveragePresence?: boolean; showSojourn: boolean;
+  camera?: boolean; colorObserved: boolean; showPresence: boolean; showAveragePresence?: boolean; showSojourn: boolean;
   matchStripScale?: boolean; showSojournAverages?: boolean;
 };
 
 self.onmessage = (message: MessageEvent<Request>) => {
   try {
     const {
-      scenario, start, end, width, animated = true, mode, colorObserved,
+      scenario, start, end, width, animated = true, mode, camera, colorObserved,
       showPresence, showAveragePresence, showSojourn, showSojournAverages, matchStripScale,
     } = message.data;
     const height = Math.round(width * 0.55);
@@ -26,9 +26,11 @@ self.onmessage = (message: MessageEvent<Request>) => {
     replay.ensureAhead(end);
     const count = replay.countAt(end);
     const presenceSteps = showPresence ? replay.presenceSteps(count) : undefined;
-    const view = fitView(replay, end, count, mode, presenceSteps, {
+    const viewOptions = {
       showSojourn, showSojournAverages, matchStripScale, showAveragePresence,
-    });
+    };
+    const fixedView = camera ? undefined : fitView(replay, end, count, mode, presenceSteps, viewOptions);
+    let previousCamera: ReturnType<typeof fitView> | undefined;
     const duration = end - start;
     const intervals = animated ? Math.min(180, Math.max(2, Math.ceil(duration * 12))) : 0;
     const finalDelay = animated ? 90 : 0;
@@ -43,12 +45,16 @@ self.onmessage = (message: MessageEvent<Request>) => {
         delay = Math.max(2, next - elapsed);
       }
       const averagePresence = showPresence && showAveragePresence && t > 0 ? replay.measure(t).mass / t : undefined;
+      const view = fixedView ?? fitView(replay, t, replay.countAt(t), mode, presenceSteps, {
+        ...viewOptions, camera, previousCamera, averagePresence,
+      });
+      previousCamera = view;
       const cumulativeObservedSojourns = showSojourn ? replay.cumulativeObservedSojourns(t) : undefined;
       const sojournMeans = showSojournAverages && cumulativeObservedSojourns
         ? replay.sojournMeans(cumulativeObservedSojourns.length, cumulativeObservedSojourns.at(-1))
         : undefined;
       renderChart(context, replay, t, view, width, height, {
-        mode, colorObserved, title: true, presenceSteps, averagePresence, cumulativeObservedSojourns, sojournMeans,
+        mode, camera, colorObserved, title: true, presenceSteps, averagePresence, cumulativeObservedSojourns, sojournMeans,
       });
       encoder.addFrame(context.getImageData(0, 0, width, height).data, delay);
       if (animated && i % 8 === 0) {

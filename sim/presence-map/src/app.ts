@@ -18,6 +18,7 @@ const windowHint = element("window-hint");
 const source = element("source");
 const speed = element<HTMLSelectElement>("speed");
 const viewSelect = element<HTMLSelectElement>("block-view");
+const camera = element<HTMLInputElement>("camera");
 const colorObserved = element<HTMLInputElement>("color-observed");
 const showPresence = element<HTMLInputElement>("show-presence");
 const showAveragePresence = element<HTMLInputElement>("show-average-presence");
@@ -81,6 +82,7 @@ function syncControls() {
 
 function setWindowStart(start?: number) {
   windowStart = start;
+  chartFrame = undefined;
   const active = start !== undefined;
   element("history-comparisons").hidden = active;
   element("history-measurements").hidden = active;
@@ -104,7 +106,6 @@ function reset() {
   time = 0;
   stepDropStartedAt = undefined;
   setWindowStart();
-  chartFrame = undefined;
   syncControls();
 }
 
@@ -180,6 +181,9 @@ function draw(stepDropAge?: number) {
     matchStripScale: matchStripScale.checked,
     showAveragePresence: showAverage,
     window: observation,
+    camera: camera.checked,
+    previousCamera: chartFrame?.view,
+    averagePresence,
   });
   const plot = plotBox(width, height, blockView, view);
   chartFrame = { plot, view, time };
@@ -187,6 +191,7 @@ function draw(stepDropAge?: number) {
   const slice = hoverTime !== undefined && hoverTime <= time ? hoverTime : undefined;
   renderChart(context, process, time, view, width, height, {
     mode: blockView,
+    camera: camera.checked,
     colorObserved: colorObserved.checked,
     cursor: slice,
     presenceSteps,
@@ -224,7 +229,8 @@ function draw(stepDropAge?: number) {
   let tooltipText = "";
   if (cursor) {
     const onStrip = cursor.y >= plot.top && cursor.y <= plot.baseline;
-    const strip = onStrip ? Math.min(view.lanes, Math.floor((plot.baseline - cursor.y) / plot.laneHeight) + 1) : 0;
+    const lane = Math.min(view.lanes - 1, Math.floor((plot.baseline - cursor.y) / plot.laneHeight));
+    const strip = onStrip ? (view.firstStrip ?? 1) + lane : 0;
     const event = (observation?.arrivals ?? process.arrivals)[strip - 1];
     if (observation && slice !== undefined && slice < observation.start) {
       tooltipText = `t = ${number(slice)} s · Before window`;
@@ -233,7 +239,7 @@ function draw(stepDropAge?: number) {
         ? observation.arrivals.filter(event => event.t <= slice && slice < event.end).length
         : process.measure(slice).present;
       tooltipText = `t = ${number(slice)} s · N(t) = ${present}`;
-      if (event && slice >= event.t && slice < event.end) {
+      if (event && slice >= event.t && slice < event.end && (!camera.checked || time < event.end)) {
         tooltipText += `\nStrip ${strip} · ${number(event.t)}–${number(event.end)} s`;
       }
     } else if (cumulativeObservedSojourns && event && event.t <= time && cursor.x >= plot.left && cursor.x < plot.origin) {
@@ -304,6 +310,8 @@ reducedMotion.addEventListener("change", () => {
   dirty = true;
 });
 function syncColorNotes() {
+  element("history-geometry").hidden = camera.checked;
+  element("camera-geometry").hidden = !camera.checked;
   const fullColors = element("block-colors");
   fullColors.hidden = blockView !== "full" || !colorObserved.checked;
   const sojournColors = element("sojourn-colors");
@@ -326,6 +334,7 @@ viewSelect.addEventListener("change", () => {
   blockView = mode === "contour" || mode === "observed" ? mode : "full";
   syncColorNotes();
 });
+camera.addEventListener("change", syncColorNotes);
 colorObserved.addEventListener("change", syncColorNotes);
 function syncPresenceControls() {
   showAveragePresence.disabled = !showPresence.checked;
@@ -519,7 +528,7 @@ element("export-form").addEventListener("submit", event => {
     };
     worker.postMessage({
       scenario, start, end, width, animated: element<HTMLInputElement>("gif-animate").checked,
-      mode: blockView, colorObserved: colorObserved.checked,
+      mode: blockView, camera: camera.checked, colorObserved: colorObserved.checked,
       showPresence: showPresence.checked, showAveragePresence: showAveragePresence.checked,
       showSojourn: showSojourn.checked, showSojournAverages: showSojournAverages.checked,
       matchStripScale: matchStripScale.checked,

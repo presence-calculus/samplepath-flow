@@ -100,6 +100,7 @@
               <option value="contour">Contour</option>
             </select>
           </label>
+          <label title="Follow blocks that are still present"><input id="camera" type="checkbox"> Camera</label>
           <label><input id="color-observed" type="checkbox" checked> Show observed</label>
           <label>Speed
             <select id="speed" aria-label="Playback speed">
@@ -134,7 +135,7 @@
       <div><dt>Carry-ins at start</dt><dd id="window-carry-in">—</dd></div>
       <div><dt>Window presence mass</dt><dd><span id="window-mass">—</span> <small>block·s</small></dd></div>
     </dl>
-    <p class="geometry">Each block occupies one strip, from its arrival until its marked duration elapses. A vertical slice counts blocks present at that instant. The accumulated area is presence mass. <span id="block-colors">Blue shows observed presence. Green shows remaining duration.</span> <span id="contour-colors" hidden>Solid blue shows observed presence. Dashed green shows remaining duration.</span> <span id="presence-comparison" hidden>The area below zero measures observed presence mass in block-seconds. Match strip scale puts the two areas on the same vertical scale.</span></p>
+    <p class="geometry">Each block occupies one strip, from its arrival until its marked duration elapses. <span id="history-geometry">A vertical slice counts blocks present at that instant. The accumulated area is presence mass.</span><span id="camera-geometry" hidden>Departed blocks still contribute to historical slice counts and presence mass.</span> <span id="block-colors">Blue shows observed presence. Green shows remaining duration.</span> <span id="contour-colors" hidden>Solid blue shows observed presence. Dashed green shows remaining duration.</span> <span id="presence-comparison" hidden>The area below zero measures observed presence mass in block-seconds. Match strip scale puts the two areas on the same vertical scale.</span></p>
     <p id="sojourn-comparison" class="geometry" hidden>To the left of the time axis, each bar adds up the durations through that strip. <span id="sojourn-colors">Blue shows time already observed, and green shows time remaining. The top blue bar shows total presence mass.</span></p>
     <p id="notice" class="notice" role="status" hidden></p>
   </main>
@@ -173,7 +174,7 @@
   <dialog id="export-dialog">
     <form id="export-form">
       <h2>Export a GIF</h2>
-      <p>Choose a time interval. The GIF uses the selected block view and a fixed scale.</p>
+      <p>Choose a time interval. The GIF uses the selected block view. Camera follows the active blocks.</p>
       <div class="fields export-fields">
         <label>Start (seconds) <input id="gif-start" type="number" min="0" step="any" value="0" required></label>
         <label>End (seconds) <input id="gif-end" type="number" min=".1" step="any" required></label>
