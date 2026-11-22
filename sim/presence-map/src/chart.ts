@@ -12,6 +12,7 @@ const green = "#098478";
 const blue = "#264e80";
 const presenceColor = "#a0442c";
 const presenceFill = "#f8ebe5";
+const averageColor = "#243751";
 const contourWidth = 2;
 const remainingDash = [4, 3];
 export const dropDuration = 0.35;
@@ -80,12 +81,14 @@ export function renderChart(
   context: Context, process: PresenceProcess, t: number, view: View, width: number, height: number,
   options: {
     mode: BlockView; colorObserved?: boolean; cursor?: number; reducedMotion?: boolean; stepDropAge?: number;
-    title?: boolean; presenceSteps?: readonly PresenceStep[]; cumulativeObservedSojourns?: readonly number[];
+    title?: boolean; presenceSteps?: readonly PresenceStep[]; averagePresence?: number;
+    cumulativeObservedSojourns?: readonly number[];
   },
 ) {
   const fullBlocks = options.mode !== "observed";
   const contour = options.mode === "contour";
   const { colorObserved = true, presenceSteps, cumulativeObservedSojourns } = options;
+  const averagePresence = presenceSteps ? options.averagePresence : undefined;
   const showSojourn = cumulativeObservedSojourns !== undefined;
   const compareAreas = Boolean(presenceSteps || showSojourn);
   const plot = plotBox(width, height, options.mode, view);
@@ -102,7 +105,9 @@ export function renderChart(
   context.textAlign = "left";
   context.textBaseline = "middle";
   context.font = "600 14px system-ui, sans-serif";
-  context.fillText(options.title ? "Presence map  /  Arrival strip" : "Arrival strip", left, 19);
+  const title = options.title ? "Presence map  /  Arrival strip" : "Arrival strip";
+  const titleEnd = left + context.measureText(title).width;
+  context.fillText(title, left, 19);
 
   if (width >= 435 || presenceSteps) {
     context.font = "12px system-ui, sans-serif";
@@ -114,10 +119,12 @@ export function renderChart(
       else labels.push([green, "Present"], [blue, "Departed"]);
     }
     if (presenceSteps) labels.push([presenceColor, "−N(t)"]);
+    if (averagePresence !== undefined) labels.push([averageColor, `L(T) = ${number(averagePresence)}`, true]);
     let rightEdge = right;
     for (const [color, label, dashed] of labels.reverse()) {
       const labelX = rightEdge - context.measureText(label).width;
-      const lineSample = contour || color === presenceColor;
+      const lineSample = contour || color === presenceColor || dashed;
+      if (labelX - (lineSample ? 22 : 14) < titleEnd + 12) break;
       if (lineSample) {
         context.save();
         context.strokeStyle = color;
@@ -305,6 +312,18 @@ export function renderChart(
   context.restore();
   if (presenceSteps) {
     drawPresenceMirror(context, presenceSteps, t, plot, x);
+  }
+  if (averagePresence !== undefined) {
+    const y = baseline + averagePresence * laneHeight;
+    context.save();
+    context.beginPath();
+    context.strokeStyle = averageColor;
+    context.lineWidth = 2;
+    context.setLineDash(remainingDash);
+    context.moveTo(origin, y);
+    context.lineTo(now, y);
+    context.stroke();
+    context.restore();
   }
   context.beginPath();
   context.strokeStyle = "#185dcb";

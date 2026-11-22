@@ -4,12 +4,14 @@ import { PresenceProcess, type Scenario } from "./process.js";
 
 type Request = {
   scenario: Scenario; start: number; end: number; width: number; animated?: boolean; mode: BlockView;
-  colorObserved: boolean; showPresence: boolean; showSojourn: boolean;
+  colorObserved: boolean; showPresence: boolean; showAveragePresence?: boolean; showSojourn: boolean;
 };
 
 self.onmessage = (message: MessageEvent<Request>) => {
   try {
-    const { scenario, start, end, width, animated = true, mode, colorObserved, showPresence, showSojourn } = message.data;
+    const {
+      scenario, start, end, width, animated = true, mode, colorObserved, showPresence, showAveragePresence, showSojourn,
+    } = message.data;
     const height = Math.round(width * 0.55);
     if (typeof OffscreenCanvas === "undefined") {
       throw new Error("GIF export requires a browser with OffscreenCanvas. Try a recent version of Chrome, Safari, or Firefox.");
@@ -36,9 +38,10 @@ self.onmessage = (message: MessageEvent<Request>) => {
         const next = Math.round(duration * (i + 1) / intervals * 100);
         delay = Math.max(2, next - elapsed);
       }
+      const averagePresence = showPresence && showAveragePresence && t > 0 ? replay.measure(t).mass / t : undefined;
       const cumulativeObservedSojourns = showSojourn ? replay.cumulativeObservedSojourns(t) : undefined;
       renderChart(context, replay, t, view, width, height, {
-        mode, colorObserved, title: true, presenceSteps, cumulativeObservedSojourns,
+        mode, colorObserved, title: true, presenceSteps, averagePresence, cumulativeObservedSojourns,
       });
       encoder.addFrame(context.getImageData(0, 0, width, height).data, delay);
       if (animated && i % 8 === 0) {
