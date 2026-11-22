@@ -19,6 +19,7 @@ const viewSelect = element<HTMLSelectElement>("block-view");
 const colorObserved = element<HTMLInputElement>("color-observed");
 const showPresence = element<HTMLInputElement>("show-presence");
 const showAveragePresence = element<HTMLInputElement>("show-average-presence");
+const matchStripScale = element<HTMLInputElement>("match-strip-scale");
 const showSojourn = element<HTMLInputElement>("show-sojourn");
 const rateInput = element<HTMLInputElement>("rate");
 const rateOutput = element<HTMLOutputElement>("rate-value");
@@ -102,11 +103,16 @@ function draw(stepDropAge?: number) {
   const count = process.countAt(time);
   const presenceSteps = showPresence.checked ? process.presenceSteps(count) : undefined;
   const updateMetrics = performance.now() - lastMetrics > 100 || dirty;
-  const showAverage = showPresence.checked && showAveragePresence.checked && time > 0;
-  const metrics = updateMetrics || showAverage ? process.measure(time, count) : undefined;
-  const averagePresence = showAverage && metrics ? metrics.mass / time : undefined;
+  const showAverage = showPresence.checked && showAveragePresence.checked;
+  const hasAverage = showAverage && time > 0;
+  const metrics = updateMetrics || hasAverage ? process.measure(time, count) : undefined;
+  const averagePresence = hasAverage && metrics ? metrics.mass / time : undefined;
   const cumulativeObservedSojourns = showSojourn.checked ? process.cumulativeObservedSojourns(time, count) : undefined;
-  const view = fitView(process, time, count, blockView, presenceSteps, showSojourn.checked);
+  const view = fitView(process, time, count, blockView, presenceSteps, {
+    showSojourn: showSojourn.checked,
+    matchStripScale: matchStripScale.checked,
+    showAveragePresence: showAverage,
+  });
   const plot = plotBox(width, height, blockView, view);
   let slice: number | undefined;
   if (cursor && cursor.x >= plot.origin && cursor.x <= plot.left + plot.width &&
@@ -225,11 +231,15 @@ viewSelect.addEventListener("change", () => {
 colorObserved.addEventListener("change", syncColorNotes);
 function syncPresenceControls() {
   showAveragePresence.disabled = !showPresence.checked;
+  element("presence-scale").hidden = !showPresence.checked;
   element("presence-comparison").hidden = !showPresence.checked;
   dirty = true;
 }
 showPresence.addEventListener("change", syncPresenceControls);
 showAveragePresence.addEventListener("change", () => {
+  dirty = true;
+});
+matchStripScale.addEventListener("change", () => {
   dirty = true;
 });
 showSojourn.addEventListener("change", () => {
@@ -408,7 +418,7 @@ element("export-form").addEventListener("submit", event => {
       scenario, start, end, width, animated: element<HTMLInputElement>("gif-animate").checked,
       mode: blockView, colorObserved: colorObserved.checked,
       showPresence: showPresence.checked, showAveragePresence: showAveragePresence.checked,
-      showSojourn: showSojourn.checked,
+      showSojourn: showSojourn.checked, matchStripScale: matchStripScale.checked,
     });
   } catch {
     gifStatus("GIF rendering could not start in this browser.");

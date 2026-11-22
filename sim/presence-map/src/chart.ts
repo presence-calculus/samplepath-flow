@@ -1,10 +1,13 @@
 import type { PresenceProcess, PresenceStep } from "./process.js";
 
-export type View = { horizon: number; lanes: number; mirrorDepth: number; sojournHorizon: number };
+export type View = {
+  horizon: number; lanes: number; mirrorDepth: number; sojournHorizon: number; matchStripScale?: boolean;
+  showAveragePresence?: boolean;
+};
 export type BlockView = "full" | "observed" | "contour";
 export type Plot = {
   left: number; top: number; width: number; height: number;
-  origin: number; timeWidth: number; baseline: number; laneHeight: number;
+  origin: number; timeWidth: number; baseline: number; laneHeight: number; presenceUnitHeight: number;
 };
 type Context = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 type OutlineBlock = { left: number; right: number; top: number; bottom: number; landed: boolean };
@@ -13,13 +16,16 @@ const blue = "#264e80";
 const presenceColor = "#a0442c";
 const presenceFill = "#f8ebe5";
 const averageColor = "#243751";
+const averageLabelWidth = 66;
+const averageLabelGap = 8;
+const averageLabelPadding = 5;
 const contourWidth = 2;
 const remainingDash = [4, 3];
 export const dropDuration = 0.35;
 
 export function fitView(
   process: PresenceProcess, t: number, count: number, mode: BlockView, presenceSteps?: readonly PresenceStep[],
-  showSojourn = false,
+  { showSojourn = false, matchStripScale = false, showAveragePresence = false } = {},
 ): View {
   let extent = t;
   if (mode !== "observed") {
@@ -41,6 +47,8 @@ export function fitView(
     lanes: Math.max(8, Math.ceil((count + 2) / 4) * 4),
     mirrorDepth,
     sojournHorizon: showSojourn ? paddedHorizon(cumulativeSojourn, 1) : 0,
+    matchStripScale,
+    showAveragePresence: Boolean(presenceSteps) && showAveragePresence,
   };
 }
 
@@ -48,12 +56,17 @@ export function plotBox(width: number, height: number, mode: BlockView, view: Vi
   const left = width < 440 ? 42 : 61;
   const top = mode === "observed" ? 38 : 56;
   const plotHeight = height - top - 76;
-  const laneHeight = plotHeight / (view.lanes + view.mirrorDepth);
-  const baseline = top + plotHeight - view.mirrorDepth * laneHeight;
-  const plotWidth = width - left - 22;
+  const sharedUnitHeight = plotHeight / (view.lanes + view.mirrorDepth);
+  const minimumMirrorHeight = view.mirrorDepth && !view.matchStripScale ? plotHeight / 3 : 0;
+  const mirrorHeight = Math.max(view.mirrorDepth * sharedUnitHeight, minimumMirrorHeight);
+  const laneHeight = (plotHeight - mirrorHeight) / view.lanes;
+  const presenceUnitHeight = view.mirrorDepth ? mirrorHeight / view.mirrorDepth : 0;
+  const baseline = top + plotHeight - mirrorHeight;
+  const rightMargin = view.showAveragePresence ? averageLabelWidth + averageLabelGap + 4 : 22;
+  const plotWidth = width - left - rightMargin;
   const timeWidth = view.sojournHorizon > 0 ? plotWidth * 0.6 : plotWidth;
   const origin = left + (plotWidth - timeWidth);
-  return { left, top, width: plotWidth, height: plotHeight, origin, timeWidth, baseline, laneHeight };
+  return { left, top, width: plotWidth, height: plotHeight, origin, timeWidth, baseline, laneHeight, presenceUnitHeight };
 }
 
 function paddedHorizon(extent: number, minimum: number): number {
@@ -92,7 +105,11 @@ export function renderChart(
   const showSojourn = cumulativeObservedSojourns !== undefined;
   const compareAreas = Boolean(presenceSteps || showSojourn);
   const plot = plotBox(width, height, options.mode, view);
-  const { left, top, origin, timeWidth, baseline, laneHeight } = plot;
+  const { left, top, origin, timeWidth, baseline, laneHeight, presenceUnitHeight } = plot;
+  const averageLine = averagePresence === undefined ? undefined : {
+    y: baseline + averagePresence * presenceUnitHeight,
+    label: number(averagePresence),
+  };
   const right = left + plot.width;
   const bottom = top + plot.height;
   const x = (time: number) => origin + time / view.horizon * timeWidth;
@@ -119,7 +136,7 @@ export function renderChart(
       else labels.push([green, "Present"], [blue, "Departed"]);
     }
     if (presenceSteps) labels.push([presenceColor, "−N(t)"]);
-    if (averagePresence !== undefined) labels.push([averageColor, `L(T) = ${number(averagePresence)}`, true]);
+    if (averageLine) labels.push([averageColor, "L(T)", true]);
     let rightEdge = right;
     for (const [color, label, dashed] of labels.reverse()) {
       const labelX = rightEdge - context.measureText(label).width;
@@ -172,7 +189,8 @@ export function renderChart(
       }
     }
   }
-  const laneStep = Math.max(1, Math.ceil(niceStep((view.lanes + view.mirrorDepth) / Math.max(4, Math.floor(plot.height / 26)))));
+  const stripTickCount = Math.max(4, Math.floor((baseline - top) / 26));
+  const laneStep = Math.max(1, Math.ceil(niceStep(view.lanes / stripTickCount)));
   context.textAlign = "right";
   for (let strip = 1; strip <= view.lanes; strip += laneStep) {
     const position = baseline - (strip - 1) * laneHeight;
@@ -183,11 +201,15 @@ export function renderChart(
   }
   if (presenceSteps) {
     context.fillText("0", left - 9, baseline);
-    for (let level = laneStep; level <= view.mirrorDepth; level += laneStep) {
-      const position = baseline + level * laneHeight;
-      context.moveTo(origin, position);
-      context.lineTo(right, position);
-      context.fillText(`−${number(level)}`, left - 9, position);
+    const presenceTickCount = Math.floor((bottom - baseline) / 20);
+    if (presenceTickCount > 0) {
+      const presenceStep = Math.max(1, Math.ceil(niceStep(view.mirrorDepth / presenceTickCount)));
+      for (let level = presenceStep; level <= view.mirrorDepth; level += presenceStep) {
+        const position = baseline + level * presenceUnitHeight;
+        context.moveTo(origin, position);
+        context.lineTo(right, position);
+        context.fillText(`−${number(level)}`, left - 9, position);
+      }
     }
   }
   context.strokeStyle = contour ? "#eff3f8" : "#e4eaf2";
@@ -313,15 +335,14 @@ export function renderChart(
   if (presenceSteps) {
     drawPresenceMirror(context, presenceSteps, t, plot, x);
   }
-  if (averagePresence !== undefined) {
-    const y = baseline + averagePresence * laneHeight;
+  if (averageLine) {
     context.save();
     context.beginPath();
     context.strokeStyle = averageColor;
     context.lineWidth = 2;
     context.setLineDash(remainingDash);
-    context.moveTo(origin, y);
-    context.lineTo(now, y);
+    context.moveTo(origin, averageLine.y);
+    context.lineTo(now, averageLine.y);
     context.stroke();
     context.restore();
   }
@@ -340,6 +361,18 @@ export function renderChart(
     context.stroke();
   }
   context.restore();
+
+  if (averageLine) {
+    const labelLeft = now + averageLabelGap;
+    const textWidth = averageLabelWidth - 2 * averageLabelPadding;
+    context.font = "600 12px system-ui, sans-serif";
+    const boxWidth = Math.min(context.measureText(averageLine.label).width, textWidth) + 2 * averageLabelPadding;
+    context.fillStyle = "#eff3f8";
+    context.fillRect(labelLeft, averageLine.y - 9, boxWidth, 18);
+    context.fillStyle = averageColor;
+    context.textAlign = "left";
+    context.fillText(averageLine.label, labelLeft + averageLabelPadding, averageLine.y, textWidth);
+  }
 
   const labelWidth = 124;
   const labelX = right - labelWidth;
@@ -366,7 +399,7 @@ function drawPresenceMirror(
     if (step.t > t) break;
     const at = x(step.t);
     path.lineTo(at, level);
-    level = plot.baseline + step.present * plot.laneHeight;
+    level = plot.baseline + step.present * plot.presenceUnitHeight;
     path.lineTo(at, level);
   }
   const now = x(t);

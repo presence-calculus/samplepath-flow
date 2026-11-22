@@ -5,12 +5,14 @@ import { PresenceProcess, type Scenario } from "./process.js";
 type Request = {
   scenario: Scenario; start: number; end: number; width: number; animated?: boolean; mode: BlockView;
   colorObserved: boolean; showPresence: boolean; showAveragePresence?: boolean; showSojourn: boolean;
+  matchStripScale?: boolean;
 };
 
 self.onmessage = (message: MessageEvent<Request>) => {
   try {
     const {
-      scenario, start, end, width, animated = true, mode, colorObserved, showPresence, showAveragePresence, showSojourn,
+      scenario, start, end, width, animated = true, mode, colorObserved,
+      showPresence, showAveragePresence, showSojourn, matchStripScale,
     } = message.data;
     const height = Math.round(width * 0.55);
     if (typeof OffscreenCanvas === "undefined") {
@@ -24,7 +26,7 @@ self.onmessage = (message: MessageEvent<Request>) => {
     replay.ensureAhead(end);
     const count = replay.countAt(end);
     const presenceSteps = showPresence ? replay.presenceSteps(count) : undefined;
-    const view = fitView(replay, end, count, mode, presenceSteps, showSojourn);
+    const view = fitView(replay, end, count, mode, presenceSteps, { showSojourn, matchStripScale, showAveragePresence });
     const duration = end - start;
     const intervals = animated ? Math.min(180, Math.max(2, Math.ceil(duration * 12))) : 0;
     const finalDelay = animated ? 90 : 0;
