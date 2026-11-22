@@ -1,6 +1,7 @@
 export type MarkedPoint = { t: number; duration: number };
 export type Arrival = MarkedPoint & { strip: number; end: number; cumulativeSojourn: number };
 export type PresenceStep = { t: number; present: number };
+export type SojournMeans = { full: number; observed?: number };
 
 export type Simulation = { kind: "simulation"; seed: number; rate: number; mean: number; blockCount?: number };
 export type Scenario = Simulation | { kind: "file"; events: MarkedPoint[] };
@@ -140,6 +141,14 @@ export class PresenceProcess {
       totals.push(observed);
     }
     return totals;
+  }
+
+  sojournMeans(count: number, observedTotal?: number): SojournMeans | undefined {
+    if (count === 0) return undefined;
+    return {
+      full: this.arrivals[count - 1].cumulativeSojourn / count,
+      observed: observedTotal === undefined ? undefined : observedTotal / count,
+    };
   }
 
   measure(t: number, count = this.countAt(t)) {

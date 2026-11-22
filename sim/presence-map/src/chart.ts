@@ -1,8 +1,8 @@
-import type { PresenceProcess, PresenceStep } from "./process.js";
+import type { PresenceProcess, PresenceStep, SojournMeans } from "./process.js";
 
 export type View = {
   horizon: number; lanes: number; mirrorDepth: number; sojournHorizon: number; matchStripScale?: boolean;
-  showAveragePresence?: boolean;
+  showAveragePresence?: boolean; showSojournAverages?: boolean;
 };
 export type BlockView = "full" | "observed" | "contour";
 export type Plot = {
@@ -16,6 +16,8 @@ const blue = "#264e80";
 const presenceColor = "#a0442c";
 const presenceFill = "#f8ebe5";
 const averageColor = "#243751";
+const sojournMeanColor = "#0f1c2e";
+const observedSojournMeanColor = "#5187cf";
 const averageLabelWidth = 66;
 const averageLabelGap = 8;
 const averageLabelPadding = 5;
@@ -27,7 +29,7 @@ export const dropDuration = 0.35;
 
 export function fitView(
   process: PresenceProcess, t: number, count: number, mode: BlockView, presenceSteps?: readonly PresenceStep[],
-  { showSojourn = false, matchStripScale = false, showAveragePresence = false } = {},
+  { showSojourn = false, matchStripScale = false, showAveragePresence = false, showSojournAverages = false } = {},
 ): View {
   let extent = t;
   if (mode !== "observed") {
@@ -51,6 +53,7 @@ export function fitView(
     sojournHorizon: showSojourn ? paddedHorizon(cumulativeSojourn, 1) : 0,
     matchStripScale,
     showAveragePresence: Boolean(presenceSteps) && showAveragePresence,
+    showSojournAverages: showSojourn && showSojournAverages,
   };
 }
 
@@ -61,7 +64,7 @@ export function plotBox(width: number, height: number, mode: BlockView, view: Vi
   );
   const tickMargin = blockAxisX + 14 + tickLabelGap + 8 * tickCharacters;
   const left = Math.max(width < 440 ? 42 : 61, tickMargin);
-  const top = mode === "observed" ? 38 : 56;
+  const top = view.showSojournAverages ? 64 : mode === "observed" ? 38 : 56;
   const plotHeight = height - top - 76;
   const sharedUnitHeight = plotHeight / (view.lanes + view.mirrorDepth);
   const minimumMirrorHeight = view.mirrorDepth && !view.matchStripScale ? plotHeight / 3 : 0;
@@ -102,7 +105,7 @@ export function renderChart(
   options: {
     mode: BlockView; colorObserved?: boolean; cursor?: number; reducedMotion?: boolean; stepDropAge?: number;
     title?: boolean; presenceSteps?: readonly PresenceStep[]; averagePresence?: number;
-    cumulativeObservedSojourns?: readonly number[];
+    cumulativeObservedSojourns?: readonly number[]; sojournMeans?: SojournMeans;
   },
 ) {
   const fullBlocks = options.mode !== "observed";
@@ -122,6 +125,20 @@ export function renderChart(
   const x = (time: number) => origin + time / view.horizon * timeWidth;
   const sojournX = (seconds: number) => origin - Math.min(seconds / view.sojournHorizon, 1) * (origin - left);
   const count = process.countAt(t);
+  const sojournLines: { x: number; label: string; color: string; dash: number[] }[] = [];
+  const sojournMeans = showSojourn ? options.sojournMeans : undefined;
+  if (sojournMeans) {
+    sojournLines.push({
+      x: sojournX(sojournMeans.full), label: `Full avg ${number(sojournMeans.full)} s`,
+      color: sojournMeanColor, dash: [],
+    });
+    if (colorObserved && sojournMeans.observed !== undefined) {
+      sojournLines.push({
+        x: sojournX(sojournMeans.observed), label: `Observed avg ${number(sojournMeans.observed)} s`,
+        color: observedSojournMeanColor, dash: remainingDash,
+      });
+    }
+  }
 
   context.fillStyle = "#ffffff";
   context.fillRect(0, 0, width, height);
@@ -134,6 +151,25 @@ export function renderChart(
     context.font = "600 14px system-ui, sans-serif";
     context.fillText(title, left, 19);
     legendStart += context.measureText(title).width + 12;
+  }
+
+  if (sojournLines.length) {
+    context.save();
+    context.font = "600 11px system-ui, sans-serif";
+    context.lineWidth = 2;
+    context.fillStyle = "#324b67";
+    let y = top - 25;
+    for (const line of sojournLines) {
+      context.strokeStyle = line.color;
+      context.setLineDash(line.dash);
+      context.beginPath();
+      context.moveTo(left, y);
+      context.lineTo(left + 14, y);
+      context.stroke();
+      context.fillText(line.label, left + 19, y, right - left - 19);
+      y += 14;
+    }
+    context.restore();
   }
 
   if (width >= 435 || presenceSteps) {
@@ -366,6 +402,32 @@ export function renderChart(
     else context.fillRect(drop.left, dropTop, drop.width, dropHeight);
   }
   context.restore();
+  if (sojournLines.length) {
+    context.save();
+    context.beginPath();
+    context.rect(left, top, origin - left, baseline - top);
+    context.clip();
+    // Draw the white outlines first so both styles remain visible when the averages coincide.
+    context.beginPath();
+    for (const line of sojournLines) {
+      context.moveTo(line.x, top);
+      context.lineTo(line.x, baseline);
+    }
+    context.strokeStyle = "#ffffff";
+    context.lineWidth = 4;
+    context.setLineDash([]);
+    context.stroke();
+    context.lineWidth = 2;
+    for (const line of sojournLines) {
+      context.beginPath();
+      context.moveTo(line.x, top);
+      context.lineTo(line.x, baseline);
+      context.strokeStyle = line.color;
+      context.setLineDash(line.dash);
+      context.stroke();
+    }
+    context.restore();
+  }
   if (presenceSteps) {
     drawPresenceMirror(context, presenceSteps, t, plot, x);
   }

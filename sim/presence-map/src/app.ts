@@ -21,6 +21,7 @@ const showPresence = element<HTMLInputElement>("show-presence");
 const showAveragePresence = element<HTMLInputElement>("show-average-presence");
 const matchStripScale = element<HTMLInputElement>("match-strip-scale");
 const showSojourn = element<HTMLInputElement>("show-sojourn");
+const showSojournAverages = element<HTMLInputElement>("show-sojourn-averages");
 const rateInput = element<HTMLInputElement>("rate");
 const rateOutput = element<HTMLOutputElement>("rate-value");
 const blockCountInput = element<HTMLInputElement>("block-count");
@@ -119,8 +120,13 @@ function draw(stepDropAge?: number) {
   const metrics = updateMetrics || hasAverage ? process.measure(time, count) : undefined;
   const averagePresence = time > 0 && metrics ? metrics.mass / time : undefined;
   const cumulativeObservedSojourns = showSojourn.checked ? process.cumulativeObservedSojourns(time, count) : undefined;
+  const showSojournMeans = showSojourn.checked && showSojournAverages.checked;
+  const sojournMeans = updateMetrics || showSojournMeans
+    ? process.sojournMeans(count, cumulativeObservedSojourns?.at(-1))
+    : undefined;
   const view = fitView(process, time, count, blockView, presenceSteps, {
     showSojourn: showSojourn.checked,
+    showSojournAverages: showSojournMeans,
     matchStripScale: matchStripScale.checked,
     showAveragePresence: showAverage,
   });
@@ -138,6 +144,7 @@ function draw(stepDropAge?: number) {
     presenceSteps,
     averagePresence: showAverage ? averagePresence : undefined,
     cumulativeObservedSojourns,
+    sojournMeans: showSojournMeans ? sojournMeans : undefined,
     stepDropAge,
     reducedMotion: reducedMotion.matches ||
       (!running && stepDropAge === undefined && process.arrivals[count - 1]?.t === time),
@@ -150,7 +157,7 @@ function draw(stepDropAge?: number) {
     presentOutput.textContent = number(present);
     massOutput.textContent = `${number(mass)} `;
     arrivalRateCurrent.textContent = time > 0 ? number(count / time) : "—";
-    sojournMeanCurrent.textContent = count > 0 ? number(process.arrivals[count - 1].cumulativeSojourn / count) : "—";
+    sojournMeanCurrent.textContent = sojournMeans ? number(sojournMeans.full) : "—";
     averagePresenceCurrent.textContent = averagePresence === undefined ? "—" : number(averagePresence);
     next.disabled = !process.nextAfter(time);
     lastMetrics = performance.now();
@@ -257,8 +264,13 @@ showAveragePresence.addEventListener("change", () => {
 matchStripScale.addEventListener("change", () => {
   dirty = true;
 });
-showSojourn.addEventListener("change", () => {
+function syncSojournControls() {
+  showSojournAverages.disabled = !showSojourn.checked;
   element("sojourn-comparison").hidden = !showSojourn.checked;
+  dirty = true;
+}
+showSojourn.addEventListener("change", syncSojournControls);
+showSojournAverages.addEventListener("change", () => {
   dirty = true;
 });
 
@@ -433,7 +445,8 @@ element("export-form").addEventListener("submit", event => {
       scenario, start, end, width, animated: element<HTMLInputElement>("gif-animate").checked,
       mode: blockView, colorObserved: colorObserved.checked,
       showPresence: showPresence.checked, showAveragePresence: showAveragePresence.checked,
-      showSojourn: showSojourn.checked, matchStripScale: matchStripScale.checked,
+      showSojourn: showSojourn.checked, showSojournAverages: showSojournAverages.checked,
+      matchStripScale: matchStripScale.checked,
     });
   } catch {
     gifStatus("GIF rendering could not start in this browser.");
@@ -452,4 +465,5 @@ syncControls();
 syncScenarioTargets();
 syncColorNotes();
 syncPresenceControls();
+syncSojournControls();
 requestAnimationFrame(tick);
