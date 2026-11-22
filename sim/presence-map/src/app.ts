@@ -29,6 +29,9 @@ const timeOutput = element("time").firstChild!;
 const countOutput = element("count");
 const presentOutput = element("present");
 const massOutput = element("mass").firstChild!;
+const arrivalRateCurrent = element("arrival-rate-current");
+const sojournMeanCurrent = element("sojourn-mean-current");
+const averagePresenceCurrent = element("average-presence-current");
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 let scenario: Scenario = readScenario();
@@ -66,6 +69,13 @@ function syncControls() {
   dirty = true;
 }
 
+function syncScenarioTargets() {
+  const settings = scenario.kind === "simulation" ? scenario : undefined;
+  element("arrival-rate-target").textContent = settings ? number(settings.rate) : "—";
+  element("sojourn-mean-target").textContent = settings ? number(settings.mean) : "—";
+  element("average-presence-target").textContent = settings ? number(settings.rate * settings.mean) : "—";
+}
+
 function reset() {
   process = new PresenceProcess(scenario);
   time = 0;
@@ -75,6 +85,7 @@ function reset() {
 
 function useScenario(value: Scenario) {
   scenario = value;
+  syncScenarioTargets();
   if (location.hash) history.replaceState(null, "", location.pathname + location.search);
   running = true;
   reset();
@@ -106,7 +117,7 @@ function draw(stepDropAge?: number) {
   const showAverage = showPresence.checked && showAveragePresence.checked;
   const hasAverage = showAverage && time > 0;
   const metrics = updateMetrics || hasAverage ? process.measure(time, count) : undefined;
-  const averagePresence = hasAverage && metrics ? metrics.mass / time : undefined;
+  const averagePresence = time > 0 && metrics ? metrics.mass / time : undefined;
   const cumulativeObservedSojourns = showSojourn.checked ? process.cumulativeObservedSojourns(time, count) : undefined;
   const view = fitView(process, time, count, blockView, presenceSteps, {
     showSojourn: showSojourn.checked,
@@ -125,7 +136,7 @@ function draw(stepDropAge?: number) {
     colorObserved: colorObserved.checked,
     cursor: slice,
     presenceSteps,
-    averagePresence,
+    averagePresence: showAverage ? averagePresence : undefined,
     cumulativeObservedSojourns,
     stepDropAge,
     reducedMotion: reducedMotion.matches ||
@@ -138,6 +149,9 @@ function draw(stepDropAge?: number) {
     countOutput.textContent = number(count);
     presentOutput.textContent = number(present);
     massOutput.textContent = `${number(mass)} `;
+    arrivalRateCurrent.textContent = time > 0 ? number(count / time) : "—";
+    sojournMeanCurrent.textContent = count > 0 ? number(process.arrivals[count - 1].cumulativeSojourn / count) : "—";
+    averagePresenceCurrent.textContent = averagePresence === undefined ? "—" : number(averagePresence);
     next.disabled = !process.nextAfter(time);
     lastMetrics = performance.now();
   }
@@ -434,6 +448,7 @@ exportDialog.addEventListener("close", () => {
 });
 
 syncControls();
+syncScenarioTargets();
 syncColorNotes();
 syncPresenceControls();
 requestAnimationFrame(tick);

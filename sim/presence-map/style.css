@@ -62,6 +62,11 @@ select { appearance: none; padding-right: 28px; background-image: url("data:imag
 dt { color: var(--muted); font-size: .875rem; }
 dd { font-size: 1.65rem; line-height: 1.25; margin: 4px 0 0; font-weight: 670; font-variant-numeric: tabular-nums; }
 small { font-weight: 500; font-size: .8rem; color: var(--muted); }
+.comparison-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.comparison-metrics h3 { margin: 0; font-size: .875rem; font-weight: 650; }
+.comparison-metrics h3 small { margin-left: 4px; }
+.comparison-values { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; margin: 8px 0 0; }
+.comparison-values dd { font-size: 1.45rem; overflow-wrap: anywhere; }
 .geometry { font-size: .9rem; color: var(--muted); }
 .notice { position: fixed; right: 22px; bottom: 22px; max-width: calc(100% - 44px); padding: 11px 15px; background: #172943; color: white; border-radius: 8px; box-shadow: 0 8px 28px #243b532a; }
 .tooltip { position: absolute; pointer-events: none; white-space: pre-line; background: #172943; color: #fff; border-radius: 7px; font-size: .79rem; padding: 7px 10px; }
@@ -89,9 +94,12 @@ input[type="number"] { min-width: 0; width: 100%; padding: 7px 9px; border: 1px 
   main { width: calc(100% - 32px); padding-top: 26px; }
   .intro { align-items: flex-start; flex-direction: column; gap: 16px; margin-bottom: 18px; }
   .board-head, .controls { padding: 12px; }
-  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .metrics > div:nth-child(3) { border-left: 0; }
-  .metrics > div:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .metrics:not(.comparison-metrics) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .metrics:not(.comparison-metrics) > div:nth-child(3) { border-left: 0; }
+  .metrics:not(.comparison-metrics) > div:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .comparison-metrics > div { padding-inline: 9px; }
+  .comparison-values { grid-template-columns: 1fr; }
+  .comparison-values dd { font-size: 1.15rem; }
 }
 @media (max-width: 380px) {
   .controls { align-items: flex-start; flex-direction: column; }

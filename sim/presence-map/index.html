@@ -22,6 +22,30 @@
       </div>
     </header>
 
+    <section class="metrics comparison-metrics" aria-label="Little’s Law comparisons">
+      <div>
+        <h3>Arrival rate <small>arrivals/s</small></h3>
+        <dl class="comparison-values">
+          <div><dt>Target <var>λ</var></dt><dd id="arrival-rate-target">—</dd></div>
+          <div><dt>Current <var>λ(T)</var></dt><dd id="arrival-rate-current">—</dd></div>
+        </dl>
+      </div>
+      <div>
+        <h3>Avg. Duration <small>s</small></h3>
+        <dl class="comparison-values">
+          <div><dt>Scenario mean <var>W</var></dt><dd id="sojourn-mean-target">—</dd></div>
+          <div><dt>Current mean <var>W̄(n)</var></dt><dd id="sojourn-mean-current">—</dd></div>
+        </dl>
+      </div>
+      <div>
+        <h3>Time Avg. Presence <small>blocks</small></h3>
+        <dl class="comparison-values">
+          <div><dt>Predicted <var>L</var> = <var>λW</var></dt><dd id="average-presence-target">—</dd></div>
+          <div><dt>Current <var>L(T)</var></dt><dd id="average-presence-current">—</dd></div>
+        </dl>
+      </div>
+    </section>
+
     <section class="board" aria-label="Live presence map">
       <div class="board-head">
         <div class="board-title">
