@@ -2,18 +2,21 @@ export type MarkedPoint = { t: number; duration: number };
 export type Arrival = MarkedPoint & { strip: number; end: number; cumulativeSojourn: number };
 export type PresenceStep = { t: number; present: number };
 
-export type Simulation = { kind: "simulation"; seed: number; rate: number; mean: number };
+export type Simulation = { kind: "simulation"; seed: number; rate: number; mean: number; blockCount?: number };
 export type Scenario = Simulation | { kind: "file"; events: MarkedPoint[] };
 
 export const defaultScenario: Simulation = { kind: "simulation", seed: 2718, rate: 1.15, mean: 4.5 };
 
-export function simulation(seed: number, rate: number, mean: number): Simulation {
+export function simulation(seed: number, rate: number, mean: number, blockCount?: number): Simulation {
   if (!Number.isInteger(seed) || seed < 0 || seed > 4294967295 ||
       !Number.isFinite(rate) || rate < 0.05 || rate > 20 ||
       !Number.isFinite(mean) || mean < 0.1 || mean > 300) {
     throw new Error("Use a valid seed, arrival rate, and mean duration.");
   }
-  return { kind: "simulation", seed, rate, mean };
+  if (blockCount !== undefined && (!Number.isSafeInteger(blockCount) || blockCount < 1)) {
+    throw new Error("Use a positive whole number of blocks or leave it blank for unlimited arrivals.");
+  }
+  return { kind: "simulation", seed, rate, mean, blockCount };
 }
 
 export function fromJson(data: unknown): Scenario {
@@ -51,6 +54,7 @@ export class PresenceProcess {
   readonly arrivals: Arrival[] = [];
   readonly scenario: Scenario;
   private readonly random: () => number;
+  private lastDeparture = 0;
   private presenceHistory?: { arrivalCount: number; steps: PresenceStep[] };
 
   constructor(scenario: Scenario) {
@@ -64,8 +68,10 @@ export class PresenceProcess {
   }
 
   private append(point: MarkedPoint) {
+    const end = point.t + point.duration;
     const cumulativeSojourn = (this.arrivals.at(-1)?.cumulativeSojourn ?? 0) + point.duration;
-    this.arrivals.push({ ...point, end: point.t + point.duration, strip: this.arrivals.length + 1, cumulativeSojourn });
+    this.arrivals.push({ ...point, end, strip: this.arrivals.length + 1, cumulativeSojourn });
+    this.lastDeparture = Math.max(this.lastDeparture, end);
   }
 
   private generateNext() {
@@ -78,7 +84,15 @@ export class PresenceProcess {
 
   ensureAhead(t: number) {
     if (this.scenario.kind !== "simulation") return;
-    while (this.arrivals.at(-1)!.t <= t) this.generateNext();
+    const limit = this.scenario.blockCount ?? Infinity;
+    while (this.arrivals.length < limit && this.arrivals.at(-1)!.t <= t) this.generateNext();
+  }
+
+  get completionTime(): number | undefined {
+    if (this.scenario.kind === "simulation" && this.arrivals.length === this.scenario.blockCount) {
+      return this.lastDeparture;
+    }
+    return undefined;
   }
 
   countAt(t: number): number {

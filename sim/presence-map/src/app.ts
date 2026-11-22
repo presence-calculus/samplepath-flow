@@ -21,6 +21,7 @@ const showPresence = element<HTMLInputElement>("show-presence");
 const showSojourn = element<HTMLInputElement>("show-sojourn");
 const rateInput = element<HTMLInputElement>("rate");
 const rateOutput = element<HTMLOutputElement>("rate-value");
+const blockCountInput = element<HTMLInputElement>("block-count");
 const runStatus = element("run-status");
 const timeOutput = element("time").firstChild!;
 const countOutput = element("count");
@@ -47,7 +48,7 @@ function readScenario(): Scenario {
   if (!location.hash) return defaultScenario;
   try {
     const data = JSON.parse(decodeURIComponent(location.hash.slice(1)));
-    if (data.kind === "simulation") return simulation(data.seed, data.rate, data.mean);
+    if (data.kind === "simulation") return simulation(data.seed, data.rate, data.mean, data.blockCount);
     if (data.kind === "file") return fromJson(data.events);
   } catch {
     // An invalid hash should still open the demo.
@@ -91,6 +92,12 @@ function draw(stepDropAge?: number) {
   context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   process.ensureAhead(time);
+  const completionTime = process.completionTime;
+  if (running && completionTime !== undefined && time >= completionTime) {
+    time = completionTime;
+    running = false;
+    syncControls();
+  }
   const count = process.countAt(time);
   const presenceSteps = showPresence.checked ? process.presenceSteps(count) : undefined;
   const cumulativeObservedSojourns = showSojourn.checked ? process.cumulativeObservedSojourns(time, count) : undefined;
@@ -221,6 +228,10 @@ showSojourn.addEventListener("change", () => {
 
 play.addEventListener("click", () => {
   running = !running;
+  if (running && time === process.completionTime) {
+    reset();
+    return;
+  }
   stepDropStartedAt = undefined;
   syncControls();
 });
@@ -255,6 +266,7 @@ element("settings").addEventListener("click", () => {
   rateInput.value = String(settings.rate);
   showRate();
   element<HTMLInputElement>("duration").value = String(settings.mean);
+  blockCountInput.value = settings.blockCount?.toString() ?? "";
   element("scenario-error").hidden = true;
   scenarioDialog.showModal();
 });
@@ -272,6 +284,7 @@ element("scenario-form").addEventListener("submit", event => {
       element<HTMLInputElement>("seed").valueAsNumber,
       rateInput.valueAsNumber,
       element<HTMLInputElement>("duration").valueAsNumber,
+      blockCountInput.value === "" ? undefined : blockCountInput.valueAsNumber,
     ));
   } catch (error) {
     showScenarioError(error);
