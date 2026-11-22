@@ -174,6 +174,15 @@ export function renderChart(
 
   context.fillStyle = "#52677e";
   context.font = "12px system-ui, sans-serif";
+  const presenceLabelX = (showSojourn ? origin : left) - tickLabelGap;
+  const presenceTickCount = Math.floor((bottom - baseline) / 20);
+  const presenceStep = presenceSteps && presenceTickCount > 0
+    ? Math.max(1, Math.ceil(niceStep(view.mirrorDepth / presenceTickCount)))
+    : 0;
+  const durationLabelRight = showSojourn && presenceStep > 0
+    ? presenceLabelX - context.measureText(`−${number(view.mirrorDepth)}`).width - 6
+    : origin;
+  const durationTickRight = presenceStep * presenceUnitHeight < 30 ? durationLabelRight : origin;
   const timeStep = niceStep(view.horizon / Math.max(3, Math.floor(timeWidth / 94)));
   context.beginPath();
   context.textAlign = "center";
@@ -193,10 +202,14 @@ export function renderChart(
       const position = sojournX(value);
       context.moveTo(position, top);
       context.lineTo(position, baseline);
-      if (previousLabel - position >= 24) {
-        context.fillText(number(value), position, baseline + 16);
+      const label = number(value);
+      if (previousLabel - position >= 24 && position + context.measureText(label).width / 2 <= durationTickRight) {
+        context.fillText(label, position, baseline + 16);
         previousLabel = position;
       }
+    }
+    if (previousLabel === origin && left < durationTickRight) {
+      context.fillText(number(view.sojournHorizon), left, baseline + 16, 2 * (durationTickRight - left));
     }
   }
   const stripTickCount = Math.max(4, Math.floor((baseline - top) / 26));
@@ -211,14 +224,12 @@ export function renderChart(
   }
   if (presenceSteps) {
     context.fillText("0", left - tickLabelGap, baseline);
-    const presenceTickCount = Math.floor((bottom - baseline) / 20);
-    if (presenceTickCount > 0) {
-      const presenceStep = Math.max(1, Math.ceil(niceStep(view.mirrorDepth / presenceTickCount)));
+    if (presenceStep > 0) {
       for (let level = presenceStep; level <= view.mirrorDepth; level += presenceStep) {
         const position = baseline + level * presenceUnitHeight;
         context.moveTo(origin, position);
         context.lineTo(right, position);
-        context.fillText(`−${number(level)}`, left - tickLabelGap, position);
+        context.fillText(`−${number(level)}`, presenceLabelX, position);
       }
     }
   }
@@ -237,7 +248,12 @@ export function renderChart(
   context.fillStyle = "#324b67";
   context.font = "600 13px system-ui, sans-serif";
   context.fillText("Time (seconds)", origin + timeWidth / 2, bottom + 39);
-  if (showSojourn) context.fillText("Cumulative sojourn (s)", (left + origin) / 2, baseline + 39);
+  if (showSojourn) {
+    const title = "Total Duration";
+    const titleWidth = Math.min(context.measureText(title).width, Math.max(1, durationLabelRight - blockAxisX));
+    const titleX = Math.min((left + origin) / 2, durationLabelRight - titleWidth / 2);
+    context.fillText(title, titleX, baseline + 39, titleWidth);
+  }
 
   context.save();
   context.translate(blockAxisX, top + plot.height / 2);
