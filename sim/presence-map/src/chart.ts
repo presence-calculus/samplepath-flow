@@ -19,6 +19,8 @@ const averageColor = "#243751";
 const averageLabelWidth = 66;
 const averageLabelGap = 8;
 const averageLabelPadding = 5;
+const blockAxisX = 15;
+const tickLabelGap = 9;
 const contourWidth = 2;
 const remainingDash = [4, 3];
 export const dropDuration = 0.35;
@@ -53,7 +55,12 @@ export function fitView(
 }
 
 export function plotBox(width: number, height: number, mode: BlockView, view: View): Plot {
-  const left = width < 440 ? 42 : 61;
+  const tickCharacters = Math.max(
+    number(view.lanes).length,
+    view.mirrorDepth ? number(view.mirrorDepth).length + 1 : 0,
+  );
+  const tickMargin = blockAxisX + 14 + tickLabelGap + 8 * tickCharacters;
+  const left = Math.max(width < 440 ? 42 : 61, tickMargin);
   const top = mode === "observed" ? 38 : 56;
   const plotHeight = height - top - 76;
   const sharedUnitHeight = plotHeight / (view.lanes + view.mirrorDepth);
@@ -118,13 +125,16 @@ export function renderChart(
 
   context.fillStyle = "#ffffff";
   context.fillRect(0, 0, width, height);
-  context.fillStyle = "#14243b";
   context.textAlign = "left";
   context.textBaseline = "middle";
-  context.font = "600 14px system-ui, sans-serif";
-  const title = options.title ? "Presence map  /  Arrival strip" : "Arrival strip";
-  const titleEnd = left + context.measureText(title).width;
-  context.fillText(title, left, 19);
+  let legendStart = left;
+  if (options.title) {
+    const title = "Presence map";
+    context.fillStyle = "#14243b";
+    context.font = "600 14px system-ui, sans-serif";
+    context.fillText(title, left, 19);
+    legendStart += context.measureText(title).width + 12;
+  }
 
   if (width >= 435 || presenceSteps) {
     context.font = "12px system-ui, sans-serif";
@@ -141,7 +151,7 @@ export function renderChart(
     for (const [color, label, dashed] of labels.reverse()) {
       const labelX = rightEdge - context.measureText(label).width;
       const lineSample = contour || color === presenceColor || dashed;
-      if (labelX - (lineSample ? 22 : 14) < titleEnd + 12) break;
+      if (labelX - (lineSample ? 22 : 14) < legendStart) break;
       if (lineSample) {
         context.save();
         context.strokeStyle = color;
@@ -197,10 +207,10 @@ export function renderChart(
     context.moveTo(left, position);
     context.lineTo(right, position);
     const labelY = position - laneHeight / 2;
-    if (!presenceSteps || labelY <= baseline - 13) context.fillText(number(strip), left - 9, labelY);
+    if (!presenceSteps || labelY <= baseline - 13) context.fillText(number(strip), left - tickLabelGap, labelY);
   }
   if (presenceSteps) {
-    context.fillText("0", left - 9, baseline);
+    context.fillText("0", left - tickLabelGap, baseline);
     const presenceTickCount = Math.floor((bottom - baseline) / 20);
     if (presenceTickCount > 0) {
       const presenceStep = Math.max(1, Math.ceil(niceStep(view.mirrorDepth / presenceTickCount)));
@@ -208,7 +218,7 @@ export function renderChart(
         const position = baseline + level * presenceUnitHeight;
         context.moveTo(origin, position);
         context.lineTo(right, position);
-        context.fillText(`−${number(level)}`, left - 9, position);
+        context.fillText(`−${number(level)}`, left - tickLabelGap, position);
       }
     }
   }
@@ -228,6 +238,12 @@ export function renderChart(
   context.font = "600 13px system-ui, sans-serif";
   context.fillText("Time (seconds)", origin + timeWidth / 2, bottom + 39);
   if (showSojourn) context.fillText("Cumulative sojourn (s)", (left + origin) / 2, baseline + 39);
+
+  context.save();
+  context.translate(blockAxisX, top + plot.height / 2);
+  context.rotate(-Math.PI / 2);
+  context.fillText("Blocks", 0, 0);
+  context.restore();
 
   context.save();
   context.beginPath();
