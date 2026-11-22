@@ -35,6 +35,7 @@
         <dl class="comparison-values">
           <div><dt>Scenario mean <var>W</var></dt><dd id="sojourn-mean-target">—</dd></div>
           <div><dt>Current mean <var>W̄(n)</var></dt><dd id="sojourn-mean-current">—</dd></div>
+          <div class="observed-metric" id="sojourn-observed-metric"><dt>Observed mean <var>w(t)</var></dt><dd id="sojourn-observed-mean">—</dd></div>
         </dl>
       </div>
       <div>
@@ -42,6 +43,7 @@
         <dl class="comparison-values">
           <div><dt>Predicted <var>L</var> = <var>λW</var></dt><dd id="average-presence-target">—</dd></div>
           <div><dt>Current <var>L(T)</var></dt><dd id="average-presence-current">—</dd></div>
+          <div class="observed-metric" id="presence-product-metric"><dt>Predicted <var>L(T)</var> = <var>λ(T)·w(T)</var></dt><dd id="average-presence-product">—</dd></div>
         </dl>
       </div>
     </section>
@@ -72,7 +74,7 @@
               <option value="contour">Contour</option>
             </select>
           </label>
-          <label><input id="color-observed" type="checkbox" checked> Color observed</label>
+          <label><input id="color-observed" type="checkbox" checked> Show observed</label>
           <label>Speed
             <select id="speed" aria-label="Playback speed">
               <option value=".25">0.25×</option>

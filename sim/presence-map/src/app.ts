@@ -32,7 +32,9 @@ const presentOutput = element("present");
 const massOutput = element("mass").firstChild!;
 const arrivalRateCurrent = element("arrival-rate-current");
 const sojournMeanCurrent = element("sojourn-mean-current");
+const sojournObservedMean = element("sojourn-observed-mean");
 const averagePresenceCurrent = element("average-presence-current");
+const averagePresenceProduct = element("average-presence-product");
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 let scenario: Scenario = readScenario();
@@ -122,7 +124,7 @@ function draw(stepDropAge?: number) {
   const cumulativeObservedSojourns = showSojourn.checked ? process.cumulativeObservedSojourns(time, count) : undefined;
   const showSojournMeans = showSojourn.checked && showSojournAverages.checked;
   const sojournMeans = updateMetrics || showSojournMeans
-    ? process.sojournMeans(count, cumulativeObservedSojourns?.at(-1))
+    ? process.sojournMeans(count, metrics?.mass ?? cumulativeObservedSojourns?.at(-1))
     : undefined;
   const view = fitView(process, time, count, blockView, presenceSteps, {
     showSojourn: showSojourn.checked,
@@ -152,13 +154,18 @@ function draw(stepDropAge?: number) {
 
   if (updateMetrics && metrics) {
     const { present, mass } = metrics;
+    const observedMean = sojournMeans?.observed;
+    const currentPresence = averagePresence === undefined ? "—" : number(averagePresence);
     timeOutput.textContent = `${number(time)} `;
     countOutput.textContent = number(count);
     presentOutput.textContent = number(present);
     massOutput.textContent = `${number(mass)} `;
     arrivalRateCurrent.textContent = time > 0 ? number(count / time) : "—";
     sojournMeanCurrent.textContent = sojournMeans ? number(sojournMeans.full) : "—";
-    averagePresenceCurrent.textContent = averagePresence === undefined ? "—" : number(averagePresence);
+    sojournObservedMean.textContent = observedMean === undefined ? "—" : number(observedMean);
+    averagePresenceCurrent.textContent = currentPresence;
+    // For n > 0, cancel n in (n / T) × (H(T) / n) before rounding.
+    averagePresenceProduct.textContent = observedMean === undefined ? "—" : currentPresence;
     next.disabled = !process.nextAfter(time);
     lastMetrics = performance.now();
   }
@@ -237,6 +244,8 @@ reducedMotion.addEventListener("change", () => {
 function syncColorNotes() {
   element("block-colors").hidden = blockView !== "full" || !colorObserved.checked;
   element("sojourn-colors").hidden = !colorObserved.checked;
+  element("sojourn-observed-metric").hidden = !colorObserved.checked;
+  element("presence-product-metric").hidden = !colorObserved.checked;
   const contourColors = element("contour-colors");
   contourColors.hidden = blockView !== "contour";
   contourColors.textContent = colorObserved.checked

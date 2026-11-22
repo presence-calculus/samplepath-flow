@@ -90,6 +90,12 @@ input[type="number"] { min-width: 0; width: 100%; padding: 7px 9px; border: 1px 
 .export-animation { display: flex; align-items: center; gap: 6px; width: fit-content; margin-top: 12px; font-size: .875rem; }
 .preview { margin-top: 15px; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
 .preview img { width: 100%; display: block; }
+@media (min-width: 1000px) {
+  .comparison-values:has(> .observed-metric:not([hidden])) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+  }
+}
 @media (max-width: 760px) {
   main { width: calc(100% - 32px); padding-top: 26px; }
   .intro { align-items: flex-start; flex-direction: column; gap: 16px; margin-bottom: 18px; }
