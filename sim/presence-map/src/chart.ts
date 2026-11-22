@@ -1,8 +1,8 @@
-import type { PresenceProcess, PresenceStep, SojournMeans } from "./process.js";
+import type { ObservationWindow, PresenceProcess, PresenceStep, SojournMeans } from "./process.js";
 
 export type View = {
   horizon: number; lanes: number; mirrorDepth: number; sojournHorizon: number; matchStripScale?: boolean;
-  showAveragePresence?: boolean; showSojournAverages?: boolean;
+  showAveragePresence?: boolean; showSojournAverages?: boolean; timeStart?: number;
 };
 export type BlockView = "full" | "observed" | "contour";
 export type Plot = {
@@ -25,16 +25,24 @@ const blockAxisX = 15;
 const tickLabelGap = 9;
 const contourWidth = 2;
 const remainingDash = [4, 3];
+const windowStartColor = "#755293";
 export const dropDuration = 0.35;
 
 export function fitView(
   process: PresenceProcess, t: number, count: number, mode: BlockView, presenceSteps?: readonly PresenceStep[],
-  { showSojourn = false, matchStripScale = false, showAveragePresence = false, showSojournAverages = false } = {},
+  { showSojourn = false, matchStripScale = false, showAveragePresence = false, showSojournAverages = false,
+    window }: {
+    showSojourn?: boolean; matchStripScale?: boolean; showAveragePresence?: boolean; showSojournAverages?: boolean;
+    window?: ObservationWindow;
+  } = {},
 ): View {
+  const arrivals = window?.arrivals ?? process.arrivals;
+  const rowCount = window?.arrivals.length ?? count;
+  const timeStart = window && (mode === "observed" ? window.start : Math.min(window.start, arrivals[0]?.t ?? window.start));
   let extent = t;
   if (mode !== "observed") {
-    for (let i = 0; i < count; i++) {
-      extent = Math.max(extent, process.arrivals[i].end);
+    for (let i = 0; i < rowCount; i++) {
+      extent = Math.max(extent, arrivals[i].end);
     }
   }
   let mirrorDepth = 0;
@@ -45,10 +53,11 @@ export function fitView(
       mirrorDepth = Math.max(mirrorDepth, step.present + 1);
     }
   }
-  const cumulativeSojourn = process.arrivals[count - 1]?.cumulativeSojourn ?? 0;
+  const cumulativeSojourn = arrivals[rowCount - 1]?.cumulativeSojourn ?? 0;
   return {
-    horizon: paddedHorizon(extent, 12),
-    lanes: Math.max(8, Math.ceil((count + 2) / 4) * 4),
+    horizon: paddedHorizon(extent - (timeStart ?? 0), window ? 0.01 : 12),
+    timeStart,
+    lanes: Math.max(8, Math.ceil((rowCount + 2) / 4) * 4),
     mirrorDepth,
     sojournHorizon: showSojourn ? paddedHorizon(cumulativeSojourn, 1) : 0,
     matchStripScale,
@@ -105,12 +114,12 @@ export function renderChart(
   options: {
     mode: BlockView; colorObserved?: boolean; cursor?: number; reducedMotion?: boolean; stepDropAge?: number;
     title?: boolean; presenceSteps?: readonly PresenceStep[]; averagePresence?: number;
-    cumulativeObservedSojourns?: readonly number[]; sojournMeans?: SojournMeans;
+    cumulativeObservedSojourns?: readonly number[]; sojournMeans?: SojournMeans; window?: ObservationWindow;
   },
 ) {
   const fullBlocks = options.mode !== "observed";
   const contour = options.mode === "contour";
-  const { colorObserved = true, presenceSteps, cumulativeObservedSojourns } = options;
+  const { colorObserved = true, presenceSteps, cumulativeObservedSojourns, window } = options;
   const averagePresence = presenceSteps ? options.averagePresence : undefined;
   const showSojourn = cumulativeObservedSojourns !== undefined;
   const compareAreas = Boolean(presenceSteps || showSojourn);
@@ -122,9 +131,11 @@ export function renderChart(
   };
   const right = left + plot.width;
   const bottom = top + plot.height;
-  const x = (time: number) => origin + time / view.horizon * timeWidth;
+  const timeStart = view.timeStart ?? 0;
+  const x = (time: number) => origin + (time - timeStart) / view.horizon * timeWidth;
   const sojournX = (seconds: number) => origin - Math.min(seconds / view.sojournHorizon, 1) * (origin - left);
-  const count = process.countAt(t);
+  const arrivals = window?.arrivals ?? process.arrivals;
+  const count = window?.arrivals.length ?? process.countAt(t);
   const sojournLines: { x: number; label: string; color: string; dash: number[] }[] = [];
   const sojournMeans = showSojourn ? options.sojournMeans : undefined;
   if (sojournMeans) {
@@ -175,14 +186,15 @@ export function renderChart(
   if (width >= 435 || presenceSteps) {
     context.font = "12px system-ui, sans-serif";
     const labels: [color: string, label: string, dashed?: boolean][] = [];
+    const unobservedLabel = window ? "Outside window" : "Remaining";
     if (width >= 435) {
-      if (contour) labels.push([colorObserved ? blue : green, "Observed"], [green, "Remaining", true]);
+      if (contour) labels.push([colorObserved ? blue : green, "Observed"], [green, unobservedLabel, true]);
       else if (!colorObserved) labels.push([green, fullBlocks ? "Full duration" : "Observed"]);
-      else if (fullBlocks) labels.push([blue, "Observed"], [green, "Remaining"]);
+      else if (fullBlocks) labels.push([blue, "Observed"], [green, unobservedLabel]);
       else labels.push([green, "Present"], [blue, "Departed"]);
     }
     if (presenceSteps) labels.push([presenceColor, "−N(t)"]);
-    if (averageLine) labels.push([averageColor, "L(T)", true]);
+    if (averageLine) labels.push([averageColor, window ? "Window avg." : "L(T)", true]);
     let rightEdge = right;
     for (const [color, label, dashed] of labels.reverse()) {
       const labelX = rightEdge - context.measureText(label).width;
@@ -220,15 +232,16 @@ export function renderChart(
     : origin;
   const durationTickRight = presenceStep * presenceUnitHeight < 30 ? durationLabelRight : origin;
   const timeStep = niceStep(view.horizon / Math.max(3, Math.floor(timeWidth / 94)));
+  const firstTickOffset = (timeStep - timeStart % timeStep) % timeStep;
   context.beginPath();
   context.textAlign = "center";
-  for (let i = 0; i <= Math.floor(view.horizon / timeStep + 1e-9); i++) {
-    const value = i * timeStep;
-    const position = x(value);
+  for (let i = 0; firstTickOffset + i * timeStep <= view.horizon + timeStep * 1e-9; i++) {
+    const offset = firstTickOffset + i * timeStep;
+    const position = origin + offset / view.horizon * timeWidth;
     context.moveTo(position, top);
     context.lineTo(position, bottom);
     context.fillStyle = "#52677e";
-    context.fillText(number(value), position, bottom + 16);
+    context.fillText(number(timeStart + offset), position, bottom + 16);
   }
   if (showSojourn) {
     const durationStep = niceStep(view.sojournHorizon / Math.max(2, Math.floor((origin - left) / 68)));
@@ -303,15 +316,17 @@ export function renderChart(
   context.rect(left - plotPadding, top - plotPadding, plot.width + 2 * plotPadding, plot.height + 2 * plotPadding);
   context.clip();
   const now = x(t);
+  const observedFrom = window ? x(window.start) : origin;
   const barHeight = compareAreas ? laneHeight : laneHeight - Math.min(1, laneHeight * 0.12);
   const drops: { center: number; left: number; width: number }[] = [];
   const outlines: OutlineBlock[] = [];
 
   for (let i = 0; i < count; i++) {
-    const event = process.arrivals[i];
+    const event = arrivals[i];
     const leftEdge = x(event.t);
+    const observedEdge = window ? Math.max(leftEdge, observedFrom) : leftEdge;
     const split = x(Math.min(event.end, t));
-    const barWidth = split - leftEdge;
+    const barWidth = split - observedEdge;
     const center = baseline - (event.strip - 0.5) * laneHeight;
     if (cumulativeObservedSojourns) {
       const fullStart = sojournX(event.cumulativeSojourn);
@@ -337,7 +352,7 @@ export function renderChart(
       const entryCenter = top + barHeight / 2;
       drops.push({
         center: entryCenter + easing * (center - entryCenter),
-        left: leftEdge,
+        left: fullBlocks ? leftEdge : observedEdge,
         width: fullBlocks ? x(event.end) - leftEdge : Math.max(4, Math.min(20, barWidth)),
       });
     }
@@ -363,9 +378,13 @@ export function renderChart(
       const blockTop = blockCenter - barHeight / 2;
       const greenStart = colorObserved ? split : leftEdge;
       const greenWidth = x(event.end) - greenStart;
+      if (colorObserved && observedEdge > leftEdge) {
+        context.fillStyle = green;
+        context.fillRect(leftEdge, blockTop, observedEdge - leftEdge, barHeight);
+      }
       if (colorObserved && barWidth > 0) {
         context.fillStyle = blue;
-        context.fillRect(leftEdge, blockTop, barWidth, barHeight);
+        context.fillRect(observedEdge, blockTop, barWidth, barHeight);
       }
       if (greenWidth > 0) {
         context.fillStyle = green;
@@ -377,7 +396,7 @@ export function renderChart(
     const active = t < event.end;
     context.fillStyle = colorObserved && !active ? blue : green;
     if (barWidth > 0) {
-      context.fillRect(leftEdge, center - barHeight / 2, barWidth, barHeight);
+      context.fillRect(observedEdge, center - barHeight / 2, barWidth, barHeight);
     } else if (options.reducedMotion && !compareAreas) {
       context.fillRect(leftEdge - 1, center - barHeight / 2, 2, barHeight);
     }
@@ -385,12 +404,15 @@ export function renderChart(
     if (movingBlock) {
       drops.push({
         center: top + barHeight / 2 + easing * (center - top - barHeight / 2),
-        left: leftEdge,
+        left: observedEdge,
         width: Math.max(4, Math.min(20, barWidth)),
       });
     }
   }
-  if (outlines.length) strokeContour(context, outlines, now, plot, colorObserved ? blue : green);
+  if (outlines.length) {
+    const contourStart = window && window.start > timeStart ? observedFrom : undefined;
+    strokeContour(context, outlines, now, plot, colorObserved ? blue : green, contourStart);
+  }
   context.save();
   context.fillStyle = colorObserved ? "#185dcb" : green;
   context.strokeStyle = "#9eafc3";
@@ -429,7 +451,7 @@ export function renderChart(
     context.restore();
   }
   if (presenceSteps) {
-    drawPresenceMirror(context, presenceSteps, t, plot, x);
+    drawPresenceMirror(context, presenceSteps, t, plot, x, observedFrom);
   }
   if (averageLine) {
     context.save();
@@ -437,7 +459,7 @@ export function renderChart(
     context.strokeStyle = averageColor;
     context.lineWidth = 2;
     context.setLineDash(remainingDash);
-    context.moveTo(origin, averageLine.y);
+    context.moveTo(observedFrom, averageLine.y);
     context.lineTo(now, averageLine.y);
     context.stroke();
     context.restore();
@@ -448,6 +470,14 @@ export function renderChart(
   context.moveTo(now, top);
   context.lineTo(now, bottom);
   context.stroke();
+  if (window) {
+    context.beginPath();
+    context.strokeStyle = windowStartColor;
+    context.setLineDash([4, 4]);
+    context.moveTo(observedFrom, top);
+    context.lineTo(observedFrom, bottom);
+    context.stroke();
+  }
   if (options.cursor !== undefined) {
     context.beginPath();
     context.strokeStyle = "#53647f";
@@ -458,6 +488,12 @@ export function renderChart(
   }
   context.restore();
 
+  if (window) {
+    context.fillStyle = windowStartColor;
+    context.font = "600 12px system-ui, sans-serif";
+    context.textAlign = "center";
+    context.fillText("S", observedFrom, top - 9);
+  }
   if (averageLine) {
     const labelLeft = now + averageLabelGap;
     const textWidth = averageLabelWidth - 2 * averageLabelPadding;
@@ -487,10 +523,11 @@ export function renderChart(
 
 function drawPresenceMirror(
   context: Context, steps: readonly PresenceStep[], t: number, plot: Plot, x: (time: number) => number,
+  observedFrom: number,
 ) {
   const path = new Path2D();
   let level = plot.baseline;
-  path.moveTo(plot.origin, level);
+  path.moveTo(observedFrom, level);
   for (const step of steps) {
     if (step.t > t) break;
     const at = x(step.t);
@@ -514,7 +551,9 @@ function drawPresenceMirror(
   context.restore();
 }
 
-function strokeContour(context: Context, blocks: OutlineBlock[], now: number, plot: Plot, observedColor: string) {
+function strokeContour(
+  context: Context, blocks: OutlineBlock[], now: number, plot: Plot, observedColor: string, observedFrom?: number,
+) {
   const path = new Path2D();
   for (let start = 0; start < blocks.length;) {
     // Consecutive arrivals occupy adjacent strips. Join only landed blocks with overlapping times.
@@ -539,12 +578,16 @@ function strokeContour(context: Context, blocks: OutlineBlock[], now: number, pl
     start = end;
   }
 
-  // Stroke the same perimeter on both sides, so the sweep adds no edge to the shape.
+  // Clip the strokes to the observation boundaries without adding edges to the perimeter.
   const padding = contourWidth / 2;
+  const left = plot.origin - padding;
   const sides = [
-    { left: plot.origin - padding, right: now, color: observedColor, dash: [] },
+    { left: observedFrom ?? left, right: now, color: observedColor, dash: [] },
     { left: now, right: plot.left + plot.width + padding, color: green, dash: remainingDash },
   ];
+  if (observedFrom !== undefined) {
+    sides.push({ left, right: observedFrom, color: green, dash: remainingDash });
+  }
   for (const side of sides) {
     context.save();
     context.beginPath();

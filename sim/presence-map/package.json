@@ -2,5 +2,5 @@
   "name": "presence-map-lab",
   "private": true,
   "type": "module",
-  "scripts": { "build": "node build.mjs" }
+  "scripts": { "build": "node build.mjs", "test": "node --test" }
 }

@@ -2,6 +2,17 @@ export type MarkedPoint = { t: number; duration: number };
 export type Arrival = MarkedPoint & { strip: number; end: number; cumulativeSojourn: number };
 export type PresenceStep = { t: number; present: number };
 export type SojournMeans = { full: number; observed?: number };
+export type ObservationWindow = {
+  start: number;
+  duration: number;
+  arrivals: readonly Arrival[];
+  arrivalCount: number;
+  carryIn: number;
+  mass: number;
+  cumulativeObservedSojourns: readonly number[];
+  presenceSteps?: readonly PresenceStep[];
+  sojournMeans?: SojournMeans;
+};
 
 export type Simulation = { kind: "simulation"; seed: number; rate: number; mean: number; blockCount?: number };
 export type Scenario = Simulation | { kind: "file"; events: MarkedPoint[] };
@@ -49,6 +60,25 @@ function randomGenerator(seed: number) {
 
 function observedDuration(point: MarkedPoint, t: number): number {
   return Math.min(t - point.t, point.duration);
+}
+
+function buildPresenceSteps(arrivals: readonly Arrival[], count: number, start = 0): PresenceStep[] {
+  const changes = new Map<number, number>();
+  for (let i = 0; i < count; i++) {
+    const { t, end } = arrivals[i];
+    const entry = Math.max(t, start);
+    changes.set(entry, (changes.get(entry) ?? 0) + 1);
+    changes.set(end, (changes.get(end) ?? 0) - 1);
+  }
+
+  const steps: PresenceStep[] = [];
+  let present = 0;
+  for (const [t, change] of [...changes].sort(([a], [b]) => a - b)) {
+    if (change === 0) continue;
+    present += change;
+    steps.push({ t, present });
+  }
+  return steps;
 }
 
 export class PresenceProcess {
@@ -115,22 +145,41 @@ export class PresenceProcess {
   presenceSteps(arrivalCount: number): readonly PresenceStep[] {
     if (this.presenceHistory?.arrivalCount === arrivalCount) return this.presenceHistory.steps;
 
-    const changes = new Map<number, number>();
-    for (let i = 0; i < arrivalCount; i++) {
-      const { t, end } = this.arrivals[i];
-      changes.set(t, (changes.get(t) ?? 0) + 1);
-      changes.set(end, (changes.get(end) ?? 0) - 1);
-    }
-
-    const steps: PresenceStep[] = [];
-    let present = 0;
-    for (const [t, change] of [...changes].sort(([a], [b]) => a - b)) {
-      if (change === 0) continue;
-      present += change;
-      steps.push({ t, present });
-    }
+    const steps = buildPresenceSteps(this.arrivals, arrivalCount);
     this.presenceHistory = { arrivalCount, steps };
     return steps;
+  }
+
+  observeWindow(start: number, end: number, showPresence: boolean): ObservationWindow {
+    const arrivals: Arrival[] = [];
+    const cumulativeObservedSojourns: number[] = [];
+    let cumulativeSojourn = 0;
+    let mass = 0;
+    let carryIn = 0;
+    for (const event of this.arrivals) {
+      if (event.t >= end) break;
+      if (event.end <= start) continue;
+      if (event.t < start) carryIn++;
+      cumulativeSojourn += event.duration;
+      mass += Math.min(event.end, end) - Math.max(event.t, start);
+      arrivals.push({ ...event, strip: arrivals.length + 1, cumulativeSojourn });
+      cumulativeObservedSojourns.push(mass);
+    }
+
+    return {
+      start,
+      duration: end - start,
+      arrivals,
+      arrivalCount: arrivals.length - carryIn,
+      carryIn,
+      mass,
+      cumulativeObservedSojourns,
+      presenceSteps: showPresence ? buildPresenceSteps(arrivals, arrivals.length, start) : undefined,
+      sojournMeans: arrivals.length ? {
+        full: cumulativeSojourn / arrivals.length,
+        observed: mass / arrivals.length,
+      } : undefined,
+    };
   }
 
   cumulativeObservedSojourns(t: number, count = this.countAt(t)): number[] {

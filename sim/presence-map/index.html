@@ -22,7 +22,7 @@
       </div>
     </header>
 
-    <section class="metrics comparison-metrics" aria-label="Little’s Law comparisons">
+    <section id="history-comparisons" class="metrics comparison-metrics" aria-label="Little’s Law comparisons">
       <div>
         <h3>Arrival rate <small>arrivals/s</small></h3>
         <dl class="comparison-values">
@@ -48,6 +48,30 @@
       </div>
     </section>
 
+    <section id="window-comparisons" class="metrics comparison-metrics" aria-label="Observation window averages" hidden>
+      <div>
+        <h3>Window rates <small>blocks/s</small></h3>
+        <dl class="comparison-values">
+          <div><dt>Arrivals in window</dt><dd id="window-arrival-rate">—</dd></div>
+          <div><dt>Overlapping blocks</dt><dd id="window-overlap-rate">—</dd></div>
+        </dl>
+      </div>
+      <div>
+        <h3>Avg. Duration per overlapping block <small>s</small></h3>
+        <dl class="comparison-values">
+          <div><dt>Full duration</dt><dd id="window-full-mean">—</dd></div>
+          <div><dt>Observed in window</dt><dd id="window-observed-mean">—</dd></div>
+        </dl>
+      </div>
+      <div>
+        <h3>Time Avg. Presence in window <small>blocks</small></h3>
+        <dl class="comparison-values">
+          <div><dt>Presence mass ÷ window length</dt><dd id="window-average-presence">—</dd></div>
+          <div><dt>Overlap rate × observed mean</dt><dd id="window-presence-product">—</dd></div>
+        </dl>
+      </div>
+    </section>
+
     <section class="board" aria-label="Live presence map">
       <div class="board-head">
         <div class="board-title">
@@ -65,6 +89,8 @@
           <button id="play" class="dark" type="button">Pause</button>
           <button id="step" type="button" title="Advance to the next arrival">Next arrival</button>
           <button id="reset" type="button">Reset</button>
+          <button id="clear-window" type="button" hidden>Clear window</button>
+          <span id="window-hint" class="source" hidden>Click before the sweep to set the window start.</span>
         </div>
         <div class="view-controls">
           <label>View
@@ -86,7 +112,7 @@
             </select>
           </label>
           <label><input id="show-presence" type="checkbox"> Show −N(t)</label>
-          <label><input id="show-average-presence" type="checkbox" disabled> Show L(T)</label>
+          <label><input id="show-average-presence" type="checkbox" disabled> <span id="average-presence-label">Show L(T)</span></label>
           <label id="presence-scale" hidden><input id="match-strip-scale" type="checkbox"> Match strip scale</label>
           <label><input id="show-sojourn" type="checkbox"> Show W(n)</label>
           <label><input id="show-sojourn-averages" type="checkbox" disabled> Show W*(n)</label>
@@ -94,14 +120,22 @@
       </div>
     </section>
 
-    <dl class="metrics" aria-label="Current measurements">
+    <dl id="history-measurements" class="metrics" aria-label="Current measurements">
       <div><dt>Time <var>T</var></dt><dd id="time">0.0 <small>s</small></dd></div>
       <div><dt>Arrivals <var>A(T)</var></dt><dd id="count">0</dd></div>
       <div><dt>Present now <var>N(T)</var></dt><dd id="present">0</dd></div>
       <div><dt>Presence mass <var>H(T)</var></dt><dd id="mass">0.0 <small>block·s</small></dd></div>
     </dl>
+    <dl id="window-measurements" class="metrics window-measurements" aria-label="Observation window measurements" hidden>
+      <div><dt>Window start <var>S</var></dt><dd><span id="window-start">—</span> <small>s</small></dd></div>
+      <div><dt>Window end <var>T</var></dt><dd><span id="window-end">—</span> <small>s</small></dd></div>
+      <div><dt>Window length</dt><dd><span id="window-length">—</span> <small>s</small></dd></div>
+      <div><dt>Arrivals in window</dt><dd id="window-arrivals">—</dd></div>
+      <div><dt>Carry-ins at start</dt><dd id="window-carry-in">—</dd></div>
+      <div><dt>Window presence mass</dt><dd><span id="window-mass">—</span> <small>block·s</small></dd></div>
+    </dl>
     <p class="geometry">Each block occupies one strip, from its arrival until its marked duration elapses. A vertical slice counts blocks present at that instant. The accumulated area is presence mass. <span id="block-colors">Blue shows observed presence. Green shows remaining duration.</span> <span id="contour-colors" hidden>Solid blue shows observed presence. Dashed green shows remaining duration.</span> <span id="presence-comparison" hidden>The area below zero measures observed presence mass in block-seconds. Match strip scale puts the two areas on the same vertical scale.</span></p>
-    <p id="sojourn-comparison" class="geometry" hidden>Left of zero, each bar adds up the sojourns through that strip. <span id="sojourn-colors">Blue shows time already observed, and green shows time remaining. The top blue bar shows total presence mass.</span></p>
+    <p id="sojourn-comparison" class="geometry" hidden>To the left of the time axis, each bar adds up the durations through that strip. <span id="sojourn-colors">Blue shows time already observed, and green shows time remaining. The top blue bar shows total presence mass.</span></p>
     <p id="notice" class="notice" role="status" hidden></p>
   </main>
 

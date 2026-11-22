@@ -1,5 +1,5 @@
-import { dropDuration, fitView, number, plotBox, renderChart, type BlockView } from "./chart.js";
-import { defaultScenario, fromJson, PresenceProcess, simulation, type Scenario } from "./process.js";
+import { dropDuration, fitView, number, plotBox, renderChart, type BlockView, type Plot, type View } from "./chart.js";
+import { defaultScenario, fromJson, PresenceProcess, simulation, type ObservationWindow, type Scenario } from "./process.js";
 
 function element<T extends HTMLElement = HTMLElement>(id: string): T {
   return document.getElementById(id) as T;
@@ -13,6 +13,8 @@ const exportDialog = element<HTMLDialogElement>("export-dialog");
 const notice = element("notice");
 const play = element<HTMLButtonElement>("play");
 const next = element<HTMLButtonElement>("step");
+const clearWindow = element<HTMLButtonElement>("clear-window");
+const windowHint = element("window-hint");
 const source = element("source");
 const speed = element<HTMLSelectElement>("speed");
 const viewSelect = element<HTMLSelectElement>("block-view");
@@ -40,6 +42,8 @@ const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 let scenario: Scenario = readScenario();
 let process = new PresenceProcess(scenario);
 let time = 0;
+let windowStart: number | undefined;
+let chartFrame: { plot: Plot; view: View; time: number } | undefined;
 let blockView: BlockView = "full";
 let running = !reducedMotion.matches;
 let stepDropStartedAt: number | undefined;
@@ -69,7 +73,23 @@ function syncControls() {
   runStatus.classList.toggle("paused", !running);
   runStatus.lastChild!.textContent = running ? " Running" : " Paused";
   source.textContent = scenario.kind === "simulation" ? "Simulated arrivals" : "Imported arrivals";
+  const canSelectWindow = !running && time > 0;
+  windowHint.hidden = !canSelectWindow;
+  canvas.classList.toggle("selecting-window", canSelectWindow);
   dirty = true;
+}
+
+function setWindowStart(start?: number) {
+  windowStart = start;
+  const active = start !== undefined;
+  element("history-comparisons").hidden = active;
+  element("history-measurements").hidden = active;
+  element("window-comparisons").hidden = !active;
+  element("window-measurements").hidden = !active;
+  clearWindow.hidden = !active;
+  element("average-presence-label").textContent = active ? "Show window avg." : "Show L(T)";
+  cursor = undefined;
+  syncColorNotes();
 }
 
 function syncScenarioTargets() {
@@ -83,6 +103,8 @@ function reset() {
   process = new PresenceProcess(scenario);
   time = 0;
   stepDropStartedAt = undefined;
+  setWindowStart();
+  chartFrame = undefined;
   syncControls();
 }
 
@@ -93,6 +115,30 @@ function useScenario(value: Scenario) {
   running = true;
   reset();
   scenarioDialog.close();
+}
+
+function chartTime(plot: Plot, view: View, x: number, y: number): number | undefined {
+  if (x < plot.origin || x > plot.origin + plot.timeWidth ||
+      y < plot.top || y > plot.top + plot.height) return undefined;
+  return (view.timeStart ?? 0) + (x - plot.origin) / plot.timeWidth * view.horizon;
+}
+
+function updateWindowMetrics(window: ObservationWindow, end: number, averagePresence: number) {
+  element("window-start").textContent = number(window.start);
+  element("window-end").textContent = number(end);
+  element("window-length").textContent = number(window.duration);
+  element("window-arrivals").textContent = number(window.arrivalCount);
+  element("window-carry-in").textContent = number(window.carryIn);
+  element("window-mass").textContent = number(window.mass);
+  element("window-arrival-rate").textContent = number(window.arrivalCount / window.duration);
+  element("window-overlap-rate").textContent = number(window.arrivals.length / window.duration);
+  element("window-full-mean").textContent = window.sojournMeans ? number(window.sojournMeans.full) : "—";
+  const observedMean = window.sojournMeans?.observed;
+  element("window-observed-mean").textContent = observedMean === undefined ? "—" : number(observedMean);
+  const currentPresence = number(averagePresence);
+  element("window-average-presence").textContent = currentPresence;
+  // Cancel the overlap count in (overlap count / duration) × (mass / overlap count).
+  element("window-presence-product").textContent = observedMean === undefined ? "—" : currentPresence;
 }
 
 function draw(stepDropAge?: number) {
@@ -115,30 +161,30 @@ function draw(stepDropAge?: number) {
     syncControls();
   }
   const count = process.countAt(time);
-  const presenceSteps = showPresence.checked ? process.presenceSteps(count) : undefined;
+  const observation = windowStart === undefined ? undefined : process.observeWindow(windowStart, time, showPresence.checked);
+  const presenceSteps = observation ? observation.presenceSteps : showPresence.checked ? process.presenceSteps(count) : undefined;
   const updateMetrics = performance.now() - lastMetrics > 100 || dirty;
   const showAverage = showPresence.checked && showAveragePresence.checked;
-  const hasAverage = showAverage && time > 0;
-  const metrics = updateMetrics || hasAverage ? process.measure(time, count) : undefined;
-  const averagePresence = time > 0 && metrics ? metrics.mass / time : undefined;
-  const cumulativeObservedSojourns = showSojourn.checked ? process.cumulativeObservedSojourns(time, count) : undefined;
-  const showSojournMeans = showSojourn.checked && showSojournAverages.checked;
-  const sojournMeans = updateMetrics || showSojournMeans
-    ? process.sojournMeans(count, metrics?.mass ?? cumulativeObservedSojourns?.at(-1))
+  const metrics = !observation && (updateMetrics || (showAverage && time > 0)) ? process.measure(time, count) : undefined;
+  const averagePresence = observation ? observation.mass / observation.duration : time > 0 && metrics ? metrics.mass / time : undefined;
+  const cumulativeObservedSojourns = showSojourn.checked
+    ? observation?.cumulativeObservedSojourns ?? process.cumulativeObservedSojourns(time, count)
     : undefined;
+  const showSojournMeans = showSojourn.checked && showSojournAverages.checked;
+  const sojournMeans = observation ? observation.sojournMeans : updateMetrics || showSojournMeans
+      ? process.sojournMeans(count, metrics?.mass ?? cumulativeObservedSojourns?.at(-1))
+      : undefined;
   const view = fitView(process, time, count, blockView, presenceSteps, {
     showSojourn: showSojourn.checked,
     showSojournAverages: showSojournMeans,
     matchStripScale: matchStripScale.checked,
     showAveragePresence: showAverage,
+    window: observation,
   });
   const plot = plotBox(width, height, blockView, view);
-  let slice: number | undefined;
-  if (cursor && cursor.x >= plot.origin && cursor.x <= plot.left + plot.width &&
-      cursor.y >= plot.top && cursor.y <= plot.top + plot.height) {
-    const t = (cursor.x - plot.origin) / plot.timeWidth * view.horizon;
-    if (t <= time) slice = t;
-  }
+  chartFrame = { plot, view, time };
+  const hoverTime = cursor ? chartTime(plot, view, cursor.x, cursor.y) : undefined;
+  const slice = hoverTime !== undefined && hoverTime <= time ? hoverTime : undefined;
   renderChart(context, process, time, view, width, height, {
     mode: blockView,
     colorObserved: colorObserved.checked,
@@ -147,12 +193,15 @@ function draw(stepDropAge?: number) {
     averagePresence: showAverage ? averagePresence : undefined,
     cumulativeObservedSojourns,
     sojournMeans: showSojournMeans ? sojournMeans : undefined,
+    window: observation,
     stepDropAge,
     reducedMotion: reducedMotion.matches ||
       (!running && stepDropAge === undefined && process.arrivals[count - 1]?.t === time),
   });
 
-  if (updateMetrics && metrics) {
+  if (updateMetrics && observation && averagePresence !== undefined) {
+    updateWindowMetrics(observation, time, averagePresence);
+  } else if (updateMetrics && metrics) {
     const { present, mass } = metrics;
     const observedMean = sojournMeans?.observed;
     const currentPresence = averagePresence === undefined ? "—" : number(averagePresence);
@@ -166,6 +215,8 @@ function draw(stepDropAge?: number) {
     averagePresenceCurrent.textContent = currentPresence;
     // For n > 0, cancel n in (n / T) × (H(T) / n) before rounding.
     averagePresenceProduct.textContent = observedMean === undefined ? "—" : currentPresence;
+  }
+  if (updateMetrics) {
     next.disabled = !process.nextAfter(time);
     lastMetrics = performance.now();
   }
@@ -174,9 +225,13 @@ function draw(stepDropAge?: number) {
   if (cursor) {
     const onStrip = cursor.y >= plot.top && cursor.y <= plot.baseline;
     const strip = onStrip ? Math.min(view.lanes, Math.floor((plot.baseline - cursor.y) / plot.laneHeight) + 1) : 0;
-    const event = process.arrivals[strip - 1];
-    if (slice !== undefined) {
-      const { present } = process.measure(slice);
+    const event = (observation?.arrivals ?? process.arrivals)[strip - 1];
+    if (observation && slice !== undefined && slice < observation.start) {
+      tooltipText = `t = ${number(slice)} s · Before window`;
+    } else if (slice !== undefined) {
+      const present = observation
+        ? observation.arrivals.filter(event => event.t <= slice && slice < event.end).length
+        : process.measure(slice).present;
       tooltipText = `t = ${number(slice)} s · N(t) = ${present}`;
       if (event && slice >= event.t && slice < event.end) {
         tooltipText += `\nStrip ${strip} · ${number(event.t)}–${number(event.end)} s`;
@@ -236,21 +291,33 @@ canvas.addEventListener("pointermove", event => {
   dirty = true;
 });
 canvas.addEventListener("pointerleave", () => { cursor = undefined; dirty = true; });
+canvas.addEventListener("click", event => {
+  if (running || !chartFrame || chartFrame.time !== time) return;
+  const { left, top } = canvas.getBoundingClientRect();
+  const start = chartTime(chartFrame.plot, chartFrame.view, event.clientX - left, event.clientY - top);
+  if (start !== undefined && start < time) setWindowStart(start);
+});
+clearWindow.addEventListener("click", () => setWindowStart());
 new ResizeObserver(() => { dirty = true; }).observe(canvas);
 reducedMotion.addEventListener("change", () => {
   if (reducedMotion.matches) stepDropStartedAt = undefined;
   dirty = true;
 });
 function syncColorNotes() {
-  element("block-colors").hidden = blockView !== "full" || !colorObserved.checked;
-  element("sojourn-colors").hidden = !colorObserved.checked;
+  const fullColors = element("block-colors");
+  fullColors.hidden = blockView !== "full" || !colorObserved.checked;
+  const sojournColors = element("sojourn-colors");
+  sojournColors.hidden = !colorObserved.checked;
   element("sojourn-observed-metric").hidden = !colorObserved.checked;
   element("presence-product-metric").hidden = !colorObserved.checked;
   const contourColors = element("contour-colors");
   contourColors.hidden = blockView !== "contour";
-  contourColors.textContent = colorObserved.checked
-    ? "Solid blue shows observed presence. Dashed green shows remaining duration."
-    : "Solid strokes show observed presence. Dashed strokes show remaining duration.";
+  const unobserved = windowStart === undefined ? "remaining duration" : "duration outside the window";
+  fullColors.textContent = `Blue shows observed presence. Green shows ${unobserved}.`;
+  sojournColors.textContent = `Blue shows observed time, and green shows ${unobserved}. The top blue bar shows total presence mass.`;
+  const observedStroke = colorObserved.checked ? "Solid blue shows" : "Solid strokes show";
+  const unobservedStroke = colorObserved.checked ? "Dashed green shows" : "Dashed strokes show";
+  contourColors.textContent = `${observedStroke} observed presence. ${unobservedStroke} ${unobserved}.`;
   dirty = true;
 }
 
