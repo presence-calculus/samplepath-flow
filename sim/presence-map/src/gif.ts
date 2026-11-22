@@ -12,7 +12,7 @@ export class GifEncoder {
   private readonly width: number;
   private readonly height: number;
 
-  constructor(width: number, height: number) {
+  constructor(width: number, height: number, loop = true) {
     this.width = width;
     this.height = height;
     this.bytes.push(...Array.from("GIF89a", character => character.charCodeAt(0)));
@@ -20,7 +20,9 @@ export class GifEncoder {
     this.word(height);
     this.bytes.push(0xf4, 0, 0); // Global palette with 32 colors and no pixel aspect ratio.
     for (const color of palette) this.bytes.push(...color);
-    this.bytes.push(0x21, 0xff, 11, ...Array.from("NETSCAPE2.0", c => c.charCodeAt(0)), 3, 1, 0, 0, 0);
+    if (loop) {
+      this.bytes.push(0x21, 0xff, 11, ...Array.from("NETSCAPE2.0", c => c.charCodeAt(0)), 3, 1, 0, 0, 0);
+    }
   }
 
   private word(value: number) {

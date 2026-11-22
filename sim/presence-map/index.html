@@ -116,7 +116,8 @@
         <label>End (seconds) <input id="gif-end" type="number" min=".1" step="any" required></label>
         <label>Width <select id="gif-width"><option value="640">640 px</option><option value="800" selected>800 px</option><option value="960">960 px</option></select></label>
       </div>
-      <div id="gif-preview" class="preview" hidden><img id="gif-image" alt="Animated preview of the exported presence map"></div>
+      <label class="export-animation"><input id="gif-animate" type="checkbox" checked> Animate GIF</label>
+      <div id="gif-preview" class="preview" hidden><img id="gif-image" alt="Preview of the exported presence map"></div>
       <p id="gif-status" role="status" hidden></p>
       <div class="actions">
         <button data-close="export-dialog" type="button">Close</button>

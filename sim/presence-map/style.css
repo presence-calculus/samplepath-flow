@@ -81,6 +81,7 @@ input[type="number"] { min-width: 0; width: 100%; padding: 7px 9px; border: 1px 
 .import code { display: block; font-size: .78rem; margin-bottom: 11px; overflow-wrap: anywhere; }
 .import input { max-width: 100%; font-size: .875rem; }
 .error { color: #ad273a; }
+.export-animation { display: flex; align-items: center; gap: 6px; width: fit-content; margin-top: 12px; font-size: .875rem; }
 .preview { margin-top: 15px; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
 .preview img { width: 100%; display: block; }
 @media (max-width: 760px) {

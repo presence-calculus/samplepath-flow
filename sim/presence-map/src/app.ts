@@ -394,7 +394,8 @@ element("export-form").addEventListener("submit", event => {
       finish();
     };
     worker.postMessage({
-      scenario, start, end, width, mode: blockView, colorObserved: colorObserved.checked,
+      scenario, start, end, width, animated: element<HTMLInputElement>("gif-animate").checked,
+      mode: blockView, colorObserved: colorObserved.checked,
       showPresence: showPresence.checked, showSojourn: showSojourn.checked,
     });
   } catch {
