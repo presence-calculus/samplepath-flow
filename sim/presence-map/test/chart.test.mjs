@@ -11,32 +11,44 @@ const process = new PresenceProcess(fromJson([
 
 globalThis.Path2D = class {
   closedShapes = 0;
-  points = [];
+  constructor(path) { this.points = path?.points.slice() ?? []; }
   moveTo(x, y) { this.points.push([x, y]); }
   lineTo(x, y) { this.points.push([x, y]); }
   closePath() { this.closedShapes++; }
 };
 
-function render(mode, t, camera, window, replay = process, followCamera = false) {
+function render(mode, t, camera, window, replay = process, { followCamera = false, showPresence = followCamera, averagePresence } = {}) {
   const width = 800;
   const height = 400;
   const count = replay.countAt(t);
-  const presenceSteps = followCamera ? replay.presenceSteps(count) : undefined;
-  const view = fitView(replay, t, count, mode, presenceSteps, { camera: followCamera, showSojourn: true, window });
+  const presenceSteps = showPresence ? replay.presenceSteps(count) : undefined;
+  const view = fitView(replay, t, count, mode, presenceSteps, {
+    camera: followCamera, showSojourn: true, showAveragePresence: averagePresence !== undefined, averagePresence, window,
+  });
   const plot = plotBox(width, height, mode, view);
   const blocks = [];
   const cumulativeBars = [];
   const contours = [];
+  let currentPath = [];
   let presencePath;
+  let presenceArea;
+  let averageLine;
   const context = new Proxy({
     measureText(text) { return { width: text.length * 6 }; },
     fillRect(x, y, width, height) {
       if (y < plot.top || y >= plot.baseline) return;
       (x >= plot.origin ? blocks : cumulativeBars).push([x, y, width, height]);
     },
+    beginPath() { currentPath = []; },
+    moveTo(x, y) { currentPath.push([x, y]); },
+    lineTo(x, y) { currentPath.push([x, y]); },
+    fill(path) {
+      if (path && this.fillStyle === "#f8ebe5") presenceArea = path.points;
+    },
     stroke(path) {
       if (path && this.strokeStyle === "#a0442c") presencePath = path.points;
       else if (path) contours.push(path.closedShapes);
+      else if (this.strokeStyle === "#243751") averageLine = currentPath;
     },
   }, {
     get(target, name) { return target[name] ?? (() => {}); },
@@ -48,9 +60,10 @@ function render(mode, t, camera, window, replay = process, followCamera = false)
     reducedMotion: true,
     cumulativeObservedSojourns: window?.cumulativeObservedSojourns ?? replay.cumulativeObservedSojourns(t),
     presenceSteps,
+    averagePresence,
     window,
   });
-  return { plot, blocks, cumulativeBars, contours, presencePath, view };
+  return { plot, blocks, cumulativeBars, contours, presencePath, presenceArea, averageLine, view };
 }
 
 test("Camera preserves the full block geometry before departure", () => {
@@ -101,15 +114,41 @@ const lateBlocks = new PresenceProcess(fromJson([
 ]));
 
 test("Camera pans to absolute strip numbers and renders only the visible duration rows", () => {
-  const { view, cumulativeBars } = render("full", 109, true, undefined, lateBlocks, true);
+  const { view, cumulativeBars } = render("full", 109, true, undefined, lateBlocks, { followCamera: true });
   assert.ok(view.firstStrip > 90 && view.firstStrip <= 106 && view.firstStrip + view.lanes > 107 &&
     cumulativeBars.length === 108 - view.firstStrip && view.sojournHorizon >= 140.25);
 });
 
 test("Camera starts the presence curve at the existing level on the left edge", () => {
-  const { view, plot, presencePath } = render("full", 109, true, undefined, lateBlocks, true);
+  const { view, plot, presencePath } = render("full", 109, true, undefined, lateBlocks, { followCamera: true });
   const prior = lateBlocks.measure(view.timeStart).present;
   assert.ok(view.timeStart > 95 && prior > 0 && presencePath[0][0] === plot.origin &&
-    presencePath[0][1] === plot.baseline + prior * plot.presenceUnitHeight &&
+    presencePath[0][1] === plot.top + plot.height - prior * plot.presenceUnitHeight &&
     presencePath.every(([x]) => x >= plot.origin));
+});
+
+test("Presence rises on arrival and falls on departure from its own zero baseline", () => {
+  const { plot, presencePath } = render("full", 5, false, undefined, process, { showPresence: true });
+  const zero = plot.top + plot.height;
+  assert.deepEqual(presencePath.map(([, y]) => y),
+    [0, 0, 1, 1, 2, 2, 3, 3, 2, 2].map(count => zero - count * plot.presenceUnitHeight));
+});
+
+test("The shaded area under positive N(t) measures observed presence mass", () => {
+  const end = 5;
+  const { plot, view, presenceArea } = render("full", end, false, undefined, process, { showPresence: true });
+  const zero = plot.top + plot.height;
+  let pixelArea = 0;
+  for (let i = 1; i < presenceArea.length; i++) {
+    pixelArea += (presenceArea[i][0] - presenceArea[i - 1][0]) * (zero - presenceArea[i - 1][1]);
+  }
+  const mass = pixelArea / (plot.timeWidth / view.horizon * plot.presenceUnitHeight);
+  assert.ok(Math.abs(mass - process.measure(end).mass) < 1e-9);
+});
+
+test("L(T) uses the same positive scale as N(t)", () => {
+  const averagePresence = process.measure(5).mass / 5;
+  const { plot, averageLine } = render("full", 5, false, undefined, process, { showPresence: true, averagePresence });
+  const y = plot.top + plot.height - averagePresence * plot.presenceUnitHeight;
+  assert.deepEqual(averageLine.map(([, position]) => position), [y, y]);
 });
